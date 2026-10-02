@@ -21,8 +21,11 @@
     </div>
 
     <div class="stage">
-      <video ref="video" class="video" :class="{ flip: mirror }" playsinline muted autoplay></video>
-      <canvas ref="canvas" class="overlay"></canvas>
+      <video ref="video" class="video" :class="{ flip: mirror, off: fbActive }" playsinline muted autoplay></video>
+      <!-- 兜底第一级：预录 60s 视频。不做镜像 —— 片子里每式开头都打了式名，
+           镜像会把字幕翻反，现场就变成「有画面但看不懂在跳第几式」 -->
+      <video ref="fbVideo" class="fb" :class="{ on: fbActive }" playsinline muted loop></video>
+      <canvas ref="canvas" class="overlay" :class="{ off: fbActive }"></canvas>
 
       <!-- 取景引导框：定位到视频实际显示区（contain 的信箱区）内 -->
       <div class="guide" v-if="showGuide" :style="guideStyle">
@@ -39,7 +42,10 @@
           </div>
         </div>
       </div>
-      <div v-if="err" class="mask err">
+      <!-- 兜底已顶上时，摄像头错误只走这条细提示，不再挡住整块画面 -->
+      <div v-else-if="err && fbActive" class="fb-note">摄像头：{{ err }}</div>
+
+      <div v-if="err && !fbActive" class="mask err">
         <div class="mask-txt">{{ err }}</div>
         <button class="btn" @click="retry">重试</button>
         <button class="btn ghost" @click="manualMode">改用手动模式继续</button>
@@ -70,6 +76,14 @@
         </svg>
         <div class="hi-label">{{ orient.headYawText }}</div>
       </div>
+    </div>
+
+    <!-- 预录兜底状态条：常驻可见，让人知道「现在演的是保命带」，别以为卡死 -->
+    <div class="fb-bar" v-if="fbActive">
+      <span class="fb-dot"></span>
+      <span>预录演示中 · {{ fbReason }}</span>
+      <span class="fb-sep">·</span>
+      <span>计时与打卡不中断，按「下一个式」往下走</span>
     </div>
 
     <!-- 七弦弦位 -->
@@ -113,9 +127,14 @@
     </div>
 
     <div class="footbar">
-      <button class="btn sm ghost" @click="skip">
-        {{ landmarksSeen ? '跳过本式（兜底）' : '点一下也算响（摄像头不可用）' }}
+      <button class="btn sm" :class="fbActive ? 'primary' : 'ghost'" @click="fbActive ? backToCamera() : skip()">
+        {{
+          fbActive
+            ? '下一个式 ▶'
+            : (landmarksSeen ? '跳过本式（兜底）' : '点一下也算响（摄像头不可用）')
+        }}
       </button>
+      <button class="btn sm ghost" v-if="fbActive" @click="backToCamera()">回到摄像头</button>
       <button class="btn sm ghost" @click="freeMode = !freeMode; resetStep()">
         {{ freeMode ? '切回跟练' : '自由练习' }}
       </button>
@@ -131,6 +150,7 @@ import { createPoseEngine, drawPose, KEY_POINTS, HEAD_POINTS, listCameras, RESOL
 import { headPose, bodyPose, createTurnTracker } from '../engine/pose'
 import { MoveJudge, NAMES, THRESHOLD } from '../engine/judge'
 import { pluck, chordAll, unlockAudio } from '../engine/guqin'
+import { FallbackSwitch, frameAlive, FALLBACK_SRC, FALLBACK_CFG } from '../engine/fallback'
 import { saveRecord } from '../stores/records'
 import CamSettings from '../components/CamSettings.vue'
 
@@ -192,6 +212,18 @@ let judge = null
 let rafUI = 0
 let lastLitClear = 0
 let loadTimer = 0
+
+// ---- 兜底第一级：预录视频切换 ----
+// 摄像头翻车时 3 秒内顶上，式号 / 计时 / 打卡都不中断（R2 的主防线）
+const fbVideo = ref(null)
+const fbActive = ref(false)
+const fbReason = ref('')
+let fbSwitch = null
+let readyAt = 0             // 引擎就绪时刻，用于「迟迟没人入镜」的计时起点
+let lastAliveAt = 0         // 最近一帧有效人体的时刻
+let aliveStreak = 0         // 连续有效帧数（恢复实面前要攒够）
+let autoTimer = 0           // 预录模式下的「下一个式」保险推进
+let retryTimer = 0          // 摄像头彻底挂掉后的后台重试
 
 // 拳种：由首页 ?style= 指定，未指定则取第一个已就绪的
 const style = computed(() => getStyle(resolveStyle(route.query.style)) || getStyle('baduanjin'))
@@ -260,8 +292,10 @@ async function init() {
   // 兜底：25s 还没就绪就明说，避免无限转圈
   loadTimer = setTimeout(() => {
     if (loading.value) {
-      err.value = '加载超时（25 秒）。可能是首次访问需要读取 16MB 本地模型，或显卡驱动卡住了 MediaPipe。请点「重试」，或换用 Edge 浏览器再试。'
+      // 25 秒还没起来，与其停在转圈，不如直接上预录 —— 演示不空场优先（裁决序：保 P0）
+      err.value = ''
       loading.value = ''
+      enterFallback('识别加载超时（25 秒）')
     }
   }, 25000)
 
@@ -297,8 +331,12 @@ async function init() {
     if (info.deviceId) safeSet('xianyang.deviceId', info.deviceId)
 
     clearTimeout(loadTimer)
+    clearTimeout(retryTimer)
     loading.value = ''
     stageNow.value = 'ready'
+    readyAt = performance.now()
+    lastAliveAt = readyAt          // 别让「.readyAt - 0」立刻误判成断流
+    aliveStreak = 0
     resetStep()
     // 摄像头就绪后再填下拉框（复用已授权的设备列表，不再请求权限）
     settings.value?.refresh()
@@ -317,13 +355,106 @@ async function init() {
       ? '没有找到可用的摄像头。请检查设备连接，或在设置里换一个设备。'
       : '初始化失败：' + (e?.message || e)
     loading.value = ''
+    // 摄像头起不来≠演示完了：先上预录，同时后台隔一阵重试（现场换设备/重授权后能自动回来）
+    enterFallback('摄像头初始化失败：' + (e?.message || e))
+    scheduleRetry()
   }
 }
 
 function safeGet(k) { try { return localStorage.getItem(k) } catch { return null } }
 function safeSet(k, v) { try { localStorage.setItem(k, v) } catch { /* file:// 下不可写，忽略 */ } }
 
-function retry() { engine?.dispose(); engine = null; init() }
+// ================= 兜底第一级：预录视频 =================
+function setupFallback() {
+  fbSwitch = new FallbackSwitch(fbVideo.value, {
+    onEnter: (reason) => {
+      fbActive.value = true
+      fbReason.value = reason
+      // 别把切走前那一帧的骨架留在屏幕上，看着像还活着
+      lastLandmarks = null
+      liveScore.value = 0
+      lastAliveAt = 0
+      aliveStreak = 0
+      err.value = ''            // 兜底顶上了，就不再弹整块错误遮罩
+      startAutoAdvance()        // 现场没人按也别卡死在这一式
+    },
+    onExit: () => {
+      fbActive.value = false
+      stopAutoAdvance()
+    },
+  })
+  fbSwitch.prepare()            // 预热不阻塞：现场真要切时基本都是热启动
+}
+
+function startAutoAdvance() {
+  stopAutoAdvance()
+  autoTimer = setTimeout(() => { if (fbActive.value) skip() }, FALLBACK_CFG.autoAdvanceMs)
+}
+function stopAutoAdvance() { clearTimeout(autoTimer); autoTimer = 0 }
+
+/** 断识别 / 迟迟无人 → 切预录。切不动要明说，不能假装兜住了 */
+async function enterFallback(reason) {
+  if (!fbSwitch || fbSwitch.active) return
+  const okd = await fbSwitch.enter(reason)
+  if (!okd) {
+    console.error('[fallback] 兜底第一级失效：', reason)
+    err.value = '摄像头不可用，预录兜底也没起来（取不到 ' + FALLBACK_SRC + '）。点「改用手动模式继续」用点按拨弦。'
+  }
+}
+
+function exitFallback(reason) {
+  if (reason) console.info('[fallback] 退出预录：', reason)
+  fbReason.value = ''
+  fbSwitch?.exit()
+}
+
+/** 手动 / 自动回到实时画面 */
+async function backToCamera() {
+  exitFallback('手动切回')
+  clearTimeout(retryTimer)
+  const r = RESOLUTIONS.find((x) => x.id === cfg.resId) || RESOLUTIONS[0]
+  try {
+    if (!engine) { err.value = ''; await init(); return }
+    const saved = safeGet('xianyang.deviceId')
+    const info = await engine.start(video.value, { deviceId: saved, width: r.w, height: r.h })
+    camLabel.value = info.label || '摄像头'
+    landmarksSeen.value = false
+    lastAliveAt = performance.now()
+    aliveStreak = 0
+    resetStep()
+  } catch (e) {
+    console.error(e)
+    err.value = '重新打开摄像头失败：' + (e?.message || e)
+  }
+}
+
+/** 引擎就绪后没人入镜 / 识别中断超时 → 兜底 */
+function checkFallbackStall() {
+  if (!fbSwitch || fbSwitch.active || !engine || !engine.isRunning || finished.value) return
+  const now = performance.now()
+  const stalled = landmarksSeen.value
+    ? now - lastAliveAt > FALLBACK_CFG.noSignalMs
+    : readyAt && now - readyAt > FALLBACK_CFG.firstFrameMs
+  if (!stalled) return
+  enterFallback(landmarksSeen.value ? '识别中断（连续无有效人体）' : '迟迟没有人入镜')
+}
+
+/** 摄像头彻底挂掉时，后台隔一阵重试一次（别让演示从此没有摄像头） */
+function scheduleRetry() {
+  clearTimeout(retryTimer)
+  retryTimer = setTimeout(async () => {
+    if (finished.value || fbSwitch?.active || engine) return
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices) return
+    console.info('[fallback] 后台重试摄像头…')
+    try {
+      await init()
+    } catch {
+      scheduleRetry()
+    }
+  }, FALLBACK_CFG.retryMs)
+}
+
+function retry() { fbSwitch?.exit(); stopAutoAdvance(); engine?.dispose(); engine = null; init() }
 
 // ---- 切换摄像头 / 分辨率（不重载模型）----
 async function onSwitchDevice(deviceId) {
@@ -353,11 +484,15 @@ async function onSwitchRes(resId) {
 
 onMounted(() => {
   unlockAudio()               // 由用户手势触发，解锁音频
+  setupFallback()             // 预热预录视频（不等它，现场要切时多半是热启动）
   init()
 })
 
 onBeforeUnmount(() => {
   clearTimeout(loadTimer)
+  clearTimeout(retryTimer)
+  stopAutoAdvance()
+  fbSwitch?.exit()
   cancelAnimationFrame(rafUI)
   window.removeEventListener('resize', sizeCanvas)
   engine?.dispose()
@@ -456,6 +591,18 @@ function onResult(landmarks, world) {
   if (!judge) return
   lastLandmarks = landmarks
   if (landmarks) landmarksSeen.value = true
+
+  // ---- 信号健康检查（喂给兜底第一级）----
+  // 帧有效 ≠ 判定命中。这里只管「画面里还有没有个人」，
+  // 判定该响不响归 judge.js 管，两件事别混（范围冻结：不动判定器）。
+  if (frameAlive(landmarks)) {
+    lastAliveAt = performance.now()
+    aliveStreak++
+    // 预录期间画面回来了 → 自动切回实时，不用等人点
+    if (fbActive.value && aliveStreak >= FALLBACK_CFG.recoverFrames) exitFallback('画面恢复')
+  } else {
+    aliveStreak = 0
+  }
   // 摄像头真实分辨率就绪后重算一次 fitBox（contain 的实际显示区）
   const v = video.value
   if (v && v.videoWidth && fitSize !== `${v.videoWidth}x${v.videoHeight}`) {
@@ -499,6 +646,8 @@ function advance() {
 
 function finish() {
   finished.value = true
+  stopAutoAdvance()
+  exitFallback('一曲完成')
   engine?.stop()
   saveRecord({ moves: [...doneSet.value], names: NAMES.filter((_, i) => doneSet.value.has(i)) })
 }
@@ -511,6 +660,8 @@ function skip() {                 // 三级兜底之一：跳过本式也算完�
   if (mv.chord) chordAll(); else pluck(mv.stringIndex)
   litStrings.value = mv.chord ? [1, 2, 3, 4, 5, 6, 7] : [mv.stringIndex]
   lastLitClear = performance.now()
+  // 预录模式下没有判定器喂命中，「下一个式」得续上保险计时
+  if (fbActive.value) startAutoAdvance()
   if (stepIdx.value >= totalMoves.value - 1) finish(); else advance()
 }
 
@@ -520,6 +671,8 @@ function restart() {
   finished.value = false
   landmarksSeen.value = false
   litStrings.value = []
+  stopAutoAdvance()
+  exitFallback('重新开始')
   resetStep()
   // 引擎若被手动模式停掉了，这里重新拉起（不重载模型）
   if (engine && !engine.isRunning) init()
@@ -528,6 +681,9 @@ function restart() {
 
 function manualMode() {          // 三级兜底之三：关摄像头，改为点按触发
   engine?.stop()
+  exitFallback('改用手动模式')
+  stopAutoAdvance()
+  clearTimeout(retryTimer)
   err.value = ''
   stepIdx.value = 0
   resetStep()
@@ -536,7 +692,7 @@ function manualMode() {          // 三级兜底之三：关摄像头，改为�
   camLabel.value = '手动模式'
 }
 
-function quit() { engine?.dispose(); router.push('/') }
+function quit() { exitFallback('退出跟练'); engine?.dispose(); router.push('/') }
 
 // 绘制循环：骨架 + 弦位余晖
 function uiLoop() {
@@ -559,6 +715,7 @@ function uiLoop() {
     }
   }
   if (performance.now() - lastLitClear > 900 && litStrings.value.length) litStrings.value = []
+  checkFallbackStall()      // 断识别 → 预录顶上（Done 硬指标 ≤3s）
   rafUI = requestAnimationFrame(uiLoop)
 }
 
@@ -598,6 +755,11 @@ let lastLandmarks = null
 .video { object-fit: contain; opacity: .88; }
 .overlay { object-fit: contain; pointer-events: none; }
 .video.flip { transform: scaleX(-1); }   /* 镜像：照镜子直觉 */
+.video.off, .overlay.off { opacity: 0; pointer-events: none; }
+
+/* 兜底第一级：预录视频。与实时画面同尺寸、同 contain，切换时是「换片」不是「跳变」 */
+.fb { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity .25s ease; background: #000; }
+.fb.on { opacity: 1; }
 
 /* 加载阶段进度：4 步，让用户知道卡在哪 */
 .steps { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
@@ -683,6 +845,28 @@ let lastLandmarks = null
 .spinner { width: 34px; height: 34px; border: 2px solid rgba(232,224,208,.15); border-top-color: var(--zhu); border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .hint { position: absolute; left: 0; right: 0; bottom: 58px; text-align: center; font-size: 12px; color: var(--xuan-faint); font-family: var(--font-ui); }
+
+/* 预录兜底状态条 */
+.fb-bar {
+  display: flex; align-items: center; gap: 7px; justify-content: center; flex-wrap: wrap;
+  margin: 2px 12px 0; padding: 6px 12px; border-radius: 10px;
+  font-size: 11.5px; font-family: var(--font-ui); color: var(--jin);
+  background: rgba(214, 197, 158, .08); border: 1px solid rgba(214, 197, 158, .22);
+}
+.fb-bar .fb-sep { color: var(--xuan-faint); }
+.fb-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--zhu); flex: 0 0 auto;
+  animation: pulse 1.1s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
+
+/* 预录播放中，摄像头错误折成一行小字，不挡画面 */
+.fb-note {
+  position: absolute; left: 50%; top: 8px; transform: translateX(-50%);
+  max-width: 90%; text-align: center; font-size: 10.5px; font-family: var(--font-ui);
+  color: #f0b8a8; background: rgba(10, 8, 6, .72); padding: 4px 12px; border-radius: 12px;
+  pointer-events: none; line-height: 1.5;
+}
 
 .strings { display: flex; gap: 6px; padding: 14px 16px 6px; }
 .string { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }

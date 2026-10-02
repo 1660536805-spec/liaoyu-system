@@ -127,6 +127,22 @@ console.log('\n=== 内容合规 D9：无禁词 ===')
   okc([1, 2, 3, 4, 5, 6, 7].every((n) => map.includes(n)), '1-7 号弦一一对应到 7 式')
 }
 
+console.log('\n=== 兜底第一级接线（R2）===')
+{
+  const { readFile } = await import('node:fs/promises')
+  const src = await readFile(new URL('../src/views/TrainView.vue', import.meta.url), 'utf8')
+  okc(src.includes("ref=\"fbVideo\""), '跟练页有预录视频元素')
+  okc(src.includes('FallbackSwitch'), '跟练页接了 FallbackSwitch')
+  okc(src.includes('checkFallbackStall'), '有「断识别 → 兜底」的循环巡检')
+  okc(src.includes("exitFallback") && src.includes('startAutoAdvance'), '退出预录与保险推进都在')
+  const feat = await load('/src/engine/fallback.js')
+  okc(typeof feat.frameAlive === 'function', 'fallback.js 导出 frameAlive')
+  okc(feat.FALLBACK_SRC.startsWith('/assets/'), '预录视频走本地 assets/（不是 CDN）')
+  // 兜底触发参数一旦被改坏会直接毁掉现场，钉死在合理区间
+  const c = feat.FALLBACK_CFG
+  okc(c.noSignalMs <= 5000 && c.firstFrameMs <= 12000, '触发等待不超过 5s / 12s（演示等不起）')
+}
+
 console.log('\n=== 判定器接线正确性 ===')
 {
   const { MoveJudge, NAMES } = await load('/src/engine/judge.js')
