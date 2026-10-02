@@ -3,13 +3,35 @@
     <div class="body home">
       <div class="hero">
         <div class="brand">弦养</div>
-        <div class="tagline">练完一套八段锦 · 弹完一曲古琴</div>
+        <div class="tagline">练完一套 · 弹完一曲古琴</div>
       </div>
 
-      <button class="big-btn" @click="start">
+      <!-- 拳种选择：八段锦已上线，太极/五禽戏为预留入口 -->
+      <div class="styles">
+        <button
+          v-for="st in STYLE_LIST" :key="st.id"
+          class="style" :class="{ on: styleId === st.id, pending: st.status !== 'ready' }"
+          :disabled="st.status !== 'ready'"
+          :title="st.status === 'ready' ? st.desc : st.pendingReason"
+          @click="pick(st)"
+        >
+          <div class="style-name">
+            {{ st.name }}
+            <span v-if="st.status !== 'ready'" class="style-badge">{{ st.badge }}</span>
+          </div>
+          <div class="style-sub">{{ st.moves.length ? st.moves.length + ' 式 · ' + st.subtitle.split('· ').pop() : st.subtitle }}</div>
+        </button>
+      </div>
+
+      <button class="big-btn" @click="start" :disabled="!cur">
         <span class="big-btn-label">开始练</span>
-        <span class="big-btn-sub">八式 · 约 4 分钟</span>
+        <span class="big-btn-sub">{{ cur ? cur.moves.length + ' 式 · 约 4 分钟' : '暂无可练拳种' }}</span>
       </button>
+
+      <p class="style-desc" v-if="cur">{{ cur.desc }}</p>
+      <p class="style-pending" v-for="st in pendingList" :key="st.id">
+        {{ st.name }} · {{ st.pendingReason }}
+      </p>
 
       <div class="stats" v-if="lastRecord">
         <div class="stat">
@@ -47,10 +69,20 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getRecords } from '../stores/records'
 import { listCameras } from '../engine/poseEngine'
+import { STYLE_LIST, getStyle, resolveStyle } from '../data/styles'
 import { unlockAudio } from '../engine/guqin'
 
 const router = useRouter()
 const records = ref([])
+const styleId = ref(resolveStyle(safeGetStyle()))
+const cur = computed(() => getStyle(styleId.value))
+const pendingList = computed(() => STYLE_LIST.filter((s) => s.status !== 'ready'))
+function safeGetStyle() { try { return localStorage.getItem('xianyang.style') } catch { return null } }
+function pick(s) {
+  if (s.status !== 'ready') return
+  styleId.value = s.id
+  try { localStorage.setItem('xianyang.style', s.id) } catch { /* file:// 下不可写，忽略 */ }
+}
 const lastRecord = computed(() => records.value[0] || null)
 
 // 摄像头预检：点「开始练」时浏览器才弹权限框，用户会紧张。
@@ -76,32 +108,34 @@ onMounted(() => {
 })
 
 function start() {
-  router.push('/train')
+  if (!cur.value) return
+  router.push({ path: '/train', query: { style: cur.value.id } })
 }
 </script>
 
 <style scoped>
 .home {
   display: flex; flex-direction: column; align-items: center;
-  padding: 8vh 24px 32px; gap: 26px; text-align: center;
+  padding: 8vh 24px 32px; gap: 18px; text-align: center;
 }
-.hero { margin-bottom: 4vh; }
+.hero { margin-bottom: 1vh; }
 .brand {
-  font-size: 62px; letter-spacing: 16px; text-indent: 16px;
+  font-size: 54px; letter-spacing: 16px; text-indent: 16px;
   color: var(--xuan); font-weight: 400; line-height: 1.1;
   text-shadow: 0 0 40px rgba(214, 197, 158, .18);
 }
 .tagline { margin-top: 14px; font-size: 14px; color: var(--xuan-dim); letter-spacing: 2px; }
 
 .big-btn {
-  width: min(300px, 74vw); aspect-ratio: 1; border-radius: 50%;
+  width: min(250px, 64vw); aspect-ratio: 1; border-radius: 50%;
   background: radial-gradient(circle at 50% 38%, #2a231b, #191510);
   border: 1px solid rgba(214, 197, 158, .28);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 8px; box-shadow: 0 0 60px rgba(200, 85, 61, .12), inset 0 0 40px rgba(0,0,0,.5);
   transition: transform .16s, box-shadow .16s;
 }
-.big-btn:hover { box-shadow: 0 0 80px rgba(200, 85, 61, .26), inset 0 0 40px rgba(0,0,0,.5); }
+.big-btn:disabled { opacity: .45; cursor: not-allowed; }
+.big-btn:hover:not(:disabled) { box-shadow: 0 0 80px rgba(200, 85, 61, .26), inset 0 0 40px rgba(0,0,0,.5); }
 .big-btn:active { transform: scale(.96); }
 .big-btn-label { font-size: 30px; letter-spacing: 6px; text-indent: 6px; }
 .big-btn-sub { font-size: 12px; color: var(--xuan-faint); font-family: var(--font-ui); letter-spacing: 1px; }
@@ -109,6 +143,24 @@ function start() {
 .stats { display: flex; gap: 34px; margin-top: 2vh; }
 .stat-num { font-size: 26px; color: var(--jin); }
 .stat-label { font-size: 11px; color: var(--xuan-faint); font-family: var(--font-ui); margin-top: 4px; }
+
+/* 拳种选择 */
+.styles { display: flex; gap: 8px; width: 100%; max-width: 420px; }
+.style {
+  flex: 1; padding: 9px 8px; border-radius: var(--r-m);
+  background: rgba(232, 224, 208, .04);
+  border: 1px solid rgba(232, 224, 208, .09);
+  text-align: center; transition: all .15s;
+}
+.style:hover:not(:disabled) { background: rgba(232, 224, 208, .08); }
+.style.on { background: rgba(200, 85, 61, .16); border-color: var(--zhu); }
+.style.pending { opacity: .5; cursor: not-allowed; }
+.style-name { font-size: 14px; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.style-badge { font-size: 9px; padding: 1px 5px; border-radius: 8px; background: rgba(232, 224, 208, .12); color: var(--xuan-faint); font-family: var(--font-ui); }
+.style.on .style-badge { background: rgba(200, 85, 61, .3); color: #f0c0b4; }
+.style-sub { font-size: 10.5px; color: var(--xuan-faint); margin-top: 3px; font-family: var(--font-ui); }
+.style-desc { font-size: 12px; color: var(--xuan-dim); line-height: 1.8; max-width: 380px; text-align: center; font-family: var(--font-ui); }
+.style-pending { font-size: 11px; color: var(--xuan-faint); font-family: var(--font-ui); margin: -14px 0 0; }
 
 .links { display: flex; gap: 12px; margin-top: 1vh; }
 

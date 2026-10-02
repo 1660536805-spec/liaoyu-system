@@ -13,8 +13,9 @@
     "test:render": "node scripts/render.test.mjs",
     "verify:cam": "node scripts/cam-verify.mjs",
     "verify:real": "node scripts/judge-on-real.mjs",
-    "test:all": "npm run test:judge && npm run test:render && npm run verify:real && npm run verify:table",
-    "verify:table": "node scripts/verify-node-table.mjs"
+    "test:all": "npm run test:judge && npm run test:render && npm run test:audio && npm run verify:real && npm run verify:table",
+    "verify:table": "node scripts/verify-node-table.mjs",
+    "test:audio": "node scripts/audio.test.mjs"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^0.10.21",

@@ -2,9 +2,10 @@
   <div class="wrap">
     <div class="topbar">
       <button class="btn ghost sm" @click="$router.push('/')">← 首页</button>
-      <h1>动作要领</h1>
+      <h1>{{ style.name }} · 要领</h1>
     </div>
     <div class="body list">
+      <div v-if="!moves.length" class="empty">该拳种动作清单待定</div>
       <div v-for="(m, i) in moves" :key="m.id" class="item" :class="{ done: done.has(m.id - 1) }">
         <div class="item-idx">{{ i + 1 }}</div>
         <div class="item-main">
@@ -22,10 +23,14 @@
 
 <script setup>
 import { computed } from 'vue'
-import moves from '../data/moves.json'
+import { useRoute } from 'vue-router'
+import { getStyle, resolveStyle } from '../data/styles'
 import { getRecords } from '../stores/records'
 
 // 最近一次完成过的式
+const route = useRoute()
+const style = computed(() => getStyle(resolveStyle(route.query.style)) || getStyle('baduanjin'))
+const moves = computed(() => style.value.moves)
 const done = computed(() => new Set(getRecords()[0]?.moves ?? []))
 </script>
 

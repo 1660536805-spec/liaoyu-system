@@ -2,9 +2,9 @@
   <div class="wrap train">
     <div class="topbar">
       <button class="btn ghost sm" @click="quit">← 退出</button>
-      <div class="prog">{{ doneCount }} / 8</div>
+      <div class="prog">{{ doneCount }} / {{ totalMoves }}</div>
       <div class="spacer"></div>
-      <div class="mode">{{ freeMode ? '自由练习' : '跟练' }}</div>
+      <div class="mode">{{ style.name }}{{ freeMode ? ' · 自由练习' : '' }}</div>
       <CamSettings
         ref="settings"
         :threshold="cfg.threshold"
@@ -100,14 +100,15 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
-import moves from '../data/moves.json'
+import { useRouter, useRoute } from 'vue-router'
+import { getStyle, resolveStyle } from '../data/styles'
 import { createPoseEngine, drawPose, KEY_POINTS, listCameras, RESOLUTIONS, FRAMES } from '../engine/poseEngine'
 import { MoveJudge, NAMES, THRESHOLD } from '../engine/judge'
 import { pluck, chordAll, unlockAudio } from '../engine/guqin'
 import { saveRecord } from '../stores/records'
 import CamSettings from '../components/CamSettings.vue'
 
+const route = useRoute()
 const router = useRouter()
 const video = ref(null)
 const canvas = ref(null)
@@ -161,7 +162,11 @@ let rafUI = 0
 let lastLitClear = 0
 let loadTimer = 0
 
-const currentMove = computed(() => moves[stepIdx.value])
+// 拳种：由首页 ?style= 指定，未指定则取第一个已就绪的
+const style = computed(() => getStyle(resolveStyle(route.query.style)) || getStyle('baduanjin'))
+const moves = computed(() => style.value.moves)
+const totalMoves = computed(() => moves.value.length || 8)
+const currentMove = computed(() => moves.value[stepIdx.value])
 const doneCount = computed(() => doneSet.value.size)
 
 // ---- 取景诊断：实时算关键点可见度，据此给引导 ----
@@ -370,7 +375,7 @@ let diagTick = 0
 let fitSize = ''
 
 function onHit(i) {
-  const mv = moves[i]
+  const mv = moves.value[i]
   doneSet.value = new Set([...doneSet.value, i])
 
   if (mv.chord) {
@@ -383,13 +388,13 @@ function onHit(i) {
   lastLitClear = performance.now()
 
   if (!freeMode.value) {
-    if (i === 7 || doneSet.value.size >= 8) finish()
+    if (i === totalMoves.value - 1 || doneSet.value.size >= totalMoves.value) finish()
     else if (i === stepIdx.value) advance()
   }
 }
 
 function advance() {
-  stepIdx.value = Math.min(7, stepIdx.value + 1)
+  stepIdx.value = Math.min(totalMoves.value - 1, stepIdx.value + 1)
   resetStep()
 }
 
@@ -401,11 +406,13 @@ function finish() {
 
 function skip() {                 // 三级兜底之一：跳过本式也算完成
   const i = stepIdx.value
+  const mv = moves.value[i]
+  if (!mv) return
   doneSet.value = new Set([...doneSet.value, i])
-  if (moves[i].chord) chordAll(); else pluck(moves[i].stringIndex)
-  litStrings.value = moves[i].chord ? [1, 2, 3, 4, 5, 6, 7] : [moves[i].stringIndex]
+  if (mv.chord) chordAll(); else pluck(mv.stringIndex)
+  litStrings.value = mv.chord ? [1, 2, 3, 4, 5, 6, 7] : [mv.stringIndex]
   lastLitClear = performance.now()
-  if (stepIdx.value >= 7) finish(); else advance()
+  if (stepIdx.value >= totalMoves.value - 1) finish(); else advance()
 }
 
 function restart() {
