@@ -18,6 +18,12 @@
         </div>
       </div>
     </div>
+
+    <!-- 素材署名：CC BY 4.0 要求可触达处保留署名。
+         刻意不写 <a href>：D5 断网验收要求零外链，此处只留文字署名即可满足。 -->
+    <div class="body credits">
+      古琴音色素材：RafaelCaro · 许可 CC BY 4.0（署名即可商用，详见素材包内 README）
+    </div>
   </div>
 </template>
 
@@ -38,6 +44,7 @@ const done = computed(() => new Set(getRecords()[0]?.moves ?? []))
 .sm { padding: 7px 12px; font-size: 12px; }
 .list { padding: 16px; }
 .item { display: flex; gap: 13px; padding: 14px 0; border-bottom: 1px solid rgba(232,224,208,.06); }
+.credits { padding: 18px 16px 26px; font-size: 11.5px; color: rgba(232,224,208,.34); }
 .item-idx { flex: 0 0 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(232,224,208,.2); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--xuan-dim); font-family: var(--font-ui); }
 .item.done .item-idx { background: var(--zhu); border-color: var(--zhu); color: #fff; }
 .item-main { flex: 1; }
