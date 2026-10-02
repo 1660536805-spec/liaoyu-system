@@ -192,5 +192,37 @@ console.log('\n=== H. hasLegs 门槛正确性 ===')
   okc(true, '膝踝 vis=0.05 时走降级路径（由 §G 得分验证）')
 }
 
+console.log('\n=== I. 镜像自适应（真机实测：95.6% 帧画面水平镜像）===')
+// 式7 曾硬编码 fwdL<0（假设左肩在画面左），镜像下会失效。
+// 现改为从双肩实际位置推断出拳方向，应对正常/镜像都成立。
+{
+  const mk7 = (mirrored) => {
+    const p = blank()
+    const S = (i, x, y) => set(p, i, x, y)
+    S(LM.L_SHO, 0.42, 0.35); S(LM.R_SHO, 0.58, 0.35)
+    S(LM.L_ELB, 0.32, 0.36); S(LM.L_WRI, 0.18, 0.36)   // 左拳前伸
+    S(LM.R_WRI, 0.58, 0.55); S(LM.R_ELB, 0.60, 0.44)   // 右手贴腰
+    S(LM.NOSE, 0.5, 0.20); S(LM.L_EYE, 0.47, 0.19); S(LM.R_EYE, 0.53, 0.19)
+    if (mirrored) for (const q of p) q.x = 1 - q.x
+    return p
+  }
+  for (const mir of [false, true]) {
+    const j = new MoveJudge({ holdFrames: 8, order: 6 })
+    let hit = 0
+    for (let f = 0; f < 40; f++) hit += j.update(mk7(mir)).length
+    okc(hit > 0 && j.lastScores[6] >= 0.55, `式7 ${mir ? '镜像画面' : '正常画面'} 可触发（命中 ${hit}，得分 ${j.lastScores[6].toFixed(2)}）`)
+  }
+  for (const mir of [false, true]) {
+    const j = new MoveJudge({ holdFrames: 8, order: null })
+    let n = 0
+    for (let f = 0; f < 120; f++) {
+      const p = blank()
+      if (mir) for (const q of p) q.x = 1 - q.x
+      n += j.update(p).length
+    }
+    okc(n === 0, `静立 ${mir ? '镜像' : '正常'} 不误触发（${n} 次）`)
+  }
+}
+
 console.log('\n' + (fail === 0 ? '✅ 全部通过' : `❌ ${fail} 项失败`))
 process.exit(fail === 0 ? 0 : 1)

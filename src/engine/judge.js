@@ -202,24 +202,33 @@ const MOVES = [
     return reach * 0.34 + sync * 0.30 + bend * 0.24 + still * 0.12
   },
 
-  // 7 攒拳怒目增气力 —— 一拳明确前伸 + 另一手收在腰侧
-  //    收紧点：拳必须「向前」(x 明显越过同侧肩) 且 拳肘伸直 + 另一手贴腰。
-  //    三者同时成立才给高分，避免「一只手随便远一点」在静立时就误判。
+  // 7 攒拳怒目增气力 —— 一拳明确前伸 + 另一手收腰侧
+  //    【真机实测驱动】原先硬编码「fwdL < 0」，即假设画面里左肩一定在左。
+  //    实测 8797 帧发现 95.6% 的帧「左肩 x > 右肩」（画面被水平镜像，
+  //    采集器未做 scaleX(-1) 而页面做了），硬编码会导致式7 在镜像下判定失效。
+  //    现改为：从双肩实际位置推断「出拳方向」，与镜像/朝向无关。
   (p) => {
     if (!need(p, LM.L_WRI, LM.R_WRI, LM.L_SHO, LM.R_SHO, LM.L_ELB, LM.R_ELB, LM.L_HIP, LM.R_HIP)) return 0
     const t = torso(p)
-    // 前伸量：(腕x - 同侧肩x) 归一化；出拳手应是「越过肩线」的那只
+    // 前伸量：腕相对同侧肩的 x 偏移（带符号）
     const fwdL = (v(p, LM.L_WRI).x - v(p, LM.L_SHO).x) / t
     const fwdR = (v(p, LM.R_WRI).x - v(p, LM.R_SHO).x) / t
-    const punchL = Math.abs(fwdL) >= Math.abs(fwdR) && fwdL < 0
-    const punchR = !punchL && fwdR > 0
+    // 出拳方向：从双肩位置推断 —— 左肩在画面左（fwd 为负）还是右（fwd 为正）
+    const L = v(p, LM.L_SHO), R = v(p, LM.R_SHO)
+    const leftOnScreen = L.x < R.x
+    // 出拳手 = 「更向外伸」的那只，即 fwd 与「出拳方向」同号
+    const outward = leftOnScreen ? -1 : 1
+    const scoreL = fwdL * outward
+    const scoreR = fwdR * outward
+    const punchL = scoreL >= scoreR && scoreL > 0.2
+    const punchR = !punchL && scoreR > 0.2
     if (!punchL && !punchR) return 0                     // 没有一只手明确向前 → 直接 0
     const SH = punchL ? LM.L_SHO : LM.R_SHO
     const EL = punchL ? LM.L_ELB : LM.R_ELB
     const WR = punchL ? LM.L_WRI : LM.R_WRI
     const OTHER = punchL ? LM.R_WRI : LM.L_WRI
     // 前伸距离要够（约 0.55~1.15 肩宽）
-    const reach = okUp(Math.abs(punchL ? fwdL : fwdR), 0.55, 1.15)
+    const reach = okUp(Math.max(scoreL, scoreR), 0.55, 1.15)
     // 拳与肩同高（水平打出）
     const level = okUp(1 - Math.abs(v(p, WR).y - v(p, SH).y) / t, 0.0, 0.35)
     // 拳肘伸直

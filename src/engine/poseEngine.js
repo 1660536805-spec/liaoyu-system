@@ -15,6 +15,7 @@
 //  4. 设备 label 在授权前是空的（浏览器隐私策略），要用 deviceId 兜底展示
 
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision'
+import { createLandmarkCleaner } from './cleaner.js'
 
 const WASM_PATH = '/wasm'
 const MODEL_PATH = '/models/pose_landmarker_lite.task'
@@ -109,6 +110,7 @@ export async function createPoseEngine({ numPoses = 1, delegate = 'GPU', timeout
   let currentDeviceId = null
   const listeners = { result: [], error: [], status: [] }
   let lastVideoTime = -1
+  const cleaner = createLandmarkCleaner()   // 出画/低置信点保护（真机实测驱动）
 
   const emit = (evt, ...a) => (listeners[evt] || []).forEach((fn) => { try { fn(...a) } catch (e) { console.error(e) } })
   const status = (stage, detail) => {
@@ -154,7 +156,9 @@ export async function createPoseEngine({ numPoses = 1, delegate = 'GPU', timeout
         lastVideoTime = v.currentTime
         try {
           const res = landmarker.detectForVideo(v, t)
-          const lm = res.landmarks && res.landmarks[0] ? res.landmarks[0] : null
+          const raw = res.landmarks && res.landmarks[0] ? res.landmarks[0] : null
+          // 净化：剔除越界/低置信点，冻结其坐标；整帧不可用时返回 null
+          const lm = raw ? cleaner.clean(raw) : null
           emit('result', lm, res)
         } catch (e) {
           emit('error', e)
@@ -242,6 +246,7 @@ export async function createPoseEngine({ numPoses = 1, delegate = 'GPU', timeout
     },
 
     get isRunning() { return running },
+    get cleanStats() { return cleaner.stats },
     get deviceId() { return currentDeviceId },
     dispose() { this.stop(); landmarker?.close?.() },
   }
