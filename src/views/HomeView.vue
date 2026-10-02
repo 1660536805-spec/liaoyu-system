@@ -70,7 +70,7 @@ import { useRouter } from 'vue-router'
 import { getRecords } from '../stores/records'
 import { listCameras } from '../engine/poseEngine'
 import { STYLE_LIST, getStyle, resolveStyle } from '../data/styles'
-import { unlockAudio } from '../engine/guqin'
+import { unlockAudio, preloadSamples } from '../engine/guqin'
 import { primeVoice } from '../engine/voice'
 
 const router = useRouter()
@@ -112,6 +112,8 @@ function start() {
   if (!cur.value) return
   // 在用户手势内解锁语音与音频（浏览器自动播放策略要求）
   unlockAudio()
+  // 趁手势内把 7 个采样拉进内存，避免第一个动作触发时才加载
+  preloadSamples()
   primeVoice()
   router.push({ path: '/train', query: { style: cur.value.id } })
 }

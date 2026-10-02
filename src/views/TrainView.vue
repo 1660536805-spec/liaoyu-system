@@ -156,7 +156,7 @@ import { getStyle, resolveStyle } from '../data/styles'
 import { createPoseEngine, drawPose, KEY_POINTS, HEAD_POINTS, listCameras, RESOLUTIONS, FRAMES } from '../engine/poseEngine'
 import { headPose, bodyPose, createTurnTracker } from '../engine/pose'
 import { MoveJudge, NAMES, THRESHOLD } from '../engine/judge'
-import { pluck, chordAll, unlockAudio } from '../engine/guqin'
+import { pluck, chordAll, unlockAudio, preloadSamples } from '../engine/guqin'
 import { FallbackSwitch, frameAlive, FALLBACK_SRC, FALLBACK_CFG } from '../engine/fallback'
 import { saveRecord } from '../stores/records'
 import CamSettings from '../components/CamSettings.vue'
@@ -496,6 +496,7 @@ async function onSwitchRes(resId) {
 
 onMounted(() => {
   unlockAudio()               // 由用户手势触发，解锁音频
+  preloadSamples()            // 兜底：若首页预热已就绪则这里无事可做
   announcer.prime()           // 解锁语音（必须在用户手势内，否则被自动播放策略拦）
   setupFallback()             // 预热预录视频（不等它，现场要切时多半是热启动）
   init()
