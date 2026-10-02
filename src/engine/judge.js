@@ -39,10 +39,15 @@ function angle(a, b, c) {
   return (Math.acos(Math.min(1, Math.max(-1, d))) * 180) / Math.PI
 }
 
+// 关键点可见性门槛：任一依赖点 visibility 低则该式记 0 分（宁可不判，不误判）。
+// 阈值 0.35 而非 0.5：真机实测（2026-10-02，USB 摄像头）右手腕在
+// 「手上有深色物体 / 运动模糊」时 MediaPipe 只给 0.47，0.5 门槛会把
+// 真实动作整式拦掉（实测导致 7/8 式全判 0）。0.35 仍足以挡住真正出画的点（实测 <0.05）。
+const VIS_MIN = 0.35
 function need(p, ...idx) {
   for (const i of idx) {
     const pt = p[i]
-    if (!pt || (pt.visibility ?? 1) < 0.5) return false
+    if (!pt || (pt.visibility ?? 1) < VIS_MIN) return false
   }
   return true
 }
@@ -63,16 +68,27 @@ const handToAnkleL = (p) => dist(v(p, LM.L_WRI), v(p, LM.L_ANK)) / torso(p)
 const handToAnkleR = (p) => dist(v(p, LM.R_WRI), v(p, LM.R_ANK)) / torso(p)
 const feetSpread = (p) => dist(v(p, LM.L_ANK), v(p, LM.R_ANK)) / torso(p)
 
+// 下肢是否可靠可见。
+// 真机实测（2026-10-02，USB 摄像头近距离取景）：膝 visibility ≈0.04、踝 ≈0.02，
+// 但 MediaPipe 仍会返回 y>1 的「猜测坐标」。若直接拿来算距离会得到
+// 「手到脚踝距离 = 负值类异常」从而误判。故凡依赖下肢的式子都要先过这一关。
+const LEG_VIS = 0.35
+const hasLegs = (p) =>
+  (v(p, LM.L_KNE).visibility ?? 0) >= LEG_VIS && (v(p, LM.R_KNE).visibility ?? 0) >= LEG_VIS &&
+  (v(p, LM.L_ANK).visibility ?? 0) >= LEG_VIS && (v(p, LM.R_ANK).visibility ?? 0) >= LEG_VIS
+
 // ---------------------------------------------------------------- 八式打分（各返回 0~1）
 // 打分只依赖「本帧姿态 + 一段髋部历史」（第 8 式），历史由 update() 注入到 __bob
 const MOVES = [
   // 1 双手托天理三焦 —— 双臂高举过顶
+  //    区间按真人比例标定（单位=肩宽 T）：手举过头顶时腕约在肩线上方 1.8~2.2T，
+  //    双腕分开约 1.5~2.0T，肘接近伸直。低于 1.0T 只是抬手，不算托天。
   (p) => {
     if (!need(p, LM.L_WRI, LM.R_WRI, LM.L_SHO, LM.R_SHO, LM.L_ELB, LM.R_ELB)) return 0
-    const both = okUp(Math.min(raiseL(p), raiseR(p)), 0.6, 1.3)   // 较低那只腕也要高
-    const avg = okUp((raiseL(p) + raiseR(p)) / 2, 0.8, 1.6)
+    const both = okUp(Math.min(raiseL(p), raiseR(p)), 1.0, 1.9)   // 较低那只腕也要高过头
+    const avg = okUp((raiseL(p) + raiseR(p)) / 2, 1.2, 2.2)
     const st = okUp((angle(v(p, LM.L_SHO), v(p, LM.L_ELB), v(p, LM.L_WRI)) + angle(v(p, LM.R_SHO), v(p, LM.R_ELB), v(p, LM.R_WRI))) / 360, 0.78, 0.94)
-    const apart = okUp(dist(v(p, LM.L_WRI), v(p, LM.R_WRI)) / torso(p), 1.2, 2.2)
+    const apart = okUp(dist(v(p, LM.L_WRI), v(p, LM.R_WRI)) / torso(p), 1.3, 2.4)
     return both * 0.28 + avg * 0.26 + st * 0.24 + apart * 0.22
   },
 
@@ -91,53 +107,99 @@ const MOVES = [
   },
 
   // 3 调理脾胃须单举 —— 一手高举、一手下按
+  //    注意：raise 为负表示手在肩线以下（按手），故「按得够低」要用 lowDrop = -lo，
+  //    早前误写成 okUp(lo, …) 导致按手永远得 0 分（真机基底测试实测踩过）。
   (p) => {
     if (!need(p, LM.L_WRI, LM.R_WRI, LM.L_SHO, LM.R_SHO, LM.L_HIP, LM.R_HIP)) return 0
-    const t = torso(p)
     const rl = raiseL(p), rr = raiseR(p)
     const hi = Math.max(rl, rr), lo = Math.min(rl, rr)
-    if (hi < 0.8 || lo > 0.0) return 0                   // 举手要高、按手不能高于肩
-    const gap = okUp(hi - lo, 1.4, 2.8)
-    const upOk = okUp(hi, 0.8, 1.6)
-    const lowOk = okUp(lo, 0.2, 0.9)                    // 按手接近腰髋
-    return gap * 0.38 + upOk * 0.32 + lowOk * 0.30
+    if (hi < 1.2 || lo > -0.1) return 0                   // 举手要高过头顶，按手要低于肩线
+    const gap = okUp(hi - lo, 2.0, 3.4)
+    const upOk = okUp(hi, 1.2, 2.2)
+    const lowOk = okUp(-lo, 0.4, 1.3)                    // 按手下探深度（正值越大越低）
+    return gap * 0.34 + upOk * 0.36 + lowOk * 0.30
   },
 
   // 4 五劳七伤往后瞧 —— 躯干保持竖直 + 头明显转向一侧
+  //    【真机实测驱动】俯身动作（式5/6）时鼻子也会大幅偏移，若只按偏移判会误触发。
+  //    故加硬门槛：躯干必须站直（lean<28°），俯身一律判 0。
   (p) => {
     if (!need(p, LM.NOSE, LM.L_SHO, LM.R_SHO, LM.L_EYE, LM.R_EYE)) return 0
     const t = torso(p)
+    const lean = leanDeg(p)
+    if (lean > 28) return 0                               // 硬门槛：躯干不直 → 不是转头
     const dev = Math.abs(v(p, LM.NOSE).x - shoMid(p).x) / t
-    // 硬门槛：没明显转头直接 0（静立时鼻子偏移 <0.2 肩宽，判 0）
-    if (dev < 0.22) return 0
+    if (dev < 0.22) return 0                             // 硬门槛：没明显转头 → 判 0
     const turn = okUp(dev, 0.22, 0.52)
-    const upright = okDown(leanDeg(p), 10, 28)     // 没弯腰 = 纯转头
+    const upright = okDown(lean, 10, 28)                 // 站得越直越好
     const shoTilt = okDown(Math.abs(v(p, LM.L_SHO).y - v(p, LM.R_SHO).y) / t, 0.06, 0.20)
     return turn * 0.46 + upright * 0.34 + shoTilt * 0.20
   },
 
-  // 5 摇头摆尾去心火 —— 深俯身摆动（手不碰脚，与式6 区分）
+  // 5 摇头摆尾去心火 —— 俯身 + 左右摆动
+  //    【真机实测驱动】近距离取景时膝/踝 visibility≈0.02，但肩/肘/腕≈1.0。
+  //    故判定改用纯上半身信号：
+  //      ① 躯干前倾角（肩-髋向量，髋 vis 0.9 仍可用）
+  //      ② 双手「左右横摆」幅度（摇头摆尾的核心特征：手随身体左右摆）
+  //      ③ 双肩「左右倾斜」（摆动时肩线一高一低）
+  //    硬门槛：手必须明显下探（区别于站立），摆动才给高分。
   (p) => {
-    if (!need(p, LM.L_SHO, LM.R_SHO, LM.L_HIP, LM.R_HIP, LM.L_WRI, LM.R_WRI, LM.L_ANK, LM.R_ANK, LM.L_KNE)) return 0
+    if (!need(p, LM.L_SHO, LM.R_SHO, LM.L_HIP, LM.R_HIP, LM.L_WRI, LM.R_WRI)) return 0
     const t = torso(p)
-    // 摇头摆尾：躯干深俯 40~72°，且手离开脚（与式6 攀足的区分点，权重给足）
-    const bend = okUp(leanDeg(p), 40, 72)
-    const away = okUp(Math.min(handToAnkleL(p), handToAnkleR(p)), 0.85, 1.5)
-    // 摆动时屈膝：膝踝距从站立 ~1.25 肩宽缩到 ~0.6~0.9
-    const kneeAnkle = Math.abs(v(p, LM.L_KNE).y - v(p, LM.L_ANK).y) / t
-    const kneeBend = okDown(kneeAnkle, 0.65, 1.20)
-    return bend * 0.36 + away * 0.42 + kneeBend * 0.22
+    const sY = shoMid(p).y
+    const bend = okUp(leanDeg(p), 35, 70)                       // 俯身
+    const dropRaw = (Math.min(v(p, LM.L_WRI).y, v(p, LM.R_WRI).y) - sY) / t
+    if (dropRaw < 1.9) return 0                                 // 硬门槛：手没下探 → 判 0
+    // 与式6「攀足」区分：摇头摆尾必须真的在左右摆动手。
+    // 硬门槛 1：时序窗口未就绪 → 判 0（否则静止的攀足会被当成摆动的摇头摆尾）
+    // 硬门槛 2：双手中点横摆幅度 <0.18 肩宽 → 判 0（那是定点下探的攀足）
+    if (p.__ready === false) return 0
+    const swing = p.__handSwing ?? 0
+    if (swing < 0.18) return 0
+    const drop = okUp(dropRaw, 1.9, 3.0)
+    const handSwing = okUp(swing, 0.18, 0.80)                   // 双手横摆幅度（主信号）
+    // 躯干整体左右摆（肩中点横移）。不要用「肩线一高一低」——实测摇头摆尾时
+    // 两肩基本同向平移，倾斜量仅 0.04 肩宽，恒不达标（踩过，见 §A 调试记录）。
+    const bodySway = okUp(p.__sway ?? 0, 0.08, 0.34)
+    if (hasLegs(p)) {
+      const away = okUp(Math.min(handToAnkleL(p), handToAnkleR(p)), 0.85, 1.5)
+      return bend * 0.30 + handSwing * 0.38 + bodySway * 0.18 + away * 0.14
+    }
+    return bend * 0.32 + handSwing * 0.42 + bodySway * 0.26
   },
 
-  // 6 两手攀足固肾腰 —— 深前屈 + 手明确够到脚（硬门槛：够不到就 0 分）
+  // 6 两手攀足固肾腰 —— 深前屈 + 双手够到最下
+  //    【真机实测驱动】踝几乎不可见，改用「双手对称地探到躯干最低处」判定：
+  //      ① 躯干前倾角
+  //      ② 双手下探深度（越低越好）
+  //      ③ 双手高度接近（攀足是双手一起下去；摇头摆尾是手交替摆动，高低不一）
   (p) => {
-    if (!need(p, LM.L_WRI, LM.R_WRI, LM.L_ANK, LM.R_ANK, LM.L_SHO, LM.R_SHO, LM.L_HIP)) return 0
+    if (!need(p, LM.L_WRI, LM.R_WRI, LM.L_SHO, LM.R_SHO, LM.L_HIP, LM.R_HIP)) return 0
     const t = torso(p)
-    const hand = Math.min(handToAnkleL(p), handToAnkleR(p))
-    if (hand > 0.95) return 0                            // 手离脚太远 → 不是攀足
-    const reach = okDown(hand, 0.30, 0.95)
-    const bend = okUp(leanDeg(p), 30, 68)
-    return reach * 0.55 + bend * 0.45
+    const sY = shoMid(p).y
+    const bend = okUp(leanDeg(p), 30, 70)
+    const dropL = (v(p, LM.L_WRI).y - sY) / t
+    const dropR = (v(p, LM.R_WRI).y - sY) / t
+    const minDrop = Math.min(dropL, dropR)
+    if (minDrop < 2.1) return 0                                // 硬门槛：手没探到最低 → 判 0
+    // 与式5「摇头摆尾」区分：攀足是双手定点下探（几乎不横摆），摇头摆尾是手大幅左右摆。
+    // 硬门槛 1：时序窗口未就绪 → 判 0（同式5，避免互斥失效）
+    // 硬门槛 2：手横摆幅度 >0.16 肩宽 → 判 0（那是式5，不是攀足）
+    if (p.__ready === false) return 0
+    const swing = p.__handSwing ?? 0
+    // 0.26 而非 0.16：真机上做攀足时手也有微抖（§B 组 0.014 幅度噪声下
+    // 双手中点仍会漂 0.2+ 肩宽），门槛太紧会导致真实攀足永远判不出来。
+    if (swing > 0.26) return 0
+    const still = okDown(swing, 0.08, 0.26)
+    const reach = okUp(minDrop, 2.1, 3.4)
+    // 双手高度一致（都探到底）
+    const sync = okDown(Math.abs(dropL - dropR), 0.10, 0.75)
+    if (hasLegs(p)) {
+      const hand = Math.min(handToAnkleL(p), handToAnkleR(p))
+      if (hand > 0.95) return 0
+      return okDown(hand, 0.30, 0.95) * 0.30 + reach * 0.26 + sync * 0.20 + bend * 0.16 + still * 0.08
+    }
+    return reach * 0.34 + sync * 0.30 + bend * 0.24 + still * 0.12
   },
 
   // 7 攒拳怒目增气力 —— 一拳明确前伸 + 另一手收在腰侧
@@ -172,14 +234,24 @@ const MOVES = [
     return reach * 0.28 + level * 0.22 + straight * 0.22 + atWaist * 0.18 + handSplit * 0.10
   },
 
-  // 8 背后七颠百病消 —— 双脚并拢 + 踮脚起落（时序：髋部起伏）
+  // 8 背后七颠百病消 —— 踮脚起落，时序动作
+  //    【真机实测驱动】踝 vis≈0.02 靠不住；改用「躯干中点垂直起伏」——
+  //    踮脚时整个人上下动，肩中点同样上下动（肩 vis≈1.0，最稳）。
+  //    髋可见时用髋（更直接），不可见时自动退回肩。
   (p) => {
-    if (!need(p, LM.L_ANK, LM.R_ANK, LM.L_KNE, LM.R_KNE, LM.L_HIP, LM.R_HIP, LM.L_SHO, LM.R_SHO)) return 0
-    const together = okUp(1 - feetSpread(p) / 0.55, 0.15, 0.95)
-    const upright = okDown(leanDeg(p), 12, 30)
-    // 髋部起伏：门槛下调到 0.05~0.22，踮脚幅度约 0.25~0.4 肩宽
-    const bob = okUp(p.__bob ?? 0, 0.05, 0.22)
-    return together * 0.32 + upright * 0.24 + bob * 0.44
+    if (!need(p, LM.L_SHO, LM.R_SHO, LM.L_HIP, LM.R_HIP, LM.L_WRI, LM.R_WRI)) return 0
+    const t = torso(p)
+    const upright = okDown(leanDeg(p), 12, 30)     // 踮脚时躯干保持竖直
+    if (p.__ready === false) return 0              // 时序窗口未就绪 → 判 0
+    const bob = okUp(p.__bob ?? 0, 0.05, 0.20)      // 垂直起伏 / 肩宽
+    if (bob < 0.02) return 0                        // 硬门槛：没起伏 → 判 0
+    if (hasLegs(p)) {
+      const together = okUp(1 - feetSpread(p) / 0.55, 0.15, 0.95)
+      return together * 0.30 + upright * 0.24 + bob * 0.46
+    }
+    // 降级：看不到脚，用「双手垂于体侧」+ 躯干规律起伏当踮脚信号
+    const armsDown = okDown((Math.min(v(p, LM.L_WRI).y, v(p, LM.R_WRI).y) - shoMid(p).y) / t, 0.5, 1.8)
+    return armsDown * 0.26 + upright * 0.28 + bob * 0.46
   },
 ]
 
@@ -190,7 +262,8 @@ const NAMES = [
 
 export const THRESHOLD = 0.55
 export const MARGIN = 0.10
-const BOB_WINDOW = 45 // 帧，约 1.5s @30fps
+const BOB_WINDOW = 45  // 帧，约 1.5s @30fps
+const MIN_WINDOW = 12  // 少于此帧数视为「时序信号未就绪」，相关式子一律判 0
 
 // 判定状态机：保持 N 帧 + 互斥仲裁 + 每式锁存
 export class MoveJudge {
@@ -213,6 +286,9 @@ export class MoveJudge {
     this.counts = new Array(8).fill(0)
     this.latched = new Array(8).fill(false)
     this.hipHist = []
+    this.xHist = []
+    this.wriXHist = []
+    this.wriGapHist = []
     this.lastScores = new Array(8).fill(0)
   }
 
@@ -225,13 +301,31 @@ export class MoveJudge {
   _withBob(p) {
     if (p.__bob !== undefined) return p
     const t = torso(p)
-    const h = hipMid(p).y
-    this.hipHist.push(h)
-    if (this.hipHist.length > BOB_WINDOW) this.hipHist.shift()
-    const range = this.hipHist.length > 8
-      ? Math.max(...this.hipHist) - Math.min(...this.hipHist)
-      : 0
-    try { p.__bob = range / t } catch { /* frozen */ }
+    // 起伏源：髋可见用髋，否则退回肩（肩 visibility 常年 0.99，最可靠）
+    const useHip = (v(p, LM.L_HIP).visibility ?? 0) >= LEG_VIS && (v(p, LM.R_HIP).visibility ?? 0) >= LEG_VIS
+    const src = useHip ? hipMid(p) : shoMid(p)
+    this.hipHist.push(src.y)
+    this.xHist.push(src.x)
+    // 双手横摆：摇头摆尾的核心信号（两手交替左右摆动 → 腕中点持续横移）
+    this.wriXHist.push((v(p, LM.L_WRI).x + v(p, LM.R_WRI).x) / 2)
+    this.wriGapHist.push(Math.abs(v(p, LM.L_WRI).x - v(p, LM.R_WRI).x) / t)
+    if (this.hipHist.length > BOB_WINDOW) {
+      this.hipHist.shift(); this.xHist.shift()
+      this.wriXHist.shift(); this.wriGapHist.shift()
+    }
+    const enough = this.hipHist.length > MIN_WINDOW
+    const rng = (a) => (enough ? Math.max(...a) - Math.min(...a) : 0)
+    try {
+      // 窗口未满时全部记 0，并置 __ready=false。
+      // 关键：式5/6 靠 __handSwing 互斥，若未满就当 0，会让「静止的攀足」被
+      // 误判成「摆动的摇头摆尾」（窗口未满 → 式6 的 still 门槛失效）。故显式标记。
+      p.__ready = enough
+      p.__bob = enough ? rng(this.hipHist) / t : 0     // 躯干垂直起伏（踮脚，式8）
+      p.__sway = enough ? rng(this.xHist) / t : 0      // 躯干横摆（式5 辅助）
+      p.__handSwing = enough ? rng(this.wriXHist) / t : 0  // 双手中点横摆（式5 主信号）
+      p.__handGap = enough ? rng(this.wriGapHist) : 0   // 双手间距变化（式5 辅助）
+      p.__bobSrc = useHip ? 'hip' : 'shoulder'
+    } catch { /* frozen */ }
     return p
   }
 

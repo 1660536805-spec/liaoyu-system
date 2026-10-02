@@ -11,13 +11,22 @@
       <video ref="video" class="video" playsinline muted autoplay></video>
       <canvas ref="canvas" class="overlay"></canvas>
 
+      <!-- 取景引导框：告诉用户手该放在哪 -->
+      <div class="guide" v-if="showGuide">
+        <div class="guide-frame"></div>
+        <div class="guide-tip">{{ guideText }}</div>
+      </div>
+
       <div v-if="loading" class="mask"><div class="spinner"></div><div class="mask-txt">{{ loading }}</div></div>
       <div v-if="err" class="mask err">
         <div class="mask-txt">{{ err }}</div>
         <button class="btn" @click="$router.push('/')">返回首页</button>
         <button class="btn ghost" @click="manualMode">改用手动模式继续</button>
       </div>
-      <div v-else-if="!landmarksSeen" class="hint">把手机/电脑放好，让上半身出现在画面里</div>
+      <div v-else-if="!landmarksSeen" class="hint">站到镜头前，让上半身和双手完整入镜</div>
+
+      <!-- 实时可见度诊断（长按可展开，平时半透明小字） -->
+      <div class="diag" :class="{ bad: vis.bad }">{{ vis.text }}</div>
     </div>
 
     <!-- 七弦弦位 -->
@@ -67,7 +76,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import moves from '../data/moves.json'
 import { createPoseEngine, drawPose, KEY_POINTS } from '../engine/poseEngine'
@@ -98,6 +107,42 @@ let lastLitClear = 0
 const currentMove = computed(() => moves[stepIdx.value])
 const doneCount = computed(() => doneSet.value.size)
 
+// ---- 取景诊断：实时算关键点可见度，据此给引导 ----
+// 真机实测（2026-10-02）：近距离时膝/踝 visibility≈0.02，肩/肘/腕≈1.0。
+// 判定器已改为上半身可判，但站太近会让上半身占比过小、抖动变大，故仍要给距离提示。
+const vis = reactive({ text: '', bad: false })
+const showGuide = ref(true)
+const guideText = ref('')
+
+function updateDiag(landmarks) {
+  if (!landmarks || landmarks.length < 29) {
+    vis.text = '未检测到人体'
+    vis.bad = true
+    guideText.value = '站到镜头前，让上半身和双手完整入镜'
+    return
+  }
+  const v = (i) => landmarks[i]?.visibility ?? 0
+  const up = (v(11) + v(12) + v(13) + v(14) + v(15) + v(16)) / 6      // 上半身
+  const low = (v(25) + v(26) + v(27) + v(28)) / 4                    // 下半身
+  // 肩宽占画面比例：太小说明站太远，太大说明太近
+  const shoW = Math.hypot(landmarks[11].x - landmarks[12].x, landmarks[11].y - landmarks[12].y)
+  vis.text = `上半身 ${(up * 100).toFixed(0)}% · 下半身 ${(low * 100).toFixed(0)}% · 取景 ${(shoW * 100).toFixed(0)}%`
+
+  if (up < 0.55) {
+    vis.bad = true
+    guideText.value = '光线不足或离得太远，请靠近一些并面向光源'
+  } else if (shoW > 0.42) {
+    vis.bad = true
+    guideText.value = '离得太近了，请退后一步，让双手完整入镜'
+  } else if (low < 0.25) {
+    vis.bad = false
+    guideText.value = '上半身已够用（八式判定不依赖腿脚），可退后一步让画面更稳'
+  } else {
+    vis.bad = false
+    guideText.value = '取景良好，双手自然张开即可'
+  }
+}
+
 function resetStep() {
   liveScore.value = 0
   if (judge) judge.reset()
@@ -115,7 +160,9 @@ onMounted(async () => {
     await engine.start(video.value)
     loading.value = ''
     resetStep()
-    sizeCanvas()
+    // 等一帧让 stage 完成布局再定 canvas 尺寸，否则拿到 0
+    requestAnimationFrame(sizeCanvas)
+    setTimeout(sizeCanvas, 120)
     window.addEventListener('resize', sizeCanvas)
     uiLoop()
   } catch (e) {
@@ -133,9 +180,10 @@ onBeforeUnmount(() => {
 })
 
 function sizeCanvas() {
-  const c = canvas.value, v = video.value
-  if (!c || !v) return
-  const w = v.clientWidth || 640, h = v.clientHeight || 480
+  const c = canvas.value
+  if (!c) return
+  const stage = c.parentElement
+  const w = stage?.clientWidth || 640, h = stage?.clientHeight || 480
   c.width = w; c.height = h
 }
 
@@ -145,8 +193,11 @@ function onResult(landmarks) {
   if (landmarks) landmarksSeen.value = true
   const hits = judge.update(landmarks)
   liveScore.value = judge.lastScores[stepIdx.value] ?? 0
+  // 每 10 帧更新一次诊断，避免每帧重算文字
+  if (++diagTick % 10 === 0) updateDiag(landmarks)
   for (const h of hits) onHit(h.index)
 }
+let diagTick = 0
 
 function onHit(i) {
   const mv = moves[i]
@@ -237,17 +288,43 @@ let lastLandmarks = null
 .mode { font-size: 11px; color: var(--xuan-faint); font-family: var(--font-ui); }
 .btn.sm { padding: 7px 12px; font-size: 12px; }
 
-.stage { position: relative; flex: 0 0 auto; aspect-ratio: 4/3; background: #000; max-height: 46vh; }
+/* 竖版取景：9:16 让上半身尽量占满画面，减少头部/腿部空区 */
+.stage {
+  position: relative; flex: 1 1 auto; min-height: 0;
+  aspect-ratio: 3 / 4; max-height: 52vh;
+  align-self: center; width: 100%;
+  background: #000; border-radius: var(--r-m); overflow: hidden;
+}
 .video, .overlay { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.video { transform: scaleX(-1); opacity: .82; }
+.video { transform: scaleX(-1); opacity: .85; }
 .overlay { pointer-events: none; }
+
+/* 取景引导框：虚线框提示「双手放这里面」 */
+.guide { position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 12px; }
+.guide-frame {
+  position: absolute; left: 12%; right: 12%; top: 14%; bottom: 22%;
+  border: 1px dashed rgba(214, 197, 158, .3); border-radius: var(--r-m);
+}
+.guide-tip {
+  position: relative; font-size: 11.5px; color: var(--jin);
+  background: rgba(10, 8, 6, .72); padding: 5px 12px; border-radius: 20px;
+  font-family: var(--font-ui); text-align: center; padding-inline: 12px;
+}
+
+.diag {
+  position: absolute; left: 8px; top: 8px;
+  font-size: 10px; color: rgba(232, 224, 208, .45); font-family: var(--font-ui);
+  background: rgba(10, 8, 6, .5); padding: 2px 7px; border-radius: 10px;
+  pointer-events: none; font-variant-numeric: tabular-nums;
+}
+.diag.bad { color: #e8a08a; }
 
 .mask { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: rgba(10,8,6,.88); }
 .mask-txt { font-size: 14px; color: var(--xuan-dim); font-family: var(--font-ui); text-align: center; padding: 0 24px; line-height: 1.7; }
 .mask.err { gap: 12px; }
 .spinner { width: 34px; height: 34px; border: 2px solid rgba(232,224,208,.15); border-top-color: var(--zhu); border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.hint { position: absolute; left: 0; right: 0; bottom: 12px; text-align: center; font-size: 12px; color: var(--xuan-faint); font-family: var(--font-ui); }
+.hint { position: absolute; left: 0; right: 0; bottom: 58px; text-align: center; font-size: 12px; color: var(--xuan-faint); font-family: var(--font-ui); }
 
 .strings { display: flex; gap: 6px; padding: 14px 16px 6px; }
 .string { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
