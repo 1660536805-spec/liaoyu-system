@@ -34,6 +34,26 @@ export const BONES = [
 ]
 export const KEY_POINTS = [0, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28]
 
+/**
+ * 头部 11 点（MediaPipe Pose 全部头部关键点）
+ * 【为什么要多几个点】原先只用「鼻 + 双眼」三点判转头，实测两个问题：
+ *   ① 鼻子只有一个，转头时若鼻子投影不明显（正侧面转 90°）就完全测不出
+ *   ② 无法区分「头在转」与「整个身体在转」
+ * 补上双耳（7/8）与双口（9/10）后：
+ *   · 耳间距变化 → 侧面程度（头转 90° 时两耳前后重叠，耳距投影最小）
+ *   · 鼻相对双耳中点的偏移 → 头部朝向角
+ *   · 眼/口连线与双耳连线的夹角 → 头部 yaw（左右转）
+ */
+export const HEAD_POINTS = {
+  NOSE: 0,
+  L_EYE_IN: 1, L_EYE: 2, L_EYE_OUT: 3,
+  R_EYE_IN: 4, R_EYE: 5, R_EYE_OUT: 6,
+  L_EAR: 7, R_EAR: 8,
+  L_MOUTH: 9, R_MOUTH: 10,
+}
+// 头部可见性门槛：头部点普遍比躯干不稳定（易被手/头发遮挡），单独设阈值
+export const HEAD_VIS_MIN = 0.35
+
 // 取景比例档位。视频用 object-fit: contain 完整显示（绝不裁人体），
 // 容器比例只决定「画面在屏幕里占多高」，比例越接近视频源比例黑边越少。
 //   - 9:16 最竖，像手机竖屏，但 4:3 源会留较多上下黑边
@@ -159,7 +179,11 @@ export async function createPoseEngine({ numPoses = 1, delegate = 'GPU', timeout
           const raw = res.landmarks && res.landmarks[0] ? res.landmarks[0] : null
           // 净化：剔除越界/低置信点，冻结其坐标；整帧不可用时返回 null
           const lm = raw ? cleaner.clean(raw) : null
-          emit('result', lm, res)
+          // worldLandmarks：3D 米制坐标，原点在髋中心。
+          // 这是判断「正对 / 侧身 / 背对」的关键 —— 2D 投影无法区分前后，
+          // 因为背对时左右也会镜像、投影看起来几乎一样。
+          const world = res.worldLandmarks && res.worldLandmarks[0] ? res.worldLandmarks[0] : null
+          emit('result', lm, world, res)
         } catch (e) {
           emit('error', e)
         }

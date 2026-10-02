@@ -50,6 +50,19 @@
       <!-- 实时可见度诊断 -->
       <div class="diag" :class="{ bad: vis.bad }">{{ vis.text }}</div>
       <div class="cam-tag" v-if="camLabel">📷 {{ camLabel }}</div>
+
+      <!-- 朝向状态：正对 / 侧身 / 背对 + 转身过程 -->
+      <div class="facing" :class="orient.facing">
+        <div class="f-row"><span class="f-k">头</span><span>{{ orient.head }}</span></div>
+        <div class="f-row"><span class="f-k">身</span><span>{{ orient.body }}</span></div>
+        <div class="f-row turn" v-if="orient.turning"><span class="f-k">转</span><span>{{ orient.turn }}</span></div>
+      </div>
+
+      <!-- 背对/侧身时暂停判定的提示 -->
+      <div class="facing-warn" v-if="orient.blocked">
+        <div class="fw-title">{{ orient.warnTitle }}</div>
+        <div class="fw-tip">{{ orient.warnTip }}</div>
+      </div>
     </div>
 
     <!-- 七弦弦位 -->
@@ -102,7 +115,8 @@
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getStyle, resolveStyle } from '../data/styles'
-import { createPoseEngine, drawPose, KEY_POINTS, listCameras, RESOLUTIONS, FRAMES } from '../engine/poseEngine'
+import { createPoseEngine, drawPose, KEY_POINTS, HEAD_POINTS, listCameras, RESOLUTIONS, FRAMES } from '../engine/poseEngine'
+import { headPose, bodyPose, createTurnTracker } from '../engine/pose'
 import { MoveJudge, NAMES, THRESHOLD } from '../engine/judge'
 import { pluck, chordAll, unlockAudio } from '../engine/guqin'
 import { saveRecord } from '../stores/records'
@@ -235,7 +249,7 @@ async function init() {
   try {
     engine = await createPoseEngine()
     engine.on('error', (e) => { console.error('[pose]', e) })
-    engine.on('result', onResult)
+    engine.on('result', onResult)   // (landmarks, worldLandmarks, res)
     engine.on('status', ({ stage, detail }) => {
       stageNow.value = stage
       if (stage === 'wasm') loading.value = '正在加载本地推理运行时…'
@@ -355,8 +369,47 @@ function sizeCanvas() {
 let fitBox = { x: 0, y: 0, w: 1, h: 1 }
 const guideStyle = ref({ left: '0px', top: '0px', width: '100%', height: '100%' })
 
-function onResult(landmarks) {
+// 朝向与转身跟踪（3D 判定，实测头部判别力最强）
+const orient = reactive({
+  head: '—', body: '—', turn: '', turning: false,
+  facing: 'front', blocked: false,
+  warnTitle: '', warnTip: '',
+  headYaw: 0, bodyYaw: 0,
+})
+const turnTracker = createTurnTracker()
+
+function onOrient(world, landmarks) {
+  if (!landmarks) return
+  const h = headPose(landmarks, world)
+  const b = bodyPose(landmarks, world)
+  const t = turnTracker.update(b.source === 'world' ? h.yawDeg : null)
+
+  orient.head = h.available ? h.facingText : '头部不可见'
+  orient.body = b.available ? b.facingText : '—'
+  orient.headYaw = h.yawDeg ?? 0
+  orient.bodyYaw = b.yawDeg ?? 0
+  orient.turn = t.text
+  orient.turning = t.phase === 'turning-left' || t.phase === 'turning-right'
+
+  // 背对 → 判定不可信，明确提示；侧身 → 提示但不强停
+  if (h.facing === 'back' || b.facing === 'back') {
+    orient.facing = 'back'; orient.blocked = true
+    orient.warnTitle = '检测到你背对镜头'
+    orient.warnTip = '动作识别需要面向镜头，请转回来。检测到背对时已暂停判定，不会误触发。'
+  } else if (h.facing === 'side' || b.facing === 'side') {
+    orient.facing = 'side'; orient.blocked = true
+    orient.warnTitle = '请正对镜头'
+    orient.warnTip = '当前为侧身姿态，头部偏转 ' + Math.abs(orient.headYaw).toFixed(0) + '°。转正后自动继续。'
+  } else {
+    orient.facing = 'front'; orient.blocked = false
+  }
+}
+
+function onResult(landmarks, world) {
+  onOrient(world, landmarks)
+  // 背对 / 侧身时暂停判定：姿态既不像正对也不像任何一式，此时判定只会误触发
   if (!judge) return
+  if (orient.blocked) return
   lastLandmarks = landmarks
   if (landmarks) landmarksSeen.value = true
   // 摄像头真实分辨率就绪后重算一次 fitBox（contain 的实际显示区）
@@ -509,6 +562,32 @@ let lastLandmarks = null
 .step.now { color: var(--xuan); }
 .step.now .dot { background: var(--zhu); animation: pulse 1.1s ease-in-out infinite; }
 @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1) } 50% { opacity: .35; transform: scale(.7) } }
+
+.facing {
+  position: absolute; left: 8px; bottom: 8px;
+  display: flex; flex-direction: column; gap: 2px;
+  font-size: 10.5px; font-family: var(--font-ui);
+  background: rgba(10, 8, 6, .62); padding: 5px 8px; border-radius: 8px;
+  pointer-events: none; min-width: 108px;
+}
+.f-row { display: flex; gap: 6px; align-items: center; color: var(--xuan-dim); }
+.f-row.turn { color: var(--jin); }
+.f-k {
+  flex: 0 0 14px; height: 14px; border-radius: 4px; font-size: 9.5px;
+  display: grid; place-items: center; background: rgba(232,224,208,.12); color: var(--xuan-faint);
+}
+.facing.front .f-k { background: rgba(127,176,105,.25); color: #a8d693; }
+.facing.side .f-k { background: rgba(232,160,32,.25); color: #e8c07a; }
+.facing.back .f-k { background: rgba(200,85,61,.3); color: #f0a898; }
+
+.facing-warn {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  padding: 14px 20px; border-radius: var(--r-m); text-align: center;
+  background: rgba(20, 16, 12, .9); border: 1px solid rgba(200, 85, 61, .45);
+  pointer-events: none; max-width: 82%;
+}
+.fw-title { font-size: 15px; color: #e8a898; letter-spacing: 1px; margin-bottom: 6px; }
+.fw-tip { font-size: 12px; color: var(--xuan-dim); line-height: 1.7; font-family: var(--font-ui); }
 
 .cam-tag {
   position: absolute; right: 8px; top: 8px;
