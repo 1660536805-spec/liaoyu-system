@@ -443,7 +443,9 @@ function checkFallbackStall() {
 function scheduleRetry() {
   clearTimeout(retryTimer)
   retryTimer = setTimeout(async () => {
-    if (finished.value || fbSwitch?.active || engine) return
+    // 只有「引擎压根没有 / 已经停了」才重试；正常跑着的时候别去动它
+    // （否则每 8 秒就会把摄像头流重开一次，真机上是卡死级的操作）
+    if (finished.value || fbSwitch?.active || (engine && engine.isRunning)) return
     if (typeof navigator === 'undefined' || !navigator.mediaDevices) return
     console.info('[fallback] 后台重试摄像头…')
     try {
