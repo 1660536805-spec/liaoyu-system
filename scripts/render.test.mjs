@@ -127,6 +127,42 @@ console.log('\n=== 内容合规 D9：无禁词 ===')
   okc([1, 2, 3, 4, 5, 6, 7].every((n) => map.includes(n)), '1-7 号弦一一对应到 7 式')
 }
 
+console.log('\n=== 断网可用性（D5 前置）：零外链 ===')
+{
+  const { readFile, readdir } = await import('node:fs/promises')
+  const { join } = await import('node:path')
+  const root = fileURLToPath(new URL('..', import.meta.url))
+  const walk = async (dir) => {
+    const out = []
+    for (const e of await readdir(dir, { withFileTypes: true })) {
+      const p = join(dir, e.name)
+      if (e.isDirectory()) out.push(...(await walk(p)))
+      else out.push(p)
+    }
+    return out
+  }
+  const files = await walk(join(root, 'src'))
+  const ext = []
+  for (const f of files) {
+    const t = await readFile(f, 'utf8')
+    // 只盯会把请求打到外网的：整站外链、外链字体/CDN。注释里的示例 URL 不算。
+    const lines = t.split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l))
+    for (const l of lines) {
+      if (/(https?:)?\/\/(?!localhost)[a-z0-9.-]+\.[a-z]{2,}/i.test(l)) {
+        ext.push(f.replace(root, '') + ': ' + l.trim().slice(0, 90))
+      }
+    }
+  }
+  okc(ext.length === 0, `src/ + index.html 零外链${ext.length ? '（命中：' + ext.join(' | ') + '）' : ''}`)
+
+  const pose = await load('/src/engine/pose.js')
+  const fb = await load('/src/engine/fallback.js')
+  const idx = await readFile(join(root, 'index.html'), 'utf8')
+  okc(idx.includes('@') || !/<link[^>]+href=["']https:/i.test(idx), 'index.html 没有外链样式/字体')
+  okc(typeof pose === 'object' && pose !== null, 'pose.js 可加载（本地 wasm/模型路径在其内部）')
+  okc(fb.FALLBACK_SRC.startsWith('/assets/'), '兜底视频也是本地路径')
+}
+
 console.log('\n=== 兜底第一级接线（R2）===')
 {
   const { readFile } = await import('node:fs/promises')
