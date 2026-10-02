@@ -402,14 +402,23 @@ function startAutoAdvance() {
 }
 function stopAutoAdvance() { clearTimeout(autoTimer); autoTimer = 0 }
 
-/** 断识别 / 迟迟无人 → 切预录。切不动要明说，不能假装兜住了 */
+/**
+ * 断识别 / 迟迟无人 → 切预录。
+ *
+ * 【重要修正 2026-10-03】原实现在预录缺失时会设 err.value 弹出错误页，
+ * 结果是「摄像头其实还活着（用户正练着）」却被整屏遮罩挡住，画面全黑。
+ * 现在改为：预录不可用 → 退到**手动模式**（点一下拨弦），保持画面可见，
+ * 并在诊断条上持续提示原因，不遮挡。
+ */
 async function enterFallback(reason) {
   if (!fbSwitch || fbSwitch.active) return
   const okd = await fbSwitch.enter(reason)
-  if (!okd) {
-    console.error('[fallback] 兜底第一级失效：', reason)
-    err.value = '摄像头不可用，预录兜底也没起来（取不到 ' + FALLBACK_SRC + '）。点「改用手动模式继续」用点按拨弦。'
-  }
+  if (okd) return
+  // 预录也没有 → 手动模式兜底，绝不弹整屏错误页
+  console.warn('[fallback] 预录兜底不可用，转手动模式：', reason)
+  fbReason.value = '预录缺失 · 已转手动点按'
+  engine?.stop()          // 释放摄像头，避免持续报错
+  landmarksSeen.value = true   // 让底部按钮显示「点一下也算响」
 }
 
 function exitFallback(reason) {

@@ -14,10 +14,11 @@
     "verify:cam": "node scripts/cam-verify.mjs",
     "verify:real": "node scripts/judge-on-real.mjs",
     "test:fallback": "node scripts/fallback.test.mjs",
-    "test:all": "npm run test:judge && npm run test:render && npm run test:audio && npm run test:voice && npm run verify:real && npm run verify:table && npm run verify:cleaner && npm run verify:pose",
+    "test:all": "npm run test:judge && npm run test:render && npm run test:audio && npm run test:voice && npm run verify:real && npm run verify:table && npm run verify:cleaner && npm run verify:pose && npm run verify:fallback",
     "verify:table": "node scripts/verify-node-table.mjs",
     "test:audio": "node scripts/audio.test.mjs",
-    "test:voice": "node scripts/voice.test.mjs"
+    "test:voice": "node scripts/voice.test.mjs",
+    "verify:fallback": "node scripts/verify-fallback.mjs"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^0.10.21",
