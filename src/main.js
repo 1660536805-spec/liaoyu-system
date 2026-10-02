@@ -1,14 +1,21 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import App from './App.vue'
+import './styles/tokens.css'
 
-const page = (t) => ({ template: `<div style="padding:24px">${t}</div>` })
+import HomeView from './views/HomeView.vue'
+import TrainView from './views/TrainView.vue'
+import RecordView from './views/RecordView.vue'
+import GuideView from './views/GuideView.vue'
+
+// 用 hash 路由：现场用手机扫码/输地址打开时，任意子路由刷新都不会 404
 const routes = [
-  { path: '/', component: page('首页：定制版 / 通用版（待做）') },
-  { path: '/custom', component: page('定制问卷（任务五，P1）') },
-  { path: '/boards', component: page('选课（待做）') },
-  { path: '/boards/:id', component: page('板块详情（待做）') },
-  { path: '/train', component: page('跟练页（任务二）') },
-  { path: '/record', component: page('打卡记录（任务二）') },
+  { path: '/', component: HomeView },
+  { path: '/train', component: TrainView },
+  { path: '/record', component: RecordView },
+  { path: '/guide', component: GuideView },
 ]
-createApp(App).use(createRouter({ history: createWebHashHistory(), routes })).mount('#app')
+
+createApp(App)
+  .use(createRouter({ history: createWebHashHistory(), routes }))
+  .mount('#app')

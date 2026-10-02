@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
-    "preview": "vite preview --host"
+    "preview": "vite preview --host",
+    "test": "node src/engine/judge.test.mjs && node scripts/render.test.mjs",
+    "test:judge": "node src/engine/judge.test.mjs",
+    "test:render": "node scripts/render.test.mjs"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^0.10.21",
