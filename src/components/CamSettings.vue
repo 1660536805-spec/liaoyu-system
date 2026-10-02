@@ -59,6 +59,8 @@
           <label class="chk"><input type="checkbox" v-model="mirror" :disabled="busy" /> 镜像画面（照镜子）</label>
         </div>
 
+        <slot />
+
         <div class="panel-foot">
           <span v-if="busy" class="busy">切换中…</span>
           <button class="mini wide" @click="$emit('reset-all')">恢复默认</button>

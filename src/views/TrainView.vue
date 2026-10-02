@@ -17,7 +17,14 @@
         @hold-frames="cfg.holdFrames = $event"
         @mirror="mirror = $event"
         @reset-all="resetCfg"
-      />
+      >
+        <VoiceSettings
+          :speaker="speaker"
+          :announcer="announcer"
+          :current-id="stepIdx + 1"
+          :total="totalMoves"
+        />
+      </CamSettings>
     </div>
 
     <div class="stage">
@@ -153,6 +160,9 @@ import { pluck, chordAll, unlockAudio } from '../engine/guqin'
 import { FallbackSwitch, frameAlive, FALLBACK_SRC, FALLBACK_CFG } from '../engine/fallback'
 import { saveRecord } from '../stores/records'
 import CamSettings from '../components/CamSettings.vue'
+import VoiceSettings from '../components/VoiceSettings.vue'
+import { createSpeaker } from '../engine/voice'
+import { createAnnouncer } from '../engine/announcer'
 
 const route = useRoute()
 const router = useRouter()
@@ -486,6 +496,7 @@ async function onSwitchRes(resId) {
 
 onMounted(() => {
   unlockAudio()               // 由用户手势触发，解锁音频
+  announcer.prime()           // 解锁语音（必须在用户手势内，否则被自动播放策略拦）
   setupFallback()             // 预热预录视频（不等它，现场要切时多半是热启动）
   init()
 })
@@ -540,6 +551,15 @@ const orient = reactive({
   headYawText: '',
 })
 const turnTracker = createTurnTracker()
+
+// ---- 语音提示 ----
+// 播报时机由「动作状态」驱动（advance/skip/restart），不依赖屏幕渲染，
+// 所以 HMR、刷新、动效中断都不会影响播报正确性。
+const speaker = createSpeaker()
+const announcer = createAnnouncer(speaker, {
+  onState: (s) => { voiceSpeaking.value = !!s.speaking },
+})
+const voiceSpeaking = ref(false)
 
 function onOrient(world, landmarks) {
   if (!landmarks) return
@@ -644,6 +664,7 @@ function onHit(i) {
 function advance() {
   stepIdx.value = Math.min(totalMoves.value - 1, stepIdx.value + 1)
   resetStep()
+  announcer.onMove(stepIdx.value + 1, totalMoves.value)   // 播报新动作名
 }
 
 function finish() {
@@ -676,6 +697,7 @@ function restart() {
   stopAutoAdvance()
   exitFallback('重新开始')
   resetStep()
+  announcer.reset()          // 清空去重记录，重新播报第 1 式
   // 引擎若被手动模式停掉了，这里重新拉起（不重载模型）
   if (engine && !engine.isRunning) init()
   else if (!engine) location.reload()
