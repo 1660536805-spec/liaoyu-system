@@ -24,6 +24,14 @@
         </label>
 
         <label class="field">
+          <span class="field-label">取景比例</span>
+          <select v-model="frameId" @change="onFrame" class="sel" :disabled="busy">
+            <option v-for="f in FRAMES" :key="f.id" :value="f.id">{{ f.label }}</option>
+          </select>
+          <span class="hint">{{ FRAME_HINT[frameId] }}</span>
+        </label>
+
+        <label class="field">
           <span class="field-label">分辨率</span>
           <select v-model="resId" @change="onRes" class="sel" :disabled="busy">
             <option v-for="r in RESOLUTIONS" :key="r.id" :value="r.id">{{ r.label }}</option>
@@ -61,20 +69,21 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import { listCameras, invalidateCameraCache, RESOLUTIONS } from '../engine/poseEngine'
+import { listCameras, invalidateCameraCache, RESOLUTIONS, FRAMES, FRAME_HINT } from '../engine/poseEngine'
 
 const props = defineProps({
   threshold: { type: Number, required: true },
   holdFrames: { type: Number, required: true },
   resetTick: { type: Number, default: 0 },   // 父组件点「恢复默认」时自增，用来同步组件内状态
 })
-const emit = defineEmits(['device', 'resolution', 'threshold', 'hold-frames', 'mirror', 'reset-all', 'cams'])
+const emit = defineEmits(['device', 'resolution', 'frame', 'threshold', 'hold-frames', 'mirror', 'reset-all', 'cams'])
 
 const open = ref(false)
 const busy = ref(false)
 const cams = ref([])
 const selectedId = ref('')
 const resId = ref(RESOLUTIONS[0].id)
+const frameId = ref(FRAMES[1].id)
 const actual = ref('')
 const mirror = ref(true)
 const threshold = ref(props.threshold)
@@ -102,13 +111,14 @@ async function refresh(force = false) {
 function safeGet(k) { try { return localStorage.getItem(k) } catch { return null } }
 function onDevice() { emit('device', selectedId.value) }
 function onRes() { emit('resolution', resId.value) }
+function onFrame() { emit('frame', frameId.value) }
 function setActual(text) { actual.value = text }
 function setBusy(v) { busy.value = v }
 
 watch(() => props.threshold, (v) => (threshold.value = v))
 watch(() => props.holdFrames, (v) => (holdFrames.value = v))
 // 「恢复默认」时父组件会把 threshold/holdFrames 重置，镜像由组件自己同步回 true
-watch(() => props.resetTick, () => { mirror.value = true; resId.value = RESOLUTIONS[0].id })
+watch(() => props.resetTick, () => { mirror.value = true; resId.value = RESOLUTIONS[0].id; frameId.value = FRAMES[1].id })
 watch(threshold, (v) => emit('threshold', v))
 watch(holdFrames, (v) => emit('hold-frames', v))
 watch(mirror, (v) => emit('mirror', v))

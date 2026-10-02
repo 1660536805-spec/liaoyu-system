@@ -12,6 +12,7 @@
         :reset-tick="resetTick"
         @device="onSwitchDevice"
         @resolution="onSwitchRes"
+        @frame="cfg.frameId = $event; sizeCanvas()"
         @threshold="cfg.threshold = $event"
         @hold-frames="cfg.holdFrames = $event"
         @mirror="mirror = $event"
@@ -23,9 +24,8 @@
       <video ref="video" class="video" :class="{ flip: mirror }" playsinline muted autoplay></video>
       <canvas ref="canvas" class="overlay"></canvas>
 
-      <!-- 取景引导框：告诉用户手该放在哪 -->
-      <div class="guide" v-if="showGuide">
-        <div class="guide-frame"></div>
+      <!-- 取景引导框：定位到视频实际显示区（contain 的信箱区）内 -->
+      <div class="guide" v-if="showGuide" :style="guideStyle">
         <div class="guide-tip">{{ guideText }}</div>
       </div>
 
@@ -102,7 +102,7 @@
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import moves from '../data/moves.json'
-import { createPoseEngine, drawPose, KEY_POINTS, listCameras, RESOLUTIONS } from '../engine/poseEngine'
+import { createPoseEngine, drawPose, KEY_POINTS, listCameras, RESOLUTIONS, FRAMES } from '../engine/poseEngine'
 import { MoveJudge, NAMES, THRESHOLD } from '../engine/judge'
 import { pluck, chordAll, unlockAudio } from '../engine/guqin'
 import { saveRecord } from '../stores/records'
@@ -122,14 +122,16 @@ const mirror = ref(true)
 const camLabel = ref('')
 
 // 可调参数：现场用设置面板改，不必动代码
-const cfg = reactive({ threshold: THRESHOLD, holdFrames: 10, resId: RESOLUTIONS[0].id })
+const cfg = reactive({ threshold: THRESHOLD, holdFrames: 10, resId: RESOLUTIONS[0].id, frameId: FRAMES[1].id })
 const resetTick = ref(0)
 function resetCfg() {
   cfg.threshold = THRESHOLD
   cfg.holdFrames = 10
   cfg.resId = RESOLUTIONS[0].id
+  cfg.frameId = FRAMES[1].id
   mirror.value = true
   resetTick.value++
+  sizeCanvas()
 }
 
 // ---- 加载阶段：让「正在加载」有进度可看 ----
@@ -327,14 +329,37 @@ function sizeCanvas() {
   const c = canvas.value
   if (!c) return
   const stage = c.parentElement
-  const w = stage?.clientWidth || 640, h = stage?.clientHeight || 480
+  const v = video.value
+  const vw = v?.videoWidth || 4, vh = v?.videoHeight || 3
+  // 取景比例：优先用户在设置面板选的档位；「跟随源」则用视频真实比例
+  const f = FRAMES.find((x) => x.id === cfg.frameId) || FRAMES[1]
+  const ar = f.ratio > 0 ? f.ratio : vw / vh
+  stage.style.setProperty('--stage-ar', String(ar))
+  const w = stage.clientWidth || 640, h = stage.clientHeight || 480
   c.width = w; c.height = h
+  // video 是 object-fit: contain，实际显示区为信箱区；
+  // 骨架与取景框按同一区域换算，否则与人体错位（真机踩过）。
+  const scale = Math.min(w / vw, h / vh)
+  const dispW = vw * scale, dispH = vh * scale
+  fitBox = { x: (w - dispW) / 2, y: (h - dispH) / 2, w: dispW, h: dispH }
+  guideStyle.value = {
+    left: fitBox.x + 'px', top: fitBox.y + 'px',
+    width: dispW + 'px', height: dispH + 'px',
+  }
 }
+let fitBox = { x: 0, y: 0, w: 1, h: 1 }
+const guideStyle = ref({ left: '0px', top: '0px', width: '100%', height: '100%' })
 
 function onResult(landmarks) {
   if (!judge) return
   lastLandmarks = landmarks
   if (landmarks) landmarksSeen.value = true
+  // 摄像头真实分辨率就绪后重算一次 fitBox（contain 的实际显示区）
+  const v = video.value
+  if (v && v.videoWidth && fitSize !== `${v.videoWidth}x${v.videoHeight}`) {
+    fitSize = `${v.videoWidth}x${v.videoHeight}`
+    sizeCanvas()
+  }
   const hits = judge.update(landmarks)
   liveScore.value = judge.lastScores[stepIdx.value] ?? 0
   // 每 10 帧更新一次诊断，避免每帧重算文字
@@ -342,6 +367,7 @@ function onResult(landmarks) {
   for (const h of hits) onHit(h.index)
 }
 let diagTick = 0
+let fitSize = ''
 
 function onHit(i) {
   const mv = moves[i]
@@ -408,18 +434,23 @@ function quit() { engine?.dispose(); router.push('/') }
 
 // 绘制循环：骨架 + 弦位余晖
 function uiLoop() {
-  const c = canvas.value, v = video.value
+  const c = canvas.value
   const ctx = c?.getContext('2d')
-  if (ctx && v) {
+  if (ctx && c) {
     const w = c.width, h = c.height
-    ctx.save()
-    // 骨架坐标来自未镜像的视频帧，故镜像时同步翻转画布，两者才对齐
-    if (mirror.value) { ctx.translate(w, 0); ctx.scale(-1, 1) }
-    drawPose(ctx, lastLandmarks, w, h, {
-      highlight: liveScore.value > cfg.threshold * 0.55 ? KEY_POINTS : null,
-      glow: liveScore.value >= cfg.threshold,
-    })
-    ctx.restore()
+    ctx.clearRect(0, 0, w, h)
+    if (lastLandmarks) {
+      ctx.save()
+      // 只在实际显示区域（fitBox）内绘制，坐标系与 video 的 contain 结果对齐
+      ctx.translate(fitBox.x, fitBox.y)
+      // 镜像时同步翻转；scaleX(-1) 后需平移整个宽度，才能落在 fitBox 内
+      if (mirror.value) { ctx.translate(fitBox.w, 0); ctx.scale(-1, 1) }
+      drawPose(ctx, lastLandmarks, fitBox.w, fitBox.h, {
+        highlight: liveScore.value > cfg.threshold * 0.55 ? KEY_POINTS : null,
+        glow: liveScore.value >= cfg.threshold,
+      })
+      ctx.restore()
+    }
   }
   if (performance.now() - lastLitClear > 900 && litStrings.value.length) litStrings.value = []
   rafUI = requestAnimationFrame(uiLoop)
@@ -435,17 +466,32 @@ let lastLandmarks = null
 .mode { font-size: 11px; color: var(--xuan-faint); font-family: var(--font-ui); }
 .btn.sm { padding: 7px 12px; font-size: 12px; }
 
-/* 竖版取景：9:16 让上半身尽量占满画面，减少头部/腿部空区 */
+/* 竖版取景。
+   原设计有两个 bug（真机截图暴露）：
+   ① object-fit: cover —— 把画面左右裁掉，视觉上「只剩上半身」
+   ② aspect-ratio 写死 3/4 —— 与 4:3 视频源不匹配，浪费 44% 画面高度
+   现方案：
+   · object-fit: contain —— 整幅画面完整显示，绝不裁人体
+   · 容器比例由 JS 按视频真实比例设定（--stage-ar），只在「明显竖向」时锁定竖屏
+   · 高宽都不撑满，居中留边，保证任何摄像头都能看到完整画面 */
 .stage {
-  position: relative; flex: 1 1 auto; min-height: 0;
-  aspect-ratio: 3 / 4; max-height: 52vh;
-  align-self: center; width: 100%;
+  position: relative; flex: 0 1 auto; min-height: 0;
+  aspect-ratio: var(--stage-ar, 0.75);  /* 取景比例，由设置面板控制（竖屏诉求，默认 3:4） */
+  height: min(100%, 66vh);
+  width: auto; max-width: 100%;
+  align-self: center;
   background: #000; border-radius: var(--r-m); overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(232, 224, 208, .06);
 }
-.video, .overlay { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.video { opacity: .85; }
+/* 窄屏（手机竖持）：宽度主导，撑满可用宽度 */
+@media (max-width: 560px) {
+  .stage { width: 100%; height: auto; }
+}
+
+.video, .overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
+.video { object-fit: contain; opacity: .88; }
+.overlay { object-fit: contain; pointer-events: none; }
 .video.flip { transform: scaleX(-1); }   /* 镜像：照镜子直觉 */
-.overlay { pointer-events: none; }
 
 /* 加载阶段进度：4 步，让用户知道卡在哪 */
 .steps { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
@@ -465,11 +511,8 @@ let lastLandmarks = null
 }
 
 /* 取景引导框：虚线框提示「双手放这里面」 */
-.guide { position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 12px; }
-.guide-frame {
-  position: absolute; left: 12%; right: 12%; top: 14%; bottom: 22%;
-  border: 1px dashed rgba(214, 197, 158, .3); border-radius: var(--r-m);
-}
+/* 引导框：位置由 JS 按视频实际显示区（contain 信箱区）算出，用 inline style 定位 */
+.guide { position: absolute; pointer-events: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 10px; }
 .guide-tip {
   position: relative; font-size: 11.5px; color: var(--jin);
   background: rgba(10, 8, 6, .72); padding: 5px 12px; border-radius: 20px;
