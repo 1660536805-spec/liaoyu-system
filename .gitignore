@@ -9,3 +9,6 @@ certs/*.key
 certs/*.csr
 certs/*.srl
 certs/server.crt
+
+.tmp-fallback/
+package-for-team/dist/
