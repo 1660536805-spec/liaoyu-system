@@ -93,10 +93,10 @@
       <span>计时与打卡不中断，按「下一个式」往下走</span>
     </div>
 
-    <!-- 七弦弦位 -->
+    <!-- 弦位（数随拳种：八段锦 7 弦 / 五禽戏 5 弦） -->
     <div class="strings">
       <div
-        v-for="s in 7" :key="s"
+        v-for="s in style.strings" :key="s"
         class="string"
         :class="{ lit: litStrings.includes(s), target: currentMove?.stringIndex === s }"
       >
@@ -281,18 +281,38 @@ function updateDiag(landmarks) {
 function resetStep() {
   liveScore.value = 0
   if (judge) judge.reset()
-  // 顺序模式：只判当前式；自由模式：8 式全开 + 仲裁
+  // 顺序模式：只判当前式；自由模式：全式开 + 仲裁
   judge = new MoveJudge({
     holdFrames: cfg.holdFrames,
     threshold: cfg.threshold,
     order: freeMode.value ? null : stepIdx.value,
     headYaw: freeMode.value ? null : (HEAD_YAW_REQ[stepIdx.value] ?? null),
     headYawTol: 18,
+    // 拳种决定用哪套判定规则（八段锦内置 / 五禽戏、太极用 styleRules）
+    style: style.value.id,
+    count: style.value.moves.length,
   })
+  announcer.setStyle(style.value.id)
+  // 播报当前式首式。必须在这里报（而非等 advance）：
+  // 进跟练页 / 切换拳种 / 重建判定器 都会走到 resetStep，
+  // 但「第一式」不会经过 advance，所以这是唯一入口。
+  if (!announceOnReset) {
+    announceOnReset = true
+    announcer.onMove(stepIdx.value + 1, totalMoves.value, { force: true })
+  }
 }
+
+// 首次进页要报首式；之后切式由 advance 报，避免 resetStep 被频繁调用时重复播
+let announceOnReset = false
 
 // 配置变更后重建判定器（阈值/保持帧数是构造参数，改完要 new）
 watch(() => [cfg.threshold, cfg.holdFrames, freeMode.value], () => resetStep())
+
+// 切换拳种：重置播报开关，让新拳种的第 1 式也播出来
+watch(() => style.value.id, () => {
+  announceOnReset = false
+  resetStep()
+})
 
 async function init() {
   err.value = ''
@@ -658,7 +678,7 @@ function onHit(i) {
 
   if (mv.chord) {
     chordAll()                                   // 收势：七弦齐鸣和声
-    litStrings.value = [1, 2, 3, 4, 5, 6, 7]
+    litStrings.value = Array.from({ length: style.value.strings }, (_, i) => i + 1)
   } else {
     pluck(mv.stringIndex)                        // 拨响对应琴弦
     litStrings.value = [mv.stringIndex]
@@ -691,7 +711,9 @@ function skip() {                 // 三级兜底之一：跳过本式也算完�
   if (!mv) return
   doneSet.value = new Set([...doneSet.value, i])
   if (mv.chord) chordAll(); else pluck(mv.stringIndex)
-  litStrings.value = mv.chord ? [1, 2, 3, 4, 5, 6, 7] : [mv.stringIndex]
+  litStrings.value = mv.chord
+    ? Array.from({ length: style.value.strings }, (_, i) => i + 1)
+    : [mv.stringIndex]
   lastLitClear = performance.now()
   // 预录模式下没有判定器喂命中，「下一个式」得续上保险计时
   if (fbActive.value) startAutoAdvance()

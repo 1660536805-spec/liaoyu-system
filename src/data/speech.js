@@ -10,8 +10,8 @@
 //
 // 三档冗余（降级用）：full（简称+提示）→ short（仅简称）→ name（原名兜底）
 
-/** 各式的播报文案。voice 为口语化简称，say 为动作提示（一句话，可省略） */
-export const MOVE_SPEECH = {
+/** 各式的播报文案。voice 为口语化简称，say 为动作提示 */
+const BADUANJIN_SPEECH = {
   1: { voice: '双手托天', say: '双臂向上举过头顶' },
   2: { voice: '左右开弓', say: '一手臂平举，另一手屈肘' },
   3: { voice: '单举', say: '一手高举，一手向下按' },
@@ -22,35 +22,85 @@ export const MOVE_SPEECH = {
   8: { voice: '背后七颠', say: '两脚并拢，脚跟起落七次' },
 }
 
-/** 完成语（第八式之后播报） */
+/** 五禽戏五式（华佗五禽戏标准） */
+const WUQINXI_SPEECH = {
+  1: { voice: '虎举', say: '双手上举，十指张开如虎爪' },
+  2: { voice: '鹿抵', say: '腰部后弓，双臂前伸' },
+  3: { voice: '熊运', say: '腰腹带动，躯干缓缓画圆' },
+  4: { voice: '猿攀', say: '双手高举，屈肘引体向上' },
+  5: { voice: '鸟飞', say: '双手展开如鸟翅，脚跟提起' },
+}
+
+/** 太极（当前仅起势，其余待补） */
+const TAIJI_SPEECH = {
+  1: { voice: '起势', say: '两脚与肩同宽，双手下垂，肩松气沉' },
+}
+
+/** 按拳种取文案表 */
+const BY_STYLE = {
+  baduanjin: BADUANJIN_SPEECH,
+  wuqinxi: WUQINXI_SPEECH,
+  taiji: TAIJI_SPEECH,
+}
+
 export const COMPLETE_SPEECH = {
-  voice: '八式练毕',
-  say: '一套完成，缓缓收势',
+  voice: '全套练毕',
+  say: '缓缓收势，调息',
+}
+
+/** 完成语按拳种定制（八段锦有专门的收势语） */
+const COMPLETE_BY_STYLE = {
+  baduanjin: { voice: '八式练毕', say: '一套完成，缓缓收势' },
+  wuqinxi: { voice: '五式练毕', say: '虎鹿熊猿鸟，一套完成' },
+  taiji: { voice: '起势完成', say: '气沉丹田' },
+}
+
+/**
+ * 按拳种取文案表。
+ * 【重要】未知拳种必须返回 null 而非 fallback 到八段锦 ——
+ * 否则新增拳种忘了配文案时，会错播别的拳种的动作名。
+ */
+function table(styleId) {
+  return BY_STYLE[styleId] || null
+}
+
+/** 取某式播报文案（无则返回 null） */
+export function getMoveSpeech(styleId, id) {
+  const t = table(styleId)
+  if (!t) return null
+  return t[id] || null
+}
+
+/** 取完成语。未知拳种返回 null（不套用别的拳种的完成语） */
+export function getCompleteSpeech(styleId) {
+  return COMPLETE_BY_STYLE[styleId] || null
 }
 
 /**
  * 生成播报文本
- * @param {number} id 动作 id（1~8）
- * @param {number} total 总数
- * @param {'full'|'short'|'name'} level 冗余档位，由引擎可用性决定
+ * @param {string} styleId 拳种
+ * @param {number} id 动作 id
+ * @param {'full'|'short'|'name'} level 冗余档位
  */
-export function buildSpeech(id, total, level = 'full') {
-  const m = MOVE_SPEECH[id]
+export function buildSpeech(styleId, id, level = 'full') {
+  const m = getMoveSpeech(styleId, id)
   if (!m) return ''
   if (level === 'name') return ''
   if (level === 'short') return m.voice
   return `第${id}式，${m.voice}。${m.say}。`
 }
 
-/** 完整语（第八式触发） */
-export function buildCompleteSpeech(level = 'full') {
+/** 完整语 */
+export function buildCompleteSpeech(styleId, level = 'full') {
+  const c = getCompleteSpeech(styleId)
+  if (!c) return ''
   if (level === 'name') return ''
-  if (level === 'short') return COMPLETE_SPEECH.voice
-  return `${COMPLETE_SPEECH.voice}。${COMPLETE_SPEECH.say}。`
+  if (level === 'short') return c.voice
+  return `${c.voice}。${c.say}。`
 }
 
 /** 供 UI 显示（让用户知道会读什么） */
-export function previewText(id) {
-  const m = MOVE_SPEECH[id]
+export function previewText(styleId, id) {
+  const m = getMoveSpeech(styleId, id)
   return m ? `第${id}式，${m.voice}。${m.say}。` : ''
 }

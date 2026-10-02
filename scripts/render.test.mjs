@@ -175,8 +175,12 @@ console.log('\n=== 兜底第一级接线（R2）===')
   okc(typeof feat.frameAlive === 'function', 'fallback.js 导出 frameAlive')
   okc(feat.FALLBACK_SRC.startsWith('/assets/'), '预录视频走本地 assets/（不是 CDN）')
   // 兜底触发参数一旦被改坏会直接毁掉现场，钉死在合理区间
+  // （2026-10-03 真机标定后放宽：弯腰做式5/6 头会短暂离画，
+  //  原 4s+6点门槛会误触发把用户正练的画面切走）
   const c = feat.FALLBACK_CFG
-  okc(c.noSignalMs <= 5000 && c.firstFrameMs <= 12000, '触发等待不超过 5s / 12s（演示等不起）')
+  okc(c.noSignalMs >= 10000 && c.noSignalMs <= 20000, `断流容忍 ${c.noSignalMs}ms 在 10~20s（覆盖弯腰/遮挡）`)
+  okc(c.firstFrameMs >= 12000 && c.firstFrameMs <= 20000, `首帧等待 ${c.firstFrameMs}ms 在 12~20s`)
+  okc(c.minAlivePoints <= 4, `有信号门槛 ${c.minAlivePoints}/8 不误伤（实测 4/8 误判率≈0%）`)
 }
 
 console.log('\n=== 判定器接线正确性 ===')

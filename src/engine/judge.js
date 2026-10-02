@@ -11,6 +11,8 @@
 // MediaPipe Pose 索引：0鼻 2左眼 5右眼 11左肩 12右肩 13左肘 14右肘 15左腕 16右腕
 //                     23左髋 24右髋 25左膝 26右膝 27左踝 28右踝
 
+import { WUQINXI_RULES, TAIJI_RULES } from './styleRules.js'
+
 const LM = {
   NOSE: 0, L_EYE: 2, R_EYE: 5,
   L_SHO: 11, R_SHO: 12, L_ELB: 13, R_ELB: 14, L_WRI: 15, R_WRI: 16,
@@ -76,6 +78,30 @@ const LEG_VIS = 0.35
 const hasLegs = (p) =>
   (v(p, LM.L_KNE).visibility ?? 0) >= LEG_VIS && (v(p, LM.R_KNE).visibility ?? 0) >= LEG_VIS &&
   (v(p, LM.L_ANK).visibility ?? 0) >= LEG_VIS && (v(p, LM.R_ANK).visibility ?? 0) >= LEG_VIS
+
+// ---------------------------------------------------------------- 规则上下文
+// 八段锦用内置的 MOVES；五禽戏/太极用 styleRules.js 的规则集。
+// 两者接口一致：ctx 提供归一化工具，规则只管打分。
+const RULE_SETS = {
+  baduanjin: null,          // null = 用内置 MOVES
+  wuqinxi: WUQINXI_RULES,
+  taiji: TAIJI_RULES,
+}
+
+/** 组装规则所需的归一化工具集。索引统一从 LM 取，供外部规则使用。 */
+function makeCtx() {
+  return {
+    // 关键点索引（styleRules.js 里的规则用 c.L_WRI 等访问）
+    NOSE: LM.NOSE, L_EYE: LM.L_EYE, R_EYE: LM.R_EYE,
+    L_SHO: LM.L_SHO, R_SHO: LM.R_SHO, L_ELB: LM.L_ELB, R_ELB: LM.R_ELB,
+    L_WRI: LM.L_WRI, R_WRI: LM.R_WRI,
+    L_HIP: LM.L_HIP, R_HIP: LM.R_HIP,
+    L_KNE: LM.L_KNE, R_KNE: LM.R_KNE,
+    L_ANK: LM.L_ANK, R_ANK: LM.R_ANK,
+    // 归一化工具
+    need, angle, dist, torso, shoMid, hipMid, leanDeg, hasLegs, okUp, okDown, v,
+  }
+}
 
 // ---------------------------------------------------------------- 八式打分（各返回 0~1）
 // 打分只依赖「本帧姿态 + 一段髋部历史」（第 8 式），历史由 update() 注入到 __bob
@@ -290,6 +316,8 @@ export class MoveJudge {
      *  「有没有转到要求的角度」，而不是「是否正对镜头」。 */
     headYaw = null,
     headYawTol = 18,
+    style = 'baduanjin',
+    count = 8,
   } = {}) {
     this.holdFrames = holdFrames
     this.threshold = threshold
@@ -297,25 +325,33 @@ export class MoveJudge {
     this.order = order
     this.headYaw = headYaw
     this.headYawTol = headYawTol
+    this.style = style
+    this.count = count                    // 该拳种的式数
     this.reset()
   }
 
+  /** 当前拳种对应的规则集（数组，元素为 (p, ctx) => 0~1） */
+  get rules() {
+    const custom = RULE_SETS[this.style]
+    return Array.isArray(custom) ? custom : MOVES
+  }
+
   reset() {
-    this.counts = new Array(8).fill(0)
-    this.latched = new Array(8).fill(false)
+    this.counts = new Array(this.count).fill(0)
+    this.latched = new Array(this.count).fill(false)
     this.headHit = false
     this.headErr = null
     this.hipHist = []
     this.xHist = []
     this.wriXHist = []
     this.wriGapHist = []
-    this.lastScores = new Array(8).fill(0)
+    this.lastScores = new Array(this.count).fill(0)
   }
 
   // 只算分，不触发（UI 显示实时强度用）
   scores(p) {
     if (!p || p.length < 29) return new Array(8).fill(0)
-    return MOVES.map((fn) => fn(this._withBob(p)))
+    return this.rules.map((fn) => fn(this._withBob(p), makeCtx()))
   }
 
   _withBob(p) {
@@ -355,7 +391,7 @@ export class MoveJudge {
    */
   update(p, headYawDeg = null) {
     if (!p || p.length < 29) return []
-    const sc = MOVES.map((fn) => fn(this._withBob(p)))
+    const sc = this.rules.map((fn) => fn(this._withBob(p), makeCtx()))
     this.lastScores = sc
 
     // 头部角度判据：若该式要求转头到位，且 3D yaw 不可用，则整式判 0
@@ -381,15 +417,15 @@ export class MoveJudge {
     } else {
       // 自由模式：最高分 + 领先幅度仲裁
       best = 0
-      for (let i = 1; i < 8; i++) if (sc[i] > sc[best]) best = i
+      for (let i = 1; i < this.count; i++) if (sc[i] > sc[best]) best = i
       second = 0
-      for (let i = 0; i < 8; i++) if (i !== best && sc[i] > second) second = sc[i]
+      for (let i = 0; i < this.count; i++) if (i !== best && sc[i] > second) second = sc[i]
     }
     const lead = sc[best] - second
     const okBest = sc[best] >= this.threshold && (this.order !== null || lead >= this.margin)
 
     const hit = []
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < this.count; i++) {
       if (okBest && i === best) {
         this.counts[i]++
         if (this.counts[i] >= this.holdFrames && !this.latched[i]) {

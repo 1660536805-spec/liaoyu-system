@@ -6,13 +6,13 @@
         <div class="tagline">练完一套 · 弹完一曲古琴</div>
       </div>
 
-      <!-- 拳种选择：八段锦已上线，太极/五禽戏为预留入口 -->
+      <!-- 拳种选择：八段锦/五禽戏已上线，太极仅起势可用 -->
       <div class="styles">
         <button
           v-for="st in STYLE_LIST" :key="st.id"
-          class="style" :class="{ on: styleId === st.id, pending: st.status !== 'ready' }"
-          :disabled="st.status !== 'ready'"
-          :title="st.status === 'ready' ? st.desc : st.pendingReason"
+          class="style" :class="{ on: styleId === st.id, partial: st.status === 'partial' }"
+          :disabled="!st.moves.length"
+          :title="st.moves.length ? st.desc : st.pendingReason"
           @click="pick(st)"
         >
           <div class="style-name">
@@ -20,12 +20,13 @@
             <span v-if="st.status !== 'ready'" class="style-badge">{{ st.badge }}</span>
           </div>
           <div class="style-sub">{{ st.moves.length ? st.moves.length + ' 式 · ' + st.subtitle.split('· ').pop() : st.subtitle }}</div>
+          <div class="style-pending-note" v-if="st.status === 'partial'">{{ st.pendingReason }}</div>
         </button>
       </div>
 
       <button class="big-btn" @click="start" :disabled="!cur">
         <span class="big-btn-label">开始练</span>
-        <span class="big-btn-sub">{{ cur ? cur.moves.length + ' 式 · 约 4 分钟' : '暂无可练拳种' }}</span>
+        <span class="big-btn-sub">{{ cur ? cur.name + ' · ' + cur.moves.length + ' 式 · 约 ' + Math.ceil(cur.moves.length * 0.5) + ' 分钟' : '暂无可练拳种' }}</span>
       </button>
 
       <p class="style-desc" v-if="cur">{{ cur.desc }}</p>
@@ -80,7 +81,7 @@ const cur = computed(() => getStyle(styleId.value))
 const pendingList = computed(() => STYLE_LIST.filter((s) => s.status !== 'ready'))
 function safeGetStyle() { try { return localStorage.getItem('xianyang.style') } catch { return null } }
 function pick(s) {
-  if (s.status !== 'ready') return
+  if (!s.moves.length) return
   styleId.value = s.id
   try { localStorage.setItem('xianyang.style', s.id) } catch { /* file:// 下不可写，忽略 */ }
 }
@@ -164,6 +165,7 @@ function start() {
 .style-name { font-size: 14px; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 5px; }
 .style-badge { font-size: 9px; padding: 1px 5px; border-radius: 8px; background: rgba(232, 224, 208, .12); color: var(--xuan-faint); font-family: var(--font-ui); }
 .style.on .style-badge { background: rgba(200, 85, 61, .3); color: #f0c0b4; }
+.style-pending-note { font-size: 9.5px; color: var(--xuan-faint); font-family: var(--font-ui); margin-top: 4px; line-height: 1.4; }
 .style-sub { font-size: 10.5px; color: var(--xuan-faint); margin-top: 3px; font-family: var(--font-ui); }
 .style-desc { font-size: 12px; color: var(--xuan-dim); line-height: 1.8; max-width: 380px; text-align: center; font-family: var(--font-ui); }
 .style-pending { font-size: 11px; color: var(--xuan-faint); font-family: var(--font-ui); margin: -14px 0 0; }

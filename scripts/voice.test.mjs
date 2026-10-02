@@ -4,7 +4,7 @@
 // 说明：这里用 mock speaker（不真发声），只验证「什么时候该播」这个逻辑，
 // 真发声与音质属浏览器/模型行为，不在此断言。
 import { createAnnouncer } from '../src/engine/announcer.js'
-import { buildSpeech, buildCompleteSpeech, MOVE_SPEECH, previewText } from '../src/data/speech.js'
+import { buildSpeech, buildCompleteSpeech, getMoveSpeech, previewText } from '../src/data/speech.js'
 
 let fail = 0
 const okc = (c, m) => { console.log((c ? '  ✓ ' : '  ✗ ') + m); if (!c) fail++ }
@@ -40,20 +40,41 @@ function mockSpeaker(opts = {}) {
   }
 }
 
-console.log('\n=== 1. 播报文案生成 ===')
+console.log('\n=== 1. 播报文案生成（多拳种）===')
 {
-  const t1 = buildSpeech(1, 8, 'full')
-  okc(t1.includes('第1式'), `式1 全档含序号：「${t1}」`)
+  // 八段锦
+  const t1 = buildSpeech('baduanjin', 1, 'full')
+  okc(t1.includes('第1式'), `八段锦式1 全档含序号：「${t1}」`)
   okc(t1.includes('双手托天'), '含口语简称')
   okc(t1.includes('双臂向上举过头顶'), '含动作要领')
-  const t2 = buildSpeech(1, 8, 'short')
-  okc(t2 === '双手托天', `short 档只留简称：「${t2}」`)
-  okc(buildSpeech(1, 8, 'name') === '', 'name 档返回空（无可用引擎时静默）')
-  okc(Object.keys(MOVE_SPEECH).length === 8, '八式文案齐全')
-  okc(previewText(4) !== '', 'previewText 可供 UI 预览')
-  // 简称必须比原名短（节奏考虑）
-  const shorts = Object.values(MOVE_SPEECH).map((m) => m.voice)
-  okc(shorts.every((s) => s.length <= 5), `简称均 ≤5 字（节奏快）：${shorts.map((s) => s.length).join(',')}`)
+  okc(buildSpeech('baduanjin', 1, 'short') === '双手托天', 'short 档只留简称')
+  okc(buildSpeech('baduanjin', 1, 'name') === '', 'name 档返回空（无可用引擎时静默）')
+
+  // 五禽戏 —— 用户反馈的核心：进五禽戏第一式要播报
+  const h1 = buildSpeech('wuqinxi', 1, 'full')
+  okc(h1.includes('第1式') && h1.includes('虎举'), `五禽戏式1 播报：「${h1}」`)
+  okc(h1.includes('虎爪'), '五禽戏式1 含要领（虎爪）')
+  const names = [1, 2, 3, 4, 5].map((i) => getMoveSpeech('wuqinxi', i)?.voice)
+  okc(JSON.stringify(names) === JSON.stringify(['虎举', '鹿抵', '熊运', '猿攀', '鸟飞']),
+    `五禽戏五式齐全且顺序正确：${names.join('/')}`)
+  const wqShort = [1, 2, 3, 4, 5].map((i) => buildSpeech('wuqinxi', i, 'short'))
+  okc(wqShort.every((t) => t && t.length <= 4), `五禽戏简称均 ≤4 字：${wqShort.join('、')}`)
+  okc(buildCompleteSpeech('wuqinxi', 'short') === '五式练毕', '五禽戏完成语定制')
+  okc(buildCompleteSpeech('baduanjin', 'short') === '八式练毕', '八段锦完成语定制')
+
+  // 太极
+  const t2 = buildSpeech('taiji', 1, 'full')
+  okc(t2.includes('起势'), `太极式1 播报：「${t2}」`)
+  okc(buildSpeech('taiji', 2, 'full') === '', '太极式2（未落地）返回空，不误播')
+  okc(buildSpeech('nonexistent', 1, 'full') === '', '未知拳种返回空')
+
+  // 各式简称长度（节奏考虑）
+  const allShort = [
+    ...[1,2,3,4,5,6,7,8].map((i) => getMoveSpeech('baduanjin', i)?.voice || ''),
+    ...[1,2,3,4,5].map((i) => getMoveSpeech('wuqinxi', i)?.voice || ''),
+  ]
+  okc(allShort.every((s) => s.length <= 5), `全部简称 ≤5 字：${allShort.join('、')}`)
+  okc(previewText('wuqinxi', 1).includes('虎举'), 'previewText 可供 UI 预览')
 }
 
 console.log('\n=== 2. 正常流程：动作切换才播 ===')
@@ -153,7 +174,7 @@ console.log('\n=== 8. 边界⑥完成语 ===')
   await an.onComplete(8)
   okc(sp.log.length === 1, '整套完成时播报完成语')
   okc(sp.log[0].includes('八式练毕'), `完成语文案正确：「${sp.log[0]}」`)
-  okc(buildCompleteSpeech('short') === '八式练毕', 'short 档完成语也可用')
+  okc(buildCompleteSpeech('baduanjin', 'short') === '八式练毕', 'short 档完成语也可用')
 }
 
 console.log('\n=== 9. 边界⑦重复点击试听 ===')

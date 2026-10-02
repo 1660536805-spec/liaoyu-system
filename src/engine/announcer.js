@@ -25,6 +25,7 @@ export function createAnnouncer(speaker, opts = {}) {
   let lastIdAt = 0
   let busy = false
   let level = 'full'         // 冗余档：full | short | name
+  let styleId = 'baduanjin'  // 当前拳种（决定播报文案）
   const onState = opts.onState || (() => {})
 
   // 引擎可用性 → 自动挑冗余档
@@ -49,6 +50,15 @@ export function createAnnouncer(speaker, opts = {}) {
   }
 
   return {
+    /** 切换拳种：文案随之切换，并清空去重（避免新拳种第一式被吞） */
+    setStyle(id) {
+      if (id && id !== styleId) {
+        styleId = id
+        this.reset()
+      }
+    },
+    get style() { return styleId },
+
     /** 用户手势里调一次，解锁音频 */
     prime() { speaker.prime() },
 
@@ -81,7 +91,7 @@ export function createAnnouncer(speaker, opts = {}) {
         // 没有任何引擎可用 → 静默
         return ''
       }
-      const text = buildSpeech(id, total, level)
+      const text = buildSpeech(styleId, id, level)
       if (!text) return ''
       return say(text)
     },
@@ -92,14 +102,14 @@ export function createAnnouncer(speaker, opts = {}) {
       currentId = null
       level = pickLevel()
       if (level === 'name') return ''
-      return say(buildCompleteSpeech(level))
+      return say(buildCompleteSpeech(styleId, level))
     },
 
     /** 重播当前动作（设置面板的「试听」按钮用） */
     async repeat(id, total) {
       if (!speaker.enabled) return ''
       level = pickLevel()
-      const text = buildSpeech(id, total, level === 'name' ? 'short' : level)
+      const text = buildSpeech(styleId, id, level === 'name' ? 'short' : level)
       if (!text) return ''
       return say(text)
     },
