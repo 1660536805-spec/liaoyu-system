@@ -58,10 +58,17 @@
         <div class="f-row turn" v-if="orient.turning"><span class="f-k">转</span><span>{{ orient.turn }}</span></div>
       </div>
 
-      <!-- 背对/侧身时暂停判定的提示 -->
-      <div class="facing-warn" v-if="orient.blocked">
-        <div class="fw-title">{{ orient.warnTitle }}</div>
-        <div class="fw-tip">{{ orient.warnTip }}</div>
+      <!-- 头部形变指示器：头转时圆变椭圆 -->
+      <div class="head-ind" v-if="orient.headAvailable">
+        <svg viewBox="0 0 44 44" class="hi-svg">
+          <ellipse
+            :cx="22" :cy="22"
+            :rx="22 * orient.ellipseRx" :ry="22 * orient.ellipseRy"
+            class="hi-shape" :class="orient.facing" />
+          <circle :cx="22" :cy="22" r="2.2" class="hi-nose" />
+          <line x1="22" y1="22" :x2="orient.arrowX2" :y2="orient.arrowY2" class="hi-dir" />
+        </svg>
+        <div class="hi-label">{{ orient.headYawText }}</div>
       </div>
     </div>
 
@@ -86,7 +93,12 @@
         <div class="gauge-fill" :style="{ width: (liveScore * 100).toFixed(0) + '%' }"></div>
         <div class="gauge-mark" :style="{ left: (cfg.threshold * 100).toFixed(0) + '%' }"></div>
       </div>
-      <div class="gauge-tip">做到位即响，无需倒数 · 阈值 {{ cfg.threshold.toFixed(2) }}</div>
+      <div class="gauge-tip">
+        做到位即响，无需倒数 · 阈值 {{ cfg.threshold.toFixed(2) }}
+        <span v-if="judge && judge.headYaw !== null && !judge.headHit" class="head-req">
+          · 需转头 {{ Math.abs(judge.headYaw) }}°（现 {{ orient.headYawText }}）
+        </span>
+      </div>
     </div>
 
     <!-- 完成 -->
@@ -138,6 +150,11 @@ const camLabel = ref('')
 
 // 可调参数：现场用设置面板改，不必动代码
 const cfg = reactive({ threshold: THRESHOLD, holdFrames: 10, resId: RESOLUTIONS[0].id, frameId: FRAMES[1].id })
+
+// 各式期望的头部 yaw（度，绝对值）。null = 不要求头部角度。
+// 【设计原则】转身/转头是动作的一部分，判定看「有没有转到要求角度」，
+// 而非「是否正对镜头」。八段锦中仅式4 需转头；太极转身式将来在此配置。
+const HEAD_YAW_REQ = { 3: 40 }
 const resetTick = ref(0)
 function resetCfg() {
   cfg.threshold = THRESHOLD
@@ -227,6 +244,8 @@ function resetStep() {
     holdFrames: cfg.holdFrames,
     threshold: cfg.threshold,
     order: freeMode.value ? null : stepIdx.value,
+    headYaw: freeMode.value ? null : (HEAD_YAW_REQ[stepIdx.value] ?? null),
+    headYawTol: 18,
   })
 }
 
@@ -375,6 +394,13 @@ const orient = reactive({
   facing: 'front', blocked: false,
   warnTitle: '', warnTip: '',
   headYaw: 0, bodyYaw: 0,
+  // 头部形变指示器
+  headAvailable: false,
+  ellipseRx: 1,      // 横向半径系数：转头时变小
+  ellipseRy: 1,      // 纵向半径系数
+  dirX: 0, dirZ: -1,// 朝向向量（屏幕上画箭头用）
+  arrowX2: 22, arrowY2: 2, // 箭头终点（预先算好，SVG 属性不支持表达式）
+  headYawText: '',
 })
 const turnTracker = createTurnTracker()
 
@@ -391,25 +417,43 @@ function onOrient(world, landmarks) {
   orient.turn = t.text
   orient.turning = t.phase === 'turning-left' || t.phase === 'turning-right'
 
-  // 背对 → 判定不可信，明确提示；侧身 → 提示但不强停
-  if (h.facing === 'back' || b.facing === 'back') {
-    orient.facing = 'back'; orient.blocked = true
-    orient.warnTitle = '检测到你背对镜头'
-    orient.warnTip = '动作识别需要面向镜头，请转回来。检测到背对时已暂停判定，不会误触发。'
-  } else if (h.facing === 'side' || b.facing === 'side') {
-    orient.facing = 'side'; orient.blocked = true
-    orient.warnTitle = '请正对镜头'
-    orient.warnTip = '当前为侧身姿态，头部偏转 ' + Math.abs(orient.headYaw).toFixed(0) + '°。转正后自动继续。'
+  // ---- 头部形变指示器 ----
+  // 【实测结论】不能用「双耳+鼻三角形」的高宽比表示转头 —— 415 帧实测发现
+  //   正对时高宽比 0.268，侧转时 0.449，方向甚至相反（因为鼻的 2D 投影
+  //   位置受头部姿态影响太大，与耳连线关系不单调）。
+  // 改用可证的物理量：双耳 3D 距离（实测 正对 0.140m → 侧对 0.114m）。
+  // 把它映射成椭圆「横向压缩」：头转得越多，横向越扁、纵向保持。
+  orient.headAvailable = h.available && h.source === 'world'
+  if (orient.headAvailable) {
+    const yAbs = Math.abs(h.yawDeg)
+    // 0° → rx=1.0（正圆）；90° → rx=0.30（明显扁）
+    const k = Math.min(1, yAbs / 90)
+    orient.ellipseRx = +(1 - 0.70 * k).toFixed(3)
+    orient.ellipseRy = 1
+    // 朝向向量（用于画箭头）：yaw 的符号方向
+    const r = (yAbs * Math.PI) / 180
+    orient.dirX = +(Math.sin(r) * Math.sign(h.yawDeg || 1)).toFixed(3)
+    orient.dirZ = +(-Math.cos(r)).toFixed(3)
+    orient.arrowX2 = +(22 + 20 * orient.dirX).toFixed(2)
+    orient.arrowY2 = +(22 - 20 * orient.dirZ).toFixed(2)
+    orient.headYawText = yAbs < 8 ? '头部正对' : `头转 ${yAbs.toFixed(0)}°`
   } else {
-    orient.facing = 'front'; orient.blocked = false
+    orient.arrowX2 = 22; orient.arrowY2 = 22
+    orient.headYawText = h.available ? '头侧转（2D 估计）' : '头部不可见'
   }
+
+  // 【重要】转身 / 侧身 / 背身本身可能就是太极动作的一部分（云手转身、白鹤亮翅…），
+  // 故这里**不再把朝向当门禁**，只作为参考量显示。
+  // 判定该看的是「头/身有没有转到要求的角度」，由 judge.js 的角度判据负责。
+  orient.facing = h.facing === 'back' ? 'back' : (h.facing === 'side' ? 'side' : 'front')
+  orient.blocked = false
+  orient.warnTitle = ''
+  orient.warnTip = ''
 }
 
 function onResult(landmarks, world) {
   onOrient(world, landmarks)
-  // 背对 / 侧身时暂停判定：姿态既不像正对也不像任何一式，此时判定只会误触发
   if (!judge) return
-  if (orient.blocked) return
   lastLandmarks = landmarks
   if (landmarks) landmarksSeen.value = true
   // 摄像头真实分辨率就绪后重算一次 fitBox（contain 的实际显示区）
@@ -418,7 +462,9 @@ function onResult(landmarks, world) {
     fitSize = `${v.videoWidth}x${v.videoHeight}`
     sizeCanvas()
   }
-  const hits = judge.update(landmarks)
+  // 传头部 yaw：某些式子要求转到特定角度（式4 往后瞧需 40°）
+  const headYawForJudge = (world && orient.headAvailable) ? orient.headYaw : null
+  const hits = judge.update(landmarks, headYawForJudge)
   liveScore.value = judge.lastScores[stepIdx.value] ?? 0
   // 每 10 帧更新一次诊断，避免每帧重算文字
   if (++diagTick % 10 === 0) updateDiag(landmarks)
@@ -562,6 +608,24 @@ let lastLandmarks = null
 .step.now { color: var(--xuan); }
 .step.now .dot { background: var(--zhu); animation: pulse 1.1s ease-in-out infinite; }
 @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1) } 50% { opacity: .35; transform: scale(.7) } }
+
+/* 头部形变指示器：正对=圆，头转=椭圆（横向压缩） */
+.head-ind {
+  position: absolute; right: 8px; bottom: 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: rgba(10, 8, 6, .62); padding: 6px 8px 5px; border-radius: 10px;
+  pointer-events: none;
+}
+.hi-svg { width: 44px; height: 44px; display: block; }
+.hi-shape { fill: none; stroke-width: 1.6; transition: rx .12s, ry .12s, stroke .2s; }
+.hi-shape.front { stroke: #7fb069; }
+.hi-shape.side { stroke: #e8a020; }
+.hi-shape.back { stroke: #c8553d; }
+.hi-nose { fill: rgba(232, 224, 208, .9); }
+.hi-dir { stroke: rgba(214, 197, 158, .55); stroke-width: 1.2; stroke-dasharray: 2 2; }
+.hi-label { font-size: 9.5px; color: var(--xuan-dim); font-family: var(--font-ui); white-space: nowrap; }
+
+.head-req { color: var(--jin); }
 
 .facing {
   position: absolute; left: 8px; bottom: 8px;

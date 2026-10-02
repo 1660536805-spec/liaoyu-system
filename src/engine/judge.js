@@ -283,17 +283,28 @@ export class MoveJudge {
    * @param {number|null} order 非 null 时为「顺序模式」：只判定 order 指定的那一式
    *                             （八段锦是顺序练的，这是产品主用模式，可彻底消除串扰）
    */
-  constructor({ holdFrames = 12, threshold = THRESHOLD, margin = MARGIN, order = null } = {}) {
+  constructor({
+    holdFrames = 12, threshold = THRESHOLD, margin = MARGIN, order = null,
+    /** 期望的头部 yaw（度，绝对值）。null 表示该式不要求头部角度。
+     *  太极/五禽戏里「转头」「转身」常是动作本身的一部分，故判定应看
+     *  「有没有转到要求的角度」，而不是「是否正对镜头」。 */
+    headYaw = null,
+    headYawTol = 18,
+  } = {}) {
     this.holdFrames = holdFrames
     this.threshold = threshold
     this.margin = margin
     this.order = order
+    this.headYaw = headYaw
+    this.headYawTol = headYawTol
     this.reset()
   }
 
   reset() {
     this.counts = new Array(8).fill(0)
     this.latched = new Array(8).fill(false)
+    this.headHit = false
+    this.headErr = null
     this.hipHist = []
     this.xHist = []
     this.wriXHist = []
@@ -342,10 +353,25 @@ export class MoveJudge {
    * @param {PoseLandmark[]|null} p
    * @returns {{index:number,name:string,score:number}[]} 本帧命中的式
    */
-  update(p) {
+  update(p, headYawDeg = null) {
     if (!p || p.length < 29) return []
     const sc = MOVES.map((fn) => fn(this._withBob(p)))
     this.lastScores = sc
+
+    // 头部角度判据：若该式要求转头到位，且 3D yaw 不可用，则整式判 0
+    if (this.headYaw !== null) {
+      if (headYawDeg === null || headYawDeg === undefined) {
+        this.headHit = false
+        this.headErr = '无 3D 数据，无法判头部角度'
+        sc.fill(0)
+      } else {
+        const a = Math.abs(headYawDeg)
+        const want = Math.abs(this.headYaw)
+        this.headErr = Math.abs(a - want).toFixed(0) + '° / 需要 ' + want + '°'
+        this.headHit = Math.abs(a - want) <= this.headYawTol
+        if (!this.headHit) sc.fill(0)     // 头没转到要求角度 → 本式不成立
+      }
+    }
 
     let best, second
     if (this.order !== null) {
