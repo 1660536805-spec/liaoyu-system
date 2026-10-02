@@ -73,11 +73,27 @@ console.log('\n=== 跟练页 /train ===')
   okc(html.includes('双手托天理三焦'), '含第 1 式名称')
   okc(html.includes('做到位即响'), '含「做到位即响」文案（无倒计时，文档 2.4 要求）')
   okc(html.includes('跳过本式') || html.includes('点一下也算响'), '含三级兜底按钮（跳过/点按也算响）')
-  okc(html.includes('正在加载本地模型'), '含加载态（模型离线加载）')
+  okc(html.includes('读取推理运行时') || html.includes('正在准备'), '含分阶段加载进度（4 步可见）')
+  okc(html.includes('打开摄像头'), '含「正在打开摄像头」阶段文案')
   okc(html.includes('自由练习'), '含自由练习模式切换')
   // 七个弦位
   const bars = (html.match(/class="bar"/g) || []).length
   okc(bars === 7, `七弦弦位渲染 ${bars} 个（期望 7）`)
+  // 设置面板是 v-if 展开，SSR 时不渲染；断言「齿轮入口在」+ 面板源码含各项控件
+  okc(html.includes('摄像头设置'), '含设置面板入口（齿轮按钮）')
+  const CamSettings = (await load('/src/components/CamSettings.vue')).default
+  const panelHtml = await renderToString(createSSRApp(CamSettings, { threshold: 0.55, holdFrames: 10 }))
+  okc(panelHtml.includes('摄像头与识别设置'), '设置面板含标题')
+  okc(panelHtml.includes('640 × 480'), '设置面板含分辨率档位')
+  okc(panelHtml.includes('镜像画面'), '设置面板含镜像开关')
+  okc(panelHtml.includes('灵敏度') && panelHtml.includes('保持帧数'), '设置面板含识别参数滑块')
+  okc((panelHtml.match(/<select/g) || []).length >= 2, '设置面板有 2 个下拉（摄像头 + 分辨率）')
+}
+
+console.log('\n=== 首页摄像头预检 ===')
+{
+  const html = await renderPage('/')
+  okc(html.includes('正在检测摄像头') || html.includes('摄像头'), '首页含摄像头预检状态区')
 }
 
 console.log('\n=== 记录页 /record ===')

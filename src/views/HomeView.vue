@@ -31,6 +31,12 @@
         <button class="btn ghost" @click="$router.push('/guide')">动作要领</button>
       </nav>
 
+      <div class="cam-state" v-if="camInfo">
+        <span class="dot" :class="camInfo.ok ? 'ok' : 'bad'"></span>
+        <span>{{ camInfo.text }}</span>
+        <button class="btn mini" @click="probeCam">{{ camInfo.ok ? '重新检测' : '开启摄像头' }}</button>
+      </div>
+
       <div class="foot">摄像头画面全部在本机处理，不上传、不联网</div>
     </div>
   </div>
@@ -40,15 +46,36 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getRecords } from '../stores/records'
+import { listCameras } from '../engine/poseEngine'
+import { unlockAudio } from '../engine/guqin'
 
 const router = useRouter()
 const records = ref([])
 const lastRecord = computed(() => records.value[0] || null)
 
-onMounted(() => { records.value = getRecords() })
+// 摄像头预检：点「开始练」时浏览器才弹权限框，用户会紧张。
+// 改成在首页就静默枚举（不弹框），进跟练页时权限已就绪，画面秒出。
+const camInfo = ref(null)
+
+async function probeCam() {
+  camInfo.value = { ok: false, text: '正在检测摄像头…' }
+  try {
+    const cams = await listCameras()   // 内部会请求一次权限
+    camInfo.value = cams.length
+      ? { ok: true, text: `已就绪：${cams[0].label}${cams.length > 1 ? ` 等 ${cams.length} 个设备` : ''}` }
+      : { ok: false, text: '未检测到摄像头，接上后点此重试' }
+  } catch (e) {
+    camInfo.value = { ok: false, text: '摄像头未授权：' + (e?.message || e) }
+  }
+}
+
+onMounted(() => {
+  records.value = getRecords()
+  unlockAudio()
+  probeCam()
+})
 
 function start() {
-  // 必须由用户手势触发，才能解锁 AudioContext（浏览器自动播放策略）
   router.push('/train')
 }
 </script>
@@ -84,5 +111,17 @@ function start() {
 .stat-label { font-size: 11px; color: var(--xuan-faint); font-family: var(--font-ui); margin-top: 4px; }
 
 .links { display: flex; gap: 12px; margin-top: 1vh; }
+
+.cam-state {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 12px; color: var(--xuan-dim); font-family: var(--font-ui);
+  background: rgba(232, 224, 208, .04); border: 1px solid rgba(232, 224, 208, .09);
+  padding: 8px 14px; border-radius: 20px; max-width: 100%;
+}
+.cam-state .dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
+.cam-state .dot.ok { background: #7fb069; box-shadow: 0 0 8px rgba(127, 176, 105, .5); }
+.cam-state .dot.bad { background: var(--zhu); box-shadow: 0 0 8px var(--zhu-glow); }
+.btn.mini { padding: 4px 11px; font-size: 11px; border-radius: 14px; }
+
 .foot { margin-top: auto; font-size: 11px; color: rgba(232,224,208,.2); font-family: var(--font-ui); }
 </style>

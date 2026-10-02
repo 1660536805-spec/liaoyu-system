@@ -5,10 +5,22 @@
       <div class="prog">{{ doneCount }} / 8</div>
       <div class="spacer"></div>
       <div class="mode">{{ freeMode ? '自由练习' : '跟练' }}</div>
+      <CamSettings
+        ref="settings"
+        :threshold="cfg.threshold"
+        :hold-frames="cfg.holdFrames"
+        :reset-tick="resetTick"
+        @device="onSwitchDevice"
+        @resolution="onSwitchRes"
+        @threshold="cfg.threshold = $event"
+        @hold-frames="cfg.holdFrames = $event"
+        @mirror="mirror = $event"
+        @reset-all="resetCfg"
+      />
     </div>
 
     <div class="stage">
-      <video ref="video" class="video" playsinline muted autoplay></video>
+      <video ref="video" class="video" :class="{ flip: mirror }" playsinline muted autoplay></video>
       <canvas ref="canvas" class="overlay"></canvas>
 
       <!-- 取景引导框：告诉用户手该放在哪 -->
@@ -17,16 +29,27 @@
         <div class="guide-tip">{{ guideText }}</div>
       </div>
 
-      <div v-if="loading" class="mask"><div class="spinner"></div><div class="mask-txt">{{ loading }}</div></div>
+      <div v-if="loading" class="mask">
+        <div class="spinner"></div>
+        <div class="mask-txt">{{ loading }}</div>
+        <!-- 分阶段进度：让用户知道在做什么，而不是一个孤零零的转圈 -->
+        <div class="steps">
+          <div v-for="s in STEPS" :key="s.id" class="step" :class="s.cls">
+            <span class="dot"></span><span class="step-txt">{{ s.label }}</span>
+          </div>
+        </div>
+      </div>
       <div v-if="err" class="mask err">
         <div class="mask-txt">{{ err }}</div>
-        <button class="btn" @click="$router.push('/')">返回首页</button>
+        <button class="btn" @click="retry">重试</button>
         <button class="btn ghost" @click="manualMode">改用手动模式继续</button>
+        <button class="btn ghost" @click="$router.push('/')">返回首页</button>
       </div>
       <div v-else-if="!landmarksSeen" class="hint">站到镜头前，让上半身和双手完整入镜</div>
 
-      <!-- 实时可见度诊断（长按可展开，平时半透明小字） -->
+      <!-- 实时可见度诊断 -->
       <div class="diag" :class="{ bad: vis.bad }">{{ vis.text }}</div>
+      <div class="cam-tag" v-if="camLabel">📷 {{ camLabel }}</div>
     </div>
 
     <!-- 七弦弦位 -->
@@ -48,9 +71,9 @@
       <div class="cur-cue">{{ currentMove?.cue }}</div>
       <div class="gauge">
         <div class="gauge-fill" :style="{ width: (liveScore * 100).toFixed(0) + '%' }"></div>
-        <div class="gauge-mark"></div>
+        <div class="gauge-mark" :style="{ left: (cfg.threshold * 100).toFixed(0) + '%' }"></div>
       </div>
-      <div class="gauge-tip">做到位即响，无需倒数</div>
+      <div class="gauge-tip">做到位即响，无需倒数 · 阈值 {{ cfg.threshold.toFixed(2) }}</div>
     </div>
 
     <!-- 完成 -->
@@ -76,23 +99,54 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import moves from '../data/moves.json'
-import { createPoseEngine, drawPose, KEY_POINTS } from '../engine/poseEngine'
-import { MoveJudge, NAMES } from '../engine/judge'
+import { createPoseEngine, drawPose, KEY_POINTS, listCameras, RESOLUTIONS } from '../engine/poseEngine'
+import { MoveJudge, NAMES, THRESHOLD } from '../engine/judge'
 import { pluck, chordAll, unlockAudio } from '../engine/guqin'
 import { saveRecord } from '../stores/records'
+import CamSettings from '../components/CamSettings.vue'
 
 const router = useRouter()
 const video = ref(null)
 const canvas = ref(null)
+const settings = ref(null)
 
-const loading = ref('正在加载本地模型…')
+const loading = ref('正在准备…')
 const err = ref('')
 const landmarksSeen = ref(false)
 const finished = ref(false)
 const freeMode = ref(false)
+const mirror = ref(true)
+const camLabel = ref('')
+
+// 可调参数：现场用设置面板改，不必动代码
+const cfg = reactive({ threshold: THRESHOLD, holdFrames: 10, resId: RESOLUTIONS[0].id })
+const resetTick = ref(0)
+function resetCfg() {
+  cfg.threshold = THRESHOLD
+  cfg.holdFrames = 10
+  cfg.resId = RESOLUTIONS[0].id
+  mirror.value = true
+  resetTick.value++
+}
+
+// ---- 加载阶段：让「正在加载」有进度可看 ----
+const STAGE_ORDER = [
+  { id: 'wasm', label: '读取推理运行时' },
+  { id: 'model', label: '加载姿态模型' },
+  { id: 'camera', label: '打开摄像头' },
+  { id: 'ready', label: '就绪' },
+]
+const stageNow = ref('')
+const STEPS = computed(() => {
+  const idx = STAGE_ORDER.findIndex((s) => s.id === stageNow.value)
+  return STAGE_ORDER.map((s, i) => ({
+    ...s,
+    cls: idx < 0 ? '' : i < idx ? 'done' : i === idx ? 'now' : 'todo',
+  }))
+})
 
 const stepIdx = ref(0)          // 当前第几式（0~7）
 const doneSet = ref(new Set())  // 已完成的式
@@ -103,6 +157,7 @@ let engine = null
 let judge = null
 let rafUI = 0
 let lastLitClear = 0
+let loadTimer = 0
 
 const currentMove = computed(() => moves[stepIdx.value])
 const doneCount = computed(() => doneSet.value.size)
@@ -147,33 +202,122 @@ function resetStep() {
   liveScore.value = 0
   if (judge) judge.reset()
   // 顺序模式：只判当前式；自由模式：8 式全开 + 仲裁
-  judge = new MoveJudge({ holdFrames: 10, order: freeMode.value ? null : stepIdx.value })
+  judge = new MoveJudge({
+    holdFrames: cfg.holdFrames,
+    threshold: cfg.threshold,
+    order: freeMode.value ? null : stepIdx.value,
+  })
 }
 
-onMounted(async () => {
-  unlockAudio()               // 由用户手势触发，解锁音频
+// 配置变更后重建判定器（阈值/保持帧数是构造参数，改完要 new）
+watch(() => [cfg.threshold, cfg.holdFrames, freeMode.value], () => resetStep())
+
+async function init() {
+  err.value = ''
+  loading.value = '正在准备…'
+  stageNow.value = 'wasm'
+  clearTimeout(loadTimer)
+  // 兜底：25s 还没就绪就明说，避免无限转圈
+  loadTimer = setTimeout(() => {
+    if (loading.value) {
+      err.value = '加载超时（25 秒）。可能是首次访问需要读取 16MB 本地模型，或显卡驱动卡住了 MediaPipe。请点「重试」，或换用 Edge 浏览器再试。'
+      loading.value = ''
+    }
+  }, 25000)
+
   try {
     engine = await createPoseEngine()
     engine.on('error', (e) => { console.error('[pose]', e) })
     engine.on('result', onResult)
+    engine.on('status', ({ stage, detail }) => {
+      stageNow.value = stage
+      if (stage === 'wasm') loading.value = '正在加载本地推理运行时…'
+      else if (stage === 'model') loading.value = '正在加载姿态模型（本地 5.5MB）…'
+      else if (stage === 'camera') loading.value = '正在打开摄像头…'
+      else if (stage === 'ready') loading.value = '正在启动识别…'
+      if (detail) console.log('[stage]', stage, detail)
+      if (stage === 'ready' && detail) {
+        const m = /(\d+)×(\d+)/.exec(detail)
+        if (m) settings.value?.setActual(`${m[1]}×${m[2]}`)
+      }
+    })
+
     await nextTick()
-    await engine.start(video.value)
+
+    // 优先用上次选过的设备（localStorage），现场换设备后不用重新选
+    const saved = safeGet('xianyang.deviceId')
+    const cams = await listCameras()
+    const useId = cams.find((c) => c.deviceId === saved)?.deviceId
+      || cams.find((c) => c.hasLabel)?.deviceId
+      || cams[0]?.deviceId
+      || null
+    const r = RESOLUTIONS.find((x) => x.id === cfg.resId) || RESOLUTIONS[0]
+    const info = await engine.start(video.value, { deviceId: useId, width: r.w, height: r.h })
+    camLabel.value = info.label || (cams.find((c) => c.deviceId === info.deviceId)?.label ?? '摄像头')
+    if (info.deviceId) safeSet('xianyang.deviceId', info.deviceId)
+
+    clearTimeout(loadTimer)
     loading.value = ''
+    stageNow.value = 'ready'
     resetStep()
+    // 摄像头就绪后再填下拉框（复用已授权的设备列表，不再请求权限）
+    settings.value?.refresh()
     // 等一帧让 stage 完成布局再定 canvas 尺寸，否则拿到 0
     requestAnimationFrame(sizeCanvas)
     setTimeout(sizeCanvas, 120)
     window.addEventListener('resize', sizeCanvas)
     uiLoop()
   } catch (e) {
+    clearTimeout(loadTimer)
     console.error(e)
-    err.value = /Permission|NotAllowed/i.test(e?.name + e?.message)
-      ? '摄像头未授权。请在浏览器地址栏允许摄像头后重试。'
-      : '摄像头或模型加载失败：' + (e?.message || e)
+    const s = e?.name + ' ' + e?.message
+    err.value = /NotAllowed|Permission/i.test(s)
+      ? '摄像头未授权。请在浏览器地址栏左侧的权限图标里允许摄像头，然后点「重试」。'
+      : /NotFound|Requested device/i.test(s)
+      ? '没有找到可用的摄像头。请检查设备连接，或在设置里换一个设备。'
+      : '初始化失败：' + (e?.message || e)
+    loading.value = ''
   }
+}
+
+function safeGet(k) { try { return localStorage.getItem(k) } catch { return null } }
+function safeSet(k, v) { try { localStorage.setItem(k, v) } catch { /* file:// 下不可写，忽略 */ } }
+
+function retry() { engine?.dispose(); engine = null; init() }
+
+// ---- 切换摄像头 / 分辨率（不重载模型）----
+async function onSwitchDevice(deviceId) {
+  if (!engine || !deviceId) return
+  camLabel.value = '切换中…'
+  const r = RESOLUTIONS.find((x) => x.id === cfg.resId) || RESOLUTIONS[0]
+  try {
+    const info = await engine.switchDevice(video.value, deviceId, { width: r.w, height: r.h })
+    safeSet('xianyang.deviceId', deviceId)
+    camLabel.value = info.label || deviceId.slice(0, 8)
+    settings.value?.setActual(`${info.width}×${info.height}`)
+    requestAnimationFrame(sizeCanvas)
+  } catch (e) {
+    camLabel.value = '切换失败'
+    console.error('[pose] 切换摄像头失败', e)
+  }
+}
+
+async function onSwitchRes(resId) {
+  cfg.resId = resId
+  if (!engine) return
+  const r = RESOLUTIONS.find((x) => x.id === resId)
+  if (!r) return
+  const out = await engine.setResolution(video.value, r.w, r.h)
+  if (out) { settings.value?.setActual(`${out.width}×${out.height}`); requestAnimationFrame(sizeCanvas) }
+}
+
+onMounted(() => {
+  unlockAudio()               // 由用户手势触发，解锁音频
+  init()
 })
 
 onBeforeUnmount(() => {
+  clearTimeout(loadTimer)
   cancelAnimationFrame(rafUI)
   window.removeEventListener('resize', sizeCanvas)
   engine?.dispose()
@@ -243,9 +387,11 @@ function restart() {
   stepIdx.value = 0
   finished.value = false
   landmarksSeen.value = false
+  litStrings.value = []
   resetStep()
-  if (!engine?.isRunning && video.value?.srcObject) engine?.start(video.value)
-  else if (!engine?.isRunning) location.reload()
+  // 引擎若被手动模式停掉了，这里重新拉起（不重载模型）
+  if (engine && !engine.isRunning) init()
+  else if (!engine) location.reload()
 }
 
 function manualMode() {          // 三级兜底之三：关摄像头，改为点按触发
@@ -255,6 +401,7 @@ function manualMode() {          // 三级兜底之三：关摄像头，改为�
   resetStep()
   finished.value = false
   landmarksSeen.value = true
+  camLabel.value = '手动模式'
 }
 
 function quit() { engine?.dispose(); router.push('/') }
@@ -266,11 +413,11 @@ function uiLoop() {
   if (ctx && v) {
     const w = c.width, h = c.height
     ctx.save()
-    // 镜像画面，符合照镜子的直觉
-    ctx.translate(w, 0); ctx.scale(-1, 1)
+    // 骨架坐标来自未镜像的视频帧，故镜像时同步翻转画布，两者才对齐
+    if (mirror.value) { ctx.translate(w, 0); ctx.scale(-1, 1) }
     drawPose(ctx, lastLandmarks, w, h, {
-      highlight: liveScore.value > 0.3 ? KEY_POINTS : null,
-      glow: liveScore.value >= 0.55,
+      highlight: liveScore.value > cfg.threshold * 0.55 ? KEY_POINTS : null,
+      glow: liveScore.value >= cfg.threshold,
     })
     ctx.restore()
   }
@@ -296,8 +443,26 @@ let lastLandmarks = null
   background: #000; border-radius: var(--r-m); overflow: hidden;
 }
 .video, .overlay { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.video { transform: scaleX(-1); opacity: .85; }
+.video { opacity: .85; }
+.video.flip { transform: scaleX(-1); }   /* 镜像：照镜子直觉 */
 .overlay { pointer-events: none; }
+
+/* 加载阶段进度：4 步，让用户知道卡在哪 */
+.steps { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.step { display: flex; align-items: center; gap: 9px; font-size: 12px; color: var(--xuan-faint); font-family: var(--font-ui); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(232,224,208,.18); flex: 0 0 auto; }
+.step.done { color: var(--xuan-dim); }
+.step.done .dot { background: var(--jin); }
+.step.now { color: var(--xuan); }
+.step.now .dot { background: var(--zhu); animation: pulse 1.1s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; transform: scale(1) } 50% { opacity: .35; transform: scale(.7) } }
+
+.cam-tag {
+  position: absolute; right: 8px; top: 8px;
+  font-size: 10px; color: rgba(232,224,208,.5); font-family: var(--font-ui);
+  background: rgba(10, 8, 6, .5); padding: 2px 7px; border-radius: 10px;
+  pointer-events: none; max-width: 46%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 
 /* 取景引导框：虚线框提示「双手放这里面」 */
 .guide { position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 12px; }
@@ -341,7 +506,7 @@ let lastLandmarks = null
 .cur-cue { font-size: 12.5px; color: var(--xuan-dim); line-height: 1.8; font-family: var(--font-ui); padding: 0 10px; }
 .gauge { position: relative; height: 6px; border-radius: 3px; background: rgba(232,224,208,.1); margin: 14px auto 0; max-width: 320px; overflow: hidden; }
 .gauge-fill { height: 100%; background: linear-gradient(90deg, var(--zhu), var(--jin)); border-radius: 3px; transition: width .08s linear; }
-.gauge-mark { position: absolute; left: 55%; top: -3px; width: 2px; height: 12px; background: rgba(232,224,208,.5); }
+.gauge-mark { position: absolute; top: -3px; width: 2px; height: 12px; background: rgba(232,224,208,.5); transition: left .15s; }
 .gauge-tip { font-size: 10.5px; color: var(--xuan-faint); font-family: var(--font-ui); margin-top: 7px; }
 
 .done { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 20px; }
