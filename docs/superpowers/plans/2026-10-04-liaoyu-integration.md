@@ -69,7 +69,8 @@
 - [x] Write failing tests for audio blocked until user action, track change/route exit cleanup, and training route exit while the camera is loading.
 - [x] Implement playback cleanup and clear user-facing recovery states. Run `npm --prefix app run test:all`, `npm --prefix app run build`, build test and release smoke.
 - [x] Start the root preview server and inspect the full mobile flow in a browser, including permission rejection and refresh; record limits that require real camera/phone validation in README.
-- [x] Commit release fixes and documentation; verify the branch diff, then push `liaoyu0-1` and open a draft PR for review.
+- [x] Commit release fixes and documentation, verify the branch diff, and push `liaoyu0-1`.
+- [ ] Open a draft PR against `main`; pending GitHub write access (the local `gh` token is invalid and the connected GitHub integration returned 403).
 
 ## Final acceptance
 
