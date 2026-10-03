@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import App from './App.vue'
 import './styles/tokens.css'
+import './styles/legacy-ui.css'
 
 import HomeView from './views/HomeView.vue'
 import SoundView from './views/OrderView.vue'
@@ -20,13 +21,24 @@ import MeView from './views/MeView.vue'
 import BodyDataView from './views/BodyDataView.vue'
 import SettingsView from './views/SettingsView.vue'
 import PoseLabView from './views/PoseLabView.vue'
+import LegacySplashView from './views/LegacySplashView.vue'
+import LegacyQuestionsView from './views/LegacyQuestionsView.vue'
+import LegacyHomeView from './views/LegacyHomeView.vue'
+import LegacySoundView from './views/LegacySoundView.vue'
+import LegacyIntroView from './views/LegacyIntroView.vue'
+import LegacyFinishView from './views/LegacyFinishView.vue'
+import LegacyProfileView from './views/LegacyProfileView.vue'
+import LegacyBodyView from './views/LegacyBodyView.vue'
 
 // 用 hash 路由：现场用手机扫码/输地址打开时，任意子路由刷新都不会 404
 // v2.3 流程：启动 → 欢迎（首次）→ 快速问卷 → 首页 → 准备页 → 跟练 → 总结
 const routes = [
-  { path: '/', component: HomeView },
+  { path: '/', component: LegacyHomeView },
+  { path: '/questions', component: LegacyQuestionsView },
+  { path: '/intro', component: LegacyIntroView },
+  { path: '/finish', component: LegacyFinishView },
   // 音疗页
-  { path: '/sound', component: SoundView },
+  { path: '/sound', component: LegacySoundView },
   { path: '/order', redirect: '/sound' },
   // 完整曲库
   { path: '/sound/library', component: LibraryView },
@@ -36,8 +48,8 @@ const routes = [
   { path: '/train', component: TrainView },
   { path: '/summary', component: SummaryView },
   // 我的
-  { path: '/me', component: MeView },
-  { path: '/me/body-data', component: BodyDataView },
+  { path: '/me', component: LegacyProfileView },
+  { path: '/me/body-data', component: LegacyBodyView },
   { path: '/me/settings', component: SettingsView },
   // 记录与要领
   { path: '/record', component: RecordView },
@@ -46,7 +58,8 @@ const routes = [
   { path: '/workshop', component: WorkshopView },
   { path: '/arc', component: ArcView },
   // 启动与首次流程
-  { path: '/splash', component: SplashView },
+  { path: '/splash', component: LegacySplashView },
+  { path: '/onboarding', component: LegacyQuestionsView },
   { path: '/welcome', component: WelcomeView },
   { path: '/onboarding', component: OnboardingView },
   // 骨架采集台：调参工具，刻意放在 hash 路由末尾且不进 AppTab。

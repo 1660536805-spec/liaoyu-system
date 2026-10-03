@@ -342,7 +342,7 @@ const trainingSession = createTrainingSession({
   }),
   audio: { pluck, chordAll },
   recordStore,
-  tone: tone.value,
+  tone: tone.value.key,
   guided: true,
 })
 trainingSession.on('frame', ({ frame }) => onResult(...frame))
@@ -456,7 +456,7 @@ async function init() {
       || cams[0]?.deviceId
       || null
     const r = RESOLUTIONS.find((x) => x.id === cfg.resId) || RESOLUTIONS[0]
-    const info = await trainingSession.start({ deviceId: useId, video: video.value, width: r.w, height: r.h })
+    const info = await trainingSession.start({ mode: freeMode.value ? 'free' : 'guided', deviceId: useId, video: video.value, width: r.w, height: r.h })
     camLabel.value = info.label || (cams.find((c) => c.deviceId === info.deviceId)?.label ?? '摄像头')
     if (info.deviceId) safeSet('xianyang.deviceId', info.deviceId)
 
@@ -624,11 +624,21 @@ async function onSwitchRes(resId) {
 }
 
 onMounted(() => {
+  freeMode.value = route.query.mode === 'free'
   unlockAudio()               // 由用户手势触发，解锁音频
   preloadSamples()            // 兜底：若首页预热已就绪则这里无事可做
   announcer.prime()           // 解锁语音（必须在用户手势内，否则被自动播放策略拦）
   setupFallback()             // 预热预录视频（不等它，现场要切时多半是热启动）
-  init()
+  if (route.query.manual === '1') {
+    trainingSession.enableManual()
+    loading.value = ''
+    stageNow.value = 'ready'
+    landmarksSeen.value = true
+    camLabel.value = '手动模式'
+    resetStep()
+  } else {
+    init()
+  }
   harpTimer = setInterval(() => {
     harpStep.value = (harpStep.value % 5) + 1
   }, 1200)
@@ -809,6 +819,7 @@ function finish() {
   stopAutoAdvance()
   exitFallback('一曲完成')
   trainingSession.stop({ reason: '一曲完成' })
+  router.replace('/finish')
 }
 
 function skip() {                 // 三级兜底之一：跳过本式也算完成
@@ -841,7 +852,7 @@ function restart() {
 }
 
 function manualMode() {          // 三级兜底之三：关摄像头，改为点按触发
-  trainingSession.stopCamera()
+  trainingSession.enableManual()
   exitFallback('改用手动模式')
   stopAutoAdvance()
   clearTimeout(retryTimer)

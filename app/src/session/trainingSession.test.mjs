@@ -2,13 +2,14 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createTrainingSession } from './trainingSession.js'
 
-function harness({ engineFactory, recordStore, moveCount = 2 } = {}) {
+function harness({ engineFactory, recordStore, moveCount = 2, tone = 'gong' } = {}) {
   const events = []
   const records = []
   const played = []
   const moves = Array.from({ length: moveCount }, (_, i) => ({ id: i + 1, name: `式${i + 1}`, stringIndex: i + 1, chord: i === moveCount - 1 }))
   const session = createTrainingSession({
     moves,
+    tone,
     engineFactory: engineFactory || (async () => makeEngine()),
     judgeFactory: (index) => ({ index }),
     audio: { pluck: (i) => played.push(['pluck', i]), chordAll: () => played.push(['chord']) },
@@ -44,6 +45,7 @@ test('start emits ordered loading and ready stages, and two move hits complete o
   assert.equal(events.filter((e) => e.type === 'completed').length, 1)
   assert.equal(records.length, 1)
   assert.deepEqual(records[0].moveIds, [1, 2])
+  assert.equal(records[0].tone, 'gong')
   assert.equal(engine.stopped, true)
 })
 
@@ -79,6 +81,16 @@ test('manual and fallback hits remain available after the camera fails', async (
   assert.equal(session.hit(2, 'fallback'), true)
   assert.equal(records.length, 1)
   assert.deepEqual(played, [['pluck', 1], ['chord']])
+})
+
+test('manual practice can start without creating an engine or requesting a camera', () => {
+  let engineCalls = 0
+  const { session, played } = harness({ engineFactory: async () => { engineCalls++; return makeEngine() } })
+  session.enableManual()
+  assert.equal(session.snapshot().stage, 'ready')
+  assert.equal(session.hit(1, 'manual'), true)
+  assert.equal(engineCalls, 0)
+  assert.deepEqual(played, [['pluck', 1]])
 })
 
 test('stop while engine is loading disposes the late engine without starting its camera', async () => {

@@ -183,6 +183,19 @@ export function createTrainingSession({
     try { engine?.stop?.() } catch (e) { console.error('[session] camera stop failed', e) }
   }
 
+  function enableManual() {
+    if (stopped) return false
+    ++loadToken
+    try { engine?.stop?.() } catch { /* release is best-effort */ }
+    try { engine?.dispose?.() } catch { /* release is best-effort */ }
+    engine = null
+    paused = false
+    if (startedAt === null) startedAt = clock()
+    error = null
+    setStage('ready', '手动练习')
+    return true
+  }
+
   function disposeEngine() {
     try { engine?.dispose?.() } catch (e) { console.error('[session] engine dispose failed', e) }
     engine = null
@@ -213,6 +226,7 @@ export function createTrainingSession({
     stop,
     dispose,
     stopCamera,
+    enableManual,
     disposeEngine,
     switchDevice,
     setResolution,

@@ -1,12 +1,16 @@
 <template>
   <div class="app">
     <router-view />
-    <AppTab />
+    <AppTab v-if="showAppTab" />
   </div>
 </template>
 
 <script setup>
 import AppTab from './components/AppTab.vue'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+const route = useRoute()
+const showAppTab = computed(() => !['/', '/splash', '/questions', '/intro', '/train', '/finish', '/me', '/me/body-data', '/sound'].includes(route.path))
 </script>
 
 <style>

@@ -45,9 +45,9 @@
 
 **Interfaces:** `createTrainingSession({ engineFactory, judgeFactory, audio, recordStore, clock })` returns `{ on(event, listener), start({ mode, deviceId }), pause(), resume(), stop({ reason }), dispose(), snapshot() }`. Events contain `{ type, stage, moveId, source, completedMoveIds, error }`. `recordStore.save({ moveIds, sources, startedAt, endedAt, tone })` returns the existing record shape and `recordStore.list()` returns newest first.
 
-- [ ] Write failing tests for ordered loading/ready/hit/completed events, duplicate hit suppression, pause, permission rejection, stop during loading, dispose cleanup and one record for a partial session. Also test malformed/unavailable localStorage.
-- [ ] Extract camera/pose/judge/guqin lifecycle from `TrainView.vue` into the controller, preserving the existing engine math and fallback behavior. Bind the existing training view to controller events and stable `moves.json` IDs.
-- [ ] Run the focused tests, existing judge/audio/fallback suites and build; commit when all pass.
+- [x] Write failing tests for ordered loading/ready/hit/completed events, duplicate hit suppression, pause, permission rejection, stop during loading, dispose cleanup and one record for a partial session. Also test malformed/unavailable localStorage.
+- [x] Extract camera/pose/judge/guqin lifecycle from `TrainView.vue` into the controller, preserving the existing engine math and fallback behavior. Bind the existing training view to controller events and stable `moves.json` IDs.
+- [x] Run the focused tests, existing judge/audio/fallback suites and build; commit when all pass.
 
 ### Task 3: Rebuild the UI flow around the real session
 
@@ -55,10 +55,10 @@
 
 **Interfaces:** Routes `/#/splash`, `/#/questions`, `/#/`, `/#/sound`, `/#/intro`, `/#/train`, `/#/finish`, `/#/me`, `/#/me/body-data`; `profile.load()` and `profile.save(value)` accept validated height, weight, age and preferences. Finish/profile views consume `recordStore.list()`.
 
-- [ ] Write a failing flow test for first visit → questions → home → intro → training; camera denied → retry/manual route; move hits → finish; finish → profile showing the same record; refresh retaining data.
-- [ ] Port the nine screens' layout, copy and art from `main/dist/app.js` and `app.css` into scoped Vue views/CSS. Wire every visible primary action to an actual route, preference, audio or session action; disable and explain any unavailable action.
-- [ ] Render training status and camera failures from the session controller, and show manual move provenance in finish/profile. Run the flow test and build, then compare key screens against `main` at mobile width.
-- [ ] Commit the UI flow.
+- [x] Write a failing flow test for first visit → questions → home → intro → training; camera denied → retry/manual route; move hits → finish; finish → profile showing the same record; refresh retaining data.
+- [x] Port the nine screens' layout, copy and art from `main/dist/app.js` and `app.css` into scoped Vue views/CSS. Wire every visible primary action to an actual route, preference, audio or session action; disable and explain any unavailable action.
+- [x] Render training status and camera failures from the session controller, and show manual move provenance in finish/profile. Run the flow test and build, then compare key screens against `main` at mobile width.
+- [x] Commit the UI flow.
 
 ### Task 4: Playback, lifecycle and release verification
 
