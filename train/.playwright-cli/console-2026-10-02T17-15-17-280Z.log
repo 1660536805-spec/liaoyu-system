@@ -1,0 +1,14 @@
+[     351ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/src/engine/guqin.js?t=1790956166605:83
+[     352ms] [LOG] [pose] wasm · 读取本地推理运行时 @ http://localhost:5173/src/engine/poseEngine.js:136
+[     423ms] [LOG] [pose] model · 加载姿态模型（约 5.5MB，本地文件） @ http://localhost:5173/src/engine/poseEngine.js:136
+[     435ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/src/engine/guqin.js?t=1790956166605:83
+[     435ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/src/engine/guqin.js?t=1790956166605:83
+[     435ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/src/engine/guqin.js?t=1790956166605:83
+[     435ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/src/engine/guqin.js?t=1790956166605:83
+[     435ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/src/engine/guqin.js?t=1790956166605:83
+[     435ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/src/engine/guqin.js?t=1790956166605:83
+[     435ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/src/engine/guqin.js?t=1790956166605:83
+[     645ms] [LOG] I1002 17:15:17.923000 2136208 gl_context.cc:407] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium))), renderer: WebKit WebGL @ http://localhost:5173/wasm/vision_wasm_internal.js:4659
+[     645ms] [WARNING] W1002 17:15:17.924999 2136208 gl_context.cc:1118] OpenGL error checking is disabled @ http://localhost:5173/wasm/vision_wasm_internal.js:8350
+[     647ms] [LOG] Graph successfully started running. @ http://localhost:5173/wasm/vision_wasm_internal.js:1370
+[     647ms] [LOG] [pose] model · 就绪（GPU） @ http://localhost:5173/src/engine/poseEngine.js:136

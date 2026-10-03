@@ -1,0 +1,10 @@
+[
+  { "name": "双手托天理三焦", "tip": "双臂上举，舒展肩背，适合久坐后放松", "stringIndex": 1, "sec": 30 },
+  { "name": "左右开弓似射雕", "tip": "马步拉弓，打开胸背", "stringIndex": 2, "sec": 30 },
+  { "name": "调理脾胃须单举", "tip": "一手上托一手下按，舒缓体侧", "stringIndex": 3, "sec": 30 },
+  { "name": "五劳七伤往后瞧", "tip": "转头后望，放松颈肩", "stringIndex": 4, "sec": 30 },
+  { "name": "摇头摆尾去心火", "tip": "俯身摇摆，舒缓放松", "stringIndex": 5, "sec": 30 },
+  { "name": "两手攀足固肾腰", "tip": "前屈攀足，拉伸腰背", "stringIndex": 6, "sec": 30 },
+  { "name": "攒拳怒目增气力", "tip": "冲拳怒目，活力舒展", "stringIndex": 7, "sec": 30 },
+  { "name": "背后七颠百病消", "tip": "足跟起落，收势放松（七弦齐鸣）", "stringIndex": 0, "sec": 30, "chord": true }
+]

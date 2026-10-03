@@ -1,0 +1,21 @@
+[req]
+distinguished_name = dn
+req_extensions = v3_req
+prompt = no
+[dn]
+C = CN
+ST = Local
+L = Local
+O = Xianyang
+CN = 192.168.0.2
+[v3_req]
+basicConstraints = CA:FALSE
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt
+[alt]
+IP.1 = 192.168.0.2
+IP.2 = 127.0.0.1
+IP.3 = 0.0.0.0
+DNS.1 = localhost
+DNS.2 = *.local
