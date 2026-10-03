@@ -84,7 +84,7 @@ button{font-family:inherit;border:0;background:none;cursor:pointer;color:inherit
 .tag.blu{color:#5A7290;border-color:#C3CFDD;background:rgba(236,241,247,.7)}
 
 /* ---- 底部导航 ---- */
-.nav{position:sticky;bottom:0;z-index:20;margin-top:auto;background:rgba(251,243,227,.96);border-top:1px solid var(--line);
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,47rem);z-index:20;background:rgba(251,243,227,.96);border-top:1px solid var(--line);
   display:flex;align-items:flex-end;justify-content:space-around;padding:.9rem 1rem calc(.9rem + env(safe-area-inset-bottom));backdrop-filter:blur(6px)}
 .nitem{display:flex;flex-direction:column;align-items:center;gap:.35rem;flex:1;color:#A08A70;font-size:1.15rem;letter-spacing:.06em}
 .nitem svg{width:2.6rem;height:2.6rem}
@@ -545,4 +545,16 @@ button{font-family:inherit;border:0;background:none;cursor:pointer;color:inherit
 @media(max-width:360px){
   .steppers{flex-wrap:wrap}
 }
+button:focus-visible,[role="button"]:focus-visible{outline:2px solid var(--green-deep);outline-offset:3px}
+main:focus{outline:none}
+.player .pctrl>button{display:flex;align-items:center;justify-content:center;min-width:2.8rem;min-height:2.8rem}
+.player .pctrl>button>svg{width:2rem;height:2rem}
+.stage.paused *{animation-play-state:paused!important}
+.stage .fade-b{pointer-events:none}
+.setrow{cursor:pointer}
+.toast{max-width:calc(100vw - 2rem);width:max-content;text-align:center;overflow-wrap:anywhere}
+.food .tags{flex-wrap:wrap}
+.sec-h{flex-wrap:wrap}
+.sec-h .sec-note{font-weight:400}
+.vf-tx{display:block;align-content:center}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

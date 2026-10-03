@@ -4,7 +4,7 @@
 'use strict';
 var root, state={
   screen:'loading', first:true,
-  qIndex:2, qSel:null,
+  qIndex:0, qSel:null,
   answers:[], organ:0, track:-1,
   mode:0, rec:0, imode:0, istage:0,
   progress:0, running:false,
@@ -69,7 +69,14 @@ function knot(){return '<svg class="knot" viewBox="0 0 24 24" aria-hidden="true"
 
 /* ---------- 公共片段 ---------- */
 function brand(sz,sub){return '<div class="brandrow"><span class="t-callig" style="font-size:'+sz+'rem">弦养</span><span class="seal">弦养</span></div>'+(sub?'<div class="t-sub" style="margin-top:1.1rem">'+sub+'</div>':'')}
-function toast(msg){var t=document.querySelector('.toast');if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t)}t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('show')},1600)}
+function toast(msg){var t=document.querySelector('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.setAttribute('aria-live','polite');document.body.appendChild(t)}t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('show')},3500)}
+var BODY_LIMITS={h:[100,230],w:[20,250],a:[1,120]};
+var BODY_OPTIONS={inj:['颈肩','腰背','膝盖','手腕','无'],goals:['舒缓肩颈','改善睡眠','调理脾胃','提神','无所谓'],diet:['素食','少盐','无特殊']};
+var BODY_NONE={inj:'无',goals:'无所谓',diet:'无特殊'};
+function bodyValue(k,v){return typeof v==='number'&&Number.isFinite(v)?Math.max(BODY_LIMITS[k][0],Math.min(BODY_LIMITS[k][1],Math.round(v))):state.body[k]}
+function bodyChoices(k,values){var valid=values.filter(function(v){return BODY_OPTIONS[k].indexOf(v)>=0}).filter(function(v,i,a){return a.indexOf(v)===i});return valid.indexOf(BODY_NONE[k])>=0?[BODY_NONE[k]]:(valid.length?valid:[BODY_NONE[k]])}
+function saveBodyState(){try{localStorage.setItem('xy-body',JSON.stringify({body:state.body,inj:state.inj,goals:state.goals,diet:state.diet,recipe:state.recipe}));return true}catch(_){toast('本机存储不可用，设置仅在本次访问保留');return false}}
+function loadBodyState(){try{var x=JSON.parse(localStorage.getItem('xy-body')||'null');if(!x||typeof x!=='object'||Array.isArray(x))return;if(x.body&&typeof x.body==='object'&&!Array.isArray(x.body))Object.keys(BODY_LIMITS).forEach(function(k){state.body[k]=bodyValue(k,x.body[k])});Object.keys(BODY_OPTIONS).forEach(function(k){if(Array.isArray(x[k]))state[k]=bodyChoices(k,x[k])});if(typeof x.recipe==='boolean')state.recipe=x.recipe}catch(_){} }
 
 /* ---------- 加载页 ---------- */
 function pgLoading(){return '<main class="sc center" style="padding-bottom:0;position:relative;min-height:100dvh;display:flex;flex-direction:column">'
@@ -85,9 +92,9 @@ function pgLoading(){return '<main class="sc center" style="padding-bottom:0;pos
    +'<circle cx="82.6" cy="28" r="3.4" fill="#C9A063"/></g>'
    +'<g transform="translate(33,33) scale(1.35)" color="#A87F3F">'+ic('lotus')+'</g>'
  +'</svg></div>'
- +'<p class="load-tip">正在准备古琴音色与动作识别…</p>'
+ +'<p class="load-tip">古琴与动作练习 · 界面预览</p>'
  +'<button class="btn" style="width:32rem;margin:2.6rem auto 0" data-a="load-enter">'+ic('lotus','width:2.4rem;height:2.4rem;color:#F6E3C8')+'进入弦养</button>'
- +'<div class="load-foot">加载完成后即可开始</div>'
+ +'<div class="load-foot">未连接摄像头与动作识别</div>'
  +'</div>'
  +'<div class="load-guqin" style="margin-top:auto"><img src="/art/guqin.png" alt="" style="height:30rem"></div>'
  +'</main>'}
@@ -142,17 +149,17 @@ function pgAudio(){var organs=[
    +'<img class="pic" src="'+o[4]+'" style="'+o[5]+'" alt=""></button>'}).join('')+'</div>'
  +'</section>'
  +'<div style="display:flex;gap:1.2rem;margin-top:1.4rem">'
-  +'<button class="btn btn-gho" style="flex:1;min-height:4.8rem;font-size:1.45rem">'+ic('shuffle','width:2rem;height:2rem')+'说不上来，随便听听 ›</button>'
-  +'<button class="btn" style="flex:1.15;min-height:4.8rem;font-size:1.45rem" data-a="nav-home">'+ic('music','width:2rem;height:2rem')+'练完了·听一首完整的 ›</button></div>'
+  +'<button class="btn btn-gho" style="flex:1;min-height:4.8rem;font-size:1.45rem" data-a="random-track">'+ic('shuffle','width:2rem;height:2rem')+'说不上来，随便听听 ›</button>'
+  +'<button class="btn" style="flex:1.15;min-height:4.8rem;font-size:1.45rem" data-a="play" data-i="0">'+ic('music','width:2rem;height:2rem')+'练完了·听一首完整的 ›</button></div>'
  +'<section class="player card">'
   +'<img class="pic" src="/art/card-landscape.jpg" alt="">'
-  +'<div class="pr"><span class="live">'+ic('music','width:1.2rem;height:1.2rem')+'正在播放</span>'
-  +'<div class="tt">平湖秋月 <i>♡</i></div>'
-  +'<p>月映平湖，琴声如水，安抚心神，涤荡烦忧。</p>'
-  +'<div class="tags"><span class="tag org">心·徵</span><span class="tag">安神助眠</span><span class="tag">平静情绪</span><span class="tag">缓解焦虑</span></div>'
-  +'<div class="pbar"><i style="width:28%"></i></div>'
-  +'<div class="times"><span>02:18</span><span>08:24</span></div>'
-  +'<div class="pctrl">'+ic('refresh')+ic('prev')+'<button class="pc" data-a="play">'+ic('pause')+'</button>'+ic('next')+ic('list')+'</div>'
+  +'<div class="pr"><span class="live">'+ic('music','width:1.2rem;height:1.2rem')+'曲目预览 · 未提供音源</span>'
+  +'<div class="tt">'+tracks[Math.max(0,state.track)][0]+' <i aria-hidden="true">♡</i></div>'
+  +'<p>'+tracks[Math.max(0,state.track)][1]+'</p>'
+  +'<div class="tags"><span class="tag '+tracks[Math.max(0,state.track)][3]+'">'+tracks[Math.max(0,state.track)][2]+'</span><span class="tag">'+tracks[Math.max(0,state.track)][4]+'</span><span class="tag">'+tracks[Math.max(0,state.track)][5]+'</span></div>'
+  +'<div class="pbar"><i style="width:0%"></i></div>'
+  +'<div class="times"><span>00:00</span><span>时长待确认</span></div>'
+  +'<div class="pctrl"><button data-a="unavailable" aria-label="循环播放">'+ic('refresh')+'</button><button data-a="track-prev" aria-label="上一首曲目预览">'+ic('prev')+'</button><button class="pc" data-a="play" data-i="'+Math.max(0,state.track)+'" aria-label="尝试播放当前曲目">'+ic('play')+'</button><button data-a="track-next" aria-label="下一首曲目预览">'+ic('next')+'</button><button data-a="track-list" aria-label="查看推荐曲目">'+ic('list')+'</button></div>'
   +'</div></section>'
  +'<section class="card" style="padding:1.6rem 1.5rem;margin-top:2rem">'
   +'<div class="sec-h">'+knot()+'跟着呼吸，更好地感受音乐<span class="sec-note">让呼吸与琴音同频，放松身心</span></div>'
@@ -167,11 +174,11 @@ function pgAudio(){var organs=[
   +'<div class="sec-h">'+knot()+'为你推荐<button class="sec-note" data-a="swap-tracks" style="display:inline-flex;align-items:center;gap:.4rem">'+ic('refresh','width:1.4rem;height:1.4rem')+'换一批</button></div>'
   +'<div style="margin-top:.6rem">'+tracks.map(function(t,i){return '<div class="track">'
    +'<img class="thumb" src="'+t[7]+'" style="'+(t[8]||'')+'" alt="">'
-   +'<div style="flex:1;min-width:0"><div class="tt">'+t[0]+(state.track===i?' <span class="note">♪ 播放中</span>':'')+'</div>'
+   +'<div style="flex:1;min-width:0"><div class="tt">'+t[0]+(state.track===i?' <span class="note">已选预览</span>':'')+'</div>'
    +'<div style="font-size:1.15rem;color:var(--muted);margin-top:.2rem">'+t[1]+'</div>'
    +'<div class="tags"><span class="tag '+t[3]+'">'+t[2]+'</span><span class="tag">'+t[4]+'</span><span class="tag">'+t[5]+'</span></div></div>'
-   +'<span class="dur">'+t[6]+'</span>'
-   +'<button class="play-c'+(state.track===i?' on':'')+'" data-a="play" data-i="'+i+'">'+(state.track===i?ic('pause'):ic('play'))+'</button></div>'}).join('')+'</div>'
+   +'<span class="dur">预览</span>'
+   +'<button class="play-c'+(state.track===i?' on':'')+'" data-a="play" data-i="'+i+'" aria-label="尝试播放'+t[0]+'">'+ic('play')+'</button></div>'}).join('')+'</div>'
  +'</section>'
  +nav('audio',true)+'</main>'}
 
@@ -179,7 +186,7 @@ function pgAudio(){var organs=[
 function nav(cur,four){var h='<nav class="nav">'
  if(four)h+='<button class="nitem'+(cur==='home'?' on':'')+'" data-a="nav-home">'+ic('home')+'首页</button>'
  h+='<button class="nitem'+(cur==='audio'?' on':'')+'" data-a="nav-audio">'+ic('music')+'音疗</button>'
- +'<button class="nitem" data-a="nav-home"><span class="big">'+ic('yinyang')+'</span>开始练</button>'
+ +'<button class="nitem" data-a="nav-intro"><span class="big">'+ic('yinyang')+'</span>开始练</button>'
  +'<button class="nitem'+(cur==='profile'?' on':'')+'" data-a="nav-profile">'+ic('user')+'我的</button></nav>'
  return h}
 
@@ -222,7 +229,7 @@ function pgIntro(){
   '<svg viewBox="0 0 100 44"><ellipse cx="50" cy="30" rx="46" ry="12" fill="#DCE8DC" opacity=".5"/><ellipse cx="50" cy="27" rx="24" ry="8" fill="none" stroke="#8FAF97" stroke-width="1.6"/><ellipse cx="50" cy="27" rx="13" ry="5" fill="none" stroke="#8FAF97" stroke-width="1.6"/><circle cx="50" cy="27" r="4" fill="#C05A2E"/></svg>']
  var stages=[['阶段一 · 点','认识动作 · 建立感觉'],['阶段二 · 线','贯穿动作 · 气息流动'],['阶段三 · 面','完整演练 · 身心融合']]
  return '<main class="sc" style="min-height:100dvh;display:flex;flex-direction:column;padding-bottom:3rem">'
- +'<div class="top"><button class="icbtn" data-a="back">'+ic('back')+'</button><span></span><button class="icbtn">'+ic('qmark')+'</button></div>'
+ +'<div class="top"><button class="icbtn" data-a="back">'+ic('back')+'</button><span></span><button class="icbtn" aria-label="练习帮助">'+ic('qmark')+'</button></div>'
  +'<div class="intro-hero" style="margin-top:.6rem">'
   +'<img class="bg" src="/art/landscape.jpg" style="object-position:74% 22%" alt=""><div class="fade"></div>'
   +'<img class="fig" src="/art/figure-pose.png" alt="">'
@@ -253,14 +260,15 @@ function pgIntro(){
    +'<div class="env"><span class="c">'+ic('sun')+'</span><b>正面受光</b><span>面部清晰<br>避免逆光</span></div>'
    +'<div class="env"><span class="c">'+ic('chair')+'</span><b>环境整洁</b><span>周围无杂物<br>留出练习空间</span></div>'
   +'</div></section>'
- +'<div class="cam-row"><button class="btn" data-a="start-practice">'+ic('camera','width:2.2rem;height:2.2rem')+'启动摄像头并起式</button>'
+ +'<div class="cam-row"><button class="btn" data-a="start-practice">'+ic('camera','width:2.2rem;height:2.2rem')+'开始动作预览</button>'
   +'<button class="btn btn-gho ex" data-a="demo"><span class="pc">'+ic('play','width:1.4rem;height:1.4rem')+'</span>示例</button></div>'
  +'</main>'}
 
 /* ---------- 跟练页 ---------- */
 var POSES=['双手托天理三焦','左右开弓似射雕','调理脾胃须单举','五劳七伤往后瞧','摇头摆尾去心火','两手攀足固肾腰','攒拳怒目增气力','背后七颠百病消']
-function pgPractice(){var i=state.progress
- var dots='';for(var k=0;k<7;k++){dots+='<span class="d'+(k===i?' on':'')+'">'+(k===0?'1':(k+1))+'</span>'}
+function practicePoses(){return state.imode===1?[POSES[0],POSES[1],POSES[2]]:POSES}
+function pgPractice(){var i=state.progress,poses=practicePoses()
+ var dots='';for(var k=0;k<poses.length;k++){dots+='<span class="d'+(k===i?' on':'')+'"'+(k===i?' aria-current="step"':'')+'>'+(k+1)+'</span>'}
  var skel='<svg class="skel" viewBox="0 0 100 100" preserveAspectRatio="none" width="30rem">'
   +'<polyline points="50,4 36,14 64,14 46,42 30,34 46,42 54,42 70,34 54,42 38,62 62,62 50,66 44,84 56,84 50,92" fill="none" stroke="rgba(140,220,170,.85)" stroke-width=".7"/>'
   +[[50,4],[36,14],[64,14],[30,34],[70,34],[46,42],[54,42],[38,62],[62,62],[50,66],[44,84],[56,84],[50,92]].map(function(p){return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="1.5" fill="#8FDCAA" stroke="rgba(255,255,255,.8)" stroke-width=".4"/>'}).join('')+'</svg>'
@@ -269,8 +277,8 @@ function pgPractice(){var i=state.progress
  return '<main class="sc" style="padding-bottom:3rem">'
  +'<div class="p-top"><button class="icbtn" data-a="exit-practice">'+ic('back')+'</button>'
   +'<div class="center"><div class="brand-mid" style="display:flex;align-items:flex-start;justify-content:center;gap:.8rem"><span>弦养</span><span class="seal" style="font-size:.9rem;margin-top:.2rem">弦养</span></div><div class="p-sub">让传统之美，滋养当下的你</div></div>'
-  +'<div style="display:flex;gap:.9rem"><button class="icbtn">'+ic('music')+'</button><button class="icbtn">'+ic('gear')+'</button></div></div>'
- +'<section class="card pinfo"><div><span class="cur">当前式名</span><h3><i>第'+(i+1)+'式</i> '+POSES[i]+'</h3></div>'
+  +'<div style="display:flex;gap:.9rem"><button class="icbtn" aria-label="练习音乐">'+ic('music')+'</button><button class="icbtn" aria-label="设置">'+ic('gear')+'</button></div></div>'
+ +'<section class="card pinfo"><div><span class="cur">动作预览 · 指标为示例</span><h3><i>第'+(i+1)+'式</i> '+poses[i]+'</h3></div>'
   +'<div class="pstats">'
   +'<div class="pstat"><span class="lb">'+ic('user2')+'上半身</span><div class="v">92<i>%</i></div><div class="bar"><i style="width:92%"></i></div></div>'
   +'<div class="pstat"><span class="lb">'+ic('user2')+'下半身</span><div class="v">88<i>%</i></div><div class="bar"><i style="width:88%"></i></div></div>'
@@ -279,7 +287,7 @@ function pgPractice(){var i=state.progress
   +'<img class="fig" src="/art/figure-pose.png" alt="">'+skel
   +'<div class="bubble"><b>'+ic('volume')+'</b>抬头上托，舒展胸廓，感受三焦通畅。</div>'
   +'<div class="side">'
-   +'<button class="sitem on">'+ic('medit')+'跟练中</button>'
+   +'<button class="sitem on">'+ic('medit')+'动作预览</button>'
    +'<button class="sitem">'+ic('demo')+'动作示范</button>'
    +'<button class="sitem">'+ic('doc')+'动作要点</button>'
    +'<button class="sitem">'+ic('qmark')+'常见问题</button></div>'
@@ -288,7 +296,7 @@ function pgPractice(){var i=state.progress
  +'<div class="pdots"><span class="rail"></span>'+dots+'</div>'
  +'<div class="holdrow">···<span class="pill">保持 <b>3</b> 秒</span>···</div>'
  +'<div class="ctrl"><button class="cbtn" data-a="prev-step">'+ic('prev')+'上一个</button>'
-  +'<button class="mainc" data-a="toggle-run">'+(state.running?ic('pause'):ic('play'))+'</button>'
+  +'<button class="mainc" data-a="toggle-run" aria-label="'+(state.running?'暂停':'继续')+'呼吸动画预览">'+(state.running?ic('pause'):ic('play'))+'</button>'
   +'<button class="cbtn" data-a="next-step">'+ic('next')+'下一个</button></div>'
  +'</main>'}
 
@@ -300,10 +308,10 @@ function pgDone(){var colors=[['#7FA08C','准确'],['#D9B25F','偏差'],['#C4472
   rows+='<div class="srow">'+ns+'</div>'}
  return '<main class="sc" style="padding-bottom:3.4rem;position:relative">'
  +'<img class="done-hbg" src="/art/landscape.jpg" alt="">'
- +'<div class="top"><button class="icbtn" data-a="back">'+ic('back')+'</button><span></span><button class="icbtn">'+ic('share')+'</button></div>'
+ +'<div class="top"><button class="icbtn" data-a="back">'+ic('back')+'</button><span></span><button class="icbtn" data-a="share-sheet" aria-label="分享琴谱">'+ic('share')+'</button></div>'
  +'<div style="margin-top:1rem;position:relative">'+brand(4)+'</div>'
  +'<div class="t-sub" style="margin-top:.6rem;position:relative">以琴养心，日日精进</div>'
- +'<h1 class="done-h" style="position:relative">今日练习完成</h1>'
+ +'<h1 class="done-h" style="position:relative">动作预览完成</h1><p class="sec-note" style="position:relative">以下评分与建议为示例，未进行动作识别或测量。</p>'
  +'<p class="done-p" style="position:relative">一曲既终，心自安然。<br>弦音有度，步履生香。</p>'
  +'<section class="card score-card"><div class="ring">'
   +'<svg viewBox="0 0 124 124"><circle cx="62" cy="62" r="52" fill="none" stroke="#EADCC2" stroke-width="9"/>'
@@ -316,7 +324,7 @@ function pgDone(){var colors=[['#7FA08C','准确'],['#D9B25F','偏差'],['#C4472
    +'<div class="st"><span class="lb">'+ic('bars')+'命中数</span><div class="v">146<i>/162</i></div><small>准确率 90%</small></div>'
    +'<div class="st"><span class="lb">'+ic('cal')+'连续打卡</span><div class="v">7<i>天</i></div><small>持之以恒</small></div></div></div></section>'
  +'<section class="card trackcard"><span class="sq">'+ic('music')+'</span>'
-  +'<div class="tx"><b>双手托天理三焦 <i>›</i></b><span>第 2/8 段 · 平和舒展</span></div>'
+  +'<div class="tx"><b>双手托天理三焦 <i>›</i></b><span>'+practicePoses().length+' 式预览 · 平和舒展</span></div>'
   +'<button class="rep">'+ic('play')+'完整回放</button></section>'
  +'<div class="fret"><span class="lab">一二三四五六七</span>'+rows
   +'<div class="legend">'+colors.map(function(c){return '<span><i style="background:'+c[0]+'"></i>'+c[1]+'</span>'}).join('')+'</div></div>'
@@ -339,14 +347,14 @@ function pgDone(){var colors=[['#7FA08C','准确'],['#D9B25F','偏差'],['#C4472
 
 /* ---------- 我的页 ---------- */
 function pgProfile(){return '<main class="sc navpad" style="min-height:100dvh;display:flex;flex-direction:column">'
- +'<div class="top"><span></span><div style="display:flex;gap:1rem"><button class="icbtn">'+ic('bell')+'<span class="dot"></span></button><button class="icbtn">'+ic('gear')+'</button></div></div>'
+ +'<div class="top"><span></span><div style="display:flex;gap:1rem"><button class="icbtn" aria-label="通知">'+ic('bell')+'<span class="dot"></span></button><button class="icbtn" aria-label="设置">'+ic('gear')+'</button></div></div>'
  +'<div class="brandrow" style="margin-top:1rem"><span class="t-callig" style="font-size:4.6rem">我的</span><span class="seal">弦养</span></div>'
  +'<div class="t-sub" style="margin-top:1rem">在弦音中，遇见更好的自己</div>'
  +'<div class="pf-row"><div class="avatar"><img src="/art/q-mood.jpg" alt=""><span class="cam">'+ic('camera')+'</span></div>'
   +'<div><h3>清弦月 <i>›</i></h3><span class="stagepill">'+ic('lotus')+'中级阶段 ›</span>'
   +'<div class="xprow"><div class="bar"><i></i></div><span>360 / 600</span></div>'
   +'<p class="pf-desc">继续练习，舒展身心，遇见更平和的自己。</p></div></div>'
- +'<section class="card bodycard"><div class="sec-h">'+knot()+'身体数据<span class="sec-note">更新于 10月23日 14:20</span></div>'
+ +'<section class="card bodycard"><div class="sec-h">'+knot()+'身体数据<span class="sec-note">示例指标 · 未连接设备</span></div>'
   +'<div class="bstats">'
    +'<div class="bstat"><span class="ic pink">'+ic('heart')+'</span><div class="lb">心率</div><div class="v">72</div><div style="font-size:1.2rem;color:var(--muted)">次/分</div><span class="tag grn st">正常</span></div>'
    +'<div class="bstat"><span class="ic ind">'+ic('moon')+'</span><div class="lb">睡眠时长</div><div class="v">6.5</div><div style="font-size:1.2rem;color:var(--muted)">小时</div><span class="tag grn st">良好</span></div>'
@@ -387,63 +395,85 @@ function pgBody(){function chips(name,opts,multi){return '<div class="chips">'+o
  +'<section class="bdcard card"><div class="sec-h">'+knot()+'饮食偏好</div><p class="desc">选择你的饮食偏好，帮助我们推荐更合适的养生建议。</p>'
   +chips('diet',[['素食','leaf'],['少盐','salt'],['无特殊','bowl']],true)+'</section>'
  +'<section class="bdcard card togrow"><div class="tx"><b>是否接收每日食谱推荐</b><p>根据你的体质与目标，推荐个性化的三餐食养建议。</p></div>'
-  +'<button class="tog'+(state.recipe?' on':'')+'" data-a="tog"></button></section>'
- +'<div class="save-wrap"><button class="btn" data-a="save-body">保存并生成定制方案 '+ic('chev','width:1.5rem;height:1.5rem')+'</button></div>'
+  +'<button class="tog'+(state.recipe?' on':'')+'" data-a="tog" role="switch" aria-label="接收每日食谱推荐" aria-checked="'+state.recipe+'"></button></section>'
+ +'<div class="save-wrap"><button class="btn" data-a="save-body">保存身体设置 '+ic('chev','width:1.5rem;height:1.5rem')+'</button></div>'
  +'</main>'}
 
 /* ---------- 渲染 & 事件 ---------- */
 var PAGES={loading:pgLoading,question:pgQuestion,audio:pgAudio,home:pgHome,intro:pgIntro,practice:pgPractice,done:pgDone,profile:pgProfile,body:pgBody}
-function paint(){document.title='弦养';root.innerHTML=(PAGES[state.screen]||pgLoading)()}
-function go(s){state.screen=s;window.scrollTo(0,0);paint()}
+function paint(){
+  var active=document.activeElement,buttons=Array.from(root.querySelectorAll('button')),focusIndex=buttons.indexOf(active);
+  document.title='弦养';root.dataset.screen=state.screen;root.innerHTML=(PAGES[state.screen]||pgLoading)();
+  root.querySelector('main').setAttribute('tabindex','-1');
+  root.querySelectorAll('button').forEach(function(b){
+    b.type='button';var a=b.dataset.a;
+    if(a==='back'||a==='exit-practice')b.setAttribute('aria-label','返回');
+    if(a==='stp')b.setAttribute('aria-label',(b.dataset.d==='1'?'增加':'减少')+({h:'身高',w:'体重',a:'年龄'})[b.dataset.k]);
+    if(['chip','qsel','organ','mode','imode','istage'].indexOf(a)>=0)b.setAttribute('aria-pressed',String(b.classList.contains('sel')||b.classList.contains('on')));
+    if(!a){b.dataset.a='unavailable';b.dataset.label=b.getAttribute('aria-label')||b.textContent.trim()||'此功能'}
+    if(!b.getAttribute('aria-label')&&!b.textContent.trim())b.setAttribute('aria-label','查看功能说明');
+  });
+  root.querySelectorAll('.setrow').forEach(function(row){row.setAttribute('role','button');row.tabIndex=0;row.dataset.a='unavailable';row.dataset.label=row.querySelector('b').textContent});
+  var stage=root.querySelector('.stage');if(stage){stage.classList.toggle('paused',!state.running);stage.dataset.preview='true'}
+  if(focusIndex>=0){var next=root.querySelectorAll('button')[focusIndex];if(next)next.focus({preventScroll:true})}
+}
+function go(s){state.screen=s;paint();window.scrollTo(0,0);root.querySelector('main').focus({preventScroll:true})}
 
 document.addEventListener('click',function(e){
   var el=e.target.closest('[data-a]');if(!el)return
   var a=el.getAttribute('data-a')
   switch(a){
-    case 'load-enter':go('question');break
+    case 'load-enter':state.qIndex=0;state.qSel=null;state.answers=[];go('question');break
     case 'back':go(state.screen==='body'?'profile':'home');break
-    case 'qsel':state.qSel=+el.getAttribute('data-i');paint();break
-    case 'q-prev':if(state.qIndex>0){state.qIndex--;paint()}else go('home');break
-    case 'q-next':state.answers[state.qIndex]=state.qSel;if(state.qIndex<6){state.qIndex++;state.qSel=null;paint()}else go('home');break
+    case 'qsel':state.qSel=+el.getAttribute('data-i');state.answers[state.qIndex]=state.qSel;paint();break
+    case 'q-prev':if(state.qIndex>0){state.qIndex--;state.qSel=typeof state.answers[state.qIndex]==='number'?state.answers[state.qIndex]:null;paint()}else go('home');break
+    case 'q-next':if(typeof state.qSel!=='number'){toast('请选择一项后再继续');return}state.answers[state.qIndex]=state.qSel;if(state.qIndex<6){state.qIndex++;state.qSel=typeof state.answers[state.qIndex]==='number'?state.answers[state.qIndex]:null;paint()}else go('home');break
     case 'q-skip':go('home');break
     case 'nav-audio':go('audio');break
     case 'nav-home':go('home');break
+    case 'nav-intro':go('intro');break
     case 'nav-profile':go('profile');break
     case 'go-intro':go('intro');break
     case 'swap-rec':state.rec++;paint();toast('已为你换一份推荐');break
-    case 'mode':state.mode=+el.getAttribute('data-i');paint();break
+    case 'mode':if(el.dataset.i!=='0'){toast(el.dataset.i==='1'?'五禽戏尚未提供，当前可预览八段锦':'当前推荐为本地示例，尚未接入 AI 推荐');break}state.mode=0;paint();break
     case 'imode':state.imode=+el.getAttribute('data-i');paint();break
     case 'istage':state.istage=+el.getAttribute('data-i');paint();break
-    case 'demo':toast('示例演示即将上线');break
+    case 'demo':toast('当前仅提供静态动作预览，未提供演示视频');break
     case 'organ':state.organ=+el.getAttribute('data-i');paint();break
-    case 'swap-tracks':toast('已换一批曲目');break
-    case 'play':var i=+el.getAttribute('data-i');state.track=(state.track===i?-1:i);paint();break
-    case 'start-practice':state.progress=0;state.running=true;go('practice');break
+    case 'swap-tracks':toast('当前仅有这四首曲目资料，未提供更多音源');break
+    case 'random-track':state.track=Math.floor(Math.random()*4);paint();toast('已选择曲目预览；未提供音源，无法播放');break
+    case 'track-prev':state.track=(Math.max(0,state.track)+3)%4;paint();break
+    case 'track-next':state.track=(Math.max(0,state.track)+1)%4;paint();break
+    case 'track-list':var list=root.querySelector('.track');if(list)list.scrollIntoView({block:'center'});break
+    case 'play':state.track=+el.getAttribute('data-i');paint();toast('未提供该曲音源，无法播放；当前仅为曲目预览');break
+    case 'start-practice':state.progress=0;state.running=true;go('practice');toast('静态动作预览；未启动摄像头、音频或 AI 识别');break
     case 'skip-intro':go('home');break
     case 'go-body':go('body');break
-    case 'exit-practice':go('home');break
+    case 'exit-practice':state.running=false;go('home');break
     case 'toggle-run':state.running=!state.running;paint();break
-    case 'prev-step':if(state.progress>0){state.progress--;state.running=true;paint()}break
-    case 'next-step':if(state.progress<7){state.progress++;state.running=true;paint()}else go('done');break
-    case 'finish':go('home');toast('已完成打卡，今日练习 +1');break
+    case 'prev-step':if(state.progress>0){state.progress--;paint()}else toast('已经是第一式');break
+    case 'next-step':if(state.progress<practicePoses().length-1){state.progress++;paint()}else{state.running=false;go('done')}break
+    case 'finish':go('home');toast('动作预览已结束；尚未接入真实打卡记录');break
     case 'again':state.progress=0;state.running=true;go('practice');break
-    case 'share-sheet':toast('琴谱已生成，可保存分享');break
-    case 'stp':var k=el.getAttribute('data-k'),d=+el.getAttribute('data-d')
-      state.body[k]=Math.max(0,state.body[k]+d);paint();break
-    case 'chip':var nm=el.getAttribute('data-name'),v=el.getAttribute('data-v'),multi=el.getAttribute('data-multi')==='1'
-      var arr=state[nm],ix=arr.indexOf(v)
-      if(multi){if(ix>=0){if(arr.length>1)arr.splice(ix,1)}else arr.push(v)}
-      else{state[nm]=[v]}
-      paint();break
-    case 'tog':state.recipe=!state.recipe;paint();break
-    case 'save-body':go('profile');toast('定制方案已生成');break
+    case 'share-sheet':toast('未生成真实琴谱或分享文件，暂不可分享');break
+    case 'unavailable':toast((el.dataset.label||el.getAttribute('aria-label')||el.textContent.trim()||'此功能')+'：当前仅为界面示例，尚未接入实际功能');break
+    case 'stp':var k=el.getAttribute('data-k'),d=+el.getAttribute('data-d');if(!Object.prototype.hasOwnProperty.call(BODY_LIMITS,k)||(d!==1&&d!==-1))return;
+      var value=bodyValue(k,state.body[k]+d);if(value===state.body[k])toast('已达到允许范围 '+BODY_LIMITS[k].join('–'));state.body[k]=value;saveBodyState();paint();break
+    case 'chip':var nm=el.getAttribute('data-name'),v=el.getAttribute('data-v');if(!Object.prototype.hasOwnProperty.call(BODY_OPTIONS,nm)||BODY_OPTIONS[nm].indexOf(v)<0)return;
+      var arr=state[nm].slice(),ix=arr.indexOf(v);
+      if(v===BODY_NONE[nm])arr=[v];else{arr=arr.filter(function(item){return item!==BODY_NONE[nm]});if(ix>=0)arr=arr.filter(function(item){return item!==v});else arr.push(v)}
+      state[nm]=bodyChoices(nm,arr);saveBodyState();paint();break
+    case 'tog':state.recipe=!state.recipe;saveBodyState();paint();break
+    case 'save-body':var saved=saveBodyState();go('profile');toast(saved?'身体设置已保存到本机；未接入 AI 方案生成':'本机存储不可用，设置仅在本次访问保留');break
   }
 })
+
+document.addEventListener('keydown',function(e){var el=e.target.closest('[role="button"][data-a]');if(el&&(e.key==='Enter'||e.key===' ')){e.preventDefault();el.click()}})
 
 /* URL 直达（预览用） */
 function init(){
   root=document.getElementById('app')
-  var link=document.createElement('link');link.rel='stylesheet';link.href='/app.css';document.head.appendChild(link)
+  root.classList.add('phone');loadBodyState();
   var q=new URLSearchParams(location.search)
   if(q.get('first')==='1'){try{localStorage.removeItem('xy-state')}catch(_){}}
   var sv=q.get('screen');if(sv&&PAGES[sv]){state.screen=sv}
