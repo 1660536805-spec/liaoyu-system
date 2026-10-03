@@ -8,3 +8,5 @@ Thumbs.db
 node_modules/
 __pycache__/
 *.pyc
+# UI 比对脚本的中间截图（可随时重跑 compare.cjs / nav.cjs 再生成）
+outputs/ui-compare/out/
