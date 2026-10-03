@@ -18,7 +18,7 @@ CERT_DIR="$ROOT/certs"
 mkdir -p "$CERT_DIR"
 cd "$CERT_DIR"
 
-IP="192.168.1.209"
+IP="192.168.0.2"
 HOSTS="localhost,127.0.0.1,$IP"
 
 echo "=== 1/4 生成根 CA（有效期 10 年）==="
@@ -55,7 +55,7 @@ keyUsage = critical, digitalSignature, keyEncipherment
 extendedKeyUsage = serverAuth
 subjectAltName = @alt
 [alt]
-IP.1 = 192.168.1.209
+IP.1 = $IP
 IP.2 = 127.0.0.1
 IP.3 = 0.0.0.0
 DNS.1 = localhost
@@ -72,7 +72,7 @@ extendedKeyUsage = serverAuth
 subjectAltName = @alt
 authorityKeyIdentifier = keyid,issuer
 [alt]
-IP.1 = 192.168.1.209
+IP.1 = $IP
 IP.2 = 127.0.0.1
 IP.3 = 0.0.0.0
 DNS.1 = localhost

@@ -276,6 +276,32 @@ export async function createPoseEngine({ numPoses = 1, delegate = 'GPU', timeout
   }
 }
 
+/**
+ * 标准骨架（ghost）：只描边不画关节点，且**不擦画布**，
+ * 供调用方先画它、再画用户骨架，保证用户骨架永远压在最上层。
+ * alpha 取 0.62：亮青色在深色摄像头画面上仍清晰可辨，
+ * 又不至于盖住后面的真人动作；用户骨架用暖白压在最上层，两层靠颜色分开。
+ */
+export function drawGhostPose(ctx, landmarks, w, h, { alpha = 0.62 } = {}) {
+  if (!landmarks) return
+  const X = (i) => landmarks[i].x * w
+  const Y = (i) => landmarks[i].y * h
+  ctx.save()
+  ctx.globalAlpha = alpha
+  ctx.lineWidth = Math.max(4, w / 160)
+  ctx.lineCap = 'round'
+  ctx.strokeStyle = 'rgba(186, 240, 255, 1)'   // 亮青色，深色画面上不发灰
+  ctx.beginPath()
+  for (const [a, b] of BONES) {
+    const pa = landmarks[a], pb = landmarks[b]
+    if (!pa || !pb) continue
+    ctx.moveTo(X(a), Y(a))
+    ctx.lineTo(X(b), Y(b))
+  }
+  ctx.stroke()
+  ctx.restore()
+}
+
 /** 把 33 点画到 canvas 上（白骨架，命中时高亮关键点） */
 export function drawPose(ctx, landmarks, w, h, { highlight = null, glow = false } = {}) {
   ctx.clearRect(0, 0, w, h)

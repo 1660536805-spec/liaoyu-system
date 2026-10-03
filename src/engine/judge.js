@@ -46,10 +46,24 @@ function angle(a, b, c) {
 // 「手上有深色物体 / 运动模糊」时 MediaPipe 只给 0.47，0.5 门槛会把
 // 真实动作整式拦掉（实测导致 7/8 式全判 0）。0.35 仍足以挡住真正出画的点（实测 <0.05）。
 const VIS_MIN = 0.35
+
+// ---- 半身模式（近距离取景）下的髋部门槛 ----
+// 【为什么要单独放宽髋】
+//   近距离（1~1.5m）时全身装不下，髋常贴在画面边缘或被遮挡 → visibility 掉到
+//   0.2~0.35 之间。髋在躯干上、人体先验强，此时 MediaPipe 给的**坐标仍可信**；
+//   但膝/踝是肢体末端，出画后返回的是 y>1 的瞎猜坐标（实测 visibility≈0.02），
+//   所以膝踝门槛一律不放宽 —— 只放宽髋，且只到 0.15。
+// 【触发方式】TrainView 的免标定取景伺服逐帧把 landmarks.__half 置位：
+//   true = 当前画面装不下全身（半身取景）→ 髋门槛降到 0.15；其余情况完全同旧逻辑。
+const HIP_VIS_HALF = 0.15
+const hipGate = (p) => (p && p.__half ? HIP_VIS_HALF : VIS_MIN)
+
 function need(p, ...idx) {
   for (const i of idx) {
     const pt = p[i]
-    if (!pt || (pt.visibility ?? 1) < VIS_MIN) return false
+    // 髋用可降级的门槛；其它关键点仍用 VIS_MIN
+    const gate = (i === LM.L_HIP || i === LM.R_HIP) ? hipGate(p) : VIS_MIN
+    if (!pt || (pt.visibility ?? 1) < gate) return false
   }
   return true
 }
@@ -358,7 +372,8 @@ export class MoveJudge {
     if (p.__bob !== undefined) return p
     const t = torso(p)
     // 起伏源：髋可见用髋，否则退回肩（肩 visibility 常年 0.99，最可靠）
-    const useHip = (v(p, LM.L_HIP).visibility ?? 0) >= LEG_VIS && (v(p, LM.R_HIP).visibility ?? 0) >= LEG_VIS
+    // 半身模式下髋即使贴边也可用（坐标仍可信），故用可降级的髋门槛而非固定 LEG_VIS
+    const useHip = (v(p, LM.L_HIP).visibility ?? 0) >= hipGate(p) && (v(p, LM.R_HIP).visibility ?? 0) >= hipGate(p)
     const src = useHip ? hipMid(p) : shoMid(p)
     this.hipHist.push(src.y)
     this.xHist.push(src.x)

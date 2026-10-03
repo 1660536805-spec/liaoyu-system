@@ -4,7 +4,7 @@ extendedKeyUsage = serverAuth
 subjectAltName = @alt
 authorityKeyIdentifier = keyid,issuer
 [alt]
-IP.1 = 192.168.1.209
+IP.1 = 192.168.0.2
 IP.2 = 127.0.0.1
 IP.3 = 0.0.0.0
 DNS.1 = localhost

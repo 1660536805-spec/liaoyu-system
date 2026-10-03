@@ -22,12 +22,17 @@ if (hasLocalCert) {
   console.warn('[vite] 手机访问时 iOS Safari 会拒绝自签名证书，请先跑：bash scripts/gen-cert.sh')
 }
 
+// 端口：云部署平台会注入 PORT 环境变量；本地未注入时沿用原端口
+const PORT = Number(process.env.PORT) || (useHttps ? 5174 : 5173)
+
 export default defineConfig({
   plugins: [vue()],
   server: {
     host: true,          // 0.0.0.0，局域网手机可达
-    port: useHttps ? 5174 : 5173,
+    port: PORT,
     https: useHttps ? httpsConfig : false,
+    // 云端部署走反向代理域名，不设白名单会被 Vite 的 host 检查拦掉
+    allowedHosts: true,
   },
-  preview: { host: true, port: useHttps ? 5174 : 5173 },
+  preview: { host: true, port: PORT, allowedHosts: true },
 })

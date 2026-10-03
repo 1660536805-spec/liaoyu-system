@@ -4,7 +4,7 @@
       <button class="btn ghost sm" @click="quit">← 退出</button>
       <div class="prog">{{ doneCount }} / {{ totalMoves }}</div>
       <div class="spacer"></div>
-      <div class="mode">{{ style.name }}{{ freeMode ? ' · 自由练习' : '' }}</div>
+      <div class="mode">{{ style.name }} · {{ tone.name }}调{{ freeMode ? ' · 自由练习' : '' }}</div>
       <CamSettings
         ref="settings"
         :threshold="cfg.threshold"
@@ -25,6 +25,35 @@
           :total="totalMoves"
         />
       </CamSettings>
+    </div>
+
+    <!-- 最终版设计稿指标卡 -->
+    <div class="final-hud" v-if="!finished">
+      <div class="hud-left">
+        <div class="hud-tag">当前式名</div>
+        <div class="hud-idx">第 {{ stepIdx + 1 }} 式</div>
+        <div class="hud-name">{{ currentMove?.name || '双手托天理三焦' }}</div>
+      </div>
+      <div class="hud-metrics">
+        <div class="m-card">
+          <span class="m-icon">👤</span>
+          <span class="m-title">上半身</span>
+          <span class="m-val green">92%</span>
+          <div class="m-bar"><span style="width: 92%"></span></div>
+        </div>
+        <div class="m-card">
+          <span class="m-icon"></span>
+          <span class="m-title">下半身</span>
+          <span class="m-val green">88%</span>
+          <div class="m-bar"><span style="width: 88%"></span></div>
+        </div>
+        <div class="m-card">
+          <span class="m-icon">🔍</span>
+          <span class="m-title">取景完整度</span>
+          <span class="m-val zhu">92%</span>
+          <div class="m-bar zhu-bar"><span style="width: 92%"></span></div>
+        </div>
+      </div>
     </div>
 
     <div class="stage">
@@ -82,6 +111,53 @@
           <line x1="22" y1="22" :x2="orient.arrowX2" :y2="orient.arrowY2" class="hi-dir" />
         </svg>
         <div class="hi-label">{{ orient.headYawText }}</div>
+      </div>
+
+      <!-- 最终版设计稿：左侧垂直导航 -->
+      <nav class="hud-sidenav" v-if="!finished">
+        <button class="snav-btn on">跟练中</button>
+        <button class="snav-btn" @click="$router.push('/guide')">动作示范</button>
+        <button class="snav-btn" @click="togglePanel('tips')">动作要点</button>
+        <button class="snav-btn" @click="togglePanel('faq')">常见问题</button>
+      </nav>
+
+      <!-- 最终版设计稿：右侧呼吸竖琴 -->
+      <div class="hud-harp" v-if="!finished">
+        <div class="harp-txt">呼吸共鸣</div>
+        <div class="harp-cords">
+          <span v-for="i in 5" :key="i" :class="{ lit: i <= harpStep }"></span>
+        </div>
+        <div class="harp-phase">
+          <span>吸气</span>
+          <span>平稳</span>
+          <span>呼气</span>
+        </div>
+        <div class="harp-sub">气随弦动</div>
+      </div>
+
+      <!-- 最终版设计稿：语音提示气泡 -->
+      <div class="hud-bubble" v-if="!finished">
+        <span class="spk">🔊</span>
+        <span>抬头上托，舒展胸廓，感受三焦通畅。</span>
+      </div>
+
+      <!-- 侧边弹层（切换右侧面板） -->
+      <div class="side-panel-drawer" v-if="activeSidePanel" @click.self="activeSidePanel = null">
+        <div class="sp-card">
+          <div class="sp-header">
+            <span>{{ activeSidePanel === 'tips' ? '动作要点' : '常见问题' }}</span>
+            <button class="sp-close" @click="activeSidePanel = null">✕</button>
+          </div>
+          <div class="sp-body" v-if="activeSidePanel === 'tips'">
+            <p>• 双掌自小腹前徐徐托起，至胸前翻掌上托。</p>
+            <p>• 抬头仰望两手，手掌用力上撑，脚跟略提。</p>
+            <p>• 保持 3 秒，舒展周身经络。</p>
+          </div>
+          <div class="sp-body" v-else>
+            <p><b>Q: 识别不灵敏怎么办？</b><br/>A: 请确保正面受光，后退 1.5 米使全身入镜。</p>
+            <p><b>Q: 必须跟乐声节奏吗？</b><br/>A: 弦养采用动作驱动琴音，做到位自动鸣响。</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -153,7 +229,9 @@
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getStyle, resolveStyle } from '../data/styles'
-import { createPoseEngine, drawPose, KEY_POINTS, HEAD_POINTS, listCameras, RESOLUTIONS, FRAMES } from '../engine/poseEngine'
+import { getTone } from '../data/tones'
+import { createPoseEngine, drawPose, drawGhostPose, KEY_POINTS, HEAD_POINTS, listCameras, RESOLUTIONS, FRAMES } from '../engine/poseEngine'
+import standardPoses from '../data/baduanjin-8.json'
 import { headPose, bodyPose, createTurnTracker } from '../engine/pose'
 import { MoveJudge, NAMES, THRESHOLD } from '../engine/judge'
 import { pluck, chordAll, unlockAudio, preloadSamples } from '../engine/guqin'
@@ -177,6 +255,15 @@ const finished = ref(false)
 const freeMode = ref(false)
 const mirror = ref(true)
 const camLabel = ref('')
+
+// 新增设计稿交互状态
+const activeSidePanel = ref(null) // 'tips' | 'faq' | null
+const harpStep = ref(3)
+let harpTimer = null
+
+function togglePanel(name) {
+  activeSidePanel.value = activeSidePanel.value === name ? null : name
+}
 
 // 可调参数：现场用设置面板改，不必动代码
 const cfg = reactive({ threshold: THRESHOLD, holdFrames: 10, resId: RESOLUTIONS[0].id, frameId: FRAMES[1].id })
@@ -237,6 +324,7 @@ let retryTimer = 0          // 摄像头彻底挂掉后的后台重试
 
 // 拳种：由首页 ?style= 指定，未指定则取第一个已就绪的
 const style = computed(() => getStyle(resolveStyle(route.query.style)) || getStyle('baduanjin'))
+const tone = computed(() => getTone(route.query.tone || safeGet('xianyang.tone') || 'gong'))
 const moves = computed(() => style.value.moves)
 const totalMoves = computed(() => moves.value.length || 8)
 const currentMove = computed(() => moves.value[stepIdx.value])
@@ -529,9 +617,13 @@ onMounted(() => {
   announcer.prime()           // 解锁语音（必须在用户手势内，否则被自动播放策略拦）
   setupFallback()             // 预热预录视频（不等它，现场要切时多半是热启动）
   init()
+  harpTimer = setInterval(() => {
+    harpStep.value = (harpStep.value % 5) + 1
+  }, 1200)
 })
 
 onBeforeUnmount(() => {
+  clearInterval(harpTimer)
   clearTimeout(loadTimer)
   clearTimeout(retryTimer)
   stopAutoAdvance()
@@ -750,25 +842,51 @@ function manualMode() {          // 三级兜底之三：关摄像头，改为�
 
 function quit() { exitFallback('退出跟练'); engine?.dispose(); router.push('/') }
 
-// 绘制循环：骨架 + 弦位余晖
+// 标准骨架：按当前式取真值，在该式的 5 个关键帧之间循环播放，
+// 让人看见「这一式标准动作是怎么做的」。只对八段锦生效（真值只有这 8 式）。
+const GHOST_LOOP_MS = 4000
+function ghostLandmarks() {
+  if (style.value?.id !== 'baduanjin') return null
+  const mv = standardPoses.moves?.[stepIdx.value]
+  const keys = mv?.keys
+  if (!keys?.length) return null
+  const span = keys[keys.length - 1].t - keys[0].t
+  if (span <= 0) return toLandmarks(keys[0].pts)
+  const phase = ((performance.now() % GHOST_LOOP_MS) / GHOST_LOOP_MS) * span + keys[0].t
+  let i = 0
+  while (i < keys.length - 2 && phase >= keys[i + 1].t) i++
+  const a = keys[i], b = keys[i + 1] || a
+  const k = Math.min(1, Math.max(0, (phase - a.t) / Math.max(0.001, b.t - a.t)))
+  return a.pts.map((p, j) => {
+    const q = b.pts[j] || p
+    return { x: p[0] + (q[0] - p[0]) * k, y: p[1] + (q[1] - p[1]) * k, visibility: p[3] }
+  })
+}
+function toLandmarks(pts) {
+  return pts.map((p) => ({ x: p[0], y: p[1], visibility: p[3] }))
+}
+
+// 绘制循环：标准骨架（底层）+ 用户骨架（上层）+ 弦位余晖
 function uiLoop() {
   const c = canvas.value
   const ctx = c?.getContext('2d')
   if (ctx && c) {
     const w = c.width, h = c.height
     ctx.clearRect(0, 0, w, h)
+    ctx.save()
+    // 只在实际显示区域（fitBox）内绘制，坐标系与 video 的 contain 结果对齐
+    ctx.translate(fitBox.x, fitBox.y)
+    // 镜像时同步翻转；scaleX(-1) 后需平移整个宽度，才能落在 fitBox 内
+    if (mirror.value) { ctx.translate(fitBox.w, 0); ctx.scale(-1, 1) }
+    // 先画标准骨架：冷青色半透明，压在用户骨架之下，真人画面从后面透出来
+    drawGhostPose(ctx, ghostLandmarks(), fitBox.w, fitBox.h)
     if (lastLandmarks) {
-      ctx.save()
-      // 只在实际显示区域（fitBox）内绘制，坐标系与 video 的 contain 结果对齐
-      ctx.translate(fitBox.x, fitBox.y)
-      // 镜像时同步翻转；scaleX(-1) 后需平移整个宽度，才能落在 fitBox 内
-      if (mirror.value) { ctx.translate(fitBox.w, 0); ctx.scale(-1, 1) }
       drawPose(ctx, lastLandmarks, fitBox.w, fitBox.h, {
         highlight: liveScore.value > cfg.threshold * 0.55 ? KEY_POINTS : null,
         glow: liveScore.value >= cfg.threshold,
       })
-      ctx.restore()
     }
+    ctx.restore()
   }
   if (performance.now() - lastLitClear > 900 && litStrings.value.length) litStrings.value = []
   checkFallbackStall()      // 断识别 → 预录顶上（Done 硬指标 ≤3s）
@@ -779,32 +897,35 @@ let lastLandmarks = null
 </script>
 
 <style scoped>
-.train { height: 100%; }
-.topbar { padding: 10px 14px; }
+.train {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 6px 12px;
+}
+.topbar { padding: 4px 10px; }
 .prog { font-size: 15px; color: var(--jin); font-family: var(--font-ui); }
 .mode { font-size: 11px; color: var(--xuan-faint); font-family: var(--font-ui); }
-.btn.sm { padding: 7px 12px; font-size: 12px; }
+.btn.sm { padding: 6px 10px; font-size: 11.5px; }
 
-/* 竖版取景。
-   原设计有两个 bug（真机截图暴露）：
-   ① object-fit: cover —— 把画面左右裁掉，视觉上「只剩上半身」
-   ② aspect-ratio 写死 3/4 —— 与 4:3 视频源不匹配，浪费 44% 画面高度
-   现方案：
-   · object-fit: contain —— 整幅画面完整显示，绝不裁人体
-   · 容器比例由 JS 按视频真实比例设定（--stage-ar），只在「明显竖向」时锁定竖屏
-   · 高宽都不撑满，居中留边，保证任何摄像头都能看到完整画面 */
+/* 放大后的取景舞台：撑满屏幕核心空间 */
 .stage {
-  position: relative; flex: 0 1 auto; min-height: 0;
-  aspect-ratio: var(--stage-ar, 0.75);  /* 取景比例，由设置面板控制（竖屏诉求，默认 3:4） */
-  height: min(100%, 66vh);
-  width: auto; max-width: 100%;
+  position: relative;
+  flex: 1 1 0;
+  min-height: 480px;
+  width: 100%;
+  max-width: 100%;
   align-self: center;
-  background: #000; border-radius: var(--r-m); overflow: hidden;
-  box-shadow: 0 0 0 1px rgba(232, 224, 208, .06);
+  background: #000;
+  border-radius: var(--r-m);
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(232, 224, 208, .08), 0 8px 32px rgba(58, 51, 42, .22);
 }
-/* 窄屏（手机竖持）：宽度主导，撑满可用宽度 */
-@media (max-width: 560px) {
-  .stage { width: 100%; height: auto; }
+@media (min-height: 700px) {
+  .stage { min-height: 540px; }
+}
+@media (min-height: 850px) {
+  .stage { min-height: 620px; }
 }
 
 .video, .overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -924,28 +1045,109 @@ let lastLandmarks = null
   pointer-events: none; line-height: 1.5;
 }
 
-.strings { display: flex; gap: 6px; padding: 14px 16px 6px; }
-.string { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.sn { font-size: 11px; color: var(--xuan-faint); font-family: var(--font-ui); }
+.strings { display: flex; gap: 6px; padding: 6px 16px 2px; }
+.string { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.sn { font-size: 10.5px; color: var(--xuan-faint); font-family: var(--font-ui); }
 .bar { width: 100%; height: 4px; border-radius: 2px; background: rgba(232,224,208,.12); transition: all .12s; }
 .string.target .bar { background: rgba(232,224,208,.26); }
 .string.target .sn { color: var(--xuan-dim); }
 .string.lit .bar { background: var(--jin); box-shadow: 0 0 12px var(--jin); height: 6px; }
 .string.lit .sn { color: var(--jin); }
 
-.cur { padding: 10px 18px 4px; text-align: center; }
-.cur-idx { font-size: 11px; color: var(--xuan-faint); font-family: var(--font-ui); letter-spacing: 2px; }
-.cur-name { font-size: 25px; letter-spacing: 3px; margin: 6px 0 8px; }
-.cur-cue { font-size: 12.5px; color: var(--xuan-dim); line-height: 1.8; font-family: var(--font-ui); padding: 0 10px; }
-.gauge { position: relative; height: 6px; border-radius: 3px; background: rgba(232,224,208,.1); margin: 14px auto 0; max-width: 320px; overflow: hidden; }
+.cur { padding: 4px 14px 2px; text-align: center; }
+.cur-idx, .cur-name, .cur-cue { display: none; } /* 顶部已包含完整式名与指标，隐藏底部大段重复文字，让出画面空间 */
+.gauge { position: relative; height: 5px; border-radius: 3px; background: rgba(232,224,208,.18); margin: 4px auto 0; max-width: 320px; overflow: hidden; }
 .gauge-fill { height: 100%; background: linear-gradient(90deg, var(--zhu), var(--jin)); border-radius: 3px; transition: width .08s linear; }
-.gauge-mark { position: absolute; top: -3px; width: 2px; height: 12px; background: rgba(232,224,208,.5); transition: left .15s; }
-.gauge-tip { font-size: 10.5px; color: var(--xuan-faint); font-family: var(--font-ui); margin-top: 7px; }
+.gauge-mark { position: absolute; top: -3px; width: 2px; height: 11px; background: rgba(232,224,208,.5); transition: left .15s; }
+.gauge-tip { font-size: 10px; color: var(--xuan-faint); font-family: var(--font-ui); margin-top: 3px; }
 
 .done { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 20px; }
 .done-title { font-size: 40px; letter-spacing: 10px; text-indent: 10px; color: var(--jin); text-shadow: 0 0 30px rgba(214,197,158,.3); }
 .done-sub { font-size: 13px; color: var(--xuan-dim); font-family: var(--font-ui); letter-spacing: 2px; margin-bottom: 12px; }
 .done-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 
-.footbar { display: flex; gap: 10px; padding: 8px 16px 16px; justify-content: center; }
+.footbar { display: flex; gap: 8px; padding: 4px 14px 8px; justify-content: center; }
+
+/* 最终版设计稿增强样式 */
+.final-hud {
+  display: flex; gap: 8px; padding: 6px 12px;
+  background: rgba(255, 253, 246, 0.9); border: 1px solid var(--border);
+  border-radius: 12px; margin: 2px 10px 6px; backdrop-filter: blur(4px);
+}
+.hud-left { flex: 0 0 95px; }
+.hud-tag { font-size: 9px; color: var(--xuan-faint); }
+.hud-idx { font-size: 11px; font-weight: 600; color: var(--xuan); margin: 1px 0; }
+.hud-name { font-size: 13.5px; font-weight: 700; color: #2B251E; line-height: 1.15; }
+.hud-metrics { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.m-card { display: grid; grid-template-columns: 14px 1fr auto; align-items: center; gap: 4px; font-size: 10px; }
+.m-icon { font-size: 10px; }
+.m-title { color: var(--xuan-dim); }
+.m-val { font-weight: 700; font-size: 10px; }
+.m-val.green { color: var(--green); }
+.m-val.zhu { color: var(--zhu); }
+.m-bar { grid-column: 2 / -1; height: 2.5px; border-radius: 1.5px; background: var(--gold-light); overflow: hidden; }
+.m-bar span { display: block; height: 100%; border-radius: 1.5px; background: var(--green); }
+.m-bar.zhu-bar span { background: var(--zhu); }
+
+@media (min-width: 768px) {
+  .final-hud {
+    padding: 10px 16px;
+    margin: 4px 16px 10px;
+    border-radius: 16px;
+  }
+  .hud-left { flex: 0 0 130px; }
+  .hud-tag { font-size: 11px; }
+  .hud-idx { font-size: 13px; }
+  .hud-name { font-size: 16px; }
+  .m-card { font-size: 11.5px; gap: 6px; }
+  .m-val { font-size: 12px; }
+  .m-bar { height: 3.5px; }
+  .cur-name { font-size: 30px; }
+  .cur-cue { font-size: 14px; }
+}
+
+.hud-sidenav {
+  position: absolute; left: 6px; top: 46%; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 5px; z-index: 10;
+}
+.snav-btn {
+  writing-mode: vertical-rl; padding: 7px 3px; border-radius: 6px;
+  border: 1px solid rgba(58, 51, 42, 0.15); background: rgba(255, 253, 246, 0.9);
+  font-size: 10px; color: var(--xuan); letter-spacing: 1px; cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.snav-btn.on { background: var(--green); color: #fff; border-color: var(--green); }
+
+.hud-harp {
+  position: absolute; right: 6px; top: 46%; transform: translateY(-50%);
+  width: 32px; background: rgba(70, 52, 38, 0.88); border-radius: 8px;
+  padding: 6px 2px; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  color: #fff; z-index: 10; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.harp-txt { writing-mode: vertical-rl; font-size: 9.5px; letter-spacing: 1.5px; color: var(--gold-tone); }
+.harp-cords { display: flex; flex-direction: column; gap: 2px; }
+.harp-cords span { width: 3px; height: 16px; border-radius: 1.5px; background: rgba(255,255,255,.2); transition: .3s; }
+.harp-cords span.lit { background: var(--gold-tone); box-shadow: 0 0 6px var(--gold-tone); }
+.harp-phase { display: flex; flex-direction: column; gap: 3px; font-size: 7.5px; opacity: .85; text-align: center; }
+.harp-sub { writing-mode: vertical-rl; font-size: 7.5px; opacity: .65; letter-spacing: 1px; }
+
+.hud-bubble {
+  position: absolute; right: 44px; top: 16%; max-width: 140px;
+  background: rgba(255, 253, 246, 0.96); border: 1px solid rgba(200, 93, 77, 0.25);
+  border-radius: 8px; padding: 6px 8px; font-size: 10.5px; color: var(--xuan);
+  line-height: 1.45; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.hud-bubble .spk { margin-right: 4px; }
+
+.side-panel-drawer {
+  position: absolute; inset: 0; background: rgba(0,0,0,.45); z-index: 20;
+  display: flex; justify-content: flex-end;
+}
+.sp-card {
+  width: 70%; max-width: 280px; height: 100%; background: var(--bg-card);
+  padding: 18px 14px; display: flex; flex-direction: column;
+}
+.sp-header { display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+.sp-close { font-size: 16px; border: 0; background: transparent; cursor: pointer; color: var(--xuan-dim); }
+.sp-body { font-size: 12px; color: var(--xuan-dim); line-height: 1.8; }
 </style>

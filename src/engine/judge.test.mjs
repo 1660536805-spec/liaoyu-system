@@ -224,5 +224,60 @@ console.log('\n=== I. 镜像自适应（真机实测：95.6% 帧画面水平镜�
   }
 }
 
+// ==================== §H 半身模式（近距离取景）髋门槛降级 ====================
+// 场景：1~1.5m 取景时全身装不下，髋贴在画面边缘 → visibility 落在 0.15~0.35 之间。
+// 旧逻辑：髋 visibility < VIS_MIN(0.35) → 该式直接 0 分（站着不动也永远不响）。
+// 新逻辑：TrainView 的取景伺服置位 landmarks.__half → 髋门槛降到 0.15，坐标仍可用。
+console.log('\n=== 半身模式（髋贴边降级）===')
+{
+  const mkHalf = (half, hipVis) => {
+    const p = POSES[2] ? (() => { const q = blank(); POSES[2](q); return q })() : blank()
+    // 髋贴边：坐标仍正确，但可见度低
+    p[LM.L_HIP] = { x: 0.45, y: 0.55, z: 0, visibility: hipVis }
+    p[LM.R_HIP] = { x: 0.55, y: 0.55, z: 0, visibility: hipVis }
+    if (half) p.__half = true
+    return p
+  }
+  const HIP_EDGE = 0.20      // 介于 HIP_VIS_HALF(0.15) 与 VIS_MIN(0.35) 之间
+
+  // 旧行为（全身模式）：髋贴边 → 判 0
+  {
+    const j = new MoveJudge({ holdFrames: 6, order: 2 })
+    let s = 0
+    for (let f = 0; f < 20; f++) { j.update(mkHalf(false, HIP_EDGE)); s = j.lastScores[2] ?? 0 }
+    okc(s === 0, `全身模式 + 髋 vis=${HIP_EDGE} → 判 0（保持旧行为，得分 ${s.toFixed(2)}）`)
+  }
+  // 新行为（半身模式）：髋贴边 → 仍可判
+  {
+    const j = new MoveJudge({ holdFrames: 6, order: 2 })
+    let hit = 0, s = 0
+    for (let f = 0; f < 30; f++) { hit += j.update(mkHalf(true, HIP_EDGE)).length; s = j.lastScores[2] ?? 0 }
+    okc(s > 0 && hit > 0, `半身模式 + 髋 vis=${HIP_EDGE} → 可判（得分 ${s.toFixed(2)}，命中 ${hit}）`)
+  }
+  // 髋完全不可见（vis=0.05）：即使半身模式也不放行，避免拿瞎猜坐标判定
+  {
+    const j = new MoveJudge({ holdFrames: 6, order: 2 })
+    let s = 0
+    for (let f = 0; f < 20; f++) { j.update(mkHalf(true, 0.05)); s = j.lastScores[2] ?? 0 }
+    okc(s === 0, `半身模式 + 髋 vis=0.05（真出画）→ 仍判 0（得分 ${s.toFixed(2)}）`)
+  }
+  // 膝踝门槛不因半身模式放宽：踝/膝 vis=0.20 时式8 应走降级路径，仍可触发且不误判
+  {
+    const pose8Half = (f) => {
+      const q = pose8(f)
+      q[LM.L_ANK].visibility = 0.20
+      q[LM.R_ANK].visibility = 0.20
+      q[LM.L_KNE].visibility = 0.20
+      q[LM.R_KNE].visibility = 0.20
+      q.__half = true
+      return q
+    }
+    const j = new MoveJudge({ holdFrames: 6, order: 7 })
+    let hit = 0
+    for (let f = 0; f < 60; f++) hit += j.update(pose8Half(f)).length
+    okc(hit > 0, `半身模式 + 踝/膝 vis=0.20 → 式8 走降级路径仍可触发（命中 ${hit}）`)
+  }
+}
+
 console.log('\n' + (fail === 0 ? '✅ 全部通过' : `❌ ${fail} 项失败`))
 process.exit(fail === 0 ? 0 : 1)

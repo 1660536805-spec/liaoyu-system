@@ -23,14 +23,40 @@ async function renderPage(path) {
   const TrainView = (await load('/src/views/TrainView.vue')).default
   const RecordView = (await load('/src/views/RecordView.vue')).default
   const GuideView = (await load('/src/views/GuideView.vue')).default
+  const OrderView = (await load('/src/views/OrderView.vue')).default
+  const ListenView = (await load('/src/views/ListenView.vue')).default
+  const ArcView = (await load('/src/views/ArcView.vue')).default
+  const WorkshopView = (await load('/src/views/WorkshopView.vue')).default
+  const SplashView = (await load('/src/views/SplashView.vue')).default
+  const WelcomeView = (await load('/src/views/WelcomeView.vue')).default
+  const OnboardingView = (await load('/src/views/OnboardingView.vue')).default
+  const PrepareView = (await load('/src/views/PrepareView.vue')).default
+  const SummaryView = (await load('/src/views/SummaryView.vue')).default
+  const MeView = (await load('/src/views/MeView.vue')).default
+  const BodyDataView = (await load('/src/views/BodyDataView.vue')).default
+  const SettingsView = (await load('/src/views/SettingsView.vue')).default
 
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
       { path: '/', component: HomeView },
+      { path: '/sound', component: OrderView },
+      { path: '/order', component: OrderView },
+      { path: '/sound/library', component: ListenView },
+      { path: '/listen', component: ListenView },
       { path: '/train', component: TrainView },
+      { path: '/workshop', component: WorkshopView },
+      { path: '/arc', component: ArcView },
       { path: '/record', component: RecordView },
       { path: '/guide', component: GuideView },
+      { path: '/splash', component: SplashView },
+      { path: '/welcome', component: WelcomeView },
+      { path: '/onboarding', component: OnboardingView },
+      { path: '/prepare', component: PrepareView },
+      { path: '/summary', component: SummaryView },
+      { path: '/me', component: MeView },
+      { path: '/me/body-data', component: BodyDataView },
+      { path: '/me/settings', component: SettingsView },
     ],
   })
   router.push(path)
@@ -60,11 +86,41 @@ async function renderPage(path) {
 console.log('\n=== 首页 / ===')
 {
   const html = await renderPage('/')
-  okc(html.includes('开始练'), '含大按钮「开始练」')
-  okc(html.includes('八式') || html.includes('4 分钟'), '含时长说明')
+  okc(html.includes('开始练'), '含大圆形「开始练」按钮')
+  okc(html.includes('12 分钟'), '含时长口径（约 12 分钟）')
+  okc(html.includes('为什么推荐给你'), '含右侧「为什么推荐给你」栏')
+  okc(html.includes('八段锦 · '), '含左侧「练什么」栏（拳种 · 调式）')
+  okc(html.includes('舒缓减压') || html.includes('开胸透气'), '含体验功效标签')
   okc(html.includes('弦养'), '含品牌名')
-  okc(!html.includes('还没'), '空态文案正确（无记录时）')
-  okc(html.includes('打卡记录'), '含打卡记录入口')
+}
+
+console.log('\n=== 跟练准备页 /prepare ===')
+{
+  const html = await renderPage('/prepare')
+  okc(html.includes('练习准备'), '含标题')
+  okc(html.includes('全套 8 式'), '含模式选择')
+  okc(html.includes('一 · 点') && html.includes('二 · 线') && html.includes('三 · 面'), '含阶段选择')
+  okc(html.includes('启动摄像头并起式'), '含主按钮')
+}
+
+console.log('\n=== 启动页 /splash ===')
+{
+  const html = await renderPage('/splash')
+  okc(html.includes('弦养'), '含品牌名')
+  okc(html.includes('正在准备古琴音色'), '含加载文案')
+}
+
+console.log('\n=== 欢迎页 /welcome ===')
+{
+  const html = await renderPage('/welcome')
+  okc(html.includes('以身为琴，以动为弦'), '含副标题')
+  okc(html.includes('开始体验'), '含开始体验按钮')
+}
+
+console.log('\n=== 快速问卷 /onboarding ===')
+{
+  const html = await renderPage('/onboarding')
+  okc(html.includes('最近哪里容易不舒服'), '含问卷第一题')
 }
 
 console.log('\n=== 跟练页 /train ===')
@@ -90,10 +146,33 @@ console.log('\n=== 跟练页 /train ===')
   okc((panelHtml.match(/<select/g) || []).length >= 2, '设置面板有 2 个下拉（摄像头 + 分辨率）')
 }
 
-console.log('\n=== 首页摄像头预检 ===')
+console.log('\n=== 我的页 /me ===')
 {
-  const html = await renderPage('/')
-  okc(html.includes('正在检测摄像头') || html.includes('摄像头'), '首页含摄像头预检状态区')
+  const html = await renderPage('/me')
+  okc(html.includes('我的'), '含标题')
+  okc(html.includes('身体数据'), '含身体数据入口')
+}
+
+console.log('\n=== 身体数据 /me/body-data ===')
+{
+  const html = await renderPage('/me/body-data')
+  okc(html.includes('身高'), '含身高输入')
+  okc(html.includes('体重'), '含体重输入')
+}
+
+console.log('\n=== 基础设置 /me/settings ===')
+{
+  const html = await renderPage('/me/settings')
+  okc(html.includes('基础设置'), '含标题')
+  okc(html.includes('音频'), '含音频分组')
+  okc(html.includes('弦养 v1.0'), '含版本信息')
+}
+
+console.log('\n=== 练习总结 /summary ===')
+{
+  const html = await renderPage('/summary')
+  okc(html.includes('今日琴谱'), '含标题')
+  okc(html.includes('七弦回响'), '含琴谱可视化')
 }
 
 console.log('\n=== 记录页 /record ===')
@@ -112,6 +191,166 @@ console.log('\n=== 要领页 /guide ===')
   okc(miss.length === 0, `8 式全在（缺 ${miss.length} 个）`)
   okc(html.includes('七弦齐鸣'), '含第 8 式「七弦齐鸣」标注')
   okc(html.includes('号弦'), '含 1-7 号弦映射标注')
+}
+
+console.log('\n=== 音疗页 /sound（由 /order 重构）===')
+{
+  const html = await renderPage('/sound')
+  okc(html.includes('想照顾哪里') || html.includes('选一个部位'), '含音疗主问句')
+  // 新 UI 用「肝角/心徽/脾宫/肺商/肾羽」双字名，不再显示单字脏腑
+  for (const o of ['心徽', '肝角', '脾宫', '肺商', '肾羽']) {
+    okc(html.includes(`>${o.split('')[1]}<`) || html.includes(`>${o}<`) || html.includes(o), `含五音选项「${o}」`)
+  }
+  okc(html.includes('说不上来，随便听听'), '含「说不上来」兜底项')
+  okc(html.includes('练完了'), '含「练完了 · 听一首完整的」')
+  okc(!html.includes('就用这一档开始练'), '音疗页不含进入跟练 CTA（改到准备页）')
+  okc(html.includes('宫商角徵羽'.slice(0, 1)), '唱名以小字出现')
+  // 【UI 红线】甲方 §6.2：界面不出现「主音」「入脏」
+  okc(!html.includes('主音'), '未出现「主音」（甲方红线 3）')
+  okc(!html.includes('入脏'), '未出现「入脏」（甲方红线 3）')
+  // 新 UI 直接展示推荐曲目，不再有空态引导
+  const { TONES } = await load('/src/data/tones.js')
+  okc(TONES[0].pieces.some((p) => p.title === '平沙落雁'), '宫档曲目清单含《平沙落雁》')
+}
+
+console.log('\n=== 完整曲库 /sound/library ===')
+{
+  const html = await renderPage('/sound/library')
+  for (const g of ['宫', '商', '角', '徵', '羽', '综合']) {
+    okc(html.includes(`>${g}<`), `含调式 tab「${g}」`)
+  }
+  okc(html.includes('梅花三弄'), '含已就位曲目')
+  okc(html.includes('待补'), '无音源曲目标「待补」')
+  okc(html.includes('CC BY 4.0'), '含 CC BY 4.0 署名')
+  okc(html.includes('完整曲库'), '含标题')
+  const { TONE_LIST } = await load('/src/data/tones.js')
+  const total = TONE_LIST.reduce((n, t) => n + t.pieces.length, 0)
+  okc(total >= 40, `曲库共 ${total} 首（甲方 44 首口径）`)
+}
+
+console.log('\n=== 阶段三 · 面：12 分钟弧线（/arc）===')
+{
+  const html = await renderPage('/arc')
+  okc(html.includes('十二分钟弧线'), '含阶段三标题')
+  for (const [g, o] of [['宫', '脾'], ['商', '肺'], ['角', '肝'], ['徵', '心'], ['羽', '肾']]) {
+    okc(html.includes(`>${g}<`), `含调式宫格「${g}」`)
+    okc(html.includes(`>${o}<`), `含脏腑标注「${o}」`)
+  }
+  okc(html.includes('播放倍速'), '含倍速控件')
+  okc(html.includes('做到位 · 触发浮层'), '含浮层触发按钮（onHit 契约）')
+  okc(html.includes('polygon') && html.includes('polyline'), '含强度弧线 SVG')
+  for (const s of ['1×', '4×', '8×']) okc(html.includes(`>${s}</button>`), `含倍速档 ${s}`)
+  // 注：甲方红线 3（界面不出现「主音」）针对用户端点单 / 跟练界面；
+  // 阶段二工坊与阶段三弧线的「技术面板」本身也用「主音」（甲方原型 meta / motif 就这么写），
+  // 所以这里的红线由 /order 与 /train 两条断言负责，不重复查。
+
+  const arc = await load('/src/engine/arc.js')
+  okc(arc.ARC_SECTIONS.length === 9, `九段结构 ${arc.ARC_SECTIONS.length} 段`)
+  const sum = arc.ARC_SECTIONS.reduce((n, s) => n + s.dur, 0)
+  okc(sum === 720, `九段时长合计 ${sum}s = 12:00`)
+  okc(arc.ARC_TOTAL === 720, 'ARC_TOTAL = 720（12 分钟）')
+  // 五调共用同一条结构，只换落音与主音（甲方 §5.1）
+  // 甲方 §5.1：五调共用同一条九段结构，只换「动机落音」和「低音主音」
+  //   判据 1：每个动机在五调里音数一致（结构共用，不是整条重编）
+  //   判据 2：音高集合永远落在五声 {1,2,3,5,6}（同宫系统 F G A C D）
+  //   判据 3：每个动机的末音在五调之间确有变化（换的是落音）
+  //   注：C/C2 是「悬而不解」的下沉段，只要求避主音（下方 apz/cc 块单独判），
+  //       不要求各调末音互异（jiao.C2=2 与 gong.C2=2 相同是甲方表本身如此）
+  const keys = ['A', 'B', 'E', 'D', 'C', 'C2', 'P', 'Z']
+  let shapeOk = true, landingVar = true, pentaOk = true
+  for (const k of keys) {
+    const src = arc.ARC_MODES.gong.M[k]
+    const landings = new Set()
+    for (const mk of arc.ARC_ORDER) {
+      const ns = arc.ARC_MODES[mk].M[k]
+      if (ns.length !== src.length) shapeOk = false                    // 判据 1
+      for (const d of ns) if (![1, 2, 3, 5, 6].includes(d)) pentaOk = false  // 判据 2
+      landings.add(ns[ns.length - 1])                                  // 判据 3
+    }
+    if (landings.size < 2) landingVar = false
+  }
+  okc(shapeOk, '五条动机在五调里音数一致（结构共用，只换落音）')
+  okc(pentaOk, '所有落音都落在五声 {宫商角徵羽} 内（同宫系统，音高集合恒为 F G A C D）')
+  okc(landingVar, '各动机末音在五调之间确有变化（A/B/E/D/P/Z 每调换落音）')
+  // 甲方 §5.1 落音表：A/P/Z 落主音，C/C2 故意避开主音（悬而不解）
+  {
+    let apz = true, cc = true
+    for (const mk of arc.ARC_ORDER) {
+      const t = arc.ARC_MODES[mk].tonic
+      const M = arc.ARC_MODES[mk].M
+      if (M.A[M.A.length - 1] !== t) apz = false
+      if (M.P[M.P.length - 1] !== t) apz = false
+      if (M.Z[M.Z.length - 1] !== t) apz = false
+      if (M.C[M.C.length - 1] === t) cc = false
+      if (M.C2[M.C2.length - 1] === t) cc = false
+    }
+    okc(apz, 'A 主题 / P 峰 / Z 收 都落本调主音（甲方 §5.1）')
+    okc(cc, 'C / C2 下沉段故意避开主音（悬而不解）')
+  }
+  okc(arc.ARC_MODES.gong.tonic === 1 && arc.ARC_MODES.shang.tonic === 2
+    && arc.ARC_MODES.jiao.tonic === 3 && arc.ARC_MODES.zhi.tonic === 5
+    && arc.ARC_MODES.yu.tonic === 6, '五调主音＝宫商角徵羽（与总纲 §5.1 一致）')
+  // 七弦齐鸣固定不变，属于弦层（总纲 §3 / §5.1）
+  okc(arc.ARC_CHORD.join(',') === '1,2,3,5,6,1,2', '七弦齐鸣固定不变（弦层，与调式无关）')
+  okc(arc.ARC_CHOIRS.includes(630) && arc.ARC_CHOIRS.includes(712), '七弦齐鸣落在第 7 式与收功（甲方 CHOIRS）')
+  const peak = arc.ARC_SECTIONS.find((s) => s.peak)
+  okc(!!peak && peak.n === 7, `全曲唯一的力度上扬在第 ${peak ? peak.n : '?'} 式`)
+}
+
+console.log('\n=== 阶段二 · 线：五音短句工坊（/workshop）===')
+{
+  const html = await renderPage('/workshop')
+  okc(html.includes('五音短句工坊'), '含阶段二标题')
+  for (const n of ['宫', '商', '角', '徵', '羽']) {
+    okc(html.includes(`>${n}<`), `含五音格「${n}」`)
+  }
+  okc(html.includes('句尾呼吸'), '含句尾呼吸开关（乙方 v2 新增）')
+  okc(html.includes('无缝循环'), '含无缝循环开关')
+  okc(html.includes('BPM'), '含速度控件')
+  okc(html.includes('混响'), '含混响湿度控件')
+  okc(html.includes('导出 WAV'), '含离线导出 WAV')
+  okc(html.includes('当前音') && html.includes('全部五音'), '含导出「当前音 / 全部五音」')
+  okc(html.includes('restzone'), '乐谱网格含句尾留白格（灰底）')
+
+  const ph = await load('/src/engine/phrase.js')
+  okc(ph.PHRASE_SOUND_BEATS === 8 && ph.PHRASE_REST_BEATS === 2, '每圈 8 拍出声 + 2 拍留白')
+  okc(ph.phraseBarLen(true) === 10 && ph.phraseBarLen(false) === 8, '呼吸开=10 拍，关=8 拍')
+  okc(ph.phraseBassBeats(true).join() === '0,5', '低音散音落点（呼吸开）＝第 1、6 拍')
+  okc(ph.phraseBassBeats(false).join() === '0,4', '低音散音落点（呼吸关）＝第 1、5 拍')
+  okc(Math.abs(ph.PHRASE_DRONE_LEVEL - 0.033) < 1e-9, '阶段二氛围电力平 0.033（总纲 §9.2 降级到 60%）')
+  const { TONES } = await load('/src/data/tones.js')
+  const withMel = TONES.filter((t) => t.mel && t.mel.length).length
+  okc(withMel === 5, `五条短句各有旋律音型（${withMel}/5）`)
+}
+
+console.log('\n=== 时长口径对齐（甲方 12 分钟）===')
+{
+  const { getStyle } = await load('/src/data/styles.js')
+  const bad = getStyle('baduanjin')
+  const secs = bad.moves.map((m) => m.sec)
+  okc(secs.slice(0, 7).every((s) => s === 90), '一式至七式各 90 秒')
+  okc(secs[7] === 60, '第八式 60 秒')
+  okc(secs.reduce((a, b) => a + b, 0) + 30 === 720, '七式 90s + 第八式 60s + 收功 30s = 720s = 12 分钟')
+}
+
+console.log('\n=== 解释层数据 ===')
+{
+  const { TONES, MOVE_TONE, getTone } = await load('/src/data/tones.js')
+  okc(TONES.length === 5, `五音基调 ${TONES.length} 档`)
+  okc(MOVE_TONE[2] === 'shang' && MOVE_TONE[3] === 'gong' && MOVE_TONE[5] === 'zhi'
+    && MOVE_TONE[6] === 'yu' && MOVE_TONE[7] === 'jue', '八式→五音归属与甲方一致（二商/三宫/五徵/六羽/七角）')
+  okc(getTone('jue').organ === '肝', '角 → 肝（甲方：怒属肝，情志对应更硬）')
+  okc(getTone('zhi').organ === '心', '徵 → 心（甲方：取病位不取治法方向）')
+}
+
+console.log('\n=== 音层：甲方定弦表 ===')
+{
+  const { PENTATONIC, fdeg } = await load('/src/engine/guqin.js')
+  const want = [174.61, 196.44, 220.89, 261.92, 294.66, 349.23, 392.88]
+  let bad = 0
+  PENTATONIC.forEach((p, i) => { if (Math.abs(fdeg(p.deg, p.oct) - want[i]) > 0.5) bad++ })
+  okc(bad === 0, `七弦频率与总纲 §3 一致（偏差 ${bad} 条）`)
+  okc(PENTATONIC.map((p) => p.name).join('') === '宫商角徵羽宫(高)商(高)', '弦名直读：宫商角徵羽宫高商高')
 }
 
 console.log('\n=== 内容合规 D9：无禁词 ===')

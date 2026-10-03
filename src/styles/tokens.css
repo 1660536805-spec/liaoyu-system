@@ -1,19 +1,40 @@
-/* 弦养 · 配色 token
-   三个主色：墨（底）、宣（字）、朱（点睛）
-   风格：宋式极简 + 宣纸质感，避免 AI 味 */
+/* 弦养 · 配色 token（浅色水彩版，对齐 APP 界面设计规范）
+   色彩规范：云中白 #F8F5ED / 青杏 #DCCCB0 / 山雾绿 #A7C4B3 / 日光金 #E6D7A8 / 暖砂 #E7C3A8 / 朱砂红 #C85D4D
+   字体：思源宋体（标题）/ 思源黑体系（正文）
+   说明：变量名保持与旧版一致（--ink=页面底、--xuan=主文字），全站只换色值不动结构 */
 :root {
-  /* 主色 */
-  --ink: #16130f;        /* 墨：底色 */
-  --xuan: #e8e0d0;       /* 宣：主文字 */
-  --zhu: #c8553d;        /* 朱：点睛/命中 */
+  /* 主色（浅色体系） */
+  --ink: #F8F5ED;        /* 云中白：页面底色 */
+  --xuan: #3A332A;       /* 墨褐：主文字（深暖黑） */
+  --zhu: #C85D4D;        /* 朱砂红：点睛/命中/强调 */
 
   /* 派生 */
-  --ink-2: #211c16;
-  --ink-3: #2e2720;
-  --xuan-dim: rgba(232, 224, 208, 0.62);
-  --xuan-faint: rgba(232, 224, 208, 0.32);
-  --zhu-glow: rgba(200, 85, 61, 0.42);
-  --jin: #d6c59e;        /* 弦的金色 */
+  --ink-2: #F1ECE1;      /* 浅一层纸色：面板底 */
+  --ink-3: #EAE3D3;      /* 再浅一层：按钮底 */
+  --xuan-dim: rgba(58, 51, 42, 0.62);
+  --xuan-faint: rgba(58, 51, 42, 0.32);
+  --zhu-glow: rgba(200, 93, 77, 0.35);
+  --jin: #9A7B33;        /* 日光金的文字可用色（#E6D7A8 太浅只做底色点缀） */
+
+  /* 辅助点缀（水彩感） */
+  --qing: #DCCCB0;       /* 青杏 */
+  --mist: #A7C4B3;       /* 山雾绿 */
+  --gold: #E6D7A8;       /* 日光金 */
+  --sand: #E7C3A8;       /* 暖砂色 */
+
+  /* 最终版 UI 新增 token（2026-10-03） */
+  --bg-paper: #FDF6EA;
+  --bg-card: #FFFDF8;
+  --green: #5B8C6F;
+  --green-light: #D7E7DD;
+  --gold-tone: #C7A66C;
+  --gold-light: #E8DCC1;
+  --brown: #8B6F4E;
+  --brown-dark: #5E4632;
+  --border: #E8DECC;
+  --ink-text: #4A3A2A;
+  --ink-light: #8C7B66;
+  --green-dark: #4A765E;
 
   /* 尺度 */
   --r-s: 8px;
@@ -21,35 +42,128 @@
   --r-l: 22px;
   --gap: 16px;
 
+  /* ---------- 响应式尺度（手机适配基建）----------
+     手机与桌面的差别不只是「窄」，还有三件事：
+       ① 高度：100vh 在移动端浏览器里是「地址栏收起时」的高度，
+          实际可视区会动态变。用 dvh（动态视口高）才跟得上，
+          旧浏览器回退到 vh（顺序很重要，先写不支持的再写支持的）。
+       ② 宽度：桌面不该把手机单列拉满 1440px —— 文字行太长不好读，
+          卡片太宽显得空。用 --shell-w 限宽 + 居中。
+       ③ 安全区：刘海屏顶部与底部小黑条，要用 env() 让出。 */
+  --vh: 1vh;                 /* 老浏览器兜底 */
+  --vh: 1dvh;                /* 支持 dvh 的浏览器用这个（覆盖上面） */
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --shell-w: 100%;           /* 手机：满宽 */
+  --tap: 44px;               /* 最小触摸目标（iOS HIG 44pt / Material 48dp 取 44） */
+  --tab-h: 64px;             /* 底部 Tab 高度（不含安全区） */
+  /* 页面正文底部必须留出的空间：Tab 高 + 安全区 + 一点余量，
+     否则最后一段内容被 Tab 压住点不到。原来的 padding-bottom 各页不一
+     （有 16px 的），是「页面底部内容被遮」的直接原因。 */
+  --body-pad-b: calc(var(--tab-h) + var(--safe-b) + 24px);
+
   /* 字体 */
   --font: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
   --font-ui: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* 桌面端：放开视窗宽度，大屏自适应沉浸跟练 */
+@media (min-width: 900px) {
+  :root {
+    --shell-w: 1040px;
+    --tap: 42px;
+  }
+}
+/* 超宽屏（大显示器 / 2K+）：宽幅展布 */
+@media (min-width: 1400px) {
+  :root { --shell-w: 1240px; }
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 html, body, #app { height: 100%; margin: 0; }
 
+/* 页面级：整页不允许横向滚动。
+   横向溢出的根因通常是某个子元素固定了 px 宽度或负 margin，
+   这里兜住（overscroll-behavior 顺带关掉下拉刷新对 H5 的干扰）。 */
+html, body {
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+  -webkit-text-size-adjust: 100%;   /* iOS 横屏时不放大字号 */
+}
+
 body {
   background: var(--ink);
   color: var(--xuan);
   font-family: var(--font);
   overflow: hidden;
+  /* 手机上系统字体放大后，布局不要被撑破 */
+  text-size-adjust: 100%;
 }
 
-button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+button {
+  font-family: inherit; cursor: pointer; border: none; background: none; color: inherit;
+  /* 触摸目标兜底：小于 --tap 的按钮在手机上难点中。
+     用 min-height 而不是固定 height，内容多的按钮不会被截断。 */
+  min-height: var(--tap);
+  /* iOS 点击时的高亮块去掉（自定义样式已经有了，但 button 默认还有） */
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  appearance: none;
+}
+/* 文字型小按钮（链接、chip、tag 类）不需要撑到 44px，但要有横向内边距让好点 */
+button.chip,
+button.lnk,
+button.swap,
+button.tag,
+button.mini { min-height: 34px; padding-inline: 12px; }
+
+/* 桌面端：鼠标操作，把 hover 反馈打开；手机端 hover 无意义反而会粘住 */
+@media (hover: hover) and (pointer: fine) {
+  button:hover { filter: brightness(1.04); }
+}
 
 /* ---------- 通用 ---------- */
-.wrap { height: 100%; display: flex; flex-direction: column; }
+/* 全站统一水墨底图 + 宣纸罩层：页面底色由底图提供，内容滚动其上
+   底图：青绿山水·横琴岩石·樱花枝·日轮（1080×1920 竖版，手机 cover 正好铺满）
+   旧图 bg-home.jpg 保留作 CSS 兜底（换图失败时自动退到上一层）
+   墨罩强度按这张新图的最亮处（宣纸底 244,234,214）算过：
+   最薄处 .66 叠完仍是浅纸色，--xuan #3A332A 墨褐字对比度 ≥ 6.9:1；
+   山峦青绿区同层下更到 11:1，安全。 */
+.wrap {
+  /* dvh 而非 vh：移动端地址栏展开时 vh 不变，页面底部会被推出屏幕。
+     先写 vh 兜底、再写 dvh 覆盖（老浏览器不认 dvh 会忽略第二条）。 */
+  height: 100vh;
+  height: 100dvh;
+  display: flex; flex-direction: column;
+  position: relative; isolation: isolate;
+  background-image: url('/assets/bg-shanshui.jpg'), url('/assets/bg-home.jpg');
+  background-size: cover;
+  background-position: center 22%;
+  background-repeat: no-repeat;
+}
+.wrap::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(248, 245, 237, .62) 0%, rgba(248, 245, 237, .78) 30%,
+    rgba(248, 245, 237, .85) 66%, rgba(248, 245, 237, .92) 100%);
+}
 
 .topbar {
   display: flex; align-items: center; gap: 12px;
-  padding: 14px 18px; flex: 0 0 auto;
-  border-bottom: 1px solid rgba(232, 224, 208, 0.08);
+  /* 顶部让出刘海/状态栏（env 在不支持的浏览器上返回 0，无需回退） */
+  padding: calc(14px + var(--safe-t)) calc(18px + var(--safe-r)) 14px calc(18px + var(--safe-l));
+  flex: 0 0 auto;
+  border-bottom: 1px solid rgba(58, 51, 42, 0.08);
+  /* 顶栏在手机上容易挤：允许换行，别把按钮挤到不可点 */
+  flex-wrap: wrap;
+  row-gap: 8px;
 }
 .topbar h1 { font-size: 19px; margin: 0; font-weight: 500; letter-spacing: 3px; }
 .topbar .sub { font-size: 12px; color: var(--xuan-faint); font-family: var(--font-ui); }
-.spacer { flex: 1; }
+.spacer { flex: 1; min-width: 8px; }
 
 .body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
@@ -57,12 +171,144 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   padding: 11px 20px; border-radius: var(--r-m);
   background: var(--ink-3); color: var(--xuan);
   font-size: 14px; font-family: var(--font-ui);
-  border: 1px solid rgba(232, 224, 208, 0.12);
+  border: 1px solid rgba(58, 51, 42, 0.12);
   transition: all .18s;
+  min-height: var(--tap);
 }
-.btn:hover { background: #3a3229; }
+.btn:hover { background: #E3DAC6; }
 .btn:active { transform: scale(.97); }
 .btn.primary { background: var(--zhu); border-color: var(--zhu); color: #fff; }
-.btn.primary:hover { background: #d65f47; }
+.btn.primary:hover { background: #D36B59; }
 .btn.ghost { background: transparent; }
 .btn:disabled { opacity: .4; cursor: not-allowed; }
+/* 小按钮在手机上要够点。
+   为什么是 40 而不是 44：顶栏里的「← 首页」「完成」这类次要按钮，
+   44px 会把顶栏撑得很高、挤掉标题；40px 是「明显好过 32px」与
+   「不破坏顶栏密度」的折中。主按钮（.btn）仍是 44px。 */
+.btn.sm { min-height: 40px; padding: 8px 14px; font-size: 13px; }
+
+/* ---------- 表单控件的触摸适配 ----------
+   手机上原生 checkbox 只有 18px、range 只有 16px 高，都是难点中。
+   做法：控件本身放大到 24px（视觉上更大更清楚），外层 label/包装给足 44px 点击区。
+   真正扩大点击区靠的是「父元素 padding」与「扩大 input 自身尺寸」两个手段。 */
+input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  accent-color: var(--zhu);
+  /* 扩大命中区而不改变视觉尺寸：用负 margin + padding 撑开点击热区 */
+  margin: -6px;
+  flex: 0 0 auto;
+}
+input[type="range"] {
+  /* range 的轨道细，浏览器给的命中区只有几 px 高。这里用 height 撑高，
+     轨道由 appearance:none 重画为圆角条，视觉与命中区一起变大。 */
+  -webkit-appearance: none;
+  appearance: none;
+  height: 32px;
+  background: transparent;
+  margin: 0;
+  width: 100%;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 3px; background: rgba(58, 51, 42, .18);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--zhu); border: 2px solid #FFFDF6;
+  box-shadow: 0 2px 6px rgba(58, 51, 42, .28);
+  margin-top: -10px;   /* 居中到 6px 轨道上 */
+}
+input[type="range"]::-moz-range-track {
+  height: 6px; border-radius: 3px; background: rgba(58, 51, 42, .18);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--zhu); border: 2px solid #FFFDF6;
+}
+/* select（下拉）在 iOS 上原生控件很小，放大到可点 */
+select {
+  min-height: var(--tap);
+  font-size: max(15px, 1em);   /* iOS 上 <16px 的 select 会触发页面缩放 */
+  padding-block: 10px;
+}
+/* input 字号 < 16px 时 iOS Safari 聚焦会自动放大页面并平移，一进来就错位 */
+input, textarea, select { font-size: max(16px, 1em); }
+input[type="number"], input[type="text"], input[type="email"] { min-height: var(--tap); }
+
+/* 数字输入框：去掉 iOS 的上下箭头（占宽又难点） */
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* ==========================================================================
+   手机 / 桌面响应式基建
+   --------------------------------------------------------------------------
+   三条约束，逐条对应真机上会出问题的点：
+
+   ① 高度用 dvh，不用 vh
+      移动端浏览器的 vh 是「地址栏完全收起时」的高度。地址栏展开时
+      window.innerHeight 变小，而 vh 不变 → 页面底部被推到屏幕外。
+      dvh 跟真实可视区同步。（iOS 15.4+ / Chrome 108+ 支持）
+
+   ② 桌面限宽居中
+      手机单列在 1440px 上铺满，文字行长得难读、卡片空得像没做完。
+      --shell-w 限宽后内容居中，两侧留给底图 —— 反而比铺满好看。
+
+   ③ 安全区 + 底部 Tab 空间
+      刘海屏顶部要加 --safe-t；页面正文底部要留 --body-pad-b，
+      否则最后一段被 Tab 压住、点不到。
+   ========================================================================== */
+
+/* --- 全局：字号下限 12px（在手机上 < 12px 基本读不清） ---
+   ⚠ 这里必须用 !important，原因是本文件是**全局非 scoped** 样式，
+   而各 view 的 <style scoped> 会给类名加 [data-v-xxx] 属性选择器，
+   优先级 (0,2,0) 高于这里的 (0,1,0) —— 不加 important 完全不生效。
+   这是 !important 的正当用途：跨组件的**可读性底线**，
+   语义上属于「设计规范强制项」，不是「懒得写对选择器」。 */
+@media (max-width: 640px) {
+  .foot, .sub, .tip, .hint, .note, .ver, .stage-next,
+  .data-lab, .h-lab, .stat-label, .gauge-tip, .cur-idx,
+  .opt-dur, .stage-k, .s-desc, .swap, .float-demo,
+  .di-lab, .score-lbl, .sv-sub, .privacy, .lead, .legend,
+  .credits, .hint-text, .cur-hint,
+  .seal, .rtag, .sp-desc, .tone-check, .seg, .to, .o,
+  .item-string, .item-tone, .tag, .s-name, .sec-time,
+  .data-unit, .data-state, .sell-desc, .grp-title,
+  .exp-num, .encourage, .sec-icon {
+    font-size: max(12px, 1em) !important;
+  }
+  /* 底部 Tab 标签：scoped 在 AppTab.vue 里，单独处理 */
+  .app-tab .label { font-size: 12px !important; }
+}
+
+/* --- 桌面：限宽居中 + 两侧不出白边 --- */
+@media (min-width: 900px) {
+  /* 正文容器限宽居中。放在 .app 上，子页面的 .wrap 自动继承宽度。 */
+  .app {
+    max-width: var(--shell-w);
+    margin: 0 auto;
+    /* 桌面端两侧补一层纸色，与底图衔接处不突兀 */
+    box-shadow: 0 0 0 1px rgba(58, 51, 42, .06), 0 24px 80px rgba(58, 51, 42, .10);
+    background: var(--ink);
+  }
+  /* 桌面端字号可以略大（不需要迁就小屏） */
+  :root { --tap: 40px; }
+  .btn.sm { min-height: 34px; }
+}
+
+/* --- 横屏手机：内容别被压扁 --- */
+@media (max-height: 480px) and (orientation: landscape) {
+  /* 横屏时可视高度只有 200 多 px，正文底部不能还留 88px，
+     否则一屏放不下任何内容。这里压缩到最小可用值。 */
+  :root {
+    --body-pad-b: calc(var(--tab-h) + var(--safe-b) + 8px);
+    --tab-h: 52px;
+  }
+}
+
+/* --- 超宽屏：底图 cover 会把主体放太大，桌面端改用 contain 更稳 --- */
+@media (min-width: 1600px) {
+  .wrap { background-size: cover; background-position: center 25%; }
+}

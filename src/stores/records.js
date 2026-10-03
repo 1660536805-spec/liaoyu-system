@@ -29,15 +29,21 @@ export function lastRecord() {
   return getRecords()[0] || null
 }
 
-export function saveRecord({ moves = [], names = [] }) {
+const pad2 = (n) => String(n).padStart(2, '0')
+
+export function saveRecord({ moves = [], names = [], tone = '', minutes = 0 } = {}) {
   const d = new Date()
   const rec = {
     ts: d.getTime(),
-    date: `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`,
+    // day 用于「连续打卡」按自然日去重（YYYY-MM-DD），与展示用的 date 分开
+    day: `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`,
+    date: `${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`,
     doneCount: moves.length,
     complete: moves.length >= 8,
     moves,
     names,
+    tone,                     // 这一套用的五音基调（解释层，仅用于展示，不参与播放）
+    minutes,                  // 实际练习时长（分钟），0 表示未记录
   }
   const list = read()
   list.push(rec)

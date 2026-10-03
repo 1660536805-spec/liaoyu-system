@@ -58,6 +58,7 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
 import { previewText } from '../data/speech.js'
+import { saveSettings } from '../stores/settings'
 
 const props = defineProps({
   speaker: { type: Object, required: true },      // voice.js 实例
@@ -77,10 +78,15 @@ props.speaker.on('state', (st) => { s.value = { ...st } })
 try {
   const saved = JSON.parse(localStorage.getItem('xianyang.voice') || '{}')
   Object.assign(local, saved)
-  if (local.enabled) {
-    props.speaker.set({ enabled: true, volume: local.volume, rate: local.rate, engineMode: local.engineMode })
-  }
 } catch { /* file:// 下不可写，忽略 */ }
+
+// 跟练页已按基础设置页的「语音播报动作名」设过 speaker.enabled；
+// 这里若本面板从没被用户碰过（enabled 还是初始 false），就沿用那个值，
+// 免得「设置页说开着、面板却显示已关闭」两处打架。
+if (!localStorage.getItem('xianyang.voice') && props.speaker.enabled) local.enabled = true
+if (local.enabled) {
+  props.speaker.set({ enabled: true, volume: local.volume, rate: local.rate, engineMode: local.engineMode })
+}
 
 const engineText = computed(() => {
   if (!local.enabled) return '已关闭'
@@ -97,6 +103,8 @@ const engineClass = computed(() => {
 
 function persist() {
   try { localStorage.setItem('xianyang.voice', JSON.stringify(local)) } catch { /* ignore */ }
+  // 与基础设置页的「语音播报动作名」保持同一份事实
+  saveSettings({ voiceOn: local.enabled })
   emit('change', { ...local })
 }
 function apply() { props.speaker.set({ volume: local.volume, rate: local.rate, engineMode: local.engineMode }); props.announcer.refresh(); persist() }
