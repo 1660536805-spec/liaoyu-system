@@ -146,6 +146,8 @@ function go(path) {
   padding: 9px 10px calc(9px + var(--safe-b));
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
+  /* 主壳 body 全局带 antialiased；本导航在 .ls 之外，需显式补上以对齐文字渲染 */
+  -webkit-font-smoothing: antialiased;
 }
 .nav-ref .nitem {
   appearance: none;

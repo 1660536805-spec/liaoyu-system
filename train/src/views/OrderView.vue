@@ -91,7 +91,7 @@
             <div class="track" v-for="(t, i) in tracks" :key="t.title + i">
               <img class="thumb" :src="BASE + 'art/' + t.img" :style="t.filt" alt="" />
               <div class="ls-track-tx">
-                <div class="tt">{{ t.title }}<span class="note" v-if="curTrack === i">已选预览</span></div>
+                <div class="tt">{{ t.title + (curTrack === i ? ' ' : '') }}<span class="note" v-if="curTrack === i">已选预览</span></div>
                 <div class="ls-track-desc">{{ t.desc }}</div>
                 <div class="tags">
                   <span class="tag" :class="t.cls">{{ t.organ }}</span>
@@ -100,7 +100,7 @@
                 </div>
               </div>
               <span class="dur">预览</span>
-              <button class="play-c" :class="{ on: curTrack === i && playing }" v-html="icon('play')" :aria-label="'尝试播放' + t.title" @click="playTrack(i)"></button>
+              <button class="play-c" :class="{ on: curTrack === i }" v-html="icon('play')" :aria-label="'尝试播放' + t.title" @click="playTrack(i)"></button>
             </div>
           </div>
         </section>
@@ -165,14 +165,16 @@ const TRACKS = [
 /* ---------- 状态 ---------- */
 const tracks = ref(TRACKS.map((t) => ({ ...t })))
 const selOrgan = ref(0)
-const curTrack = ref(0)
+// 与主壳 state.track 初始值一致(= -1)：未选中任何曲目 → 不显示「已选预览」角标、
+// 推荐列表无高亮项。主壳 pgAudio 里所有取值都用 Math.max(0, state.track) 兜底。
+const curTrack = ref(-1)
 const playing = ref(false)
 const curTime = ref(0)
 const curDur = ref(0)
 const au = ref(null)
 const recRef = ref(null)
 
-const cur = computed(() => tracks.value[curTrack.value] || tracks.value[0])
+const cur = computed(() => tracks.value[Math.max(0, curTrack.value)] || tracks.value[0])
 const pct = computed(() => (curDur.value > 0 ? Math.min(100, (curTime.value / curDur.value) * 100) : 0))
 const liveText = computed(() => (playing.value ? '正在播放' : cur.value.file ? '曲目预览 · 可试听' : '曲目预览 · 未提供音源'))
 const timeLabel = computed(() => fmt(curTime.value))
@@ -201,7 +203,8 @@ function pickOrgan(i) {
 
 function step(dir) {
   const n = tracks.value.length
-  curTrack.value = (curTrack.value + dir + n) % n
+  // 主壳：track-prev = (max(0,track)+3)%4、track-next = (max(0,track)+1)%4
+  curTrack.value = (Math.max(0, curTrack.value) + dir + n) % n
   resetAudio()
 }
 
@@ -237,6 +240,8 @@ function playTrack(i) {
 }
 
 function togglePlay() {
+  // 主壳 .pc 按钮语义 data-i="max(0,state.track)"：未选中时先把当前曲目落到第 0 首
+  if (curTrack.value < 0) curTrack.value = 0
   if (playing.value) {
     au.value?.pause()
     return
