@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>摄像头 FOV 实测 · 近距离取景可行性</title>
+<style>
+  :root { --jin:#d6c59e; --zhu:#c8553d; --ink:#0f0d0b; }
+  * { box-sizing: border-box; }
+  body {
+    margin:0; padding:18px; background:var(--ink); color:#e8e0d0;
+    font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif; line-height:1.7;
+  }
+  h1 { font-size:17px; letter-spacing:2px; margin:0 0 4px; color:var(--jin); }
+  .sub { font-size:12px; color:#8a8172; margin-bottom:14px; }
+  .wrap { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; }
+  .left { flex:1 1 420px; min-width:320px; }
+  .right { flex:0 0 300px; min-width:280px; }
+  .stage { position:relative; background:#000; border-radius:12px; overflow:hidden; aspect-ratio:4/3; }
+  video { width:100%; height:100%; object-fit:contain; display:block; }
+  .line { position:absolute; top:0; bottom:0; width:2px; background:var(--zhu); box-shadow:0 0 8px rgba(200,85,61,.8); }
+  .line::after {
+    content:''; position:absolute; left:-5px; top:0; width:12px; height:12px;
+    background:var(--zhu); border-radius:50%;
+  }
+  .card {
+    background:rgba(232,224,208,.04); border:1px solid rgba(232,224,208,.12);
+    border-radius:12px; padding:14px; margin-bottom:12px;
+  }
+  .card h2 { font-size:13px; margin:0 0 10px; color:var(--jin); letter-spacing:1px; }
+  label { display:block; font-size:12px; color:#b8ae9c; margin:10px 0 4px; }
+  input[type=number], input[type=range], select {
+    width:100%; padding:6px 8px; font-size:13px; border-radius:7px;
+    background:#1a1613; color:#e8e0d0; border:1px solid rgba(232,224,208,.16);
+  }
+  input[type=range] { padding:0; accent-color:var(--zhu); }
+  button {
+    padding:8px 14px; font-size:13px; border-radius:8px; border:none; cursor:pointer;
+    background:var(--zhu); color:#fff;
+  }
+  button.ghost { background:rgba(232,224,208,.1); color:#d8cfbe; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .kv { display:flex; justify-content:space-between; font-size:12.5px; padding:4px 0; border-bottom:1px dashed rgba(232,224,208,.08); }
+  .kv b { color:var(--jin); font-weight:600; font-variant-numeric:tabular-nums; }
+  .verdict { margin-top:10px; padding:10px 12px; border-radius:9px; font-size:12.5px; }
+  .ok { background:rgba(127,176,105,.14); color:#a8d693; border:1px solid rgba(127,176,105,.3); }
+  .bad { background:rgba(200,85,61,.14); color:#f0a898; border:1px solid rgba(200,85,61,.32); }
+  .warn { background:rgba(232,160,32,.12); color:#e8c07a; border:1px solid rgba(232,160,32,.3); }
+  .tip { font-size:11.5px; color:#8a8172; margin-top:8px; }
+  .steps { font-size:12px; color:#c8bfae; }
+  .steps li { margin:6px 0; }
+  code { background:rgba(232,224,208,.08); padding:1px 5px; border-radius:4px; font-size:11.5px; }
+</style>
+</head>
+<body>
+<h1>摄像头 FOV 实测 · 1–1.5m 取景可行性</h1>
+<div class="sub">用一张已知尺寸的纸（A4 横举 210mm）在已知距离下测出真实 HFOV / VFOV，再反推「全身 / 上半身入镜所需最小距离」</div>
+
+<div style="max-width:100%; background:rgba(232,160,32,.12); border:1px solid rgba(232,160,32,.32); color:#e8c07a; border-radius:12px; padding:12px 14px; font-size:12.5px; margin-bottom:14px;">
+  <b>⚠ 本工具的定位：只用于「设备选型 / 能力体检」，不用于运行时的取景判断。</b><br/>
+  原因：<b>FOV 是镜头内参</b>（同一颗镜头基本固定，测一次存档即可），但决定「这一刻能不能拍全人」的是
+  <b>外参</b>——镜头高度、俯仰角、摆放角度、用户距离，这些<b>每次使用都可能变</b>，手机还会在超广/主摄之间自动切换。
+  所以运行时必须<b>免标定</b>：本项目已在跟练页内置「取景伺服」——用人体自身当尺子
+  （头顶→髋 的像素长度 + 髋约在身高 53% 的人体先验），逐帧推算「全身比画面还高多少 / 脚部超出多少屏高」，
+  并区分「<b>缩放不足→请后退 X%</b>」与「<b>角度没摆对→设备向下倾</b>」两种指令，对任意设备、任意摆放角度自适应。
+</div>
+
+<div class="wrap">
+  <div class="left">
+    <div class="stage">
+      <video id="v" playsinline muted autoplay></video>
+      <div class="line" id="l1" style="left:30%"></div>
+      <div class="line" id="l2" style="left:70%"></div>
+    </div>
+    <div class="row">
+      <button id="start">打开摄像头</button>
+      <button class="ghost" id="retry">换一个摄像头</button>
+      <span class="tip" id="dev"></span>
+    </div>
+
+    <div class="card">
+      <h2>测量步骤</h2>
+      <ol class="steps">
+        <li>把 <b>A4 纸横着举</b>在镜头正前方，量出纸到镜头的距离填在右侧（建议 1.00 m）。</li>
+        <li>拖动下面两个滑块，让两条红线<b>正好对齐纸的左右边缘</b>（纸要占画面中间偏大区域，读数更准）。</li>
+        <li>填身高，右侧会实时给出你的 HFOV / VFOV，以及「全身」「上半身」各需要站多远。</li>
+      </ol>
+      <label>左边界位置 <span id="x1v">30</span>%</label>
+      <input type="range" id="x1" min="0" max="100" step="0.1" value="30" />
+      <label>右边界位置 <span id="x2v">70</span>%</label>
+      <input type="range" id="x2" min="0" max="100" step="0.1" value="70" />
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="card">
+      <h2>输入</h2>
+      <label>参照物宽度（mm）· A4 横 = 210，A4 竖 = 297</label>
+      <input type="number" id="objW" value="210" step="1" />
+      <label>纸到镜头距离（m）</label>
+      <input type="number" id="dist" value="1.00" step="0.05" />
+      <label>身高（m）</label>
+      <input type="number" id="height" value="1.70" step="0.01" />
+      <label>目标距离（m）· 判定可行性</label>
+      <input type="number" id="target" value="1.50" step="0.05" />
+    </div>
+
+    <div class="card">
+      <h2>实测结果</h2>
+      <div class="kv"><span>画面分辨率</span><b id="res">—</b></div>
+      <div class="kv"><span>参照物像素宽度</span><b id="pxw">—</b></div>
+      <div class="kv"><span>水平 HFOV</span><b id="hfov">—</b></div>
+      <div class="kv"><span>垂直 VFOV</span><b id="vfov">—</b></div>
+      <div class="kv"><span>全身入镜最小距离</span><b id="dfull">—</b></div>
+      <div class="kv"><span>上半身入镜最小距离</span><b id="dupper">—</b></div>
+      <div id="v1" class="verdict">按步骤测量后给出结论</div>
+    </div>
+
+    <div class="card">
+      <h2>优化建议</h2>
+      <div id="advice" class="tip">测量后自动生成（镜头高度、站位距离、是否需要外挂广角/换手机超广）</div>
+      <p class="tip" style="margin-top:10px">
+        公式：<code>VFOV_need = 2·arctan((H/2)/d)</code>；
+        上半身按头顶→髋 ≈ 0.55×身高 估算。
+        镜头<b>对准人体中心高度</b>最省 FOV，可比随意摆放省 10° 左右。
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+// 经典脚本（非 ESM）：保证 file:// 双击也能跑
+var v = document.getElementById('v')
+var l1 = document.getElementById('l1')
+var l2 = document.getElementById('l2')
+var dev = document.getElementById('dev')
+var curId = null
+
+document.getElementById('start').onclick = function () { openCam(null) }
+document.getElementById('retry').onclick = function () { cycleCam() }
+
+async function openCam(deviceId) {
+  try {
+    var c = { video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false }
+    if (deviceId) c.video.deviceId = { exact: deviceId }
+    var s = await navigator.mediaDevices.getUserMedia(c)
+    v.srcObject = s
+    await v.play()
+    var tk = s.getVideoTracks()[0]
+    curId = tk.getSettings().deviceId || null
+    dev.textContent = '当前：' + (tk.label || '摄像头')
+    setTimeout(readRes, 600)
+  } catch (e) {
+    dev.textContent = '打开失败：' + e.message + '（file:// 下若失败，请用 http 方式打开）'
+  }
+}
+async function cycleCam() {
+  var list = await navigator.mediaDevices.enumerateDevices()
+  var cams = list.filter(function (d) { return d.kind === 'videoinput' })
+  if (!cams.length) return
+  var i = cams.findIndex(function (d) { return d.deviceId === curId })
+  openCam(cams[(i + 1) % cams.length].deviceId)
+}
+function readRes() {
+  document.getElementById('res').textContent = v.videoWidth + '×' + v.videoHeight
+}
+
+// 滑块 → 线位置 → 计算
+var x1 = document.getElementById('x1')
+var x2 = document.getElementById('x2')
+function sync() {
+  l1.style.left = x1.value + '%'
+  l2.style.left = x2.value + '%'
+  document.getElementById('x1v').textContent = x1.value
+  document.getElementById('x2v').textContent = x2.value
+  calc()
+}
+x1.oninput = sync
+x2.oninput = sync
+;['objW', 'dist', 'height', 'target'].forEach(function (id) {
+  document.getElementById(id).oninput = calc
+})
+
+function num(id) { return parseFloat(document.getElementById(id).value) || 0 }
+
+function calc() {
+  var W = v.videoWidth, H = v.videoHeight
+  if (!W || !H) return
+  var objW = num('objW') / 1000          // m
+  var d = num('dist')
+  var hBody = num('height')
+  var target = num('target')
+  var pct = Math.abs(parseFloat(x2.value) - parseFloat(x1.value)) / 100
+  var pxW = Math.max(1, pct * W)
+  document.getElementById('pxw').textContent = pxW.toFixed(0) + ' px'
+
+  // 参照物张角 → 换算全画面 HFOV
+  var thetaObj = 2 * Math.atan((objW / 2) / d)
+  var hfov = 2 * Math.atan(Math.tan(thetaObj / 2) * (W / pxW))
+  var vfov = 2 * Math.atan(Math.tan(hfov / 2) * (H / W))
+  var deg = function (r) { return (r * 180 / Math.PI) }
+
+  document.getElementById('hfov').textContent = deg(hfov).toFixed(1) + '°'
+  document.getElementById('vfov').textContent = deg(vfov).toFixed(1) + '°'
+
+  // 最小距离：d_min = (H_target/2) / tan(VFOV/2)
+  var half = Math.tan(vfov / 2)
+  var dFull = (hBody / 2) / half
+  var dUpper = (hBody * 0.55 / 2) / half
+  document.getElementById('dfull').textContent = dFull.toFixed(2) + ' m'
+  document.getElementById('dupper').textContent = dUpper.toFixed(2) + ' m'
+
+  // 结论
+  var v1 = document.getElementById('v1')
+  var okFull = target >= dFull
+  var okUpper = target >= dUpper
+  v1.className = 'verdict ' + (okFull ? 'ok' : okUpper ? 'warn' : 'bad')
+  v1.innerHTML = okFull
+    ? '✅ ' + target.toFixed(2) + 'm 可拍到<b>全身</b>（头顶→脚底）'
+    : okUpper
+      ? '⚠️ ' + target.toFixed(2) + 'm 拍不到全身，但<b>上半身（判定所需）</b>完整 —— 推荐「上半身判定」路线'
+      : '❌ ' + target.toFixed(2) + 'm 连上半身都不完整，需退到 ≥' + dUpper.toFixed(2) + 'm 或换超广/外挂广角'
+
+  // 建议
+  var a = []
+  a.push('把镜头<b>高度对准人体中心（约 ' + (hBody / 2).toFixed(2) + ' m）</b>并尽量水平，可省约 10° FOV。')
+  if (!okFull) {
+    var need = dFull - target
+    if (need <= 0.6) a.push('只差 ' + need.toFixed(2) + ' m：退到 ' + dFull.toFixed(2) + ' m 即可全身（成本最低）。')
+    a.push('要 1–1.5m 内拍全身 → 需 VFOV ≥ ' + (2 * Math.atan((hBody / 2) / target) * 180 / Math.PI).toFixed(0) + '°：' +
+      '优先用<b>手机超广前置</b>当摄像头源，或给笔记本加<b>外挂广角夹片（0.45x）+ ChArUco 标定去畸变</b>。')
+    a.push('若接受「上半身判定」，当前设备 ' + dUpper.toFixed(2) + ' m 起即可开练，判定不受影响。')
+  } else {
+    a.push('设备 FOV 充足，注意把人放在画面中央，避开广角边缘畸变区。')
+  }
+  document.getElementById('advice').innerHTML = a.map(function (s) { return '· ' + s }).join('<br/>')
+}
+</script>
+</body>
+</html>
