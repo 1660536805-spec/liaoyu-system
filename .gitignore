@@ -8,5 +8,14 @@ Thumbs.db
 node_modules/
 __pycache__/
 *.pyc
-# UI 比对脚本的中间截图（可随时重跑 compare.cjs / nav.cjs 再生成）
+# ---- outputs/ 工作产物：截图与交付包，可用脚本重跑再生成，不进版本库 ----
+# 保留跟踪：outputs/*.md（产品文档/PPT 大纲）、outputs/ui-compare/*.cjs（比对脚本）
+outputs/**/*.png
+outputs/**/*.zip
+outputs/bugfix-results.txt
+outputs/verify/
+outputs/s4-integration/
+outputs/复刻截图/
+outputs/复刻截图v2/
 outputs/ui-compare/out/
+outputs/ui-compare/evidence/
