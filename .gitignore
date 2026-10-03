@@ -12,3 +12,6 @@ certs/server.crt
 
 .tmp-fallback/
 package-for-team/dist/
+
+# 本机 playwright-cli 测试日志（含时间截与页面快照），每次跑都会变，不入库
+.playwright-cli/
