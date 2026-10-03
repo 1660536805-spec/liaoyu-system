@@ -34,6 +34,9 @@ http.createServer((req, res) => {
   try {
     let p = decodeURIComponent(req.url.split('?')[0])
     if (p === '/') p = '/index.html'
+    // 子应用目录（如 /s4/）要落到它自己的 index.html，
+    // 否则会掉进下面的 SPA 回退、返回主站 index.html（白屏）。
+    if (p.endsWith('/')) p += 'index.html'
     // 解析原始路径后按目录边界判断，同时拒绝越界符号链接。
     const full = path.resolve(ROOT, p.replace(/^([/\\])+/, ''))
     const relative = path.relative(ROOT, full)

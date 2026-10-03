@@ -438,7 +438,7 @@ document.addEventListener('click',function(e){
     case 'mode':if(el.dataset.i!=='0'){toast(el.dataset.i==='1'?'五禽戏尚未提供，当前可预览八段锦':'当前推荐为本地示例，尚未接入 AI 推荐');break}state.mode=0;paint();break
     case 'imode':state.imode=+el.getAttribute('data-i');paint();break
     case 'istage':state.istage=+el.getAttribute('data-i');paint();break
-    case 'demo':toast('当前仅提供静态动作预览，未提供演示视频');break
+    case 'demo':location.href='s4/#/guide';break
     case 'organ':state.organ=+el.getAttribute('data-i');paint();break
     case 'swap-tracks':toast('当前仅有这四首曲目资料，未提供更多音源');break
     case 'random-track':state.track=Math.floor(Math.random()*4);paint();toast('已选择曲目预览；未提供音源，无法播放');break
@@ -446,7 +446,16 @@ document.addEventListener('click',function(e){
     case 'track-next':state.track=(Math.max(0,state.track)+1)%4;paint();break
     case 'track-list':var list=root.querySelector('.track');if(list)list.scrollIntoView({block:'center'});break
     case 'play':state.track=+el.getAttribute('data-i');paint();toast('未提供该曲音源，无法播放；当前仅为曲目预览');break
-    case 'start-practice':state.progress=0;state.running=true;go('practice');toast('静态动作预览；未启动摄像头、音频或 AI 识别');break
+    case 'start-practice':{
+      // 接入 xianyang-s4 的真实视觉身体识别（MediaPipe 姿态 + 八段锦判定 + 古琴拨弦）。
+      // 按当前所选「练习阶段」映射到 s4 的三个页面，与 s4 准备页的 begin() 规则一致：
+      //   一·点 → 跟练页 /train · 二·线 → 短句工坊 /workshop · 三·面 → 十二分钟弧线 /arc
+      var stageMap=[['train','point'],['workshop','line'],['arc','arc']];
+      var pick=stageMap[state.istage]||stageMap[0];
+      state.progress=0;state.running=true;
+      toast('正在进入动作预览…');
+      location.href='s4/#/'+pick[0]+'?stage='+pick[1]+'&mode='+(state.imode===1?'short':'full')+'&style=baduanjin&tone=gong';
+      break}
     case 'skip-intro':go('home');break
     case 'go-body':go('body');break
     case 'exit-practice':state.running=false;go('home');break
