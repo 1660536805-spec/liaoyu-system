@@ -1,0 +1,17 @@
+node_modules
+dist
+# 真机验证产出的截图与日志（含 640x480 jpg），每次跑都会变，不入库。
+# 需要留证据时手动复制到别处，或看本地文件。
+evidence/
+
+# 本地证书（含私钥，绝不入库）
+certs/*.key
+certs/*.csr
+certs/*.srl
+certs/server.crt
+
+.tmp-fallback/
+package-for-team/dist/
+
+# 本机 playwright-cli 测试日志（含时间截与页面快照），每次跑都会变，不入库
+.playwright-cli/
