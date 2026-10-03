@@ -3,6 +3,9 @@
 > 本目录（`/design/`）归**设计 / 视觉 / 内容岗**队友所有，工程侧只写代码、不占这里。
 > 代码里的界面样式在 `src/styles/tokens.css`（设计 Token）与 `src/views/*`、`src/components/*`。
 > 这里只放「设计源文件 / 设计稿 / 冻结稿 / 动效说明」，放完即冻结，工程侧按稿实现。
+>
+> 双远端同一份代码：GitHub `ccccongggg/xianyang-s4`（主）+ Gitee `congopen/xianyang-s4`（镜像），
+> 主干都是 `main`。提交一遍两边同步，不用分别推。
 
 ## 目录分工（提交时按此路径放，别自创）
 
