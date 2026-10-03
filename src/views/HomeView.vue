@@ -9,7 +9,7 @@
         </div>
         <div class="today-row">
           <span class="today">今日 · {{ term.name }}</span>
-          <span class="date">{{ todayStr }} · {{ weekday }}</span>
+          <span class="date">{{ todayStr }} · 农历{{ lunarStr }}</span>
         </div>
         <div class="sub-slogan">顺时调养，身心自在</div>
       </header>
