@@ -69,7 +69,7 @@
 
       <div class="foot">
         调律用<b>三分损益律</b>（宫 1 → 徵 3/2 → 商 9/8 → 羽 27/16 → 角 81/64），宫 = F3 174.61&nbsp;Hz。<br>
-        五条短句同属一个宫系统（F G A C D），只换主音；低音声部落在主音的低八度散音上。<br>
+        五条短句同属一个宫系统（F G A C D），只换基音；低音声部落在基音的低八度散音上。<br>
         <b>句尾呼吸版</b>：每圈 10 拍，前 8 拍出声、后 2 拍不起任何新音，只让末音余韵自然散掉；低音散音落在第 1、6 拍。
         关掉开关即回到每圈 8 拍连续形态，可即时 A/B 对比。<br>
         <b>导出</b>：用 OfflineAudioContext 离线渲染<b>同一套音频图</b>，不经扬声器，比实时快几十倍。
@@ -84,7 +84,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { TONES } from '../data/tones.js'
+import { TONES, safeCopy } from '../data/tones.js'
 import { createPhrasePlayer, phraseBarLen, phraseBassBeats, PHRASE_SOUND_BEATS } from '../engine/phrase.js'
 import { unlockAudio } from '../engine/guqin.js'
 
@@ -149,8 +149,9 @@ const metaText = computed(() => {
     barTxt = `低音散音落在第 ${bass} 拍，每圈连续无留白。`
     tailTxt = '末音余韵直接叠进下一圈，接缝听不出来。'
   }
-  return `主音 <i>${t.name}</i>　·　<i>${t.mode || ''}</i>　·　入 <i>${t.organ}</i>　·　<i>${t.feel || ''}</i><br>`
-    + `红字＝调式主音。${barTxt}一圈 ${n} 拍。${tailTxt}`
+  // 文案过 safeCopy：甲方红线禁止界面出现「主音」「入脏」，这里统一换成基音/对应
+  return safeCopy(`<i>${t.name}</i>　·　<i>${t.mode || ''}</i>　·　对应 <i>${t.organ}</i>　·　<i>${t.feel || ''}</i><br>`
+    + `${barTxt}一圈 ${n} 拍。${tailTxt}`)
 })
 
 function leave(path) { router.push(path) }
@@ -260,11 +261,11 @@ onBeforeUnmount(() => { player && player.stop(); player = null })
 
 .tones { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 0 0 16px; }
 .tone {
-  appearance: none; border: 1px solid rgba(58, 51, 42,.14); background: rgba(58, 51, 42,.04);
+  appearance: none; border: 1px solid rgba(92, 70, 50,.14); background: rgba(92, 70, 50,.04);
   color: var(--xuan); border-radius: 12px; padding: 14px 6px 11px; cursor: pointer;
   transition: .18s; font-family: inherit; text-align: center;
 }
-.tone:hover { border-color: rgba(154, 123, 51,.5); background: rgba(58, 51, 42,.08); }
+.tone:hover { border-color: rgba(154, 123, 51,.5); background: rgba(92, 70, 50,.08); }
 .tone .g { font-size: 22px; line-height: 1.15; }
 .tone .o { font-size: 11.5px; color: var(--xuan-faint); margin-top: 6px; letter-spacing: .08em; }
 .tone.on { border-color: var(--zhu); background: rgba(200, 93, 77,.14); }
@@ -272,8 +273,8 @@ onBeforeUnmount(() => { player && player.stop(); player = null })
 .tone.on .o { color: var(--jin); }
 
 .panel {
-  border: 1px solid rgba(58, 51, 42,.12); border-radius: 12px;
-  background: rgba(58, 51, 42,.03); padding: 16px 18px; margin-bottom: 16px;
+  border: 1px solid rgba(92, 70, 50,.12); border-radius: 12px;
+  background: rgba(92, 70, 50,.03); padding: 16px 18px; margin-bottom: 16px;
 }
 .row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .row + .row { margin-top: 14px; }
@@ -281,11 +282,14 @@ onBeforeUnmount(() => { player && player.stop(); player = null })
 .lbl .lb { font-size: 12.5px; color: var(--xuan-dim); }
 button.act { padding: 9px 20px; font-size: 13.5px; }
 select {
-  appearance: none; font-family: inherit; font-size: 13px; color: var(--xuan); background: rgba(46,39,32,.9);
-  border: 1px solid rgba(58, 51, 42,.16); border-radius: 9px; padding: 9px 14px; cursor: pointer;
+  /* 底色原本是 rgba(46,39,32,.9) 近黑（v1 深墨版遗留）。切浅色体系后
+     近黑底 + 浅棕墨字 = 几乎读不出来，这里换成宣纸卡片底。 */
+  appearance: none; font-family: inherit; font-size: 13px; color: var(--xuan);
+  background: var(--ink-2);
+  border: 1px solid var(--border); border-radius: 9px; padding: 9px 14px; cursor: pointer;
 }
-select option { background: #F8F5ED; color: var(--xuan); }
-.hint { font-size: 12px; color: #6f6555; line-height: 1.7; }
+select option { background: #FDF9EF; color: var(--xuan); }
+.hint { font-size: 12px; color: var(--ink-light); line-height: 1.7; }
 .hint b { color: var(--jin); font-weight: 500; }
 input[type=range] { flex: 1; min-width: 140px; accent-color: var(--zhu); background: transparent; }
 input[type=range]:disabled { opacity: .4; }
@@ -294,7 +298,7 @@ input[type=range]:disabled { opacity: .4; }
 .sw input { accent-color: var(--zhu); width: 24px; height: 24px; flex: 0 0 auto; }
 .dot {
   display: inline-block; width: 6px; height: 6px; border-radius: 50%;
-  background: rgba(58, 51, 42,.2); margin-right: 7px; vertical-align: 1px; transition: .2s;
+  background: rgba(92, 70, 50,.2); margin-right: 7px; vertical-align: 1px; transition: .2s;
 }
 .dot.live { background: var(--zhu); }
 
@@ -302,15 +306,15 @@ input[type=range]:disabled { opacity: .4; }
 .cell { text-align: center; }
 .cell .n { font-size: 20px; line-height: 1.35; color: var(--xuan); font-family: ui-monospace, Consolas, monospace; }
 .cell .n.tonic { color: var(--zhu); }
-.cell .n.hold { color: rgba(58, 51, 42,.32); }
+.cell .n.hold { color: rgba(92, 70, 50,.32); }
 .cell .n.empty { color: transparent; }
-.cell .n.rest { color: #6f6555; }
-.cell .b { font-size: 11px; color: #6f6555; font-variant-numeric: tabular-nums; }
+.cell .n.rest { color: #7A6855; }
+.cell .b { font-size: 11px; color: #7A6855; font-variant-numeric: tabular-nums; }
 .cell.restzone { background: rgba(154, 123, 51,.055); border-radius: 6px; }
 .meta { font-size: 12.5px; color: var(--xuan-dim); line-height: 1.85; font-family: var(--font-ui); }
 .meta i { font-style: normal; color: var(--jin); }
 
-.foot { margin-top: 26px; font-size: 12px; color: #6f6555; line-height: 1.9; border-top: 1px solid rgba(58, 51, 42,.12); padding-top: 16px; }
+.foot { margin-top: 26px; font-size: 12px; color: #7A6855; line-height: 1.9; border-top: 1px solid rgba(92, 70, 50,.12); padding-top: 16px; }
 .foot b { color: var(--jin); font-weight: 500; }
 
 @media (max-width: 520px) {

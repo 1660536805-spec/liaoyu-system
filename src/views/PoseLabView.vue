@@ -451,7 +451,7 @@ function updateVis(lm) {
     const v = lm[p.i]?.visibility ?? 0
     out.push({
       i: p.i, name: p.name, val: v,
-      col: v < 0.35 ? '#e05a44' : v < 0.6 ? '#d8a03a' : '#5b8c6f',
+      col: v < 0.35 ? '#B0552E' : v < 0.6 ? '#d8a03a' : '#5E7C6B',
     })
     if (v < 0.35) bad.push(p.name)
   }
@@ -850,8 +850,8 @@ onBeforeUnmount(() => {
 .bar .t1 { font-size: 15px; letter-spacing: 2px; font-family: var(--font); }
 .bar .t2 { font-size: 11px; color: #8a8172; }
 .bar .t2.ok { color: #7fb069; }
-.bar .t2.rec { color: #e05a44; }
-.bar .t2.bad { color: #e05a44; }
+.bar .t2.rec { color: #B0552E; }
+.bar .t2.bad { color: #B0552E; }
 .bar .t2.wait { color: #8a8172; }
 .sp { flex: 1; }
 
@@ -968,12 +968,12 @@ onBeforeUnmount(() => {
   margin-bottom: 0; background: transparent; color: #8a8172;
   font-size: 11.5px; font-family: inherit;
 }
-.vtoggle .vc { margin-left: auto; color: #6f6555; font-size: 10.5px; }
+.vtoggle .vc { margin-left: auto; color: #7A6855; font-size: 10.5px; }
 .vhead .vd { margin-left: auto; }
 .vhead .vd + .vc { margin-left: 10px; }
 .vd.ok { color: #7fb069; }
 .vd.bad { color: #e0a44a; }
-.mh { color: #6f6555; font-size: 10.5px; }
+.mh { color: #7A6855; font-size: 10.5px; }
 
 .vgrid {
   display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 9px;
@@ -985,7 +985,7 @@ onBeforeUnmount(() => {
   position: relative; overflow: hidden;
 }
 .vbar i { position: absolute; left: 0; right: 0; bottom: 0; display: block; transition: height .12s; }
-.vv { font-size: 9px; color: #6f6555; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.vv { font-size: 9px; color: #7A6855; margin-top: 2px; font-variant-numeric: tabular-nums; }
 
 .srow {
   display: flex; align-items: center; gap: 7px; padding: 2px 0;
@@ -1019,9 +1019,9 @@ onBeforeUnmount(() => {
 .srow.hit .sname { color: #e8c07a; }
 .srow.hit .sval { color: #e8c07a; }
 
-.sd { margin-left: auto; font-size: 10.5px; color: #6f6555; }
+.sd { margin-left: auto; font-size: 10.5px; color: #7A6855; }
 .sd b { color: #d8a03a; font-weight: 500; }
-.sfoot { font-size: 10.5px; color: #6f6555; margin-top: 7px; line-height: 1.6; }
+.sfoot { font-size: 10.5px; color: #7A6855; margin-top: 7px; line-height: 1.6; }
 .sfoot b { color: #b8ae9c; }
 
 .cfgrow, .orow { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 9px; }
@@ -1050,7 +1050,7 @@ onBeforeUnmount(() => {
   min-height: var(--tap);
 }
 .mk b { display: block; font-size: 15px; color: #d8cfbe; line-height: 1.2; }
-.mk span { display: block; font-size: 9.5px; color: #6f6555; margin-top: 2px; }
+.mk span { display: block; font-size: 9.5px; color: #7A6855; margin-top: 2px; }
 .mk.passed { border-color: rgba(127, 176, 105, .45); }
 .mk.passed b { color: #7fb069; }
 .mk.on { background: var(--zhu); border-color: var(--zhu); }
@@ -1062,7 +1062,7 @@ onBeforeUnmount(() => {
   margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(232, 224, 208, .1);
 }
 .kv { text-align: center; }
-.kv span { display: block; font-size: 9.5px; color: #6f6555; }
+.kv span { display: block; font-size: 9.5px; color: #7A6855; }
 .kv b { display: block; font-size: 13px; color: #d6c59e; font-weight: 500; margin-top: 2px; font-variant-numeric: tabular-nums; }
 
 .msg {
@@ -1085,7 +1085,7 @@ onBeforeUnmount(() => {
   border-bottom: 1px solid rgba(232, 224, 208, .08);
   font-variant-numeric: tabular-nums;
 }
-.scan th { color: #6f6555; font-weight: 400; }
+.scan th { color: #7A6855; font-weight: 400; }
 .scan td.th { color: #8a8172; }
 .scan td.on { color: var(--zhu); font-weight: 600; }
 .scan td.ok { color: #7fb069; }

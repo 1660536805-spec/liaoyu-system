@@ -112,7 +112,7 @@ function clearAll() {
 .set { padding: 18px 20px var(--body-pad-b); }
 .grp {
   background: rgba(255, 253, 246, .72);
-  border: 1px solid rgba(58, 51, 42, .10);
+  border: 1px solid rgba(92, 70, 50, .10);
   border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;
   backdrop-filter: blur(3px);
 }
@@ -126,13 +126,13 @@ function clearAll() {
 .row input[type="checkbox"] { width: 24px; height: 24px; accent-color: var(--zhu); flex: 0 0 auto; }
 .row select {
   appearance: none; font-family: var(--font-ui); font-size: 13px; color: var(--xuan);
-  background: rgba(255, 253, 246, .9); border: 1px solid rgba(58, 51, 42, .16);
+  background: rgba(255, 253, 246, .9); border: 1px solid rgba(92, 70, 50, .16);
   border-radius: 9px; padding: 7px 12px;
 }
 .link-row {
   width: 100%; display: flex; align-items: center; justify-content: space-between;
   padding: 11px 0; background: transparent; color: var(--xuan); font-size: 13.5px;
-  font-family: var(--font-ui); border-bottom: 1px solid rgba(58, 51, 42, .06); cursor: pointer;
+  font-family: var(--font-ui); border-bottom: 1px solid rgba(92, 70, 50, .06); cursor: pointer;
 }
 .link-row:last-of-type { border-bottom: 0; }
 .arrow { color: var(--xuan-faint); }

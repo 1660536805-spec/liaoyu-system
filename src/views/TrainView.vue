@@ -1124,7 +1124,7 @@ let lastLandmarks = null
 }
 .snav-btn {
   writing-mode: vertical-rl; padding: 7px 3px; border-radius: 6px;
-  border: 1px solid rgba(58, 51, 42, 0.15); background: rgba(255, 253, 246, 0.9);
+  border: 1px solid rgba(92, 70, 50, 0.15); background: rgba(255, 253, 246, 0.9);
   font-size: 10px; color: var(--xuan); letter-spacing: 1px; cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }

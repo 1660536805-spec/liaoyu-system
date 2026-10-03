@@ -88,7 +88,7 @@ function applyRecommendation() {
 .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
 .opt {
   width: 100%; text-align: left; padding: 16px 18px; border-radius: 12px;
-  border: 1px solid rgba(58, 51, 42,.12); background: rgba(58, 51, 42,.03);
+  border: 1px solid rgba(92, 70, 50,.12); background: rgba(92, 70, 50,.03);
   color: var(--xuan); font-size: 15px; cursor: pointer; transition: .15s;
 }
 .opt.on { border-color: var(--zhu); color: var(--zhu); background: rgba(200, 93, 77,.12); }

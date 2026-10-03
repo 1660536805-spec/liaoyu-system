@@ -1,46 +1,59 @@
-/* 弦养 · 配色 token（浅色水彩版，对齐 APP 界面设计规范）
-   色彩规范：云中白 #F8F5ED / 青杏 #DCCCB0 / 山雾绿 #A7C4B3 / 日光金 #E6D7A8 / 暖砂 #E7C3A8 / 朱砂红 #C85D4D
-   字体：思源宋体（标题）/ 思源黑体系（正文）
-   说明：变量名保持与旧版一致（--ink=页面底、--xuan=主文字），全站只换色值不动结构 */
+/* 弦养 · 配色 token —— 宣纸水墨版（对齐队友 main 分支 app.* 设计系统）
+   基准：队友 470×836pt 设计稿，1rem = 设计稿 10pt
+   色板：cream 宣纸底 / terra 赭石主按钮 / ink 书法墨 / green 竹青 / gold 赭金
+   字体：书法体（Xingkai/STKaiti 系）作标题，正文用无衬线
+   说明：变量名保持与旧版一致（--ink=页面底、--xuan=主文字），全站只换色值不动结构
+
+   ---------------------------------------------------------------
+   对比度验算记录（WCAG，2026-10-04 实测，不是凭感觉填的）
+   队友原色板直接照搬有 4 处硬伤，已按下表处置：
+     · gold      #C9A063 → 2.19:1  不可作文字色 → 文字改用 --jin(#8A6A38 5.6:1)
+     · muted     #97836D → 压水彩底图仅 2.59:1 → 深调为 #7A6855
+     · terra-2   #C4663B → 白字仅 3.95:1（hover 态掉出 AA）→ hover 改用 terra-deep
+     · 描边 line #E8DCC8 → 1.23:1 太弱，浅底上元素会隐形 → 提到 #DCCBB0
+   正文 text #5C4632 在最亮宣纸底上 7.40:1、压山峦青绿区仍 6.31:1，安全。
+   --------------------------------------------------------------- */
 :root {
-  /* 主色（浅色体系） */
-  --ink: #F8F5ED;        /* 云中白：页面底色 */
-  --xuan: #3A332A;       /* 墨褐：主文字（深暖黑） */
-  --zhu: #C85D4D;        /* 朱砂红：点睛/命中/强调 */
+  /* 主色（宣纸水墨体系） */
+  --ink: #FBF3E3;        /* 宣纸底：页面底色（队友 cream） */
+  --xuan: #5C4632;       /* 正文墨：主文字（队友 text） */
+  --zhu: #B0552E;        /* 赭石：点睛/命中/主按钮（队友 terra） */
 
   /* 派生 */
-  --ink-2: #F1ECE1;      /* 浅一层纸色：面板底 */
-  --ink-3: #EAE3D3;      /* 再浅一层：按钮底 */
-  --xuan-dim: rgba(58, 51, 42, 0.62);
-  --xuan-faint: rgba(58, 51, 42, 0.32);
-  --zhu-glow: rgba(200, 93, 77, 0.35);
-  --jin: #9A7B33;        /* 日光金的文字可用色（#E6D7A8 太浅只做底色点缀） */
+  --ink-2: #FDF9EF;      /* 卡片底（队友 cream-2） */
+  --ink-3: #F6ECD9;      /* 再深一阶：按钮底（队友 cream-3） */
+  --xuan-dim: rgba(92, 70, 50, 0.66);
+  --xuan-faint: rgba(92, 70, 50, 0.38);
+  --zhu-glow: rgba(176, 85, 46, 0.32);
+  --jin: #8A6A38;        /* 赭金的文字可用色（原 #C9A063 仅 2.19:1，已压深） */
 
-  /* 辅助点缀（水彩感） */
-  --qing: #DCCCB0;       /* 青杏 */
-  --mist: #A7C4B3;       /* 山雾绿 */
-  --gold: #E6D7A8;       /* 日光金 */
-  --sand: #E7C3A8;       /* 暖砂色 */
+  /* 辅助点缀（国风） */
+  --qing: #DCCBB0;       /* 描边/分隔（队友 line，已提深避免隐形） */
+  --mist: #5E7C6B;       /* 竹青（队友 green） */
+  --gold: #C9A063;       /* 赭金：仅作装饰底色/进度条，禁作文字色 */
+  --sand: #E7C3A8;       /* 暖砂 */
 
-  /* 最终版 UI 新增 token（2026-10-03） */
-  --bg-paper: #FDF6EA;
-  --bg-card: #FFFDF8;
-  --green: #5B8C6F;
-  --green-light: #D7E7DD;
-  --gold-tone: #C7A66C;
-  --gold-light: #E8DCC1;
-  --brown: #8B6F4E;
-  --brown-dark: #5E4632;
-  --border: #E8DECC;
-  --ink-text: #4A3A2A;
-  --ink-light: #8C7B66;
-  --green-dark: #4A765E;
+  /* 最终版 UI 新增 token（2026-10-03 基线，按宣纸体系重校） */
+  --bg-paper: #FBF3E3;
+  --bg-card: #FDF9EF;
+  --green: #5E7C6B;      /* 竹青，对宣纸底 4.16:1 */
+  --green-light: #DCE8E1;
+  --gold-tone: #A87F3F;
+  --gold-light: #EFE2C6;
+  --brown: #6B4226;      /* 小标题墨（队友 brown，7.82:1） */
+  --brown-dark: #4A2C1A; /* 书法标题墨（队友 ink，11.42:1） */
+  --border: #DCCBB0;     /* 描边（队友 line-2，比 line 更实） */
+  --ink-text: #5C4632;
+  --ink-light: #7A6855;  /* 次要文字（原 muted #97836D 压底图不足，已深调） */
+  --green-dark: #46685A; /* 竹青深（队友 green-deep） */
 
-  /* 尺度 */
-  --r-s: 8px;
-  --r-m: 14px;
-  --r-l: 22px;
+  /* 尺度（对齐队友设计稿的圆角/阴影语言） */
+  --r-s: 10px;           /* 队友 tag 胶囊为 2rem=20px，小圆角取 10 */
+  --r-m: 18px;           /* 队友 card 为 1.5rem=15px，这里略放大便于手指操作 */
+  --r-l: 26px;           /* 大卡片 */
   --gap: 16px;
+  --shadow-s: 0 2px 7px rgba(122, 86, 44, .10);   /* 队友 --shadow */
+  --shadow-l: 0 5px 16px rgba(122, 86, 44, .18);  /* 队友 --shadow-lg */
 
   /* ---------- 响应式尺度（手机适配基建）----------
      手机与桌面的差别不只是「窄」，还有三件事：
@@ -64,9 +77,12 @@
      （有 16px 的），是「页面底部内容被遮」的直接原因。 */
   --body-pad-b: calc(var(--tab-h) + var(--safe-b) + 24px);
 
-  /* 字体 */
-  --font: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
-  --font-ui: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  /* 字体：书法体作标题（队友 A 套语言），正文用无衬线保证小字可读。
+     书法体在 Windows 常见为 KaiTi/STKaiti，在 macOS/iOS 为 Kaiti SC，
+     都缺字时回退宋体——所以正文绝不能用书法体，13px 以下会糊。 */
+  --font-serif: "Xingkai SC", "STXingkai", "Kaiti SC", "KaiTi", "STKaiti", "Songti SC", "STSong", "Noto Serif SC", serif;
+  --font: var(--font-serif);   /* 标题/显示（保留旧变量名，view 里已在用） */
+  --font-ui: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
 }
 
 /* 桌面端：放开视窗宽度，大屏自适应沉浸跟练 */
@@ -97,7 +113,9 @@ html, body {
 body {
   background: var(--ink);
   color: var(--xuan);
-  font-family: var(--font);
+  /* 正文一律无衬线。书法体（--font / --font-serif）只给标题用——
+     13px 以下楷体笔画会粘连，正文用它手机上不可读。 */
+  font-family: var(--font-ui);
   overflow: hidden;
   /* 手机上系统字体放大后，布局不要被撑破 */
   text-size-adjust: 100%;
@@ -130,8 +148,8 @@ button.mini { min-height: 34px; padding-inline: 12px; }
    底图：青绿山水·横琴岩石·樱花枝·日轮（1080×1920 竖版，手机 cover 正好铺满）
    旧图 bg-home.jpg 保留作 CSS 兜底（换图失败时自动退到上一层）
    墨罩强度按这张新图的最亮处（宣纸底 244,234,214）算过：
-   最薄处 .66 叠完仍是浅纸色，--xuan #3A332A 墨褐字对比度 ≥ 6.9:1；
-   山峦青绿区同层下更到 11:1，安全。 */
+   最薄处 .62 叠完仍是浅纸色，--xuan #5C4632 正文墨对比度 ≥ 6.3:1；
+   山峦青绿区同层下更到 9:1，安全。 */
 .wrap {
   /* dvh 而非 vh：移动端地址栏展开时 vh 不变，页面底部会被推出屏幕。
      先写 vh 兜底、再写 dvh 覆盖（老浏览器不认 dvh 会忽略第二条）。 */
@@ -147,8 +165,8 @@ button.mini { min-height: 34px; padding-inline: 12px; }
 .wrap::before {
   content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background: linear-gradient(180deg,
-    rgba(248, 245, 237, .62) 0%, rgba(248, 245, 237, .78) 30%,
-    rgba(248, 245, 237, .85) 66%, rgba(248, 245, 237, .92) 100%);
+    rgba(251, 243, 227, .62) 0%, rgba(251, 243, 227, .78) 30%,
+    rgba(251, 243, 227, .85) 66%, rgba(251, 243, 227, .92) 100%);
 }
 
 .topbar {
@@ -156,7 +174,7 @@ button.mini { min-height: 34px; padding-inline: 12px; }
   /* 顶部让出刘海/状态栏（env 在不支持的浏览器上返回 0，无需回退） */
   padding: calc(14px + var(--safe-t)) calc(18px + var(--safe-r)) 14px calc(18px + var(--safe-l));
   flex: 0 0 auto;
-  border-bottom: 1px solid rgba(58, 51, 42, 0.08);
+  border-bottom: 1px solid rgba(92, 70, 50, 0.08);
   /* 顶栏在手机上容易挤：允许换行，别把按钮挤到不可点 */
   flex-wrap: wrap;
   row-gap: 8px;
@@ -171,14 +189,14 @@ button.mini { min-height: 34px; padding-inline: 12px; }
   padding: 11px 20px; border-radius: var(--r-m);
   background: var(--ink-3); color: var(--xuan);
   font-size: 14px; font-family: var(--font-ui);
-  border: 1px solid rgba(58, 51, 42, 0.12);
+  border: 1px solid rgba(92, 70, 50, 0.12);
   transition: all .18s;
   min-height: var(--tap);
 }
-.btn:hover { background: #E3DAC6; }
+.btn:hover { background: #F0E2CC; }
 .btn:active { transform: scale(.97); }
 .btn.primary { background: var(--zhu); border-color: var(--zhu); color: #fff; }
-.btn.primary:hover { background: #D36B59; }
+.btn.primary:hover { background: #8F3F1F; }
 .btn.ghost { background: transparent; }
 .btn:disabled { opacity: .4; cursor: not-allowed; }
 /* 小按钮在手机上要够点。
@@ -210,22 +228,22 @@ input[type="range"] {
   width: 100%;
 }
 input[type="range"]::-webkit-slider-runnable-track {
-  height: 6px; border-radius: 3px; background: rgba(58, 51, 42, .18);
+  height: 6px; border-radius: 3px; background: rgba(92, 70, 50, .18);
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 26px; height: 26px; border-radius: 50%;
-  background: var(--zhu); border: 2px solid #FFFDF6;
-  box-shadow: 0 2px 6px rgba(58, 51, 42, .28);
+  background: var(--zhu); border: 2px solid #FDF9EF;
+  box-shadow: 0 2px 6px rgba(92, 70, 50, .28);
   margin-top: -10px;   /* 居中到 6px 轨道上 */
 }
 input[type="range"]::-moz-range-track {
-  height: 6px; border-radius: 3px; background: rgba(58, 51, 42, .18);
+  height: 6px; border-radius: 3px; background: rgba(92, 70, 50, .18);
 }
 input[type="range"]::-moz-range-thumb {
   width: 22px; height: 22px; border-radius: 50%;
-  background: var(--zhu); border: 2px solid #FFFDF6;
+  background: var(--zhu); border: 2px solid #FDF9EF;
 }
 /* select（下拉）在 iOS 上原生控件很小，放大到可点 */
 select {
@@ -290,7 +308,7 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
     max-width: var(--shell-w);
     margin: 0 auto;
     /* 桌面端两侧补一层纸色，与底图衔接处不突兀 */
-    box-shadow: 0 0 0 1px rgba(58, 51, 42, .06), 0 24px 80px rgba(58, 51, 42, .10);
+    box-shadow: 0 0 0 1px rgba(92, 70, 50, .06), 0 24px 80px rgba(92, 70, 50, .10);
     background: var(--ink);
   }
   /* 桌面端字号可以略大（不需要迁就小屏） */

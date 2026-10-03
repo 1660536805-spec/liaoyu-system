@@ -61,7 +61,7 @@ function skip() { localStorage.setItem('xianyang.visited', '1'); router.push('/'
 
 .custom-tip {
   display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-radius: 12px;
-  background: rgba(255,253,246,.7); border: 1px solid rgba(58,51,42,.08);
+  background: rgba(255,253,246,.7); border: 1px solid rgba(92, 70, 50,.08);
   font-size: 12px; color: var(--xuan-dim); margin-bottom: 32px; width: 100%;
 }
 .tip-icon { font-size: 16px; }

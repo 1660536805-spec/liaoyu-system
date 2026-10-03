@@ -116,7 +116,7 @@ function demo() {
 .opt {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
   padding: 14px 12px; border-radius: 12px;
-  border: 1px solid rgba(58, 51, 42,.12); background: rgba(58, 51, 42,.03);
+  border: 1px solid rgba(92, 70, 50,.12); background: rgba(92, 70, 50,.03);
   color: var(--xuan); cursor: pointer; transition: .15s;
 }
 .opt.on { border-color: var(--zhu); background: rgba(200, 93, 77,.12); }
@@ -127,7 +127,7 @@ function demo() {
 .stage-card {
   display: grid; grid-template-columns: 56px 1fr; gap: 6px 12px;
   padding: 14px 16px; border-radius: 12px; text-align: left;
-  border: 1px solid rgba(58, 51, 42,.12); background: rgba(58, 51, 42,.03);
+  border: 1px solid rgba(92, 70, 50,.12); background: rgba(92, 70, 50,.03);
   color: var(--xuan); cursor: pointer; transition: .15s;
 }
 .stage-card.on { border-color: var(--zhu); background: rgba(200, 93, 77,.12); }
@@ -135,7 +135,7 @@ function demo() {
 .stage-n { font-size: 16px; color: var(--jin); }
 .stage-d { font-size: 12px; color: var(--xuan-dim); font-family: var(--font-ui); }
 
-.tips { padding: 14px 16px; border-radius: 12px; background: rgba(58, 51, 42,.04); }
+.tips { padding: 14px 16px; border-radius: 12px; background: rgba(92, 70, 50,.04); }
 .tips p { margin: 0 0 6px; font-size: 12.5px; color: var(--xuan-dim); font-family: var(--font-ui); line-height: 1.7; }
 .tips p:last-child { margin-bottom: 0; }
 
@@ -144,7 +144,7 @@ function demo() {
 .float-demo {
   display: block; margin: 16px auto 0;
   font-size: 13px; color: var(--xuan-faint); font-family: var(--font-ui);
-  background: transparent; border: 1px dashed rgba(58, 51, 42,.16);
+  background: transparent; border: 1px dashed rgba(92, 70, 50,.16);
   padding: 11px 18px; border-radius: 22px; cursor: pointer;
   min-height: 40px;
 }

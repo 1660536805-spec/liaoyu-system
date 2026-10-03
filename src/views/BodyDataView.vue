@@ -111,7 +111,7 @@ function clear() {
 .field label { display: block; font-size: 13px; color: var(--xuan); margin-bottom: 8px; }
 .field input[type="number"], .field input[type="text"] {
   width: 100%; padding: 12px 14px; border-radius: 10px;
-  background: rgba(58, 51, 42,.05); border: 1px solid rgba(58, 51, 42,.12);
+  background: rgba(92, 70, 50,.05); border: 1px solid rgba(92, 70, 50,.12);
   color: var(--xuan); font-size: 15px; font-family: var(--font-ui);
 }
 .field input::placeholder { color: var(--xuan-faint); }
@@ -119,8 +119,8 @@ function clear() {
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
   /* 手机上 34px 高偏难点，抬到 40px；字号 13→14 更好读 */
-  padding: 10px 16px; border-radius: 20px; border: 1px solid rgba(58, 51, 42,.12);
-  background: rgba(58, 51, 42,.04); color: var(--xuan-dim); font-size: 14px;
+  padding: 10px 16px; border-radius: 20px; border: 1px solid rgba(92, 70, 50,.12);
+  background: rgba(92, 70, 50,.04); color: var(--xuan-dim); font-size: 14px;
   cursor: pointer; transition: .15s;
   min-height: 40px;
 }

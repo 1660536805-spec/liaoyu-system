@@ -55,14 +55,14 @@ function clear() {
 .empty { text-align: center; color: var(--xuan-dim); padding: 18vh 20px; line-height: 2.2; font-size: 15px; }
 .empty span { font-size: 12px; color: var(--xuan-faint); font-family: var(--font-ui); }
 
-.rec { border: 1px solid rgba(58, 51, 42,.08); border-radius: var(--r-m); padding: 13px 15px; margin-bottom: 11px; background: rgba(58, 51, 42,.02); }
+.rec { border: 1px solid rgba(92, 70, 50,.08); border-radius: var(--r-m); padding: 13px 15px; margin-bottom: 11px; background: rgba(92, 70, 50,.02); }
 .rec.full { border-color: rgba(154, 123, 51,.28); background: rgba(154, 123, 51,.05); }
 .rec-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px; }
 .rec-date { font-family: var(--font-ui); font-size: 13px; color: var(--xuan-dim); }
 .rec-tone { margin-left: 8px; font-size: 11px; color: var(--jin); }
 .rec-badge { font-size: 11px; color: var(--jin); font-family: var(--font-ui); }
 .rec-names { display: flex; flex-wrap: wrap; gap: 6px; }
-.tag { font-size: 11.5px; padding: 3px 9px; border-radius: 20px; background: rgba(58, 51, 42,.07); color: var(--xuan-dim); font-family: var(--font-ui); }
+.tag { font-size: 11.5px; padding: 3px 9px; border-radius: 20px; background: rgba(92, 70, 50,.07); color: var(--xuan-dim); font-family: var(--font-ui); }
 .tag.dim { color: var(--xuan-faint); }
 .clear { margin-top: 12px; width: 100%; }
 </style>

@@ -186,7 +186,7 @@ onMounted(() => {
 .section-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
 .sec-title-row { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
 .sec-title { font-size: 16px; font-weight: 600; color: #2B251E; }
-.sec-status-tag { font-size: 11px; padding: 2px 7px; border-radius: 10px; background: rgba(58,51,42,.08); color: var(--xuan-dim); }
+.sec-status-tag { font-size: 11px; padding: 2px 7px; border-radius: 10px; background: rgba(92, 70, 50,.08); color: var(--xuan-dim); }
 .sec-status-tag.on { background: var(--green-light); color: var(--green); }
 .sec-time { margin-left: auto; font-size: 11px; color: var(--xuan-faint); }
 .sec-desc { font-size: 12px; color: var(--xuan-dim); line-height: 1.6; }

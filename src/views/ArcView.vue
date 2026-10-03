@@ -10,7 +10,7 @@
     <div class="body">
       <p class="lead">
         一条连续不断的底线——12 分钟不重复，照八段锦八式的起、稳、落、峰、收写。做到位时，上面那层会再叠一声泛音。<br />
-        <b>五个调式共用同一条结构，只换内容和主音</b>——这正是「同宫系统」最省事的地方：音高集合完全一样，只换谁当家。
+        <b>五个调式共用同一条结构，只换内容和基音</b>——这正是「同宫系统」最省事的地方：音高集合完全一样，只换谁当家。
       </p>
 
       <div class="modes">
@@ -55,10 +55,10 @@
 
       <div class="foot">
         调律 <b>三分损益律</b>，宫 = F3 174.61&nbsp;Hz。底线用<b>散音</b>（浑厚、余韵长），浮层用<b>泛音</b>（清灵、一触即散）。<br />
-        <b>和声骨架（五调通用）</b>：主题三次落<b>主音</b>（完全终止，确立调性）；中段两次落<b>主音上方四度</b>（半终止，悬着）；五、六式下沉低八度、落到<b>非主音</b>上（最暗、不解）；第七式主题原形强奏落主音——<b>全曲唯一的解决点</b>；第八式、收功两处<b>七弦齐鸣</b>收束。<br />
-        <b>换调换的是什么</b>：只换七条动机的<b>落音</b>和<b>低音主音</b>——结构、时长、强度曲线、音区安排全部不变。所以五个调听感不同，但「骨架」是同一副。<br />
+        <b>和声骨架（五调通用）</b>：主题三次落<b>基音</b>（完全终止，确立调性）；中段两次落<b>基音上方四度</b>（半终止，悬着）；五、六式下沉低八度、落到<b>非基音</b>上（最暗、不解）；第七式主题原形强奏落基音——<b>全曲唯一的解决点</b>；第八式、收功两处<b>七弦齐鸣</b>收束。<br />
+        <b>换调换的是什么</b>：只换七条动机的<b>落音</b>和<b>低音基音</b>——结构、时长、强度曲线、音区安排全部不变。所以五个调听感不同，但「骨架」是同一副。<br />
         <b>注意定位</b>：这是<b>跟练轨</b>（必须跟八段锦强度曲线对齐，只能自产）。练完静坐、日常赏听是另一条轨，那个位置用真人演奏录音更合适。<b>两条轨不互相替代。</b><br />
-        <b>氛围音</b>：这一阶段<b>不叠</b>——弧线自己每几拍就有一次主音低八度散音，再垫反而糊。
+        <b>氛围音</b>：这一阶段<b>不叠</b>——弧线自己每几拍就有一次基音低八度散音，再垫反而糊。
       </div>
     </div>
   </div>
@@ -72,6 +72,7 @@ import {
   arcIAt, arcSecAt, arcLanding, createArcPlayer,
 } from '../engine/arc.js'
 import { unlockAudio } from '../engine/guqin.js'
+import { safeCopy } from '../data/tones.js'
 
 const router = useRouter()
 
@@ -141,10 +142,11 @@ const motifText = computed(() => {
   const label = { A: 'A 主题', D: 'D 展开', B: 'B 中段', E: 'E 变体', C: 'C 下沉', C2: 'C2 最暗', P: 'P 峰', Z: 'Z 收' }
   const lines = keys.map((k) => {
     const ns = m.M[k].slice()
-    const tail = ns[ns.length - 1] === m.tonic ? '   ← 落主音' : ''
+    const tail = ns[ns.length - 1] === m.tonic ? '   ← 落基音' : ''
     return `${label[k]}  ${ns.join(' ')}${tail}`
   })
-  return `<b>${m.mode}　主音＝${m.g}　入${m.o}</b><br>${lines.slice(0, 6).join('<br>')}`
+  // 文案过 safeCopy：甲方红线禁止界面出现「主音」「入脏」
+  return safeCopy(`<b>${m.mode}　基音＝${m.g}　对应${m.o}</b><br>${lines.slice(0, 6).join('<br>')}`)
 })
 
 function fmt(s) {
@@ -226,11 +228,11 @@ onBeforeUnmount(() => {
 
 .modes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; }
 .md {
-  appearance: none; border: 1px solid rgba(58, 51, 42,.14); background: rgba(58, 51, 42,.04);
+  appearance: none; border: 1px solid rgba(92, 70, 50,.14); background: rgba(92, 70, 50,.04);
   color: var(--xuan); border-radius: 14px; padding: 14px 6px 11px; cursor: pointer;
   transition: .18s; font-family: inherit; text-align: center;
 }
-.md:hover { border-color: rgba(154, 123, 51,.5); background: rgba(58, 51, 42,.08); }
+.md:hover { border-color: rgba(154, 123, 51,.5); background: rgba(92, 70, 50,.08); }
 .md .g { font-size: 22px; line-height: 1.15; }
 .md .o { font-size: 11.5px; color: var(--xuan-faint); margin-top: 6px; letter-spacing: .08em; }
 .md.on { border-color: var(--zhu); background: rgba(200, 93, 77,.14); }
@@ -238,25 +240,25 @@ onBeforeUnmount(() => {
 .md.on .o { color: var(--jin); }
 
 .panel {
-  border: 1px solid rgba(58, 51, 42,.12); border-radius: 12px;
-  background: rgba(58, 51, 42,.03); padding: 16px 18px; margin: 18px 0 0;
+  border: 1px solid rgba(92, 70, 50,.12); border-radius: 12px;
+  background: rgba(92, 70, 50,.03); padding: 16px 18px; margin: 18px 0 0;
 }
 .row { display: flex; align-items: center; gap: 13px; flex-wrap: wrap; }
 .row + .row { margin-top: 14px; }
 .lbl { font-size: 12.5px; color: var(--xuan-dim); font-family: var(--font-ui); }
 .lbl .lb { font-size: 12.5px; color: var(--xuan-dim); }
 
-.seg { display: flex; border: 1px solid rgba(58, 51, 42,.16); border-radius: 9px; overflow: hidden; }
+.seg { display: flex; border: 1px solid rgba(92, 70, 50,.16); border-radius: 9px; overflow: hidden; }
 .seg button {
   appearance: none; font-family: inherit; background: transparent; color: var(--xuan-faint);
-  border: 0; border-right: 1px solid rgba(58, 51, 42,.16); padding: 8px 15px; font-size: 12.5px; cursor: pointer; transition: .15s;
+  border: 0; border-right: 1px solid rgba(92, 70, 50,.16); padding: 8px 15px; font-size: 12.5px; cursor: pointer; transition: .15s;
 }
 .seg button:last-child { border-right: 0; }
 .seg button.on { background: rgba(200, 93, 77,.18); color: var(--jin); }
 
 .dot {
   display: inline-block; width: 6px; height: 6px; border-radius: 50%;
-  background: rgba(58, 51, 42,.2); margin-right: 8px; vertical-align: 1px; transition: .2s;
+  background: rgba(92, 70, 50,.2); margin-right: 8px; vertical-align: 1px; transition: .2s;
 }
 .dot.live { background: var(--zhu); }
 
@@ -266,10 +268,10 @@ onBeforeUnmount(() => {
 .now .tm { font-size: 12.5px; color: var(--xuan-faint); font-variant-numeric: tabular-nums; font-family: var(--font-ui); }
 .hint { font-size: 12.5px; color: var(--xuan-dim); line-height: 1.8; margin-top: 10px; font-family: var(--font-ui); }
 .hint b { color: var(--jin); font-weight: 500; }
-.mot { font-size: 12px; color: #6f6555; line-height: 1.9; margin-top: 10px; font-family: ui-monospace, Consolas, monospace; }
+.mot { font-size: 12px; color: #7A6855; line-height: 1.9; margin-top: 10px; font-family: ui-monospace, Consolas, monospace; }
 .mot b { color: #888780; font-weight: 500; }
 
-.foot { margin-top: 24px; font-size: 12px; color: #6f6555; line-height: 1.95; border-top: 1px solid rgba(58, 51, 42,.12); padding-top: 16px; }
+.foot { margin-top: 24px; font-size: 12px; color: #7A6855; line-height: 1.95; border-top: 1px solid rgba(92, 70, 50,.12); padding-top: 16px; }
 .foot b { color: var(--jin); font-weight: 500; }
 
 @media (max-width: 560px) {

@@ -170,7 +170,7 @@ h1 { font-size: 18px; font-weight: 500; margin: 0; letter-spacing: .06em; }
 .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
 .tab {
   appearance: none; font-family: inherit; cursor: pointer; transition: .18s;
-  border: 1px solid rgba(58, 51, 42,.14); background: rgba(58, 51, 42,.04);
+  border: 1px solid rgba(92, 70, 50,.14); background: rgba(92, 70, 50,.04);
   color: var(--xuan-dim); border-radius: 10px; padding: 8px 14px;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
@@ -184,8 +184,8 @@ h1 { font-size: 18px; font-weight: 500; margin: 0; letter-spacing: .06em; }
 .dsc { font-size: 12.5px; color: var(--xuan-dim); line-height: 1.85; margin: 14px 0 4px; font-family: var(--font-ui); }
 
 .tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 8px; }
-.tbl th { text-align: left; color: var(--xuan-faint); font-weight: 400; padding: 6px 8px 8px; border-bottom: 1px solid rgba(58, 51, 42,.12); }
-.tbl td { padding: 9px 8px; border-bottom: 1px solid rgba(58, 51, 42,.06); color: var(--xuan-dim); cursor: pointer; }
+.tbl th { text-align: left; color: var(--xuan-faint); font-weight: 400; padding: 6px 8px 8px; border-bottom: 1px solid rgba(92, 70, 50,.12); }
+.tbl td { padding: 9px 8px; border-bottom: 1px solid rgba(92, 70, 50,.06); color: var(--xuan-dim); cursor: pointer; }
 .tbl tr:last-child td { border-bottom: 0; }
 .tbl tr.cur td { background: rgba(200, 93, 77,.1); }
 .tbl tr.cur .tt { color: var(--zhu); }
@@ -195,8 +195,8 @@ h1 { font-size: 18px; font-weight: 500; margin: 0; letter-spacing: .06em; }
 .cf { font-size: 11.5px; white-space: nowrap; }
 .cf2 { color: #7fb069; } .cf1 { color: var(--jin); } .cf0 { color: #8a7a66; }
 .pl {
-  appearance: none; font-family: inherit; border: 1px solid rgba(58, 51, 42,.14);
-  background: rgba(58, 51, 42,.05); color: var(--xuan-faint);
+  appearance: none; font-family: inherit; border: 1px solid rgba(92, 70, 50,.14);
+  background: rgba(92, 70, 50,.05); color: var(--xuan-faint);
   border-radius: 7px; padding: 5px 11px; font-size: 12px; cursor: pointer; white-space: nowrap;
 }
 .pl.has { border-color: rgba(200, 93, 77,.6); color: var(--zhu); }
@@ -207,8 +207,8 @@ h1 { font-size: 18px; font-weight: 500; margin: 0; letter-spacing: .06em; }
 .note b { color: var(--jin); font-weight: 500; }
 
 .player {
-  margin-top: 18px; border: 1px solid rgba(58, 51, 42,.12); border-radius: 12px;
-  background: rgba(58, 51, 42,.03); padding: 14px 16px;
+  margin-top: 18px; border: 1px solid rgba(92, 70, 50,.12); border-radius: 12px;
+  background: rgba(92, 70, 50,.03); padding: 14px 16px;
 }
 .np .t { font-size: 14.5px; color: var(--xuan); }
 .np .c { font-size: 11.5px; color: var(--xuan-faint); font-family: var(--font-ui); margin-top: 4px; line-height: 1.7; }
@@ -218,9 +218,9 @@ h1 { font-size: 18px; font-weight: 500; margin: 0; letter-spacing: .06em; }
 .tm { font-size: 11.5px; color: var(--xuan-dim); font-family: var(--font-ui); font-variant-numeric: tabular-nums; }
 
 .cred {
-  margin-top: 22px; font-size: 11.5px; color: rgba(58, 51, 42,.3);
+  margin-top: 22px; font-size: 11.5px; color: rgba(92, 70, 50,.3);
   line-height: 1.95; font-family: var(--font-ui);
-  border-top: 1px solid rgba(58, 51, 42,.1); padding-top: 14px;
+  border-top: 1px solid rgba(92, 70, 50,.1); padding-top: 14px;
 }
 .cred-title { color: var(--jin); margin-bottom: 4px; }
 .cred-note { margin-top: 8px; }

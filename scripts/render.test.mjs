@@ -356,7 +356,10 @@ console.log('\n=== 音层：甲方定弦表 ===')
 console.log('\n=== 内容合规 D9：无禁词 ===')
 {
   const moves = (await load('/src/data/moves.json')).default
-  const ban = ['治疗', '祛湿', '根治', '调理好', '疗效', '治愈', '药', '疗效', '排毒', '减肥']
+  // 医疗词 + 界面禁用词（甲方《五行五脏定制推荐逻辑》§6.2）
+  // ⚠ 「主音」「入脏」2026-10-04 才补进来：原词表漏了这两个，
+  //   导致 WorkshopView / ArcView 的手写模板把它们直接渲染上了界面。
+  const ban = ['治疗', '祛湿', '根治', '调理好', '疗效', '治愈', '药', '排毒', '减肥', '主音', '入脏']
   const all = JSON.stringify(moves)
   const hit = ban.filter((w) => all.includes(w))
   okc(hit.length === 0, `8 式文案无禁词${hit.length ? '（命中：' + hit.join(',') + '）' : ''}`)
@@ -364,6 +367,43 @@ console.log('\n=== 内容合规 D9：无禁词 ===')
   const map = moves.map((m) => m.stringIndex)
   okc(moves[7].chord === true && moves[7].stringIndex === 0, '第 8 式 = 七弦齐鸣（stringIndex=0 + chord）')
   okc([1, 2, 3, 4, 5, 6, 7].every((n) => map.includes(n)), '1-7 号弦一一对应到 7 式')
+}
+
+console.log('\n=== 内容合规 D9-b：全站 view 层无禁用词（防新增页面漏网）===')
+{
+  // 只扫「会渲染到界面」的模板文本：<template> 段 + <script> 里的用户可见文案。
+  // 注释与引擎内部命名（engine/ 的主音指音频基频）不属界面文案，不管。
+  const { readFile, readdir } = await import('node:fs/promises')
+  const { join } = await import('node:path')
+  const fileURLToPath2 = (await import('node:url')).fileURLToPath
+  const viewsDir = fileURLToPath2(new URL('../src/views/', import.meta.url))
+  const compDir = fileURLToPath2(new URL('../src/components/', import.meta.url))
+  const dataDir = fileURLToPath2(new URL('../src/data/', import.meta.url))
+  const ban = ['主音', '入脏', '治疗', '祛湿', '根治', '调理好']
+
+  const stripComments = (s) => s
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1')
+
+  const files = []
+  for (const dir of [viewsDir, compDir, dataDir]) {
+    let names = []
+    try { names = await readdir(dir) } catch { continue }
+    for (const n of names) if (/\.(vue|js)$/.test(n)) files.push(join(dir, n))
+  }
+
+  const hits = []
+  for (const f of files) {
+    const name = f.split(/[\\/]/).pop()
+    // tones.js 里存着 BANNED / REWRITE 词表和 safeCopy 本体，
+    // 它必须「含有」这些词才能拦得住，扫它等于自己告自己。跳过。
+    if (name === 'tones.js') continue
+    const raw = stripComments(await readFile(f, 'utf8'))
+    for (const w of ban) {
+      if (raw.includes(w)) hits.push(`${name}:${w}`)
+    }
+  }
+  okc(hits.length === 0, `view/component 层无禁用词（扫 ${files.length - 1} 个文件，tones.js 为词表定义处故跳过）${hits.length ? '→ 命中：' + hits.join(', ') : ''}`)
 }
 
 console.log('\n=== 断网可用性（D5 前置）：零外链 ===')

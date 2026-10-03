@@ -134,7 +134,7 @@ const stringBars = computed(() => {
       name: n,
       hit,
       height: Math.round(h) + '%',
-      color: hit ? 'var(--zhu)' : 'rgba(58, 51, 42,.14)',
+      color: hit ? 'var(--zhu)' : 'rgba(92, 70, 50,.14)',
     }
   })
 })
@@ -198,7 +198,7 @@ function share() { alert('分享琴谱（P1 可接入系统分享）') }
 }
 .score-circle {
   width: 140px; height: 140px; border-radius: 50%;
-  border: 8px solid rgba(58, 51, 42,.08);
+  border: 8px solid rgba(92, 70, 50,.08);
   border-top-color: var(--zhu);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
@@ -213,7 +213,7 @@ function share() { alert('分享琴谱（P1 可接入系统分享）') }
 .strings {
   display: flex; align-items: flex-end; gap: 10px; height: 130px;
   justify-content: center; padding-bottom: 26px;
-  border-bottom: 1px solid rgba(58, 51, 42,.12);
+  border-bottom: 1px solid rgba(92, 70, 50,.12);
 }
 .s-bar {
   width: 28px; border-radius: 4px 4px 0 0; position: relative; transition: .4s;
@@ -239,17 +239,17 @@ function share() { alert('分享琴谱（P1 可接入系统分享）') }
 .data { margin-bottom: 24px; }
 .data-title { font-size: 13px; color: var(--xuan-dim); font-family: var(--font-ui); margin-bottom: 12px; }
 .data-grid { display: flex; gap: 12px; }
-.data-item { flex: 1; text-align: center; padding: 14px 8px; border-radius: 12px; background: rgba(58, 51, 42,.04); }
+.data-item { flex: 1; text-align: center; padding: 14px 8px; border-radius: 12px; background: rgba(92, 70, 50,.04); }
 .data-num { display: block; font-size: 20px; color: var(--jin); }
 .data-lab { font-size: 11px; color: var(--xuan-faint); font-family: var(--font-ui); }
 
 .recipe { margin-bottom: 24px; }
 .recipe-title { font-size: 13px; color: var(--xuan-dim); font-family: var(--font-ui); margin-bottom: 12px; }
-.recipe-card { padding: 16px; border-radius: 12px; background: rgba(58, 51, 42,.04); border: 1px solid rgba(58, 51, 42,.08); }
+.recipe-card { padding: 16px; border-radius: 12px; background: rgba(92, 70, 50,.04); border: 1px solid rgba(92, 70, 50,.08); }
 .recipe-name { font-size: 16px; color: var(--jin); margin-bottom: 6px; }
 .recipe-why { font-size: 12px; color: var(--xuan-dim); font-family: var(--font-ui); line-height: 1.7; margin-bottom: 10px; }
 .recipe-save { font-size: 11px; }
-.recipe-lock { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-radius: 12px; background: rgba(58, 51, 42,.03); border: 1px dashed rgba(58, 51, 42,.12); margin-bottom: 24px; }
+.recipe-lock { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-radius: 12px; background: rgba(92, 70, 50,.03); border: 1px dashed rgba(92, 70, 50,.12); margin-bottom: 24px; }
 .recipe-lock span { font-size: 12px; color: var(--xuan-dim); font-family: var(--font-ui); }
 
 .actions { display: flex; gap: 12px; }

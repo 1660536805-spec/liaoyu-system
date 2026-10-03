@@ -151,8 +151,8 @@ function start() {
 
 .rec-card {
   position: relative; border-radius: 22px; padding: 22px 20px; min-height: 290px;
-  background: linear-gradient(135deg, #FFFDF8 0%, #F9F1E3 100%);
-  border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(58,51,42,.09);
+  background: linear-gradient(135deg, #FDF9EF 0%, #F4E9D5 100%);
+  border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(122,86,44,.10);
   display: flex; flex-direction: column; justify-content: space-between;
   margin-bottom: 18px; overflow: hidden;
 }
@@ -176,25 +176,30 @@ function start() {
 .start-btn {
   position: absolute; right: 20px; bottom: 22px;
   width: 130px; height: 130px; border-radius: 50%;
-  background: radial-gradient(circle at 40% 30%, #E2715F 0%, #C85D4D 70%, #AB4637 100%);
-  color: #FFFDF8;
+  background: radial-gradient(circle at 38% 28%, #C4663B 0%, #B0552E 62%, #8F3F1F 100%);
+  color: #FDF9EF;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-  box-shadow: 0 8px 28px rgba(200,93,77,.42), 0 0 0 6px rgba(255,255,255,.55), 0 0 0 12px rgba(200,93,77,.14);
-  border: 2px solid rgba(255,255,255,.6);
+  /* 圆按钮上不能加白边：border 画在半径内圈，会把「开始练」三字压出发虚的糊边。
+     改用 box-shadow 向外扩的宣纸色环（队友 A 套 .btn 的做法），文字区保持干净。 */
+  box-shadow: 0 10px 30px rgba(122, 60, 28, .34), 0 0 0 7px rgba(251, 243, 227, .92);
   z-index: 2;
   cursor: pointer;
   transition: transform .18s ease, box-shadow .18s ease;
   animation: pulse-entry 3.8s ease-in-out infinite;
+  /* 文字压在渐变最亮处也必须读得清：加一层同色系深色投影 */
+  text-shadow: 0 1px 3px rgba(110, 44, 18, .5);
 }
 .start-btn:active {
   transform: scale(.95);
 }
 @keyframes pulse-entry {
+  /* 呼吸只动外圈的宣纸色环宽度，不动投影颜色 —— 投影每帧变色会在
+     浅色底图上留下一圈瞬时偏色的脏边。 */
   0%, 100% {
-    box-shadow: 0 8px 28px rgba(200,93,77,.42), 0 0 0 6px rgba(255,255,255,.55), 0 0 0 12px rgba(200,93,77,.14);
+    box-shadow: 0 10px 30px rgba(122, 60, 28, .34), 0 0 0 6px rgba(251, 243, 227, .92);
   }
   50% {
-    box-shadow: 0 10px 34px rgba(200,93,77,.52), 0 0 0 7px rgba(255,255,255,.65), 0 0 0 16px rgba(200,93,77,.2);
+    box-shadow: 0 12px 36px rgba(122, 60, 28, .40), 0 0 0 10px rgba(251, 243, 227, .96);
   }
 }
 .play-tri {
@@ -245,7 +250,7 @@ function start() {
 
 .verse {
   padding: 12px 16px; border-radius: 12px; background: rgba(255,253,246,.7);
-  border: 1px solid rgba(58,51,42,.08); font-size: 12px; color: var(--xuan-dim);
+  border: 1px solid rgba(92,70,50,.10); font-size: 12px; color: var(--xuan-dim);
   font-style: italic; text-align: center;
 }
 
