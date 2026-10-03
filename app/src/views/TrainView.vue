@@ -233,10 +233,11 @@ import { getTone } from '../data/tones'
 import { createPoseEngine, drawPose, drawGhostPose, KEY_POINTS, HEAD_POINTS, listCameras, RESOLUTIONS, FRAMES } from '../engine/poseEngine'
 import standardPoses from '../data/baduanjin-8.json'
 import { headPose, bodyPose, createTurnTracker } from '../engine/pose'
-import { MoveJudge, NAMES, THRESHOLD } from '../engine/judge'
+import { MoveJudge, THRESHOLD } from '../engine/judge'
 import { pluck, chordAll, unlockAudio, preloadSamples } from '../engine/guqin'
 import { FallbackSwitch, frameAlive, FALLBACK_SRC, FALLBACK_CFG } from '../engine/fallback'
-import { saveRecord } from '../stores/records'
+import { recordStore } from '../stores/records'
+import { createTrainingSession } from '../session/trainingSession'
 import CamSettings from '../components/CamSettings.vue'
 import VoiceSettings from '../components/VoiceSettings.vue'
 import { createSpeaker } from '../engine/voice'
@@ -304,7 +305,6 @@ const doneSet = ref(new Set())  // 已完成的式
 const litStrings = ref([])      // 当前亮起的弦
 const liveScore = ref(0)        // 当前式实时分 0~1
 
-let engine = null
 let judge = null
 let rafUI = 0
 let lastLitClear = 0
@@ -328,6 +328,38 @@ const tone = computed(() => getTone(route.query.tone || safeGet('xianyang.tone')
 const moves = computed(() => style.value.moves)
 const totalMoves = computed(() => moves.value.length || 8)
 const currentMove = computed(() => moves.value[stepIdx.value])
+const trainingSession = createTrainingSession({
+  moves: moves.value,
+  engineFactory: () => createPoseEngine(),
+  judgeFactory: (index, options = {}) => new MoveJudge({
+    holdFrames: options.holdFrames,
+    threshold: options.threshold,
+    order: options.freeMode ? null : index,
+    headYaw: options.freeMode ? null : options.headYaw,
+    headYawTol: options.headYawTol,
+    style: style.value.id,
+    count: style.value.moves.length,
+  }),
+  audio: { pluck, chordAll },
+  recordStore,
+  tone: tone.value,
+  guided: true,
+})
+trainingSession.on('frame', ({ frame }) => onResult(...frame))
+trainingSession.on('stage', ({ stage, detail }) => {
+  stageNow.value = stage
+  if (stage === 'loading') loading.value = '正在准备…'
+  else if (stage === 'wasm') loading.value = '正在加载本地推理运行时…'
+  else if (stage === 'model') loading.value = '正在加载姿态模型（本地 5.5MB）…'
+  else if (stage === 'camera') loading.value = '正在打开摄像头…'
+  else if (stage === 'ready') loading.value = ''
+  if (stage === 'ready' && detail) {
+    const m = /(\d+)×(\d+)/.exec(detail)
+    if (m) settings.value?.setActual(`${m[1]}×${m[2]}`)
+  }
+  if (detail) console.log('[stage]', stage, detail)
+})
+trainingSession.on('completed', () => finish())
 const doneCount = computed(() => doneSet.value.size)
 
 // ---- 取景诊断：实时算关键点可见度，据此给引导 ----
@@ -370,16 +402,14 @@ function resetStep() {
   liveScore.value = 0
   if (judge) judge.reset()
   // 顺序模式：只判当前式；自由模式：全式开 + 仲裁
-  judge = new MoveJudge({
+  judge = trainingSession.createJudge(stepIdx.value, {
     holdFrames: cfg.holdFrames,
     threshold: cfg.threshold,
-    order: freeMode.value ? null : stepIdx.value,
     headYaw: freeMode.value ? null : (HEAD_YAW_REQ[stepIdx.value] ?? null),
     headYawTol: 18,
-    // 拳种决定用哪套判定规则（八段锦内置 / 五禽戏、太极用 styleRules）
-    style: style.value.id,
-    count: style.value.moves.length,
+    freeMode: freeMode.value,
   })
+  trainingSession.setMode(freeMode.value ? 'free' : 'guided')
   announcer.setStyle(style.value.id)
   // 播报当前式首式。必须在这里报（而非等 advance）：
   // 进跟练页 / 切换拳种 / 重建判定器 都会走到 resetStep，
@@ -418,24 +448,6 @@ async function init() {
   }, 25000)
 
   try {
-    engine = await createPoseEngine()
-    engine.on('error', (e) => { console.error('[pose]', e) })
-    engine.on('result', onResult)   // (landmarks, worldLandmarks, res)
-    engine.on('status', ({ stage, detail }) => {
-      stageNow.value = stage
-      if (stage === 'wasm') loading.value = '正在加载本地推理运行时…'
-      else if (stage === 'model') loading.value = '正在加载姿态模型（本地 5.5MB）…'
-      else if (stage === 'camera') loading.value = '正在打开摄像头…'
-      else if (stage === 'ready') loading.value = '正在启动识别…'
-      if (detail) console.log('[stage]', stage, detail)
-      if (stage === 'ready' && detail) {
-        const m = /(\d+)×(\d+)/.exec(detail)
-        if (m) settings.value?.setActual(`${m[1]}×${m[2]}`)
-      }
-    })
-
-    await nextTick()
-
     // 优先用上次选过的设备（localStorage），现场换设备后不用重新选
     const saved = safeGet('xianyang.deviceId')
     const cams = await listCameras()
@@ -444,7 +456,7 @@ async function init() {
       || cams[0]?.deviceId
       || null
     const r = RESOLUTIONS.find((x) => x.id === cfg.resId) || RESOLUTIONS[0]
-    const info = await engine.start(video.value, { deviceId: useId, width: r.w, height: r.h })
+    const info = await trainingSession.start({ deviceId: useId, video: video.value, width: r.w, height: r.h })
     camLabel.value = info.label || (cams.find((c) => c.deviceId === info.deviceId)?.label ?? '摄像头')
     if (info.deviceId) safeSet('xianyang.deviceId', info.deviceId)
 
@@ -525,7 +537,7 @@ async function enterFallback(reason) {
   // 预录也没有 → 手动模式兜底，绝不弹整屏错误页
   console.warn('[fallback] 预录兜底不可用，转手动模式：', reason)
   fbReason.value = '预录缺失 · 已转手动点按'
-  engine?.stop()          // 释放摄像头，避免持续报错
+  trainingSession.stopCamera() // 释放摄像头，避免持续报错
   landmarksSeen.value = true   // 让底部按钮显示「点一下也算响」
 }
 
@@ -541,9 +553,9 @@ async function backToCamera() {
   clearTimeout(retryTimer)
   const r = RESOLUTIONS.find((x) => x.id === cfg.resId) || RESOLUTIONS[0]
   try {
-    if (!engine) { err.value = ''; await init(); return }
+    if (!trainingSession.isRunning()) { err.value = ''; await init(); return }
     const saved = safeGet('xianyang.deviceId')
-    const info = await engine.start(video.value, { deviceId: saved, width: r.w, height: r.h })
+    const info = await trainingSession.start({ deviceId: saved, video: video.value, width: r.w, height: r.h })
     camLabel.value = info.label || '摄像头'
     landmarksSeen.value = false
     lastAliveAt = performance.now()
@@ -557,7 +569,7 @@ async function backToCamera() {
 
 /** 引擎就绪后没人入镜 / 识别中断超时 → 兜底 */
 function checkFallbackStall() {
-  if (!fbSwitch || fbSwitch.active || !engine || !engine.isRunning || finished.value) return
+  if (!fbSwitch || fbSwitch.active || !trainingSession.isRunning() || finished.value) return
   const now = performance.now()
   const stalled = landmarksSeen.value
     ? now - lastAliveAt > FALLBACK_CFG.noSignalMs
@@ -572,7 +584,7 @@ function scheduleRetry() {
   retryTimer = setTimeout(async () => {
     // 只有「引擎压根没有 / 已经停了」才重试；正常跑着的时候别去动它
     // （否则每 8 秒就会把摄像头流重开一次，真机上是卡死级的操作）
-    if (finished.value || fbSwitch?.active || (engine && engine.isRunning)) return
+    if (finished.value || fbSwitch?.active || trainingSession.isRunning()) return
     if (typeof navigator === 'undefined' || !navigator.mediaDevices) return
     console.info('[fallback] 后台重试摄像头…')
     try {
@@ -583,15 +595,15 @@ function scheduleRetry() {
   }, FALLBACK_CFG.retryMs)
 }
 
-function retry() { fbSwitch?.exit(); stopAutoAdvance(); engine?.dispose(); engine = null; init() }
+function retry() { fbSwitch?.exit(); stopAutoAdvance(); trainingSession.disposeEngine(); init() }
 
 // ---- 切换摄像头 / 分辨率（不重载模型）----
 async function onSwitchDevice(deviceId) {
-  if (!engine || !deviceId) return
+  if (!trainingSession.isRunning() || !deviceId) return
   camLabel.value = '切换中…'
   const r = RESOLUTIONS.find((x) => x.id === cfg.resId) || RESOLUTIONS[0]
   try {
-    const info = await engine.switchDevice(video.value, deviceId, { width: r.w, height: r.h })
+    const info = await trainingSession.switchDevice(video.value, deviceId, { width: r.w, height: r.h })
     safeSet('xianyang.deviceId', deviceId)
     camLabel.value = info.label || deviceId.slice(0, 8)
     settings.value?.setActual(`${info.width}×${info.height}`)
@@ -604,10 +616,10 @@ async function onSwitchDevice(deviceId) {
 
 async function onSwitchRes(resId) {
   cfg.resId = resId
-  if (!engine) return
+  if (!trainingSession.isRunning()) return
   const r = RESOLUTIONS.find((x) => x.id === resId)
   if (!r) return
-  const out = await engine.setResolution(video.value, r.w, r.h)
+  const out = await trainingSession.setResolution(video.value, r.w, r.h)
   if (out) { settings.value?.setActual(`${out.width}×${out.height}`); requestAnimationFrame(sizeCanvas) }
 }
 
@@ -630,7 +642,7 @@ onBeforeUnmount(() => {
   fbSwitch?.exit()
   cancelAnimationFrame(rafUI)
   window.removeEventListener('resize', sizeCanvas)
-  engine?.dispose()
+  trainingSession.dispose()
 })
 
 function sizeCanvas() {
@@ -769,13 +781,12 @@ let fitSize = ''
 
 function onHit(i) {
   const mv = moves.value[i]
+  if (!mv || !trainingSession.hit(mv.id, fbActive.value ? 'fallback' : 'detected')) return
   doneSet.value = new Set([...doneSet.value, i])
 
   if (mv.chord) {
-    chordAll()                                   // 收势：七弦齐鸣和声
     litStrings.value = Array.from({ length: style.value.strings }, (_, i) => i + 1)
   } else {
-    pluck(mv.stringIndex)                        // 拨响对应琴弦
     litStrings.value = [mv.stringIndex]
   }
   lastLitClear = performance.now()
@@ -793,19 +804,20 @@ function advance() {
 }
 
 function finish() {
+  if (finished.value) return
   finished.value = true
   stopAutoAdvance()
   exitFallback('一曲完成')
-  engine?.stop()
-  saveRecord({ moves: [...doneSet.value], names: NAMES.filter((_, i) => doneSet.value.has(i)) })
+  trainingSession.stop({ reason: '一曲完成' })
 }
 
 function skip() {                 // 三级兜底之一：跳过本式也算完成
   const i = stepIdx.value
   const mv = moves.value[i]
   if (!mv) return
+  const source = fbActive.value ? 'fallback' : 'manual'
+  if (!trainingSession.hit(mv.id, source)) return
   doneSet.value = new Set([...doneSet.value, i])
-  if (mv.chord) chordAll(); else pluck(mv.stringIndex)
   litStrings.value = mv.chord
     ? Array.from({ length: style.value.strings }, (_, i) => i + 1)
     : [mv.stringIndex]
@@ -825,13 +837,11 @@ function restart() {
   exitFallback('重新开始')
   resetStep()
   announcer.reset()          // 清空去重记录，重新播报第 1 式
-  // 引擎若被手动模式停掉了，这里重新拉起（不重载模型）
-  if (engine && !engine.isRunning) init()
-  else if (!engine) location.reload()
+  location.reload()
 }
 
 function manualMode() {          // 三级兜底之三：关摄像头，改为点按触发
-  engine?.stop()
+  trainingSession.stopCamera()
   exitFallback('改用手动模式')
   stopAutoAdvance()
   clearTimeout(retryTimer)
@@ -843,7 +853,7 @@ function manualMode() {          // 三级兜底之三：关摄像头，改为�
   camLabel.value = '手动模式'
 }
 
-function quit() { exitFallback('退出跟练'); engine?.dispose(); router.push('/') }
+function quit() { exitFallback('退出跟练'); trainingSession.stop({ reason: '退出跟练' }); trainingSession.dispose(); router.push('/') }
 
 // 标准骨架：按当前式取真值，在该式的 5 个关键帧之间循环播放，
 // 让人看见「这一式标准动作是怎么做的」。只对八段锦生效（真值只有这 8 式）。

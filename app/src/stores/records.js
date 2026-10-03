@@ -51,6 +51,34 @@ export function saveRecord({ moves = [], names = [], tone = '', minutes = 0 } = 
   return rec
 }
 
+export function saveSession({ moveIds = [], sources = [], names = [], startedAt = null, endedAt = null, tone = '' } = {}) {
+  const ids = [...new Set(moveIds)]
+  const minutes = Number.isFinite(startedAt) && Number.isFinite(endedAt)
+    ? Math.max(0, Math.floor((endedAt - startedAt) / 60000))
+    : 0
+  const rec = saveRecord({
+    moves: ids.map((id) => Number(id) - 1).filter((index) => Number.isInteger(index) && index >= 0),
+    names,
+    tone,
+    minutes,
+  })
+  rec.moveIds = ids
+  rec.sources = ids.map((_, index) => sources[index] || 'detected')
+  rec.startedAt = startedAt
+  rec.endedAt = endedAt
+  // saveRecord wrote its legacy shape; rewrite once with the extended session fields.
+  const list = read()
+  const savedIndex = list.findIndex((item) => item.ts === rec.ts)
+  if (savedIndex >= 0) list[savedIndex] = rec
+  write(list.slice(-60))
+  return rec
+}
+
+export const recordStore = {
+  save: saveSession,
+  list: getRecords,
+}
+
 export function clearRecords() {
   write([])
 }
