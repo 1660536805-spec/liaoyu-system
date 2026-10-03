@@ -14,6 +14,7 @@ export function createTrainingSession({
 
   const listeners = new Map()
   const completed = new Map()
+  const disposedEngines = new WeakSet()
   let engine = null
   let judge = null
   let stage = 'idle'
@@ -40,6 +41,12 @@ export function createTrainingSession({
     listeners.get(type)?.forEach((fn) => fn(event))
     listeners.get('*')?.forEach((fn) => fn(event))
     return event
+  }
+
+  function disposeInstance(instance) {
+    if (!instance || (typeof instance !== 'object' && typeof instance !== 'function') || disposedEngines.has(instance)) return
+    disposedEngines.add(instance)
+    try { instance.dispose?.() } catch (e) { console.error('[session] engine dispose failed', e) }
   }
 
   function setStage(next, detail = '') {
@@ -112,7 +119,7 @@ export function createTrainingSession({
   async function start({ mode = 'guided', deviceId: nextDeviceId = null, video, width, height, ...options } = {}) {
     if (stage === 'completed' || stopped) return null
     if (engine) {
-      try { engine.dispose?.() } catch { /* allow retry with a fresh engine */ }
+      disposeInstance(engine)
       engine = null
     }
     const token = ++loadToken
@@ -125,13 +132,13 @@ export function createTrainingSession({
     try {
       const instance = await engineFactory()
       if (token !== loadToken || stopped) {
-        instance?.dispose?.()
+        disposeInstance(instance)
         return null
       }
       attachEngine(instance, token)
       const info = await instance.start(video, { ...options, deviceId, width, height })
       if (token !== loadToken || stopped) {
-        instance.dispose?.()
+        disposeInstance(instance)
         return null
       }
       deviceId = info?.deviceId ?? deviceId
@@ -174,7 +181,7 @@ export function createTrainingSession({
 
   function dispose() {
     stop({ reason: 'dispose' })
-    try { engine?.dispose?.() } catch (e) { console.error('[session] engine dispose failed', e) }
+    disposeInstance(engine)
     engine = null
     listeners.clear()
   }
@@ -187,7 +194,7 @@ export function createTrainingSession({
     if (stopped) return false
     ++loadToken
     try { engine?.stop?.() } catch { /* release is best-effort */ }
-    try { engine?.dispose?.() } catch { /* release is best-effort */ }
+    disposeInstance(engine)
     engine = null
     paused = false
     if (startedAt === null) startedAt = clock()
@@ -197,7 +204,7 @@ export function createTrainingSession({
   }
 
   function disposeEngine() {
-    try { engine?.dispose?.() } catch (e) { console.error('[session] engine dispose failed', e) }
+    disposeInstance(engine)
     engine = null
   }
 

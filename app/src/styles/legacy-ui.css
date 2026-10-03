@@ -638,5 +638,6 @@ main:focus{outline:none}
 .legacy-form label { display: flex; align-items: center; justify-content: space-between; gap: 1rem; color: var(--brown); font-size: 1.3rem; }
 .legacy-form input, .legacy-form select { width: 14rem; min-height: 3.8rem; padding: .5rem .8rem; border: 1px solid var(--line-2); border-radius: .8rem; background: #fffdf7; color: var(--text); font: inherit; }
 .legacy-saved { color: var(--green-deep); text-align: center; font-size: 1.2rem; }
+.legacy-audio-error { margin-top: 1rem; color: #a33e2d !important; }
 .legacy-list { padding-left: 2rem; color: var(--text); font-size: 1.2rem; line-height: 2; }
 @media(min-width:700px){.app:has(.legacy-page){margin:2rem auto;min-height:calc(100dvh - 4rem);border-radius:2rem;overflow:hidden;box-shadow:0 1rem 4rem #56391c22}.legacy-page{min-height:calc(100dvh - 4rem)}}

@@ -107,6 +107,26 @@ test('stop while engine is loading disposes the late engine without starting its
   assert.equal(engine.disposed, true)
 })
 
+test('route exit while the camera is loading releases the engine once and ignores its late completion', async () => {
+  let resolveStart
+  let disposeCalls = 0
+  const engine = makeEngine()
+  engine.start = () => new Promise((resolve) => { resolveStart = resolve })
+  engine.dispose = () => { disposeCalls++ }
+  const { session, events } = harness({ engineFactory: async () => engine })
+  const starting = session.start()
+  await Promise.resolve()
+  await Promise.resolve()
+  assert.equal(typeof resolveStart, 'function')
+  session.dispose()
+  assert.equal(disposeCalls, 1)
+  resolveStart({ deviceId: 'late-camera' })
+  await starting
+  assert.equal(disposeCalls, 1)
+  assert.equal(session.snapshot().stage, 'stopped')
+  assert.equal(events.some((event) => event.type === 'frame'), false)
+})
+
 test('explicit exit saves one partial record and dispose releases the engine', async () => {
   const engine = makeEngine()
   const { session, records } = harness({ engineFactory: async () => engine })
