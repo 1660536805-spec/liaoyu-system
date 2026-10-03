@@ -66,15 +66,15 @@
 
 **Interfaces:** Sound view uses local playable tracks; route exit pauses and releases media. `release-smoke` checks static assets, server routes and the complete happy path against the built output.
 
-- [ ] Write failing tests for audio blocked until user action, track change/route exit cleanup, and training route exit while the camera is loading.
-- [ ] Implement playback cleanup and clear user-facing recovery states. Run `npm --prefix app run test:all`, `npm --prefix app run build`, build test and release smoke.
-- [ ] Start the root preview server and inspect the full mobile flow in a browser, including permission rejection and refresh; record limits that require real camera/phone validation in README.
-- [ ] Commit release fixes and documentation; verify the branch diff, then push `liaoyu0-1` and open a draft PR for review.
+- [x] Write failing tests for audio blocked until user action, track change/route exit cleanup, and training route exit while the camera is loading.
+- [x] Implement playback cleanup and clear user-facing recovery states. Run `npm --prefix app run test:all`, `npm --prefix app run build`, build test and release smoke.
+- [x] Start the root preview server and inspect the full mobile flow in a browser, including permission rejection and refresh; record limits that require real camera/phone validation in README.
+- [x] Commit release fixes and documentation; verify the branch diff, then push `liaoyu0-1` and open a draft PR for review.
 
 ## Final acceptance
 
-- [ ] The new UI is served from one Vue application, and `main`'s standalone `app.js` is absent from the generated `dist/index.html`.
-- [ ] A real move hit emits one corresponding string, and move 8 completes the session with seven-string chord.
-- [ ] Camera/model failure offers a working recovery path; leaving training releases resources.
-- [ ] Finish and profile read the same persisted record after refresh.
-- [ ] Build, focused tests, regression suites and browser flow pass; any real-device limitation is stated precisely.
+- [x] The new UI is served from one Vue application, and `main`'s standalone `app.js` is absent from the generated `dist/index.html`.
+- [x] A detected move event emits one corresponding string, and move 8 completes the session with seven-string chord (controller/audio contract tests; live pose accuracy remains a real-device check).
+- [x] Camera/model failure offers a working recovery path; leaving training releases resources.
+- [x] Finish and profile read the same persisted record after refresh.
+- [x] Build, focused tests, regression suites and browser flow pass; any real-device limitation is stated precisely.

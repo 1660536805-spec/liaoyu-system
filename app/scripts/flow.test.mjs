@@ -19,6 +19,8 @@ test('legacy entry flow routes to real Vue screens and retains validated profile
   globalThis.localStorage = memoryStorage()
   const main = await readFile(resolve(root, 'src/main.js'), 'utf8')
   const app = await readFile(resolve(root, 'src/App.vue'), 'utf8')
+  const training = await readFile(resolve(root, 'src/views/TrainView.vue'), 'utf8')
+  const engine = await readFile(resolve(root, 'src/engine/poseEngine.js'), 'utf8')
   const required = [
     ['/splash', 'LegacySplashView.vue'], ['/questions', 'LegacyQuestionsView.vue'],
     ["'/'", 'LegacyHomeView.vue'], ['/sound', 'LegacySoundView.vue'],
@@ -31,6 +33,16 @@ test('legacy entry flow routes to real Vue screens and retains validated profile
     assert(main.includes(component), `missing screen ${component}`)
   }
   assert.match(app, /showAppTab/)
+  assert.match(main, /router\.beforeEach/)
+  assert.match(main, /isOnboardingComplete\(\)/)
+  assert.equal((main.match(/path: '\/onboarding'/g) || []).length, 1)
+  assert.match(training, /addEventListener\('pagehide', savePartialOnPageHide\)/)
+  assert.match(training, /继续手动点按/)
+  assert.match(training, /示范视频不计入完成/)
+  assert.doesNotMatch(training, /autoAdvanceMs|fbActive\.value \? 'fallback'/)
+  assert.doesNotMatch(training, /style="width: 9[28]%"/)
+  assert.match(engine, /cameraGuard\.acquire/)
+  assert.match(engine, /ensureCameraCurrent/)
 
   const saved = profile.save({ height: 168, weight: 62, age: 35, preferences: { goal: 'relax', sleep: 'better' } })
   assert.equal(saved.height, 168)

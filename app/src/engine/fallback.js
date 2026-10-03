@@ -39,8 +39,6 @@ export const FALLBACK_CFG = {
   recoverFrames: 30,
   /** 摄像头彻底挂掉后，后台重试的间隔 */
   retryMs: 8000,
-  /** 预录模式下「下一式」自动推进的保险时长（防止演示卡死在某一式没人按） */
-  autoAdvanceMs: 12000,
   /**
    * 单点可见度门槛。从 0.5 降到 0.35：
    * 真机实测手上有深色物体/运动模糊时腕点 visibility 只到 0.47，

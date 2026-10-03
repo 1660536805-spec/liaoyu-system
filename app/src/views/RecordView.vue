@@ -8,6 +8,7 @@
     </div>
 
     <div class="body list">
+      <p v-if="storageWarning" class="storage-warning" role="status">{{ storageMessage }}</p>
       <div v-if="!records.length" class="empty">
         还没有练习记录<br /><span>去首页点「开始练」，练完一套就会出现在这里</span>
       </div>
@@ -33,16 +34,23 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { getRecords, clearRecords } from '../stores/records'
+import { getRecords, clearRecords, getRecordStorageStatus } from '../stores/records'
 import { getTone } from '../data/tones'
 
 const records = ref([])
+const storageWarning = ref(false)
+const storageMessage = ref('')
 const toneOf = (k) => getTone(k)
-onMounted(() => { records.value = getRecords() })
+onMounted(() => {
+  records.value = getRecords()
+  const status = getRecordStorageStatus()
+  storageWarning.value = !status.persistent || status.recovered
+  storageMessage.value = status.recovered ? '记录数据有损坏，已跳过无法读取的项目；保留原数据并在当前会话继续记录。' : '浏览器未允许本机存储，记录只在当前会话内保留。'
+})
 const fullCount = computed(() => records.value.filter((r) => r.complete).length)
 
 function clear() {
-  if (confirm('确定清空全部打卡记录？')) { clearRecords(); records.value = [] }
+  if (confirm('确定清空全部打卡记录？')) { clearRecords(); records.value = []; storageWarning.value = !getRecordStorageStatus().persistent }
 }
 </script>
 

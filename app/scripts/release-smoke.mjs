@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
+import { createServer } from 'node:net'
 import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -18,7 +19,18 @@ for (const text of ['今天想照顾哪里？', '开始练习', '练习总结', 
   assert(code.includes(text), `production bundle is missing flow content: ${text}`)
 }
 
-const port = Number(process.env.RELEASE_SMOKE_PORT) || 5191
+async function reservePort() {
+  const probe = createServer()
+  await new Promise((resolve, reject) => {
+    probe.once('error', reject)
+    probe.listen(0, '127.0.0.1', resolve)
+  })
+  const { port } = probe.address()
+  await new Promise((resolve, reject) => probe.close((error) => error ? reject(error) : resolve()))
+  return port
+}
+
+const port = Number(process.env.RELEASE_SMOKE_PORT) || await reservePort()
 const server = spawn(process.execPath, [path.join(repoDir, 'server.cjs'), String(port)], { stdio: 'ignore' })
 const base = `http://127.0.0.1:${port}`
 async function get(pathname) {

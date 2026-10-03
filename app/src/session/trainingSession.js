@@ -14,6 +14,7 @@ export function createTrainingSession({
 
   const listeners = new Map()
   const completed = new Map()
+  const sessionId = globalThis.crypto?.randomUUID?.() || `session-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`
   const disposedEngines = new WeakSet()
   let engine = null
   let judge = null
@@ -56,7 +57,7 @@ export function createTrainingSession({
   }
 
   function saveOnce() {
-    if (saved || startedAt === null) return null
+    if (saved || startedAt === null || completed.size === 0) return null
     saved = true
     stoppedAt = clock()
     return recordStore.save({
@@ -66,6 +67,7 @@ export function createTrainingSession({
       startedAt,
       endedAt: stoppedAt,
       tone,
+      sessionId,
     })
   }
 
@@ -81,10 +83,10 @@ export function createTrainingSession({
 
   function recordHit(moveId, source = 'detected') {
     if (stopped || paused) return false
-    // Keep the fallback/manual recovery actions usable if camera/model setup failed
-    // or is still stalled. Pose-detected hits remain gated on a ready engine.
+    // The only non-pose completion source is an explicit user confirmation.
     if (source === 'detected' && stage !== 'ready') return false
-    if (source !== 'detected' && !['ready', 'loading', 'camera-error'].includes(stage)) return false
+    if (source === 'manual' && !['ready', 'loading', 'camera-error'].includes(stage)) return false
+    if (!['detected', 'manual'].includes(source)) return false
     const move = moves.find((item) => item.id === moveId)
     if (!move || completed.has(moveId)) return false
     completed.set(moveId, source)

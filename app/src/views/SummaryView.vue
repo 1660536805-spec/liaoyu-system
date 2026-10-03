@@ -45,6 +45,7 @@
 
       <!-- 练习数据 -->
       <div class="data">
+        <p v-if="storageWarning" class="storage-warning" role="status">练习记录已保存在当前会话内，但浏览器本机存储不可用。</p>
         <div class="data-title">练习数据</div>
         <div class="data-grid">
           <div class="data-item"><span class="data-num">{{ done }}</span><span class="data-lab">命中式数</span></div>
@@ -79,7 +80,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getRecords, saveRecord } from '../stores/records'
+import { getRecords, saveRecord, getRecordStorageStatus } from '../stores/records'
 import { hasBodyData as readHasBodyData, getBodyData } from '../stores/bodyData'
 import { getTone } from '../data/tones'
 
@@ -90,6 +91,7 @@ const done = ref(Number(route.query.done) || 0)
 const total = ref(Number(route.query.total) || 8)
 const toneKey = ref(route.query.tone || localStorage.getItem('xianyang.tone') || 'gong')
 const tone = computed(() => getTone(toneKey.value))
+const storageWarning = ref(false)
 // 实际时长：跟练页把真值放进 query；没带就按甲方 12 分钟口径兜底
 const duration = computed(() => {
   const m = Number(route.query.minutes)
@@ -107,6 +109,7 @@ onMounted(() => {
       minutes: Number(route.query.minutes) || 0,
     })
   }
+  storageWarning.value = !getRecordStorageStatus().persistent || getRecordStorageStatus().recovered
   hasBodyData.value = readHasBodyData()
   if (hasBodyData.value) pickRecipe()
   syncStreak()

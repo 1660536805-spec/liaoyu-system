@@ -12,7 +12,7 @@
     "test": "node src/engine/judge.test.mjs && node scripts/render.test.mjs",
     "test:judge": "node src/engine/judge.test.mjs",
     "test:render": "node scripts/render.test.mjs",
-    "test:session": "node --test src/session/trainingSession.test.mjs src/stores/records.test.mjs",
+    "test:session": "node --test src/session/trainingSession.test.mjs src/engine/cameraRequest.test.mjs src/stores/records.test.mjs src/stores/profile.test.mjs",
     "test:flow": "node --test scripts/flow.test.mjs",
     "test:media": "node --test src/session/localAudio.test.mjs",
     "release:smoke": "node scripts/release-smoke.mjs",

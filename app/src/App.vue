@@ -32,17 +32,6 @@ const showAppTab = computed(() => !['/', '/splash', '/questions', '/intro', '/tr
   position: relative;
   transition: max-width .2s ease;
 }
-/* 宽屏桌面大屏：整体视觉等比放大 32%~42%，让界面真正放大，远距离跟练与大屏看清所有字 */
-@media (min-width: 900px) {
-  .app {
-    zoom: 1.32;
-  }
-}
-@media (min-width: 1400px) {
-  .app {
-    zoom: 1.42;
-  }
-}
 /* 跟练页全屏展开：释放 100% 宽度，让动作取景画面显著放大，充满整个屏幕 */
 .app:has(.train) {
   max-width: 100% !important;

@@ -1,10 +1,19 @@
 const KEY = 'xianyang.profile.v1'
+const ONBOARDING_KEY = 'xianyang.onboardingComplete.v1'
 const DEFAULTS = Object.freeze({
   height: 165,
   weight: 55,
   age: 28,
   preferences: { goal: '舒缓肩颈', tone: 'gong', mode: 'guided' },
 })
+let memoryProfile = null
+let onboardingCompleteInMemory = false
+let storageStatus = { persistent: true, recovered: false }
+let onboardingPersistent = true
+
+function storageOrNull() {
+  try { return globalThis.localStorage ?? null } catch { return null }
+}
 
 function bounded(value, fallback, min, max) {
   const number = Number(value)
@@ -28,20 +37,68 @@ function validate(value = {}) {
 }
 
 export function loadProfile() {
+  const storage = storageOrNull()
+  if (!storage) {
+    storageStatus = { ...storageStatus, persistent: false }
+    return validate(memoryProfile || DEFAULTS)
+  }
+  if (memoryProfile && !storageStatus.persistent && !storageStatus.recovered) {
+    try {
+      storage.setItem(KEY, JSON.stringify(memoryProfile))
+      storageStatus = { persistent: true, recovered: false }
+    } catch { storageStatus = { ...storageStatus, persistent: false } }
+    return validate(memoryProfile)
+  }
   try {
-    const raw = globalThis.localStorage?.getItem(KEY)
-    if (!raw) return validate()
+    const raw = storage.getItem(KEY)
+    if (!raw) { storageStatus = { persistent: true, recovered: false }; return validate(memoryProfile || DEFAULTS) }
     const parsed = JSON.parse(raw)
-    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? validate(parsed) : validate()
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('invalid profile')
+    memoryProfile = validate(parsed)
+    storageStatus = { persistent: true, recovered: false }
+    return validate(memoryProfile)
   } catch {
-    return validate()
+    storageStatus = { persistent: false, recovered: true }
+    return validate(memoryProfile || DEFAULTS)
   }
 }
 
 export function saveProfile(value) {
   const normalized = validate(value)
-  try { globalThis.localStorage?.setItem(KEY, JSON.stringify(normalized)) } catch { /* keep current session usable */ }
+  memoryProfile = normalized
+  const storage = storageOrNull()
+  try {
+    if (!storage) throw new Error('local storage unavailable')
+    storage.setItem(KEY, JSON.stringify(normalized))
+    storageStatus = { persistent: true, recovered: false }
+  } catch { storageStatus = { ...storageStatus, persistent: false } }
   return normalized
+}
+
+export function getProfileStorageStatus() { return { ...storageStatus, persistent: storageStatus.persistent && onboardingPersistent } }
+
+export function isOnboardingComplete() {
+  const storage = storageOrNull()
+  if (!storage) { onboardingPersistent = false; return onboardingCompleteInMemory }
+  try {
+    const saved = storage.getItem(ONBOARDING_KEY)
+    onboardingPersistent = true
+    onboardingCompleteInMemory = saved === '1' || onboardingCompleteInMemory
+    return onboardingCompleteInMemory
+  } catch {
+    onboardingPersistent = false
+    return onboardingCompleteInMemory
+  }
+}
+
+export function completeOnboarding() {
+  onboardingCompleteInMemory = true
+  const storage = storageOrNull()
+  try {
+    if (!storage) throw new Error('local storage unavailable')
+    storage.setItem(ONBOARDING_KEY, '1')
+    onboardingPersistent = true
+  } catch { onboardingPersistent = false }
 }
 
 export const profile = { load: loadProfile, save: saveProfile }

@@ -594,6 +594,8 @@ main:focus{outline:none}
 .legacy-card { margin-top: 1.2rem; padding: 1.7rem; border-radius: 1.5rem; background: #fdfaf2ed; border: 1px solid var(--line); box-shadow: var(--shadow); }
 .legacy-card h2 { margin: 0 0 1rem; color: var(--brown); font: 700 1.75rem var(--serif); }
 .legacy-card p, .legacy-muted { color: var(--muted); font-size: 1.25rem; line-height: 1.7; }
+.storage-warning { margin: 0 0 14px; padding: 10px 12px; border-radius: 10px; color: #805c25; background: rgba(194, 151, 69, .12); font-size: 12px; line-height: 1.6; }
+.legacy-screen .storage-warning { margin: 0 16px 14px; }
 .legacy-pill { display: inline-block; margin-top: .8rem; padding: .3rem .9rem; border-radius: 2rem; color: var(--green-deep); background: #e7ede3; font-size: 1.1rem; }
 .recommendation { display: flex; align-items: center; gap: 1rem; }
 .recommendation h2 { margin-bottom: .4rem; }

@@ -69,7 +69,7 @@ test('camera permission rejection emits a recoverable camera-error', async () =>
   assert.equal(session.snapshot().stage, 'camera-error')
 })
 
-test('manual and fallback hits remain available after the camera fails', async () => {
+test('explicit manual hit remains available after the camera fails; fallback cannot fabricate a hit', async () => {
   const error = Object.assign(new Error('denied'), { name: 'NotAllowedError' })
   const { session, records, played } = harness({ engineFactory: async () => {
     const engine = makeEngine()
@@ -78,9 +78,10 @@ test('manual and fallback hits remain available after the camera fails', async (
   } })
   await assert.rejects(session.start(), /denied/)
   assert.equal(session.hit(1, 'manual'), true)
-  assert.equal(session.hit(2, 'fallback'), true)
+  assert.equal(session.hit(2, 'fallback'), false)
+  session.stop({ reason: '检查部分记录' })
   assert.equal(records.length, 1)
-  assert.deepEqual(played, [['pluck', 1], ['chord']])
+  assert.deepEqual(played, [['pluck', 1]])
 })
 
 test('manual practice can start without creating an engine or requesting a camera', () => {
@@ -138,5 +139,24 @@ test('explicit exit saves one partial record and dispose releases the engine', a
   assert.equal(records.length, 1)
   assert.deepEqual(records[0].moveIds, [1])
   assert.deepEqual(records[0].sources, ['manual'])
+  assert.match(records[0].sessionId, /^session-|^[\da-f-]{36}$/)
   assert.equal(engine.disposed, true)
+})
+
+test('page-exit stop writes one idempotent partial checkpoint', async () => {
+  const { session, records } = harness()
+  await session.start()
+  session.hit(1, 'manual')
+  session.stop({ reason: 'pagehide' })
+  session.stop({ reason: 'unmount' })
+  session.dispose()
+  assert.equal(records.length, 1)
+  assert.deepEqual(records[0].moveIds, [1])
+})
+
+test('leaving before a move is completed does not create an empty record', async () => {
+  const { session, records } = harness()
+  await session.start()
+  session.stop({ reason: 'pagehide' })
+  assert.equal(records.length, 0)
 })

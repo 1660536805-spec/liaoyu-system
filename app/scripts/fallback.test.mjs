@@ -120,7 +120,7 @@ console.log('\n=== 5. 触发参数在合理区间 ===')
   okc(FALLBACK_CFG.firstFrameMs >= FALLBACK_CFG.noSignalMs,
     `firstFrameMs=${FALLBACK_CFG.firstFrameMs} ≥ noSignalMs（没人入镜的容忍比断流更久）`)
   okc(FALLBACK_CFG.recoverFrames >= 20, `recoverFrames=${FALLBACK_CFG.recoverFrames}（回实时要连续有效帧防抖）`)
-  okc(FALLBACK_CFG.autoAdvanceMs >= 8000, `autoAdvanceMs=${FALLBACK_CFG.autoAdvanceMs}（预录下不会卡死在某一式）`)
+  okc(!('autoAdvanceMs' in FALLBACK_CFG), '预录演示不再自动推进或记为动作完成')
   okc(/^\/assets\/fallback\.mp4$/.test(FALLBACK_SRC), '视频源是本地路径')
 }
 

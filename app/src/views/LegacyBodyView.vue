@@ -9,17 +9,18 @@
       <label>主要练习目标<select v-model="form.preferences.goal"><option v-for="goal in goals" :key="goal">{{ goal }}</option></select></label>
       <p class="legacy-muted">不填写也可以正常练习。身体数据不会用于动作识别。</p>
       <button class="legacy-primary" type="submit">保存身体设置</button>
-      <p v-if="saved" class="legacy-saved" role="status">已保存到本机</p>
+      <p v-if="saved" class="legacy-saved" role="status">{{ storageWarning ? '已保存到当前会话；本机存储不可用' : '已保存到本机' }}</p>
     </form>
   </main>
 </template>
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { profile } from '../stores/profile'
+import { profile, getProfileStorageStatus } from '../stores/profile'
 const router = useRouter()
 const form = reactive(profile.load())
 const goals = ['舒缓肩颈', '放松腰背', '改善睡眠', '舒展身心', '提振精神', '整体练习']
 const saved = ref(false)
-function save() { Object.assign(form, profile.save(form)); saved.value = true }
+const storageWarning = ref(!getProfileStorageStatus().persistent)
+function save() { Object.assign(form, profile.save(form)); storageWarning.value = !getProfileStorageStatus().persistent; saved.value = true }
 </script>

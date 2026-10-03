@@ -16,6 +16,7 @@
 
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision'
 import { createLandmarkCleaner } from './cleaner.js'
+import { createCameraRequestGuard } from './cameraRequest.js'
 
 const WASM_PATH = '/wasm'
 const MODEL_PATH = '/models/pose_landmarker_lite.task'
@@ -85,19 +86,13 @@ export const RESOLUTIONS = [
 
 /**
  * 列出摄像头。
- * 注意：授权前 label 为空（浏览器隐私策略），故先取一次权限再枚举。
- * 但**不要重复调用** —— 每次调用都会重开一次流，若页面已持有流会触发
- * video.play() 的 AbortError（真机实测踩过）。已授权过的页面应缓存结果。
+ * 这里仅枚举，不暗中申请相机权限。未授权时 label 可能为空；真正打开相机时由
+ * start() 请求权限，权限授予后再次枚举即可获得设备名称。
  */
 let camCache = null
 export async function listCameras({ force = false } = {}) {
   if (camCache && !force) return camCache
   if (!navigator.mediaDevices?.enumerateDevices) return []
-  // 拿一次权限，否则 device.label 全是空字符串
-  try {
-    const s = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-    s.getTracks().forEach((t) => t.stop())
-  } catch { /* 用户拒绝也照样枚举，只是 label 为空 */ }
   const devs = await navigator.mediaDevices.enumerateDevices()
   camCache = devs
     .filter((d) => d.kind === 'videoinput')
@@ -128,6 +123,8 @@ export async function createPoseEngine({ numPoses = 1, delegate = 'GPU', timeout
   let video = null
   let currentStream = null
   let currentDeviceId = null
+  let disposed = false
+  const cameraGuard = createCameraRequestGuard()
   const listeners = { result: [], error: [], status: [] }
   let lastVideoTime = -1
   const cleaner = createLandmarkCleaner()   // 出画/低置信点保护（真机实测驱动）
@@ -193,7 +190,15 @@ export async function createPoseEngine({ numPoses = 1, delegate = 'GPU', timeout
   }
 
   /** 打开摄像头并挂到 video 上 */
-  async function openCamera(videoEl, { deviceId = null, width = 640, height = 480, facingMode = null } = {}) {
+  function ensureCameraCurrent(token, stream, videoEl) {
+    if (cameraGuard.isCurrent(token)) return
+    try { stream?.getTracks?.().forEach((track) => track.stop()) } catch { /* best effort */ }
+    if (currentStream === stream) currentStream = null
+    if (videoEl?.srcObject === stream) videoEl.srcObject = null
+    throw Object.assign(new Error('camera request was cancelled'), { name: 'AbortError' })
+  }
+
+  async function openCamera(videoEl, { deviceId = null, width = 640, height = 480, facingMode = null } = {}, token) {
     status('camera', deviceId ? '打开所选摄像头' : '打开默认摄像头')
     const constraints = {
       audio: false,
@@ -203,11 +208,14 @@ export async function createPoseEngine({ numPoses = 1, delegate = 'GPU', timeout
     }
     // 换设备时先把旧的停掉，否则有些设备抢不到
     if (currentStream) { currentStream.getTracks().forEach((t) => t.stop()); currentStream = null }
-    currentStream = await withTimeout(navigator.mediaDevices.getUserMedia(constraints), 15000, '摄像头打开')
+    currentStream = await cameraGuard.acquire(token, navigator.mediaDevices.getUserMedia(constraints), 15000, '摄像头打开')
+    const stream = currentStream
+    ensureCameraCurrent(token, stream, videoEl)
     const track = currentStream.getVideoTracks()[0]
     currentDeviceId = track?.getSettings?.().deviceId ?? deviceId
     videoEl.srcObject = currentStream
     await videoEl.play()
+    ensureCameraCurrent(token, stream, videoEl)
     // 等真正有画面（readyState>=2 且有尺寸），否则 videoWidth 会是 0
     if (videoEl.readyState < 2 || !videoEl.videoWidth) {
       await new Promise((res) => {
@@ -215,6 +223,7 @@ export async function createPoseEngine({ numPoses = 1, delegate = 'GPU', timeout
         videoEl.addEventListener('loadeddata', () => { clearTimeout(t); res() }, { once: true })
       })
     }
+    ensureCameraCurrent(token, stream, videoEl)
     status('ready', `${videoEl.videoWidth}×${videoEl.videoHeight}`)
     return {
       deviceId: currentDeviceId,
@@ -228,8 +237,21 @@ export async function createPoseEngine({ numPoses = 1, delegate = 'GPU', timeout
     on(evt, fn) { (listeners[evt] = listeners[evt] || []).push(fn); return this },
 
     async start(videoEl, opts = {}) {
+      if (disposed) throw Object.assign(new Error('pose engine is disposed'), { name: 'AbortError' })
       video = videoEl
-      const info = await openCamera(videoEl, opts)
+      const token = cameraGuard.begin()
+      let info
+      try {
+        info = await openCamera(videoEl, opts, token)
+        ensureCameraCurrent(token, currentStream, videoEl)
+      } catch (error) {
+        if (cameraGuard.isCurrent(token)) {
+          cameraGuard.cancel()
+          if (currentStream) { currentStream.getTracks().forEach((track) => track.stop()); currentStream = null }
+          if (videoEl?.srcObject) videoEl.srcObject = null
+        }
+        throw error
+      }
       running = true
       lastVideoTime = -1
       loop()
@@ -238,10 +260,23 @@ export async function createPoseEngine({ numPoses = 1, delegate = 'GPU', timeout
 
     /** 切换摄像头：只换流，不重载模型（重载要 5 秒，现场不能接受） */
     async switchDevice(videoEl, deviceId, opts = {}) {
+      if (disposed) throw Object.assign(new Error('pose engine is disposed'), { name: 'AbortError' })
+      const token = cameraGuard.begin()
       const wasRunning = running
       running = false
       cancelAnimationFrame(rafId)
-      const info = await openCamera(videoEl, { ...opts, deviceId })
+      let info
+      try {
+        info = await openCamera(videoEl, { ...opts, deviceId }, token)
+        ensureCameraCurrent(token, currentStream, videoEl)
+      } catch (error) {
+        if (cameraGuard.isCurrent(token)) {
+          cameraGuard.cancel()
+          if (currentStream) { currentStream.getTracks().forEach((track) => track.stop()); currentStream = null }
+          if (videoEl?.srcObject) videoEl.srcObject = null
+        }
+        throw error
+      }
       if (wasRunning) { running = true; lastVideoTime = -1; loop() }
       return info
     },
@@ -263,6 +298,7 @@ export async function createPoseEngine({ numPoses = 1, delegate = 'GPU', timeout
     },
 
     stop() {
+      cameraGuard.cancel()
       running = false
       cancelAnimationFrame(rafId)
       if (currentStream) { currentStream.getTracks().forEach((t) => t.stop()); currentStream = null }
@@ -272,7 +308,7 @@ export async function createPoseEngine({ numPoses = 1, delegate = 'GPU', timeout
     get isRunning() { return running },
     get cleanStats() { return cleaner.stats },
     get deviceId() { return currentDeviceId },
-    dispose() { this.stop(); landmarker?.close?.() },
+    dispose() { if (disposed) return; disposed = true; this.stop(); cameraGuard.dispose(); landmarker?.close?.() },
   }
 }
 

@@ -8,17 +8,19 @@
       <p v-else class="legacy-muted">还没有练习记录，完成一次跟练后会显示在这里。</p>
     </section>
     <section class="legacy-card"><h2>个人资料</h2><div class="legacy-link-row"><button @click="router.push('/me/body-data')">身体数据 <span>身高、体重、年龄和练习偏好 ›</span></button><button @click="router.push('/sound')">五音氛围 <span>{{ toneName }}调 · 本机保存 ›</span></button></div></section>
+    <p v-if="storageWarning" class="legacy-muted storage-warning" role="status">本机存储不可用，当前偏好和练习记录只保留在此会话。</p>
     <nav class="legacy-nav"><button @click="router.push('/')">首页</button><button @click="router.push('/sound')">音疗</button><button @click="router.push('/intro')">开始练</button><button class="on" @click="router.push('/me')">我的</button></nav>
   </main>
 </template>
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { recordStore } from '../stores/records'
-import { profile } from '../stores/profile'
+import { recordStore, getRecordStorageStatus } from '../stores/records'
+import { profile, getProfileStorageStatus } from '../stores/profile'
 import { getTone } from '../data/tones'
 const router = useRouter()
 const records = computed(() => recordStore.list())
+const storageWarning = computed(() => !getRecordStorageStatus().persistent || !getProfileStorageStatus().persistent || getRecordStorageStatus().recovered || getProfileStorageStatus().recovered)
 const latest = computed(() => records.value[0] || null)
 const details = computed(() => profile.load())
 const movesDone = computed(() => records.value.reduce((sum, record) => sum + (record.doneCount || 0), 0))

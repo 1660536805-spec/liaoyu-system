@@ -37,21 +37,21 @@
       <div class="hud-metrics">
         <div class="m-card">
           <span class="m-icon">👤</span>
-          <span class="m-title">上半身</span>
-          <span class="m-val green">92%</span>
-          <div class="m-bar"><span style="width: 92%"></span></div>
+          <span class="m-title">上身关键点可见度</span>
+          <span class="m-val green">{{ metricText(measurements.upper) }}</span>
+          <div class="m-bar"><span :style="{ width: metricWidth(measurements.upper) }"></span></div>
         </div>
         <div class="m-card">
           <span class="m-icon"></span>
-          <span class="m-title">下半身</span>
-          <span class="m-val green">88%</span>
-          <div class="m-bar"><span style="width: 88%"></span></div>
+          <span class="m-title">下身关键点可见度</span>
+          <span class="m-val green">{{ metricText(measurements.lower) }}</span>
+          <div class="m-bar"><span :style="{ width: metricWidth(measurements.lower) }"></span></div>
         </div>
         <div class="m-card">
           <span class="m-icon">🔍</span>
-          <span class="m-title">取景完整度</span>
-          <span class="m-val zhu">92%</span>
-          <div class="m-bar zhu-bar"><span style="width: 92%"></span></div>
+          <span class="m-title">肩宽占画面</span>
+          <span class="m-val zhu">{{ metricText(measurements.framing) }}</span>
+          <div class="m-bar zhu-bar"><span :style="{ width: metricWidth(measurements.framing) }"></span></div>
         </div>
       </div>
     </div>
@@ -79,7 +79,11 @@
         </div>
       </div>
       <!-- 兜底已顶上时，摄像头错误只走这条细提示，不再挡住整块画面 -->
-      <div v-else-if="err && fbActive" class="fb-note">摄像头：{{ err }}</div>
+      <div v-else-if="err && fbActive" class="fb-note">
+        <span>摄像头：{{ err }}</span>
+        <button class="btn sm" @click="retry">重试摄像头</button>
+        <button class="btn sm ghost" @click="manualMode">继续手动点按</button>
+      </div>
 
       <div v-if="err && !fbActive" class="mask err">
         <div class="mask-txt">{{ err }}</div>
@@ -166,7 +170,7 @@
       <span class="fb-dot"></span>
       <span>预录演示中 · {{ fbReason }}</span>
       <span class="fb-sep">·</span>
-      <span>计时与打卡不中断，按「下一个式」往下走</span>
+      <span>示范视频不计入完成，请按下方按钮确认本式</span>
     </div>
 
     <!-- 弦位（数随拳种：八段锦 7 弦 / 五禽戏 5 弦） -->
@@ -210,10 +214,10 @@
     </div>
 
     <div class="footbar">
-      <button class="btn sm" :class="fbActive ? 'primary' : 'ghost'" @click="fbActive ? backToCamera() : skip()">
+      <button class="btn sm" :class="fbActive ? 'primary' : 'ghost'" @click="skip">
         {{
           fbActive
-            ? '下一个式 ▶'
+            ? '确认完成本式并继续 ▶'
             : (landmarksSeen ? '跳过本式（兜底）' : '点一下也算响（摄像头不可用）')
         }}
       </button>
@@ -261,6 +265,11 @@ const camLabel = ref('')
 const activeSidePanel = ref(null) // 'tips' | 'faq' | null
 const harpStep = ref(3)
 let harpTimer = null
+let viewActive = true
+let initSequence = 0
+const measurements = reactive({ upper: null, lower: null, framing: null })
+const metricText = (value) => value === null ? '—' : `${Math.round(value * 100)}%`
+const metricWidth = (value) => value === null ? '0%' : `${Math.max(0, Math.min(1, value)) * 100}%`
 
 function togglePanel(name) {
   activeSidePanel.value = activeSidePanel.value === name ? null : name
@@ -319,7 +328,6 @@ let fbSwitch = null
 let readyAt = 0             // 引擎就绪时刻，用于「迟迟没人入镜」的计时起点
 let lastAliveAt = 0         // 最近一帧有效人体的时刻
 let aliveStreak = 0         // 连续有效帧数（恢复实面前要攒够）
-let autoTimer = 0           // 预录模式下的「下一个式」保险推进
 let retryTimer = 0          // 摄像头彻底挂掉后的后台重试
 
 // 拳种：由首页 ?style= 指定，未指定则取第一个已就绪的
@@ -371,6 +379,9 @@ const guideText = ref('')
 
 function updateDiag(landmarks) {
   if (!landmarks || landmarks.length < 29) {
+    measurements.upper = null
+    measurements.lower = null
+    measurements.framing = null
     vis.text = '未检测到人体'
     vis.bad = true
     guideText.value = '站到镜头前，让上半身和双手完整入镜'
@@ -381,6 +392,9 @@ function updateDiag(landmarks) {
   const low = (v(25) + v(26) + v(27) + v(28)) / 4                    // 下半身
   // 肩宽占画面比例：太小说明站太远，太大说明太近
   const shoW = Math.hypot(landmarks[11].x - landmarks[12].x, landmarks[11].y - landmarks[12].y)
+  measurements.upper = up
+  measurements.lower = low
+  measurements.framing = shoW
   vis.text = `上半身 ${(up * 100).toFixed(0)}% · 下半身 ${(low * 100).toFixed(0)}% · 取景 ${(shoW * 100).toFixed(0)}%`
 
   if (up < 0.55) {
@@ -433,16 +447,19 @@ watch(() => style.value.id, () => {
 })
 
 async function init() {
+  const thisInit = ++initSequence
+  if (!viewActive) return
   err.value = ''
   loading.value = '正在准备…'
   stageNow.value = 'wasm'
   clearTimeout(loadTimer)
   // 兜底：25s 还没就绪就明说，避免无限转圈
   loadTimer = setTimeout(() => {
-    if (loading.value) {
+    if (viewActive && thisInit === initSequence && loading.value) {
       // 25 秒还没起来，与其停在转圈，不如直接上预录 —— 演示不空场优先（裁决序：保 P0）
-      err.value = ''
+      err.value = '姿态识别准备超时。可以重试摄像头，或继续手动练习。'
       loading.value = ''
+      trainingSession.enableManual()
       enterFallback('识别加载超时（25 秒）')
     }
   }, 25000)
@@ -451,12 +468,14 @@ async function init() {
     // 优先用上次选过的设备（localStorage），现场换设备后不用重新选
     const saved = safeGet('xianyang.deviceId')
     const cams = await listCameras()
+    if (!viewActive || thisInit !== initSequence) return
     const useId = cams.find((c) => c.deviceId === saved)?.deviceId
       || cams.find((c) => c.hasLabel)?.deviceId
       || cams[0]?.deviceId
       || null
     const r = RESOLUTIONS.find((x) => x.id === cfg.resId) || RESOLUTIONS[0]
     const info = await trainingSession.start({ mode: freeMode.value ? 'free' : 'guided', deviceId: useId, video: video.value, width: r.w, height: r.h })
+    if (!info || !viewActive || thisInit !== initSequence) return
     camLabel.value = info.label || (cams.find((c) => c.deviceId === info.deviceId)?.label ?? '摄像头')
     if (info.deviceId) safeSet('xianyang.deviceId', info.deviceId)
 
@@ -469,13 +488,14 @@ async function init() {
     aliveStreak = 0
     resetStep()
     // 摄像头就绪后再填下拉框（复用已授权的设备列表，不再请求权限）
-    settings.value?.refresh()
+    settings.value?.refresh(true)
     // 等一帧让 stage 完成布局再定 canvas 尺寸，否则拿到 0
     requestAnimationFrame(sizeCanvas)
     setTimeout(sizeCanvas, 120)
     window.addEventListener('resize', sizeCanvas)
     uiLoop()
   } catch (e) {
+    if (!viewActive || thisInit !== initSequence || e?.name === 'AbortError') return
     clearTimeout(loadTimer)
     console.error(e)
     const s = e?.name + ' ' + e?.message
@@ -498,6 +518,7 @@ function safeSet(k, v) { try { localStorage.setItem(k, v) } catch { /* file:// �
 function setupFallback() {
   fbSwitch = new FallbackSwitch(fbVideo.value, {
     onEnter: (reason) => {
+      if (!viewActive) return
       fbActive.value = true
       fbReason.value = reason
       // 别把切走前那一帧的骨架留在屏幕上，看着像还活着
@@ -505,22 +526,13 @@ function setupFallback() {
       liveScore.value = 0
       lastAliveAt = 0
       aliveStreak = 0
-      err.value = ''            // 兜底顶上了，就不再弹整块错误遮罩
-      startAutoAdvance()        // 现场没人按也别卡死在这一式
     },
     onExit: () => {
       fbActive.value = false
-      stopAutoAdvance()
     },
   })
   fbSwitch.prepare()            // 预热不阻塞：现场真要切时基本都是热启动
 }
-
-function startAutoAdvance() {
-  stopAutoAdvance()
-  autoTimer = setTimeout(() => { if (fbActive.value) skip() }, FALLBACK_CFG.autoAdvanceMs)
-}
-function stopAutoAdvance() { clearTimeout(autoTimer); autoTimer = 0 }
 
 /**
  * 断识别 / 迟迟无人 → 切预录。
@@ -533,12 +545,12 @@ function stopAutoAdvance() { clearTimeout(autoTimer); autoTimer = 0 }
 async function enterFallback(reason) {
   if (!fbSwitch || fbSwitch.active) return
   const okd = await fbSwitch.enter(reason)
+  if (!viewActive) return
   if (okd) return
   // 预录也没有 → 手动模式兜底，绝不弹整屏错误页
   console.warn('[fallback] 预录兜底不可用，转手动模式：', reason)
   fbReason.value = '预录缺失 · 已转手动点按'
   trainingSession.stopCamera() // 释放摄像头，避免持续报错
-  landmarksSeen.value = true   // 让底部按钮显示「点一下也算响」
 }
 
 function exitFallback(reason) {
@@ -595,7 +607,7 @@ function scheduleRetry() {
   }, FALLBACK_CFG.retryMs)
 }
 
-function retry() { fbSwitch?.exit(); stopAutoAdvance(); trainingSession.disposeEngine(); init() }
+function retry() { fbSwitch?.exit(); trainingSession.disposeEngine(); init() }
 
 // ---- 切换摄像头 / 分辨率（不重载模型）----
 async function onSwitchDevice(deviceId) {
@@ -642,13 +654,20 @@ onMounted(() => {
   harpTimer = setInterval(() => {
     harpStep.value = (harpStep.value % 5) + 1
   }, 1200)
+  window.addEventListener('pagehide', savePartialOnPageHide)
 })
 
+function savePartialOnPageHide() {
+  trainingSession.stop({ reason: 'pagehide' })
+}
+
 onBeforeUnmount(() => {
+  viewActive = false
+  ++initSequence
+  window.removeEventListener('pagehide', savePartialOnPageHide)
   clearInterval(harpTimer)
   clearTimeout(loadTimer)
   clearTimeout(retryTimer)
-  stopAutoAdvance()
   fbSwitch?.exit()
   cancelAnimationFrame(rafUI)
   window.removeEventListener('resize', sizeCanvas)
@@ -791,7 +810,7 @@ let fitSize = ''
 
 function onHit(i) {
   const mv = moves.value[i]
-  if (!mv || !trainingSession.hit(mv.id, fbActive.value ? 'fallback' : 'detected')) return
+  if (!mv || !trainingSession.hit(mv.id, 'detected')) return
   doneSet.value = new Set([...doneSet.value, i])
 
   if (mv.chord) {
@@ -816,7 +835,6 @@ function advance() {
 function finish() {
   if (finished.value) return
   finished.value = true
-  stopAutoAdvance()
   exitFallback('一曲完成')
   trainingSession.stop({ reason: '一曲完成' })
   router.replace('/finish')
@@ -826,15 +844,12 @@ function skip() {                 // 三级兜底之一：跳过本式也算完�
   const i = stepIdx.value
   const mv = moves.value[i]
   if (!mv) return
-  const source = fbActive.value ? 'fallback' : 'manual'
-  if (!trainingSession.hit(mv.id, source)) return
+  if (!trainingSession.hit(mv.id, 'manual')) return
   doneSet.value = new Set([...doneSet.value, i])
   litStrings.value = mv.chord
     ? Array.from({ length: style.value.strings }, (_, i) => i + 1)
     : [mv.stringIndex]
   lastLitClear = performance.now()
-  // 预录模式下没有判定器喂命中，「下一个式」得续上保险计时
-  if (fbActive.value) startAutoAdvance()
   if (stepIdx.value >= totalMoves.value - 1) finish(); else advance()
 }
 
@@ -844,17 +859,16 @@ function restart() {
   finished.value = false
   landmarksSeen.value = false
   litStrings.value = []
-  stopAutoAdvance()
   exitFallback('重新开始')
   resetStep()
   announcer.reset()          // 清空去重记录，重新播报第 1 式
   location.reload()
 }
 
-function manualMode() {          // 三级兜底之三：关摄像头，改为点按触发
+function manualMode() {          // 摄像头失败后由用户明确切换为点按练习
+  ++initSequence
   trainingSession.enableManual()
   exitFallback('改用手动模式')
-  stopAutoAdvance()
   clearTimeout(retryTimer)
   err.value = ''
   stepIdx.value = 0
@@ -1073,9 +1087,10 @@ let lastLandmarks = null
 /* 预录播放中，摄像头错误折成一行小字，不挡画面 */
 .fb-note {
   position: absolute; left: 50%; top: 8px; transform: translateX(-50%);
-  max-width: 90%; text-align: center; font-size: 10.5px; font-family: var(--font-ui);
-  color: #f0b8a8; background: rgba(10, 8, 6, .72); padding: 4px 12px; border-radius: 12px;
-  pointer-events: none; line-height: 1.5;
+  max-width: 95%; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;
+  text-align: center; font-size: 10.5px; font-family: var(--font-ui);
+  color: #f0b8a8; background: rgba(10, 8, 6, .78); padding: 6px 10px; border-radius: 12px;
+  pointer-events: auto; line-height: 1.5; z-index: 12;
 }
 
 .strings { display: flex; gap: 6px; padding: 6px 16px 2px; }

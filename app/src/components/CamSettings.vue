@@ -92,9 +92,7 @@ const threshold = ref(props.threshold)
 const holdFrames = ref(props.holdFrames)
 
 async function refresh(force = false) {
-  // 由父组件在摄像头就绪后调用（refresh()），面板内的「↻」传 force=true 强制重扫。
-  // 不在 onMounted 里自动调 —— 会与父组件的 listCameras() 并发请求权限，
-  // 导致 getUserMedia 抢流并触发 video.play() 的 AbortError（真机实测踩过）。
+  // 仅枚举设备，不申请权限；父组件在相机就绪后调用以读取授权后的设备名称。
   busy.value = true
   try {
     if (force) invalidateCameraCache()
