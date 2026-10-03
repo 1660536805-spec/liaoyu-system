@@ -150,11 +150,11 @@ function start() {
 .sub-slogan { font-size: 13px; color: var(--xuan-dim); margin-bottom: 20px; }
 
 .rec-card {
-  position: relative; border-radius: 20px; padding: 18px; min-height: 260px;
+  position: relative; border-radius: 22px; padding: 22px 20px; min-height: 290px;
   background: linear-gradient(135deg, #FFFDF8 0%, #F9F1E3 100%);
-  border: 1px solid var(--border); box-shadow: 0 6px 20px rgba(58,51,42,.08);
+  border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(58,51,42,.09);
   display: flex; flex-direction: column; justify-content: space-between;
-  margin-bottom: 16px; overflow: hidden;
+  margin-bottom: 18px; overflow: hidden;
 }
 .rec-card::before {
   content: ''; position: absolute; right: -20px; top: -20px; width: 160px; height: 160px;
@@ -163,20 +163,76 @@ function start() {
 .rec-head { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1; }
 .rec-badge { font-size: 12px; color: #fff; background: var(--brown); padding: 4px 10px; border-radius: 12px; }
 .rec-detail { font-size: 12px; color: var(--xuan-dim); text-decoration: underline; }
-.rec-main { position: relative; z-index: 1; }
+.rec-main {
+  position: relative; z-index: 1;
+  max-width: calc(100% - 145px); /* 留足右侧空间给大号核心入口按钮 */
+}
 .rec-title { font-size: 22px; font-weight: 600; color: #2B251E; margin-bottom: 6px; }
 .rec-sub { font-size: 14px; color: var(--xuan-dim); margin-bottom: 10px; }
 .rec-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .rtag { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--green-light); color: var(--green); }
 
+/* 核心入口大按钮：放大并强化视觉层次与呼吸感 */
 .start-btn {
-  position: absolute; right: 18px; bottom: 18px; width: 90px; height: 90px; border-radius: 50%;
-  background: var(--zhu); color: #fff; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 4px; box-shadow: 0 6px 18px rgba(200,93,77,.35); border: 3px solid rgba(255,255,255,.4);
+  position: absolute; right: 20px; bottom: 22px;
+  width: 130px; height: 130px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 30%, #E2715F 0%, #C85D4D 70%, #AB4637 100%);
+  color: #FFFDF8;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  box-shadow: 0 8px 28px rgba(200,93,77,.42), 0 0 0 6px rgba(255,255,255,.55), 0 0 0 12px rgba(200,93,77,.14);
+  border: 2px solid rgba(255,255,255,.6);
   z-index: 2;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease;
+  animation: pulse-entry 3.8s ease-in-out infinite;
 }
-.play-tri { font-size: 20px; margin-left: 3px; }
-.start-label { font-size: 14px; letter-spacing: 1px; }
+.start-btn:active {
+  transform: scale(.95);
+}
+@keyframes pulse-entry {
+  0%, 100% {
+    box-shadow: 0 8px 28px rgba(200,93,77,.42), 0 0 0 6px rgba(255,255,255,.55), 0 0 0 12px rgba(200,93,77,.14);
+  }
+  50% {
+    box-shadow: 0 10px 34px rgba(200,93,77,.52), 0 0 0 7px rgba(255,255,255,.65), 0 0 0 16px rgba(200,93,77,.2);
+  }
+}
+.play-tri {
+  font-size: 32px;
+  margin-left: 4px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.2));
+  line-height: 1;
+}
+.start-label {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-indent: 2.5px;
+  text-shadow: 0 1px 3px rgba(0,0,0,.25);
+  font-family: var(--font);
+}
+
+@media (min-width: 768px) {
+  .rec-card {
+    min-height: 310px;
+    padding: 26px 24px;
+  }
+  .rec-main {
+    max-width: calc(100% - 170px);
+  }
+  .start-btn {
+    width: 152px;
+    height: 152px;
+    right: 24px;
+    bottom: 24px;
+  }
+  .play-tri {
+    font-size: 38px;
+  }
+  .start-label {
+    font-size: 19px;
+  }
+}
 
 .style-pills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
 .spill {

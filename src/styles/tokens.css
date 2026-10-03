@@ -72,13 +72,13 @@
 /* 桌面端：放开视窗宽度，大屏自适应沉浸跟练 */
 @media (min-width: 900px) {
   :root {
-    --shell-w: 1040px;
+    --shell-w: 1180px;
     --tap: 42px;
   }
 }
 /* 超宽屏（大显示器 / 2K+）：宽幅展布 */
 @media (min-width: 1400px) {
-  :root { --shell-w: 1240px; }
+  :root { --shell-w: 1380px; }
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }

@@ -639,9 +639,12 @@ function sizeCanvas() {
   const stage = c.parentElement
   const v = video.value
   const vw = v?.videoWidth || 4, vh = v?.videoHeight || 3
-  // 取景比例：优先用户在设置面板选的档位；「跟随源」则用视频真实比例
   const f = FRAMES.find((x) => x.id === cfg.frameId) || FRAMES[1]
-  const ar = f.ratio > 0 ? f.ratio : vw / vh
+  const isWideScreen = typeof window !== 'undefined' && window.innerWidth >= 768
+  // 桌面宽屏下，若摄像头为横屏（如 USB WebCam），自适应其真实比例，消除两侧无用黑边并将画面最大化展示
+  const ar = (isWideScreen && vw > vh && cfg.frameId === FRAMES[1].id)
+    ? (vw / vh)
+    : (f.ratio > 0 ? f.ratio : (vw / vh))
   stage.style.setProperty('--stage-ar', String(ar))
   const w = stage.clientWidth || 640, h = stage.clientHeight || 480
   c.width = w; c.height = h
@@ -908,24 +911,33 @@ let lastLandmarks = null
 .mode { font-size: 11px; color: var(--xuan-faint); font-family: var(--font-ui); }
 .btn.sm { padding: 6px 10px; font-size: 11.5px; }
 
-/* 放大后的取景舞台：撑满屏幕核心空间 */
+/* 取景舞台：自适应比例最大化铺满，横屏竖屏零黑边，面积成倍提升 */
 .stage {
   position: relative;
-  flex: 1 1 0;
-  min-height: 480px;
-  width: 100%;
-  max-width: 100%;
+  flex: 1 1 auto;
+  aspect-ratio: var(--stage-ar, 1.33);
+  height: min(100%, 78vh);
+  width: auto;
+  max-width: 98%;
   align-self: center;
+  margin: 0 auto;
   background: #000;
   border-radius: var(--r-m);
   overflow: hidden;
-  box-shadow: 0 0 0 1px rgba(232, 224, 208, .08), 0 8px 32px rgba(58, 51, 42, .22);
+  box-shadow: 0 0 0 1px rgba(232, 224, 208, .12), 0 12px 40px rgba(0, 0, 0, .4);
 }
-@media (min-height: 700px) {
-  .stage { min-height: 540px; }
+@media (min-height: 800px) {
+  .stage { height: min(100%, 82vh); }
 }
-@media (min-height: 850px) {
-  .stage { min-height: 620px; }
+@media (min-height: 950px) {
+  .stage { height: min(100%, 85vh); }
+}
+@media (max-width: 560px) {
+  .stage {
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--stage-ar, 0.75);
+  }
 }
 
 .video, .overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -1091,19 +1103,19 @@ let lastLandmarks = null
 
 @media (min-width: 768px) {
   .final-hud {
-    padding: 10px 16px;
-    margin: 4px 16px 10px;
+    padding: 10px 18px;
+    margin: 4px auto 10px;
+    width: 92%;
+    max-width: 920px;
     border-radius: 16px;
   }
-  .hud-left { flex: 0 0 130px; }
+  .hud-left { flex: 0 0 140px; }
   .hud-tag { font-size: 11px; }
   .hud-idx { font-size: 13px; }
-  .hud-name { font-size: 16px; }
-  .m-card { font-size: 11.5px; gap: 6px; }
-  .m-val { font-size: 12px; }
-  .m-bar { height: 3.5px; }
-  .cur-name { font-size: 30px; }
-  .cur-cue { font-size: 14px; }
+  .hud-name { font-size: 17px; }
+  .m-card { font-size: 12px; gap: 8px; }
+  .m-val { font-size: 13px; }
+  .m-bar { height: 4px; }
 }
 
 .hud-sidenav {

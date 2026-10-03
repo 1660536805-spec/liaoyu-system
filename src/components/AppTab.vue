@@ -62,20 +62,25 @@ function go(path) {
 
 <style scoped>
 .app-tab {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--shell-w);
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-around;
-  /* 高度用 var(--tab-h)，横屏时 tokens.css 会压到 52px。
-     用 min-height 而不是 height：内容换行时不至于被裁。 */
   min-height: var(--tab-h);
-  /* 刘海屏底部小黑条：用 padding 让出，不让内容被压住 */
   padding-bottom: var(--safe-b);
   padding-left: var(--safe-l);
   padding-right: var(--safe-r);
-  background: rgba(248, 245, 237, .94);
-  border-top: 1px solid rgba(58, 51, 42, .08);
-  backdrop-filter: blur(6px);
-  flex: 0 0 auto;
+  background: rgba(248, 245, 237, .96);
+  border-top: 1px solid rgba(58, 51, 42, .1);
+  box-shadow: 0 -2px 14px rgba(58, 51, 42, .08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .tab {
   appearance: none;
