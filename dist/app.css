@@ -1,0 +1,287 @@
+/* ============================================================
+   弦养 · 最终版设计系统
+   色值与尺寸均从参考图（941×1672 @2x）实测换算：
+   画布 470pt · 内容边距 15.5pt · 内容宽 439pt · 底栏 58pt
+   ============================================================ */
+:root{
+  /* 实测色板 */
+  --bg:#FCF7EC;            /* 页面底 #FBF6EE */
+  --card:#FDFAF2;          /* 卡片面 #FAF4EB~#FDFAF2 */
+  --card-2:#FBF5E9;
+  --line:#E8DCC8;          /* 描边 #E3D8C7~#D9CABD */
+  --line-2:#D8CBB6;
+
+  --ink:#503B2D;           /* 正文深棕 */
+  --ink-2:#6B5B47;
+  --brown:#6F3F2A;         /* 品牌棕 / 标题 */
+  --brown-2:#8A5A3B;
+  --muted:#8C7C6A;         /* 次要文字 */
+  --faint:#A39985;         /* 三级文字 */
+
+  --seal:#B03A2C;          /* 印章朱红 */
+  --orange:#B45D3C;        /* 主按钮 #B25C3D */
+  --orange-hi:#C06740;
+  --orange-lo:#A85636;
+  --orange-wash:#F7E3D6;
+  --gold:#C0A16A;
+  --green:#4E6B5C;         /* 完成打卡 */
+  --green-soft:#E4EDE6;
+
+  --sh:0 3px 12px rgba(120,95,65,.07);
+  --sh-2:0 8px 24px rgba(120,95,65,.11);
+
+  --serif:'Songti SC','STSong','SimSun',serif;
+  --sans:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:#E2DACE;font:14px/1.6 var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+input{font:inherit;color:inherit}
+[hidden]{display:none!important}
+
+/* ---------- 画布 ---------- */
+.phone{position:relative;width:min(100%,470pt);min-height:100dvh;margin:0 auto;overflow:hidden;
+  background:var(--bg);box-shadow:0 0 50px rgba(90,72,48,.15)}
+.phone::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:url('/art/cloud.jpg') repeat;background-size:300px auto;opacity:.42;mix-blend-mode:multiply}
+.sc{position:relative;z-index:1;min-height:100dvh;padding:0 15.5pt calc(72pt + env(safe-area-inset-bottom))}
+.sc.flush{padding-left:0;padding-right:0}
+.sc.flush>.pad{padding-left:15.5pt;padding-right:15.5pt}
+.sc.mid{display:flex;flex-direction:column;justify-content:center}
+
+/* ---------- 排版 ---------- */
+.t-brand{font:600 30pt/1 var(--serif);color:var(--brown);letter-spacing:.1em}
+.t-h1{font:600 21pt/1.34 var(--serif);color:var(--ink);letter-spacing:.05em;margin:0 0 6pt}
+.t-h2{font:600 16pt/1.4 var(--serif);color:var(--ink);margin:0 0 5pt}
+.t-h3{font:600 14pt/1.4 var(--serif);color:var(--ink);margin:0 0 4pt}
+.t-p{font-size:12pt;line-height:1.85;color:var(--muted);margin:0}
+.t-p.sm{font-size:10.5pt;line-height:1.7}
+.t-sub{display:flex;align-items:center;gap:8pt;color:var(--faint);font-size:10.5pt;letter-spacing:.08em}
+.t-sub::before,.t-sub::after{content:'';flex:1;height:1px;background:var(--line-2)}
+.t-sub::after{background:linear-gradient(270deg,transparent,var(--line-2))}
+.ctr{text-align:center}
+
+/* ---------- 品牌 / 印章 ---------- */
+.brandrow{display:flex;align-items:center;justify-content:center;gap:6pt}
+.seal{display:inline-grid;place-items:center;width:16pt;height:16pt;border-radius:2pt;background:var(--seal);
+  color:#fff;font:600 8pt/1 var(--serif);flex:none}
+.seal.v{width:15pt;height:28pt;font-size:7.5pt;line-height:1.1;writing-mode:vertical-rl;padding:2pt 0;text-align:center}
+
+/* ---------- 卡片 ---------- */
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:11pt;
+  padding:12pt 11pt;box-shadow:var(--sh)}
+.card+.card{margin-top:9pt}
+.card-h{display:flex;align-items:center;gap:6pt;margin:0 0 9pt}
+.card-h .ic{width:19pt;height:19pt;flex:none;display:grid;place-items:center;border-radius:6pt;
+  background:linear-gradient(150deg,#DCC7A6,#C3A87E);color:#fff;font-size:10pt}
+.card-h h2{font:600 13.5pt/1.3 var(--serif);margin:0;letter-spacing:.04em}
+.card-h .go{margin-left:auto;font-size:10pt;color:var(--faint)}
+
+/* ---------- 按钮 ---------- */
+.btn{display:flex;align-items:center;justify-content:center;gap:6pt;width:100%;min-height:42pt;border-radius:999pt;
+  font-size:13.5pt;font-weight:600;letter-spacing:.03em;transition:transform .1s}
+.btn:active{transform:scale(.985)}
+.btn-pri{background:linear-gradient(135deg,var(--orange-hi),var(--orange-lo));color:#fff;
+  box-shadow:0 5pt 14pt rgba(168,86,54,.26)}
+.btn-grn{background:linear-gradient(135deg,#5A7B6C,var(--green));color:#fff;box-shadow:0 5pt 14pt rgba(78,107,92,.24)}
+.btn-gho{background:rgba(253,250,242,.8);border:1px solid var(--line-2);color:var(--brown)}
+.btn-gho.grn{color:var(--green);border-color:rgba(78,107,92,.35)}
+.btn-row{display:flex;gap:8pt;margin-top:10pt}
+.btn-row .btn{flex:1}
+.btn-txt{background:none;color:var(--muted);font-size:12pt;padding:11pt;width:100%}
+
+/* ---------- 顶栏 ---------- */
+.top{display:flex;align-items:center;gap:10pt;padding:12pt 0 4pt}
+.top .sp{flex:1}
+.top .ti{font:600 15pt var(--serif);letter-spacing:.08em}
+.icb{width:30pt;height:30pt;border-radius:50%;display:grid;place-items:center;flex:none;position:relative;
+  background:rgba(253,250,242,.7);border:1px solid var(--line);color:var(--ink);font-size:13pt}
+.icb::after{content:'';position:absolute;top:5pt;right:6pt;width:5pt;height:5pt;border-radius:50%;background:var(--seal)}
+.icb.plain::after{display:none}
+
+/* ---------- 装饰分隔 ---------- */
+.orn{display:flex;align-items:center;gap:8pt;color:var(--faint);font-size:9.5pt;letter-spacing:.16em;margin:14pt 0}
+.orn::before,.orn::after{content:'';flex:1;height:1px;background:var(--line-2)}
+.orn .lf{color:var(--gold);font-size:8pt}
+
+/* ---------- 底栏（实测 58pt） ---------- */
+.tabbar{position:fixed;z-index:60;left:50%;transform:translateX(-50%);width:min(100%,470pt);bottom:0;
+  height:calc(58pt + env(safe-area-inset-bottom));padding:6pt 14pt calc(6pt + env(safe-area-inset-bottom));
+  display:grid;grid-template-columns:repeat(3,1fr);
+  background:linear-gradient(180deg,rgba(252,247,236,.7),rgba(252,247,236,.98) 40%);
+  border-top:1px solid var(--line);backdrop-filter:blur(14px)}
+.tabbar button{display:grid;justify-items:center;gap:2pt;color:#A8998A;font-size:10pt;letter-spacing:.04em;position:relative}
+.tabbar .ti{font-size:17pt;line-height:1}
+.tabbar button.on{color:var(--orange);font-weight:600}
+.tabbar button .nd{position:absolute;top:3pt;right:24%;width:5pt;height:5pt;border-radius:50%;background:var(--seal)}
+
+/* ---------- 芯片 ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:7pt}
+.chip{display:flex;align-items:center;gap:4pt;padding:7pt 11pt;border-radius:8pt;font-size:11.5pt;
+  background:rgba(253,250,242,.7);border:1px solid var(--line);color:var(--ink-2);position:relative}
+.chip.on{background:var(--green-soft);border-color:rgba(78,107,92,.5);color:var(--green);font-weight:600}
+.chip.on::after{content:'✓';position:absolute;top:-5pt;right:-5pt;width:14pt;height:14pt;border-radius:50%;
+  background:#5A7A68;color:#fff;font-size:8pt;display:grid;place-items:center;border:1.5pt solid var(--card)}
+
+/* ---------- 步进器 ---------- */
+.stepper{display:flex;align-items:center;margin:10pt 0 14pt}
+.stepper .n{font:600 14pt var(--serif);color:var(--brown);margin-right:8pt;letter-spacing:.04em}
+.stepper .d{width:13pt;height:13pt;border-radius:50%;flex:none;border:1.4pt solid var(--line-2);
+  background:var(--card);display:grid;place-items:center;font-size:7.5pt;color:#fff}
+.stepper .d.on{background:var(--orange);border-color:var(--orange)}
+.stepper .d.cur{width:16pt;height:16pt;background:var(--card);border-color:var(--orange);border-width:1.8pt;
+  box-shadow:0 0 0 2.5pt rgba(180,93,60,.14)}
+.stepper .l{flex:1;height:1.4pt;background:var(--line-2);margin:0 4pt}
+.stepper .l.on{background:var(--orange)}
+
+/* ---------- 进度条 ---------- */
+.pbar{height:3pt;border-radius:2pt;background:var(--line);overflow:hidden}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--orange),var(--gold));border-radius:2pt}
+
+/* ---------- 数字步进输入 ---------- */
+.numstep{display:flex;align-items:center;gap:9pt}
+.numstep button{width:26pt;height:26pt;border-radius:50%;border:1px solid var(--line-2);color:var(--brown);
+  font-size:15pt;line-height:1;display:grid;place-items:center;background:rgba(253,250,242,.8)}
+.numstep b{min-width:34pt;text-align:center;font:600 17pt var(--serif);color:var(--brown)}
+
+/* ---------- 开关 ---------- */
+.sw{width:38pt;height:21pt;border-radius:11pt;background:var(--line-2);position:relative;flex:none;transition:background .2s}
+.sw::after{content:'';position:absolute;top:2.5pt;left:2.5pt;width:16pt;height:16pt;border-radius:50%;background:#fff;
+  box-shadow:0 1pt 3pt rgba(0,0,0,.16);transition:transform .2s}
+.sw.on{background:var(--green)}
+.sw.on::after{transform:translateX(17pt)}
+
+/* ---------- 列表行 ---------- */
+.row{display:flex;align-items:center;gap:9pt;padding:12pt 2pt;border-bottom:1px solid var(--line);font-size:12.5pt}
+.row:last-child{border-bottom:0}
+.row .ri{width:20pt;height:20pt;border-radius:6pt;display:grid;place-items:center;font-size:11pt;
+  background:rgba(196,168,126,.18);color:var(--brown);flex:none}
+.row .go{margin-left:auto;color:var(--faint);font-size:12pt}
+
+/* ---------- 指标 ---------- */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:0;text-align:center;padding:11pt 0}
+.metrics>div{padding:0 4pt}
+.metrics>div+div{border-left:1px solid var(--line)}
+.metrics b{display:block;font:600 16pt var(--serif);color:var(--orange);margin-bottom:2pt}
+.metrics span{font-size:9.5pt;color:var(--faint)}
+
+/* ---------- 圆形播放按钮（首页） ---------- */
+.playbig{width:78pt;height:78pt;border-radius:50%;display:grid;place-items:center;margin:0 auto;
+  background:radial-gradient(circle at 34% 30%,#DE8A5C,var(--orange) 62%,#9E4E31);
+  color:#fff;font-size:15pt;font-weight:600;box-shadow:0 10pt 26pt rgba(158,78,49,.34),0 0 0 6pt rgba(201,169,97,.16)}
+.playbig .pl{display:block;text-align:center;line-height:1.2}
+.playbig .pl i{display:block;font-size:20pt;font-style:normal;margin-bottom:1pt}
+
+/* ---------- 模式页签（首页底部） ---------- */
+.modes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7pt;margin-top:12pt}
+.mode{padding:9pt 5pt;border-radius:10pt;text-align:center;background:rgba(253,250,242,.7);border:1px solid var(--line)}
+.mode.on{background:linear-gradient(150deg,#5C7A6C,#40594C);border-color:transparent;color:#F3F7F4}
+.mode b{display:block;font:600 12.5pt var(--serif);margin-bottom:2pt}
+.mode span{font-size:8.5pt;opacity:.75}
+
+/* ---------- 五脏卡（音疗） ---------- */
+.organs{display:grid;grid-template-columns:repeat(5,1fr);gap:5pt;margin:10pt 0 12pt}
+.organ{border-radius:9pt;padding:9pt 3pt 8pt;text-align:center;background:var(--card-2);border:1px solid var(--line);
+  position:relative;overflow:hidden}
+.organ .z{font:600 19pt/1 var(--serif);color:var(--brown);margin-bottom:2pt}
+.organ .y{font-size:8.5pt;color:var(--faint);margin-bottom:3pt}
+.organ .l{font-size:8.5pt;color:var(--muted);line-height:1.3}
+.organ.on{border-color:var(--orange);box-shadow:0 0 0 1.5pt rgba(180,93,60,.2)}
+.organ.on::after{content:'✓';position:absolute;top:3pt;right:4pt;width:12pt;height:12pt;border-radius:50%;
+  background:var(--orange);color:#fff;font-size:7.5pt;display:grid;place-items:center}
+
+/* ---------- 曲目行 ---------- */
+.track{display:flex;align-items:center;gap:8pt;padding:8pt;border-radius:10pt;background:var(--card);
+  border:1px solid var(--line);margin-top:7pt}
+.track .th{width:38pt;height:38pt;border-radius:7pt;flex:none;background-size:cover;background-position:center}
+.track .tt{flex:1;min-width:0}
+.track .tt b{display:block;font:600 12.5pt var(--serif);margin-bottom:2pt}
+.track .tt span{font-size:9.5pt;color:var(--faint)}
+.track .tp{width:24pt;height:24pt;border-radius:50%;background:var(--orange);color:#fff;display:grid;
+  place-items:center;font-size:9pt;flex:none}
+
+/* ---------- 跟练：信息条 / 取景 / 侧栏 ---------- */
+.infobar{display:flex;align-items:center;padding:7pt 0;font-size:9.5pt;color:var(--muted);
+  background:rgba(253,250,242,.6);border:1px solid var(--line);border-radius:9pt;margin-bottom:8pt}
+.infobar>div{flex:1;text-align:center;line-height:1.35}
+.infobar>div+div{border-left:1px solid var(--line)}
+.infobar b{display:block;font:600 11.5pt var(--serif);color:var(--brown)}
+.stagewrap{position:relative;border-radius:11pt;overflow:hidden;height:300pt;
+  background:linear-gradient(150deg,#D6E3DF,#A3C0B8)}
+.stagewrap img{position:absolute;bottom:-96pt;left:50%;transform:translateX(-50%);height:398pt;width:auto;mix-blend-mode:multiply}
+.bubble{position:absolute;top:10pt;left:10pt;right:10pt;background:rgba(253,250,242,.92);border:1px solid var(--line);
+  border-radius:9pt;padding:7pt 10pt;font-size:10.5pt;color:var(--ink);box-shadow:var(--sh)}
+.gauge7{position:absolute;left:10pt;right:10pt;bottom:10pt;display:grid;grid-template-columns:repeat(7,1fr);gap:4pt}
+.gauge7 i{height:3pt;border-radius:2pt;background:rgba(253,250,242,.55)}
+.gauge7 i.on{background:var(--orange)}
+.practice-grid{display:grid;grid-template-columns:52pt 1fr;gap:8pt;margin-top:9pt}
+.rail{display:grid;gap:5pt;align-content:start}
+.rail button{padding:7pt 2pt;border-radius:8pt;font-size:9.5pt;text-align:center;color:var(--muted);
+  background:rgba(253,250,242,.6);border:1px solid var(--line)}
+.rail button.on{background:var(--green);color:#fff;border-color:transparent}
+.breath{background:var(--card);border:1px solid var(--line);border-radius:10pt;padding:10pt}
+.breath h3{font:600 12.5pt var(--serif);margin:0 0 7pt}
+.strings7{display:grid;gap:5pt}
+.strings7 i{display:block;height:2pt;border-radius:2pt;background:var(--line);position:relative}
+.strings7 i.lit{background:var(--orange)}
+.transport{display:flex;align-items:center;justify-content:center;gap:22pt;margin-top:13pt}
+.transport button{width:38pt;height:38pt;border-radius:50%;display:grid;place-items:center;font-size:13pt;
+  background:rgba(253,250,242,.8);border:1px solid var(--line);color:var(--ink)}
+.transport .big{width:54pt;height:54pt;font-size:19pt;background:linear-gradient(135deg,var(--orange-hi),var(--orange-lo));
+  color:#fff;border-color:transparent;box-shadow:0 6pt 16pt rgba(168,86,54,.3)}
+
+/* ---------- 结束页：分数环 ---------- */
+.ring{width:64pt;height:64pt;border-radius:50%;display:grid;place-items:center;flex:none;position:relative;
+  background:conic-gradient(var(--green) 0 89%,var(--line) 89% 100%)}
+.ring::after{content:'';position:absolute;inset:7pt;border-radius:50%;background:var(--card)}
+.ring span{position:relative;z-index:1;font:600 16pt var(--serif);color:var(--green)}
+.fret{height:52pt;border-radius:8pt;background:linear-gradient(180deg,#6B4A32,#4A3223);position:relative;overflow:hidden;margin:9pt 0 5pt}
+.fret i{position:absolute;left:8pt;right:8pt;height:1px;background:rgba(240,225,200,.32)}
+.fret b{position:absolute;width:7pt;height:7pt;border-radius:50%;transform:translate(-50%,-50%)}
+.legend{display:flex;gap:11pt;font-size:9pt;color:var(--faint);align-items:center}
+.legend s{width:7pt;height:7pt;border-radius:50%;display:inline-block;text-decoration:none;margin-right:3pt}
+
+/* ---------- 提示 ---------- */
+.toast{position:fixed;z-index:99;left:50%;bottom:88pt;transform:translateX(-50%);padding:9pt 16pt;border-radius:999pt;
+  background:rgba(80,59,45,.92);color:#FBF6EA;font-size:11pt;white-space:nowrap}
+
+/* ---------- 底部弹层 ---------- */
+.sheet{position:fixed;z-index:90;inset:0;display:grid;align-items:end;justify-items:center;background:rgba(80,59,45,.42)}
+.sheet-c{width:min(100%,470pt);background:var(--card);border-radius:18pt 18pt 0 0;padding:18pt 16pt calc(20pt + env(safe-area-inset-bottom));
+  border-top:1px solid var(--line-2)}
+
+/* ---------- 窄屏适配（iPhone SE / 小安卓） ---------- */
+@media(max-width:360px){
+  .sc{padding-left:12pt;padding-right:12pt}
+  .sc.flush>.pad{padding-left:12pt;padding-right:12pt}
+  .top.pad{padding-left:12pt;padding-right:12pt}
+  .t-brand{font-size:26pt}
+  .t-h1{font-size:18pt}
+  .playbig{width:66pt;height:66pt}
+  .playbig .pl{font-size:13pt}
+  .mode{padding:8pt 2pt}
+  .mode b{font-size:11pt}
+  .mode span{font-size:7.5pt}
+  .organ .z{font-size:16pt}
+  .organ .l{font-size:7.5pt}
+  .stagewrap{height:236pt}
+  .stagewrap img{height:314pt;bottom:-76pt}
+  .practice-grid{grid-template-columns:46pt 1fr;gap:6pt}
+  .transport{gap:14pt}
+  .transport button{width:34pt;height:34pt}
+  .transport .big{width:48pt;height:48pt;font-size:17pt}
+  .tabbar{padding-left:6pt;padding-right:6pt}
+  .tabbar button{font-size:9pt}
+  .tabbar .ti{font-size:15pt}
+  .metrics b{font-size:14pt}
+  .numstep{gap:6pt}
+  .numstep b{min-width:28pt;font-size:15pt}
+  .sheet-c{width:100%}
+}
+@media(max-width:330px){
+  .tabbar button{font-size:8.5pt;letter-spacing:0}
+  .mode span{display:none}
+}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
