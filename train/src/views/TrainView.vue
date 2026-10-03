@@ -85,7 +85,7 @@
         <div class="mask-txt">{{ err }}</div>
         <button class="btn" @click="retry">重试</button>
         <button class="btn ghost" @click="manualMode">改用手动模式继续</button>
-        <button class="btn ghost" @click="$router.push('/')">返回首页</button>
+        <button class="btn ghost" @click="toShell('/?screen=home')">返回首页</button>
       </div>
       <div v-else-if="!landmarksSeen" class="hint">站到镜头前，让上半身和双手完整入镜</div>
 
@@ -116,7 +116,7 @@
       <!-- 最终版设计稿：左侧垂直导航 -->
       <nav class="hud-sidenav" v-if="!finished">
         <button class="snav-btn on">跟练中</button>
-        <button class="snav-btn" @click="$router.push('/guide')">动作示范</button>
+        <button class="snav-btn" @click="toShell('/?screen=practice')">动作示范</button>
         <button class="snav-btn" @click="togglePanel('tips')">动作要点</button>
         <button class="snav-btn" @click="togglePanel('faq')">常见问题</button>
       </nav>
@@ -203,9 +203,9 @@
       <div class="done-title">一曲完成</div>
       <div class="done-sub">八式俱毕 · 七弦和鸣</div>
       <div class="done-actions">
-        <button class="btn primary" @click="$router.push('/record')">查看记录</button>
+        <button class="btn primary" @click="toShell('/?screen=profile')">查看记录</button>
         <button class="btn" @click="restart">再来一遍</button>
-        <button class="btn ghost" @click="$router.push('/')">返回首页</button>
+        <button class="btn ghost" @click="toShell('/?screen=home')">返回首页</button>
       </div>
     </div>
 
@@ -244,6 +244,11 @@ import { createAnnouncer } from '../engine/announcer'
 
 const route = useRoute()
 const router = useRouter()
+
+// —— 出口一律回主壳 ——
+// 本应用只保留这一页（跟练识别页），已没有 s4 自己的首页/我的/记录/要领页。
+// 退出、完成、出错后的返回，全部整页跳回主壳（dist/app.js 那套 9 页设计稿页面）。
+function toShell(url) { window.location.assign(url) }
 const video = ref(null)
 const canvas = ref(null)
 const settings = ref(null)
@@ -843,7 +848,7 @@ function manualMode() {          // 三级兜底之三：关摄像头，改为�
   camLabel.value = '手动模式'
 }
 
-function quit() { exitFallback('退出跟练'); engine?.dispose(); router.push('/') }
+function quit() { exitFallback('退出跟练'); engine?.dispose(); toShell('/?screen=home') }
 
 // 标准骨架：按当前式取真值，在该式的 5 个关键帧之间循环播放，
 // 让人看见「这一式标准动作是怎么做的」。只对八段锦生效（真值只有这 8 式）。
