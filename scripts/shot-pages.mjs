@@ -33,6 +33,8 @@ const PAGES = [
   ['splash', '/#/splash'],
   ['welcome', '/#/welcome'],
   ['onboarding', '/#/onboarding'],
+  ['onboarding-v2', '/#/onboarding-v2'],
+  ['culture', '/#/culture'],
 ]
 
 const browser = await chromium.launch({

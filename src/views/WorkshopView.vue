@@ -5,6 +5,7 @@
       <h1>五音短句工坊</h1>
       <div class="spacer"></div>
       <button class="btn ghost sm" @click="leave('/order')">点单</button>
+      <button class="btn ghost sm" @click="leave('/culture')">文化内核实验室</button>
     </div>
 
     <div class="body">

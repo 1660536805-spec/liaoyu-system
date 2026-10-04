@@ -103,7 +103,7 @@ const curveSvg = computed(() => {
   }
   const area = `22,${yLo} ` + pts.join(' ') + ` ${X(ARC_TOTAL).toFixed(1)},${yLo}`
   let svg = `<polygon points="${area}" fill="rgba(200, 93, 77,.13)"/>`
-  svg += `<polyline points="${pts.join(' ')}" fill="none" stroke="#c8553d" stroke-width="1.6"/>`
+  svg += `<polyline points="${pts.join(' ')}" fill="none" stroke="#B0552E" stroke-width="1.6"/>`
   for (let i = 1; i < ARC_SECTIONS.length; i++) {
     const xx = X(ARC_SECTIONS[i].t).toFixed(1)
     svg += `<line x1="${xx}" y1="${yHi}" x2="${xx}" y2="${yLo}" stroke="#4a4238" stroke-width="0.7" stroke-dasharray="3 4"/>`

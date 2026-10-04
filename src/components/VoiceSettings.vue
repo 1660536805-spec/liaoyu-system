@@ -155,7 +155,9 @@ defineExpose({ previewText })
 .vs-engine.ok .dot { background: #7fb069; }
 .vs-engine.bad .dot { background: var(--zhu); }
 .vs-engine.off .dot { background: var(--xuan-faint); }
-.vs-hint { font-size: 10px; color: #c8553d; margin: -4px 0 8px; font-family: var(--font-ui); line-height: 1.5; }
+/* 深色 HUD 面板内的小字提示：这里不能用 --zhu #B0552E（深底上只有 2.2:1），
+   用提亮的朱色 7.1:1，AA 通过。改配色时别手贱改回赭石。 */
+.vs-hint { font-size: 10px; color: #E88B62; margin: -4px 0 8px; font-family: var(--font-ui); line-height: 1.5; }
 
 .mini {
   margin-left: auto; padding: 3px 8px; font-size: 10.5px; border-radius: 6px;
