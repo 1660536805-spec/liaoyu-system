@@ -50,7 +50,9 @@ const active = computed(() => {
 const show = computed(() => {
   const p = route.path
   if (p.startsWith('/train')) return false
-  const noTab = ['/splash', '/welcome', '/onboarding', '/pose-lab']
+  // 引导类页面要沉浸式全屏，不给底部 Tab 占位。
+  // /onboarding-v2 是七步问卷的插画卡形态，与 /onboarding 一样全屏。
+  const noTab = ['/splash', '/welcome', '/onboarding', '/onboarding-v2', '/pose-lab']
   return !noTab.includes(p)
 })
 

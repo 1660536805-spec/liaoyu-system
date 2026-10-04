@@ -6,7 +6,34 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import AppTab from './components/AppTab.vue'
+
+const route = useRoute()
+const router = useRouter()
+
+/**
+ * 双入口分流（2026-10-04）
+ *
+ * 默认行为**完全不变**：不带 `?ia=art` 参数时，一切走原有流程，本文件等于空操作。
+ * 带 `?ia=art` 且本机没走过问卷时，落到宣纸插画卡版七步问答（#/onboarding-v2）。
+ *
+ * 为什么用 URL 参数而不是换端口/换构建：这样同一份产物能同时提供两套 IA，
+ * 对比时不用起两个服务，也不会让 8080 的既有行为被污染。
+ */
+onMounted(() => {
+  let flag = ''
+  try { flag = new URLSearchParams(window.location.search).get('ia') || '' } catch {}
+  if (flag !== 'art') return
+  // 已经标记完成过（或老用户已有偏好）就不再打扰，直接放行进首页
+  let done = ''
+  try { done = localStorage.getItem('xianyang.onboardDone') || '' } catch {}
+  if (done) return
+  if (route.path === '/' || route.path === '/welcome' || route.path === '/splash') {
+    router.replace('/onboarding-v2')
+  }
+})
 </script>
 
 <style>

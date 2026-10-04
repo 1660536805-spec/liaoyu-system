@@ -14,6 +14,7 @@ import WorkshopView from './views/WorkshopView.vue'
 import SplashView from './views/SplashView.vue'
 import WelcomeView from './views/WelcomeView.vue'
 import OnboardingView from './views/OnboardingView.vue'
+import OnboardingV2 from './views/OnboardingV2.vue'
 import PrepareView from './views/PrepareView.vue'
 import SummaryView from './views/SummaryView.vue'
 import MeView from './views/MeView.vue'
@@ -49,6 +50,9 @@ const routes = [
   { path: '/splash', component: SplashView },
   { path: '/welcome', component: WelcomeView },
   { path: '/onboarding', component: OnboardingView },
+  // 七步问卷 · 宣纸插画卡形态（队友 A 套 IA 的 Vue 实现，业务规则与上面完全一致）。
+  // 独立路径而非替换 /onboarding：两套并存方便对比，不影响既有流程与 8080 现有行为。
+  { path: '/onboarding-v2', component: OnboardingV2 },
   // 骨架采集台：调参工具，刻意放在 hash 路由末尾且不进 AppTab。
   // 走 Vue 打包而非 public/ 裸 HTML —— 后者引 /node_modules/*.mjs，
   // vite build 后 dist 里没有 node_modules，部署出去必然 404。
