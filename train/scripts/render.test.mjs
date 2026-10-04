@@ -387,7 +387,10 @@ console.log('\n=== 断网可用性（D5 前置）：零外链 ===')
     // 只盯会把请求打到外网的：整站外链、外链字体/CDN。注释里的示例 URL 不算。
     const lines = t.split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l))
     for (const l of lines) {
-      if (/(https?:)?\/\/(?!localhost)[a-z0-9.-]+\.[a-z]{2,}/i.test(l)) {
+      // 标准 XML 命名空间（createElementNS 用得到）不是网络请求，先摘掉再判：
+      // 否则 CoachFigure.vue 里的 'http://www.w3.org/2000/svg' 会被误报成外链。
+      const probe = l.replace(/https?:\/\/www\.w3\.org\/[^\s'"`)]*/gi, '')
+      if (/(https?:)?\/\/(?!localhost)[a-z0-9.-]+\.[a-z]{2,}/i.test(probe)) {
         ext.push(f.replace(root, '') + ': ' + l.trim().slice(0, 90))
       }
     }

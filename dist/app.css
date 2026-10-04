@@ -110,6 +110,24 @@ button{font-family:inherit;border:0;background:none;cursor:pointer;color:inherit
 .load-guqin img{width:100%;object-fit:cover;object-position:center 68%}
 .petal{position:absolute;color:#E8A7A0;opacity:.75;animation:fall 6s ease-in-out infinite}
 @keyframes fall{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(1.2rem) rotate(14deg)}}
+/* 主壳首页氛围层：装饰留在内容和古琴后方，不拦截点击。 */
+.loading-screen{isolation:isolate;overflow:hidden}
+.loading-screen>.load-ambience{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.loading-screen>.load-topbar,.loading-screen>.load-hero{position:relative;z-index:1}
+.loading-screen>.load-guqin{position:absolute;z-index:0;inset:auto 0 0;opacity:.98}
+.loading-screen>.load-guqin img{position:relative;z-index:0}
+.load-cloud{position:absolute;width:18rem;height:18rem;border-radius:50%;filter:blur(2.8rem);opacity:.26;animation:cloud-drift 18s ease-in-out infinite alternate}
+.cloud-a{top:23%;left:-8rem;background:rgba(216,195,151,.44)}
+.cloud-b{top:43%;right:-9rem;background:rgba(142,170,147,.34);animation-delay:-8s}
+.load-note,.load-petal{position:absolute;user-select:none;animation:float-note 9s ease-in-out infinite}
+.load-note{color:#A87F3F;font-family:var(--serif);font-size:2.6rem;opacity:.42}
+.note-a{top:32%;left:12%;animation-delay:-3s}
+.note-b{top:47%;right:11%;font-size:2rem;animation-delay:-6s}
+.load-petal{color:#C98379;font-size:1.6rem;opacity:.45}
+.petal-a{top:25%;right:18%;animation-delay:-4s}
+.petal-b{top:57%;left:18%;font-size:1.2rem;animation-delay:-1s}
+@keyframes float-note{0%,100%{transform:translate3d(0,0,0) rotate(-7deg)}50%{transform:translate3d(1.2rem,-1.1rem,0) rotate(9deg)}}
+@keyframes cloud-drift{from{transform:translate3d(-.8rem,0,0) scale(.96)}to{transform:translate3d(1.2rem,-.7rem,0) scale(1.04)}}
 
 /* ---- 步进器 ---- */
 .stepper{display:flex;align-items:center;gap:1rem;margin:2.2rem 0 0}

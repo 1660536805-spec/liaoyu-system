@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>弦养 · 陪练教练 — 逐项比对报告</title>
+<style>
+  :root{
+    --paper:#FBF3E3; --paper2:#FDF9EF; --ink:#3A3330; --ink2:#6B5F55;
+    --ochre:#B0552E; --ochre2:#CE7B48; --celadon:#6E8F7C; --celadon2:#7FA08C;
+    --gold:#C9A97E; --gold2:#E9B85F; --line:rgba(58,51,48,.16);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:"Songti SC","Hiragino Sans GB","PingFang SC",serif;line-height:1.75;}
+  .wrap{max-width:1080px;margin:0 auto;padding:56px 40px 96px;}
+  h1{font-size:34px;margin:0 0 6px;letter-spacing:.02em;color:var(--ochre);font-weight:700}
+  .sub{color:var(--ink2);font-size:15px;margin-bottom:8px}
+  .meta{font-family:"Hiragino Sans GB",sans-serif;font-size:13px;color:var(--ink2);
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    padding:10px 0;margin:18px 0 34px;display:flex;gap:26px;flex-wrap:wrap}
+  h2{font-size:23px;margin:46px 0 14px;padding-left:14px;border-left:5px solid var(--ochre);
+    letter-spacing:.01em}
+  h3{font-size:17px;margin:26px 0 10px;color:var(--celadon);font-family:"Hiragino Sans GB",sans-serif}
+  p{margin:10px 0;font-size:16px}
+  code{font-family:"SF Mono",Menlo,monospace;font-size:13px;background:rgba(176,85,46,.09);
+    padding:1px 6px;border-radius:4px;color:var(--ochre)}
+  .lead{background:var(--paper2);border:1px solid var(--line);border-radius:14px;
+    padding:20px 24px;margin:18px 0}
+  .lead b{color:var(--ochre)}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14.5px;
+    font-family:"Hiragino Sans GB",sans-serif;background:var(--paper2);
+    border-radius:12px;overflow:hidden}
+  th,td{padding:10px 13px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+  th{background:rgba(110,143,124,.18);color:#33473C;font-weight:600;font-size:13.5px;
+    letter-spacing:.02em;white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  td.dim{color:var(--ink2)}
+  .tag{display:inline-block;font-size:11.5px;padding:1px 9px;border-radius:999px;
+    font-family:"Hiragino Sans GB",sans-serif;white-space:nowrap;font-weight:600}
+  .t-rep{background:rgba(176,85,46,.15);color:var(--ochre)}
+  .t-keep{background:rgba(110,143,124,.2);color:#3C5A49}
+  .t-new{background:rgba(233,184,95,.28);color:#8A6413}
+  .t-fix{background:rgba(58,51,48,.1);color:#3A3330}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:16px 0}
+  .card{background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .card h4{margin:0 0 8px;font-size:15px;font-family:"Hiragino Sans GB",sans-serif}
+  .card.ok h4{color:var(--celadon)} .card.no h4{color:var(--ochre)}
+  .card ul{margin:6px 0 0;padding-left:20px} .card li{font-size:14.5px;margin:5px 0}
+  img.shot{width:100%;border-radius:12px;border:1px solid var(--line);margin:16px 0}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:18px 0;
+    font-family:"Hiragino Sans GB",sans-serif;font-size:14px}
+  .chip{padding:6px 14px;border-radius:999px;border:1.5px solid;font-weight:600}
+  .c-idle{border-color:#B9AFA3;color:#8C8175;background:#F2EDE3}
+  .c-demo{border-color:var(--celadon);color:#3C5A49;background:rgba(110,143,124,.14)}
+  .c-follow{border-color:var(--ochre2);color:var(--ochre);background:rgba(206,123,72,.14)}
+  .c-grace{border-color:#C2492E;color:#A6391F;background:rgba(194,73,46,.12)}
+  .c-done{border-color:var(--celadon);color:#3C5A49;background:rgba(110,143,124,.22)}
+  .arrow{color:var(--ink2)}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}
+  .kpi div{background:var(--paper2);border:1px solid var(--line);border-radius:12px;
+    padding:14px;text-align:center}
+  .kpi b{display:block;font-size:26px;color:var(--ochre);font-family:"Hiragino Sans GB",sans-serif}
+  .kpi span{font-size:12.5px;color:var(--ink2);font-family:"Hiragino Sans GB",sans-serif}
+  .warn{background:rgba(194,73,46,.07);border-left:4px solid #C2492E;border-radius:0 10px 10px 0;
+    padding:14px 20px;margin:14px 0;font-size:15px}
+  .foot{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);
+    font-size:13px;color:var(--ink2);font-family:"Hiragino Sans GB",sans-serif}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>陪练教练 · 逐项比对报告</h1>
+  <div class="sub">「本轮之前执行的动作模拟」 ⟷ 「你提供的那份 xianyang-room.html」</div>
+  <div class="meta">
+    <span>弦养 · 八段锦拆动作版</span>
+    <span>产物：<code>Downloads/工作文件/西客松/疗愈/xianyang-room.html</code></span>
+    <span>可读源码：<code>outputs/room-baduanjin/room.js</code></span>
+  </div>
+
+  <div class="lead">
+    <p style="margin-top:0"><b>先说清两边各是什么，比对才有落点。</b></p>
+    <p><b>A ｜本轮之前执行的动作模拟</b> —— <code>room-baduanjin/room.js</code> 里的<strong>八段锦 10 式</strong>动作库 + 小人绘制 + 陪练教练状态机（即你现在打开的那份 <code>xianyang-room.html</code>）。</p>
+    <p style="margin-bottom:0"><b>B ｜你提供的那份内容</b> —— 改动前的原始形态（已备份为 <code>original-backup.html</code>）。它自己的注释写得很直白：<br>
+      <code>// 首页太极小人：起势 → 云手向右三步 → 云手向左三步回到中间 → 收势，循环 33.5 秒。</code><br>
+      <code>const TJ={UA:50,FA:48,LOOP:33.5,STEP:58,CYCLE:4} …</code> —— 也就是<strong>一招云手、四个姿势常量、33.5 秒无限循环</strong>。</p>
+  </div>
+
+  <div class="warn">
+    <b>一句话结论：</b>「用户不清楚下一个动作怎么做」的根因，是 B <b>根本没有「下一个动作」</b>——
+    它的时间轴是 <code>t = (t + dt) % 33.5</code>，永远在「起势 → 云手左 → 云手右 → 收势」里打转，
+    既没有「式」的概念，也没有「你做完没有」的概念。<b>「一直停留在一个动作上循环等待」不是 bug，而是它的设计。</b>
+  </div>
+
+  <h2>一、逐项对应总表</h2>
+  <table>
+    <thead><tr><th>#</th><th>维度</th><th>B ｜你提供的内容（原始）</th><th>A ｜本轮动作模拟</th><th>对应关系</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>动作库</td><td class="dim">1 招「云手」，4 个姿势常量 <code>TJ_REST / TJ_RAISE / TJ_PRESS / TJ_CROSS</code></td>
+        <td>10 式 <code>MOVES</code>（起势 / 托天 / 开弓 / 单举 / 后瞧 / 摇头摆尾 / 攀足 / 攒拳 / 七颠 / 收势），每式带要领 <code>hint</code></td><td><span class="tag t-rep">替换</span></td></tr>
+      <tr><td>2</td><td>时间结构</td><td class="dim">单条时间轴 <code>t</code>，<code>t=(t+dt)%33.5</code></td>
+        <td>10 段 <code>SEG</code>（总 <b>60.0s</b>），状态机以 <code>(idx,u)</code> 定位</td><td><span class="tag t-rep">替换</span></td></tr>
+      <tr><td>3</td><td>驱动方式</td><td class="dim">纯时间 → 位置；<b>无状态、无输入</b></td>
+        <td>纯函数状态机 <code>coach</code> + 时间；<b>有输入</b>（点击 / 键盘）</td><td><span class="tag t-new">新增用户侧</span></td></tr>
+      <tr><td>4</td><td>手部坐标</td><td class="dim">绝对坐标常量 <code>hL/hR</code>（4 组）</td>
+        <td>极坐标 <code>(r,θ)</code> 相对各自肩，<code>r∈[28,56] &lt; 臂长</code></td><td><span class="tag t-fix">根治 B 的根因</span></td></tr>
+      <tr><td>5</td><td>手臂 IK</td><td class="dim"><code>tjIK(s,h,side)</code>；固定规则 <code>sc=e=&gt;e.y+side*.5*e.x</code>，取「更外侧」的解</td>
+        <td><code>tjIK(s,h,side,mem)</code>；<b>连续取支</b>——记住上一帧选的支，选离它更近的那支</td><td><span class="tag t-keep">继承并改造</span></td></tr>
+      <tr><td>6</td><td>肘翻折</td><td class="dim">存在（结构性）：任何「在两条垂线里挑一条」的固定规则，必在某个臂轴方向 180° 翻折</td>
+        <td><b>0 次</b>（结构上不可能：连续取支是时间的连续函数）</td><td><span class="tag t-fix">修复</span></td></tr>
+      <tr><td>7</td><td>切式 / 衔接</td><td class="dim">无「式」概念；靠 <code>t%33.5</code> 回绕，<code>REST→REST</code> 恰好接上</td>
+        <td>每式统一以「抱球」位起收 ⇒ 首尾同姿，切式零跳变；有量化验收</td><td><span class="tag t-fix">更严</span></td></tr>
+      <tr><td>8</td><td>用户侧</td><td class="dim">无</td>
+        <td><code>idle / demo / follow / grace / stepDone / allDone</code> 六态状态机</td><td><span class="tag t-new">新增</span></td></tr>
+      <tr><td>9</td><td>提示</td><td class="dim">墙上五音诗句（氛围文案，非动作指令）</td>
+        <td>式名 + 要领 + 阶段 chip + 剩余秒数（任务指令）</td><td><span class="tag t-new">新增</span></td></tr>
+      <tr><td>10</td><td>推进</td><td class="dim"><b>不存在</b>（永远循环）</td>
+        <td><code>hit()</code> / <code>timeout</code> / <code>skip</code> / <code>restart</code>，<b>每条路径都有硬上界</b></td><td><span class="tag t-new">新增</span></td></tr>
+      <tr><td>11</td><td>房间 / 小人 / 衣服 / 飘带 / 倒影 / 五音墙</td><td class="dim">—</td>
+        <td><b>逐字保留</b>：<code>TJ_DEFS</code>、<code>TJ_ARM</code>、<code>TJ_BODY</code>、<code>tjChain</code> 与原文件字符串级一致</td><td><span class="tag t-keep">原样保留</span></td></tr>
+      <tr><td>12</td><td>画布 / 坐标系</td><td class="dim"><code>viewBox="-100 150 600 300"</code>；地面 <code>y=434</code>、中轴 <code>x=200</code></td>
+        <td>同上（未动）</td><td><span class="tag t-keep">同源</span></td></tr>
+    </tbody>
+  </table>
+
+  <img class="shot" src="shots/compare-orig-vs-mine.png" alt="原始与本轮对照">
+  <p class="dim" style="text-align:center;font-size:13.5px">
+    上排＝你提供的内容：只有「云手」一招，靠左右走步撑满 33.5 秒，姿势幅度小、四帧差异有限。<br>
+    下排＝本轮动作模拟：每帧都是不同的「式」（托天、单举…），动作幅度与部位各不相同。
+  </p>
+
+  <h2>二、相同点（同源部分）</h2>
+  <p>两边是<strong>同一间房、同一个小人、同一套 IK 骨架</strong>的两个阶段。以下部分是 A 直接继承 B 的：</p>
+  <div class="grid2">
+    <div class="card ok">
+      <h4>场景与造型（逐字相同）</h4>
+      <ul>
+        <li>灰蓝立体房间、墙角透视、地面镜面倒影</li>
+        <li>小人造型 <code>TJ_DEFS / TJ_ARM / TJ_BODY</code>：白色练功服、腰带、发髻、飘带、皮肤渐变</li>
+        <li>腰带飘带 <code>tjChain</code>：同一套简易 Verlet 链</li>
+        <li>倒影机制：房间本体与地面各一个 SVG 实例，<b>共用同一个 pose</b>，保证严丝合缝</li>
+        <li>墙上五音诗句 <code>ROOM_POEM</code>（未删，仍在场）</li>
+      </ul>
+    </div>
+    <div class="card ok">
+      <h4>IK 骨架与调用链（同构）</h4>
+      <ul>
+        <li>两段式：上臂 <code>UA=50</code>、前臂 <code>FA=48</code></li>
+        <li>都把腕距夹到 <code>d ∈ [|UA−FA|+.5, UA+FA−.5]</code>，避免三角形无解</li>
+        <li>都用 <code>acos((UA²+d²−FA²)/(2·UA·d))</code> 解肘角</li>
+        <li>调用链一致：<code>const {e:Eb,h}=tjIK(肩, 目标腕, side)</code>，A 只是多传了一个取支记忆 <code>mem</code></li>
+        <li>时间骨架一致：<code>requestAnimationFrame</code> + 单帧 <code>dt</code> 钳制（B 用 0.05 秒、A 用 50 毫秒，等价）</li>
+      </ul>
+    </div>
+  </div>
+  <p>还有一层「意图上」的相同：<strong>都让手绕肩划弧</strong>。B 的云手用 <code>[px−10+60cosθ, 258−30sinθ]</code> 让手绕圈；A 把这一招抽象成极坐标 <code>(r,θ)</code>，成为整个动作库的统一存储格式。</p>
+
+  <h2>三、差异（本轮改动清单）</h2>
+  <table>
+    <thead><tr><th>改动</th><th>从</th><th>到</th><th>为什么</th></tr></thead>
+    <tbody>
+      <tr><td><b>招式数量</b></td><td class="dim">1 招循环</td><td>10 式有序库</td><td>「不知道下一个动作」的前提是有「下一个动作」</td></tr>
+      <tr><td><b>时间模型</b></td><td class="dim"><code>t %= 33.5</code> 永不结束</td><td>状态机 + 终点 <code>allDone</code></td><td>要能「推进」和「走完」</td></tr>
+      <tr><td><b>IK 取支</b></td><td class="dim">固定规则取更外侧</td><td>连续取支（记上一帧）</td><td>固定规则必翻折；连续取支结构上不可能</td></tr>
+      <tr><td><b>腕位存储</b></td><td class="dim">绝对坐标常量</td><td>相对肩的极坐标 <code>(r,θ)</code></td><td>插值只改 θ ⇒ 手绕肩划弧，不会穿过肩点</td></tr>
+      <tr><td><b>用户侧</b></td><td class="dim">无</td><td>六态状态机 + 3 个额度按钮</td><td>陪练需要「等用户」与「不卡死」并存</td></tr>
+      <tr><td><b>提示层</b></td><td class="dim">氛围诗</td><td>式名 / 要领 / 阶段 / 倒计时</td><td>把「看不懂下一步」变成「照做即可」</td></tr>
+    </tbody>
+  </table>
+
+  <h2>四、可能的偏差（需要你知道的风险）</h2>
+  <p>这几条是比对里<strong>对不齐</strong>或者<strong>性质不同</strong>的地方，不是失败，但值得你心里有数：</p>
+  <table>
+    <thead><tr><th>#</th><th>偏差</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><b>人形比例不是严格等比</b></td>
+        <td class="dim">换算用 <code>VS=1.367</code>、<code>VMX=200−120·VS</code>、<code>VGY=434</code>，但两套人形的<b>腿 / 躯干 / 臂 / 肩宽</b>比例并不相同（1.367 / 1.517 / 1.633 / 1.2）。所以 A 的姿态是「换算近似」，<b>视觉一致但几何上非同构</b>。若有「必须与原版严格同形」的要求，这里存在残差。</td></tr>
+      <tr><td>2</td><td><b>速率峰值性质不同</b></td>
+        <td class="dim">120Hz 逐帧扫描：A 全周期最大单帧位移 <b>1.887px</b> @「调理脾胃须单举」u=0.277（wrL）；按 <code>1/1.367</code> 归一到 B 的尺度 ≈ <b>1.38px/帧</b>，<b>略优于</b> B 当时的 1.47px 残留。但要注意：A 的峰值<b>不是孤立尖峰</b>（单举有 181 帧连续超 1.2px 阈值 = 持续快挥），而 B 当时的 1.47px 是<b>孤立跳变</b>。两者性质不同，不能只看数字大小。</td></tr>
+      <tr><td>3</td><td><b>「提示」的语义变了</b></td>
+        <td class="dim">B 的提示是氛围（五音诗），A 的提示是任务指令（第 N 式 / 要领 / 倒计时）。A 把诗留在了墙上，但教练条是<b>新增的第二层信息</b>；若你要保持「安静的氛围感」，教练条的视觉权重可以再调。</td></tr>
+      <tr><td>4</td><td><b>URL 参数解析曾有一处 bug（已修）</b></td>
+        <td class="dim">旧解析把 <code>location.search + location.hash</code> 直接拼接，于是 <code>?mode=free#debug</code> 会把 mode 读成 <code>"free#debug"</code> 而回落 full。已改为把 <code>?</code> 与 <code>#</code> 统一当分隔符 —— 这也正是它此前无法被端到端测试切到自由档的原因。</td></tr>
+      <tr><td>5</td><td><b>等待上界是默认值</b></td>
+        <td class="dim">跟练 <b>2.6–8.0s</b>、宽限 <b>4.0s</b>（随每式时长缩放）。觉得等太久或太短，只需调 <code>CP</code> 里的常量，无需动结构。</td></tr>
+    </tbody>
+  </table>
+
+  <h2>五、陪练教练：机制说明</h2>
+
+  <h3>5.1 触发方式</h3>
+  <table>
+    <thead><tr><th>入口</th><th>怎么到</th><th>你会看到</th></tr></thead>
+    <tbody>
+      <tr><td><b>完整引导（默认）</b></td><td class="dim">直接打开页面，或 URL 不带参数</td><td>教练条：<b>第 N 式 / 共 10 式</b> + 式名 + 阶段 chip + 要领 + 进度条 + 「开始跟练」</td></tr>
+      <tr><td><b>开始跟练</b></td><td class="dim">点 <code>开始跟练</code></td><td>进入 <code>demo</code>：教练从第 1 式（起势）开始逐式示范</td></tr>
+      <tr><td><b>自由浏览</b></td><td class="dim">点 <code>切到自由浏览</code>，或 URL 加 <code>?mode=free</code></td><td>原来的自由控制台：上一个 / 下一个 / 播放 / 连播 —— <b>不与状态机冲突</b>，适合单独复习某一式</td></tr>
+      <tr><td><b>两档互切</b></td><td class="dim">教练条 / 自由条里的互切按钮</td><td>整页重载切换，规避 hash 路由改 query 不重建组件的坑</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 动作切换与等待机制（一式的生命周期）</h3>
+  <div class="flow">
+    <span class="chip c-idle">idle 准备开始</span><span class="arrow">→</span>
+    <span class="chip c-demo">demo 教练示范</span><span class="arrow">→</span>
+    <span class="chip c-follow">follow 轮到你了</span><span class="arrow">→</span>
+    <span class="chip c-grace">grace 等你确认</span><span class="arrow">→</span>
+    <span class="chip c-done">下一式 demo …</span>
+  </div>
+  <table>
+    <thead><tr><th>阶段</th><th>教练在做什么</th><th>用户能做什么</th><th>怎么离开</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag t-keep">demo</span> 示范中</td><td class="dim">按「动作时长 × demoK」完整播放该式</td>
+        <td class="dim">只能「跳过本式」——<b>示范期点「我练好了」不算数</b>（抢做也不放行）</td><td class="dim">示范放完 → follow</td></tr>
+      <tr><td><span class="tag t-new">follow</span> 轮到你了</td><td class="dim">停在该式起收位等你</td>
+        <td class="dim">「我练好了」/「再看一遍示范」/「跳过本式」</td>
+        <td class="dim">hit() → stepDone；或到 <b>上界</b>（2.6–8.0s）→ grace</td></tr>
+      <tr><td><span class="tag t-fix">grace</span> 等你确认</td><td class="dim">文案明说「不点的话 N 秒后也会自动继续」</td>
+        <td class="dim">「我练好了」/「再练一会」/「跳过本式」</td>
+        <td class="dim">hit() → stepDone；或 <b>4.0s</b> 到点 → 直接下一式</td></tr>
+      <tr><td><span class="tag t-keep">stepDone</span> 本式完成</td><td class="dim">0.8s 完成提示，进度条走满</td><td class="dim">—</td><td class="dim">0.8s 后 → 下一式 demo</td></tr>
+    </tbody>
+  </table>
+  <div class="lead" style="border-left:4px solid var(--celadon)">
+    <b>关键设计：每一个「等」都有硬上界。</b>这正是「避免一直停在同一个动作上循环等待」的落地方式 ——
+    教练一定会等你，但<b>不会无限等</b>：跟练到点进宽限、宽限到点自动放行。
+    实测量化结果：<b>全程一次都不点，十式也能在 160.0s 内走完</b>，且实测耗时与理论上界<b>逐毫秒相等</b>（说明既无缺口、也无停死）。
+  </div>
+
+  <h3>5.3 动作序列推进规则</h3>
+  <table>
+    <thead><tr><th>入口</th><th>在哪些阶段可用</th><th>效果</th><th>额度</th></tr></thead>
+    <tbody>
+      <tr><td><code>hit()</code> 「我练好了」</td><td class="dim">follow（t≥900ms 防误触）/ grace</td><td>→ stepDone（0.8s）→ 下一式</td><td class="dim">不限</td></tr>
+      <tr><td><code>timeout</code> 兜底</td><td class="dim">follow / grace 到点</td><td>直接 → 下一式（reason = <code>timeout</code>）</td><td class="dim">自动</td></tr>
+      <tr><td>「跳过本式」</td><td class="dim">demo / follow / grace</td><td>立刻 → 下一式</td><td class="dim">不限</td></tr>
+      <tr><td>「再看一遍示范」</td><td class="dim">follow / grace</td><td>→ 回到 demo 重放本式</td><td class="dim"><b>每式 1 次</b></td></tr>
+      <tr><td>「再练一会」</td><td class="dim">grace</td><td>→ 回到 follow 续练</td><td class="dim"><b>每式 1 次</b></td></tr>
+      <tr><td>「重头再来」</td><td class="dim">任意</td><td>→ 第 1 式 demo</td><td class="dim">不限</td></tr>
+      <tr><td>第 10 式后再推进</td><td class="dim">—</td><td>→ <code>allDone</code>「全部完成」并停住</td><td class="dim">—</td></tr>
+    </tbody>
+  </table>
+  <p class="dim" style="font-size:14.5px">
+    两条保护：① 每式开头重置重放 / 续练额度，防止在某式上无限纠缠；
+    ② 单帧 <code>dt</code> 截断 50ms，切回标签页不会把好几秒当成一帧补上（否则会「瞬移」跳过整个等待）。
+    ③ 式号单调不回退（<code>restart</code> 除外）。
+  </p>
+
+  <h3>5.4 mode=full 连贯引导的验证证据</h3>
+  <div class="kpi">
+    <div><b>29/29</b><span>端到端（真点浏览器）</span></div>
+    <div><b>27/27</b><span>状态机纯函数单测</span></div>
+    <div><b>23/23</b><span>自由模式交互</span></div>
+    <div><b>0</b><span>肘翻折 / 控制台错误</span></div>
+  </div>
+  <table>
+    <thead><tr><th>验证项</th><th>结果</th></tr></thead>
+    <tbody>
+      <tr><td>全程零操作能走到「全部完成」</td><td><b>✓</b> <span class="dim">phase=allDone，idx=9</span></td></tr>
+      <tr><td>纯兜底耗时 == 理论上界</td><td><b>✓</b> <span class="dim">160.0s vs 160.0s（无缺口、无停死）</span></td></tr>
+      <tr><td>十式都进入过 follow（每式都等过用户）</td><td><b>✓</b> <span class="dim">[0,1,2,3,4,5,6,7,8,9]</span></td></tr>
+      <tr><td>状态序列按 示范→跟练→宽限 循环推进</td><td><b>✓</b> <span class="dim">demo→follow→grace ×10 → allDone</span></td></tr>
+      <tr><td>式号单调不回退</td><td><b>✓</b></td></tr>
+      <tr><td>用户主动完成比纯兜底更快</td><td><b>✓</b> <span class="dim">用户 15.9s &lt; 兜底 21.3s（压缩参数下）</span></td></tr>
+      <tr><td>切式缝（每式首尾肘外侧度）</td><td><b>✓</b> <span class="dim">55.4° == 55.4°，十式全部严格相等</span></td></tr>
+      <tr><td>每式等待硬上界 &lt; 25s</td><td><b>✓</b> <span class="dim">实测最大 20.0s</span></td></tr>
+      <tr><td>十式全链硬上界 &lt; 200s</td><td><b>✓</b> <span class="dim">160.0s</span></td></tr>
+    </tbody>
+  </table>
+
+  <img class="shot" src="shots/coach-stages.png" alt="教练条六阶段">
+  <p class="dim" style="text-align:center;font-size:13.5px">
+    教练条的六个阶段：① 准备开始（灰） ② 示范中（青瓷绿，只留「跳过本式」）
+    ③ 轮到你了（赭石，出现「我练好了」，并给出「约 N 秒后进入确认」）
+    ④ 等你确认（深赭红，出现「再练一会」，明说「不点也会自动继续」）
+    ⑤ 本式完成（进度条走满） ⑥ 全部完成（「重头再来」）。
+  </p>
+
+  <h2>六、结论</h2>
+  <p>
+    A 与 B 是<b>同一间房、同一个小人、同一套 IK 骨架</b>的两个阶段。
+    B 是「一招云手、33.5 秒氛围循环」；A 把动作层换成「十式有序库 + 极坐标腕位 + 连续取支 IK」，
+    并在其上<b>新增了陪练教练层</b>（示范 → 跟练 → 有界等待 → 推进）。
+  </p>
+  <p>
+    对应关系可以概括为三句话：<b>场景造型原样保留、动作层整层替换、教练层从零新增。</b>
+    偏差集中在两点：人形比例换算<b>非严格等比</b>（视觉一致、几何近似），
+    以及速率峰值的<b>性质不同</b>（A 是持续快挥、B 是孤立跳变）。
+  </p>
+  <p style="margin-bottom:0">
+    你提出的四条要求 —— ① 逐项比对（本报告第一至四节）② 教练先示范、后跟练（<code>demo → follow</code>）
+    ③ 每步等待且不循环卡死（<code>follow/grace</code> 双段 + 硬上界）④ <code>mode=full</code> 逐动作连贯引导
+    （29/29 + 27/27 验证）—— 均已落地。
+  </p>
+
+  <div class="foot">
+    弦养 · 八段锦拆动作版 ｜ 陪练教练逐项比对报告 ｜ 产物：<code>Downloads/工作文件/西客松/疗愈/xianyang-room.html</code>
+  </div>
+
+</div>
+</body>
+</html>

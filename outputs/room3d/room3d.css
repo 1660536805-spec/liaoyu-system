@@ -1,0 +1,19 @@
+/* 弦养 · 首页立体房间（Three.js 实时 3D 版）
+   与 xianyang-prototype.html 的基础样式（:root / body / button / .home-copy）配合使用。 */
+:root{color-scheme:light;--bg:#F3F8F8;--ink:#143E43;--lake:#2B777B;--silver:#D5E2E3;--gold:#AD873C;--serif:'Songti SC','STSong','SimSun',serif}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 system-ui,-apple-system,'Microsoft YaHei',sans-serif}
+.room-wrap{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,48px)}
+
+/* 首页 · 立体房间：Three.js 建的实房间（地面镜面 / 三面墙 / 顶面灯格）+ 3D 人体 */
+.home{--ink:#24323C;--lake:#5D7182;--silver:#D3DCE2}
+.home button:not(.primary):hover{background:#E4EAEE}.home .quiet{color:#5D6E7A}
+.room-stage{position:relative;aspect-ratio:1000/562;border-radius:6px;overflow:hidden;background:#0a1117;box-shadow:0 34px 60px -34px rgba(20,28,35,.65)}
+.room-canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
+.room-stage::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 80% 75% at 50% 50%,transparent 50%,rgba(9,13,17,.55))}
+.room-fallback{position:absolute;inset:0;display:grid;place-items:center;color:#9fb6c6;font-size:14px;text-align:center;padding:20px}
+.room-fallback[hidden]{display:none}
+.home-copy{display:grid;grid-template-columns:1.25fr 1fr;gap:40px;align-items:end;padding-top:30px}
+.home-copy h1{margin:0 0 6px;font-size:clamp(34px,4.8vw,56px)}.home-copy p{font-size:18px;margin:0}.home-copy .quiet{font-size:14px}.home-copy .actions{margin:0 0 14px}
+@media(max-width:760px){.home-copy{grid-template-columns:1fr;gap:18px;padding-top:22px}}

@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>弦养 · 预览启动台</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23FBF3E3'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' fill='%23B0552E'%3E弦%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#FBF3E3; --paper-2:#FDF9EF; --card:#FFFFFF;
+    --ink:#33291F; --ink-2:#6B5B4A; --ink-3:#9A8874;
+    --clay:#B0552E; --clay-2:#CE7B48; --celadon:#6E8F7C; --celadon-2:#7FA08C;
+    --gold:#C9A97E; --gold-2:#E9B85F; --line:#E7DCC7;
+    --serif:"Songti SC","STSong","SimSun",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:
+      radial-gradient(1200px 600px at 12% -8%, #FDF7EA 0%, transparent 62%),
+      radial-gradient(900px 500px at 104% 4%, #F3F0E4 0%, transparent 58%),
+      var(--paper);
+    color:var(--ink);font:15px/1.7 var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1200px;margin:0 auto;padding:clamp(22px,4vw,52px) clamp(16px,4vw,40px) 72px}
+
+  header.top{border-bottom:1px solid var(--line);padding-bottom:26px;margin-bottom:34px}
+  .kicker{font-size:12px;letter-spacing:.22em;color:var(--ink-3);text-transform:uppercase}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(26px,3.6vw,40px);margin:10px 0 8px;letter-spacing:.02em}
+  h1 b{color:var(--clay);font-weight:600}
+  .sub{color:var(--ink-2);max-width:74ch;margin:0}
+  .sub code{background:#F2E9D6;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px}
+
+  .note{
+    margin-top:20px;display:flex;gap:12px;align-items:flex-start;
+    background:linear-gradient(180deg,#FFF8E9,#FDF3E2);
+    border:1px solid #EBD9B8;border-left:4px solid var(--gold-2);
+    border-radius:12px;padding:14px 18px;color:#6A5327;font-size:14px
+  }
+  .note .ic{flex:none;font-size:17px;line-height:1.5}
+
+  h2.sec{font-family:var(--serif);font-size:19px;font-weight:600;margin:44px 0 4px;display:flex;align-items:center;gap:10px}
+  h2.sec .dot{width:7px;height:7px;border-radius:50%;background:var(--clay)}
+  h2.sec.g .dot{background:var(--celadon)}
+  h2.sec.n .dot{background:var(--ink-3)}
+  .secdesc{color:var(--ink-3);font-size:13.5px;margin:0 0 18px 17px}
+
+  .grid{display:grid;gap:22px;grid-template-columns:repeat(auto-fill,minmax(272px,1fr))}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    display:flex;flex-direction:column;
+    box-shadow:0 1px 2px rgba(90,70,40,.05),0 10px 26px -18px rgba(90,70,40,.35);
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .card:hover{transform:translateY(-3px);border-color:#DCCBAE;box-shadow:0 2px 4px rgba(90,70,40,.06),0 20px 40px -20px rgba(90,70,40,.42)}
+  .shot{position:relative;height:250px;background:#F1E9DA;overflow:hidden;border-bottom:1px solid var(--line)}
+  .shot img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  .shot.tall img{object-position:top center}
+  .shot .veil{position:absolute;inset:auto 0 0 0;height:64px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.92))}
+  .chip{
+    position:absolute;top:10px;left:10px;font-size:11.5px;letter-spacing:.04em;
+    padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.94);
+    border:1px solid var(--line);color:var(--ink-2);backdrop-filter:blur(4px)
+  }
+  .chip.hero{background:var(--clay);border-color:var(--clay);color:#fff}
+  .chip.warn{background:#FFF3DC;border-color:#EBD9B8;color:#8A6A22}
+  .chip.tool{background:#EFEDE5;border-color:#DFD9C9;color:#6E6552}
+  .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:9px;flex:1}
+  .card h3{font-size:16.5px;margin:0;font-weight:600;letter-spacing:.01em;line-height:1.45}
+  .card p{margin:0;color:var(--ink-2);font-size:13.5px;line-height:1.68}
+  .card p em{font-style:normal;background:#FBF0DA;border-radius:4px;padding:0 4px;color:#8A6A22}
+  .url{
+    font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink-3);
+    background:#FAF6EC;border:1px dashed var(--line);border-radius:7px;padding:6px 9px;
+    word-break:break-all;margin-top:auto
+  }
+  .go{
+    display:flex;align-items:center;justify-content:center;gap:7px;
+    text-decoration:none;font-weight:600;font-size:14px;
+    padding:10px 14px;border-radius:10px;border:1px solid var(--clay);color:#fff;
+    background:linear-gradient(180deg,var(--clay-2),var(--clay));
+  }
+  .go:hover{filter:brightness(1.06)}
+  .go.ghost{border-color:var(--celadon);background:linear-gradient(180deg,var(--celadon-2),var(--celadon))}
+  .go.plain{border-color:var(--line);background:#fff;color:var(--ink);}
+  .go.plain:hover{border-color:#CFBF9F;background:#FDFAF3}
+
+  footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:var(--ink-3);font-size:13px}
+  footer b{color:var(--ink-2)}
+  a.lk{color:var(--clay);text-decoration:none;border-bottom:1px dotted var(--clay-2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="kicker">弦养 · Xianyang</div>
+    <h1>预览<b>启动台</b></h1>
+    <p class="sub">
+      一个端口看清全部东西：产品应用和候选产物都在这儿。
+      以前出现过「<b>东西做出来了，但点错入口以为还是旧版</b>」的情况——这一页就是为了根治它。
+    </p>
+    <div class="note">
+      <span class="ic">⚠️</span>
+      <div>
+        <b>最容易踩的坑：主壳里有两个长得像「跟练」的按钮。</b><br>
+        「<b>开始动作预览</b>」→ 进真跟练页（有摄像头 + 有陪练教练）＝下面第 <b>②</b> 张卡。<br>
+        「<b>示例</b>」（在加载页右上角）→ 进的是<b>设计稿静态复刻页</b>，没有摄像头、没有教练 ＝ 第 <b>③</b> 张卡。
+      </div>
+    </div>
+  </header>
+
+  <h2 class="sec"><span class="dot"></span>产品应用</h2>
+  <p class="secdesc">线上真正会给用户看的两处</p>
+  <div class="grid">
+
+    <article class="card">
+      <div class="shot">
+        <img src="./thumbs/shell-home.png" alt="主壳首屏">
+        <span class="chip">① 主壳</span>
+        <span class="veil"></span>
+      </div>
+      <div class="body">
+        <h3>主壳 · 9 屏设计稿 1:1 复刻</h3>
+        <p>加载页 → 体质测评 → 定制方案 → 疗愈/跟练入口。视觉验收以 <em>/Desktop/ui/最终版</em> 的 9 张稿为唯一基准。</p>
+        <div class="url">/</div>
+        <a class="go plain" href="/" target="_blank">打开主壳 →</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="shot">
+        <img src="./thumbs/s4-coach.png" alt="跟练页新教练">
+        <span class="chip hero">② 真跟练页 · 有教练</span>
+        <span class="veil"></span>
+      </div>
+      <div class="body">
+        <h3>跟练页 · 陪练教练（判定闸门）</h3>
+        <p>摄像头开着的同时，底部教练条一直在演这一式。页面往下就是它：<em>请跟我做 · 第 1 式 · 双手托天理三焦</em>，右边有「完成度 / 重看示范 / 跳过本式」，小人脚下写「循环陪练中…」。</p>
+        <p><b>没通关 → 这一式一直循环；通关了 → 才进下一式。</b></p>
+        <div class="url">/s4/#/train?stage=1&amp;mode=full&amp;style=baduanjin&amp;tone=gong</div>
+        <a class="go" href="/s4/#/train?stage=1&amp;mode=full&amp;style=baduanjin&amp;tone=gong" target="_blank">打开跟练页（看教练）→</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="shot">
+        <img src="./thumbs/replica.png" alt="静态复刻页">
+        <span class="chip warn">③ 无教练 · 别认错</span>
+        <span class="veil"></span>
+      </div>
+      <div class="body">
+        <h3>主壳「示例」按钮进的页</h3>
+        <p>这是 <b>纯静态设计稿复刻</b>：视频区是<b>贴图占位</b>，教练条、完成度这些<b>全部不存在</b>。如果从这个入口进来，确实会觉得「教练没加进去 / 还是旧版」——因为进的不是同一个页面。</p>
+        <div class="url">/?screen=practice　（＝主壳「示例」的去向）</div>
+        <a class="go plain" href="/?screen=practice" target="_blank">打开这一页（对照用）→</a>
+      </div>
+    </article>
+
+  </div>
+
+  <h2 class="sec g"><span class="dot"></span>候选产物</h2>
+  <p class="secdesc">之前几轮做出来的教练形态，都在这儿，一个端口就能逐个点开对比</p>
+  <div class="grid">
+
+    <article class="card">
+      <div class="shot">
+        <img src="./thumbs/room-ver.png" alt="房间版陪练教练">
+        <span class="chip">候选 A · 3D 房间</span>
+        <span class="veil"></span>
+      </div>
+      <div class="body">
+        <h3>房间版 · 拆动作（八段锦 10 式）</h3>
+        <p>有房间场景、大画面白教练、一次一动可前后步进、能「拆动作」逐式看。但它写的是 <em>「即使一直不点，等待也有上限，到点会自动继续」</em>——即<b>计时闸门</b>，跟 ② 的判定闸门是两套语义。</p>
+        <div class="url">/outputs/room-baduanjin/preview.html</div>
+        <a class="go ghost" href="/outputs/room-baduanjin/preview.html" target="_blank">打开房间版 →</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="shot">
+        <img src="./thumbs/room3d.png" alt="首页立体房间">
+        <span class="chip">候选 B · three.js</span>
+        <span class="veil"></span>
+      </div>
+      <div class="body">
+        <h3>首页立体房间</h3>
+        <p>用 three.js 做的立体房间首页（更偏「空间氛围」探索），不是跟练逻辑本身，可作为 3D 场景素材参考。</p>
+        <div class="url">/outputs/room3d/preview.html</div>
+        <a class="go ghost" href="/outputs/room3d/preview.html" target="_blank">打开立体房间 →</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="shot">
+        <img src="./thumbs/checker.png" alt="教练提示校验台">
+        <span class="chip tool">工具 · 不是产品页</span>
+        <span class="veil"></span>
+      </div>
+      <div class="body">
+        <h3>教练提示校验台</h3>
+        <p><b>给我自己用的体检报告</b>，不是产品页：查教练提示的式号/顺序/幅度/节奏对不对，以及教练形象本身有没有变形穿模。里面的教练形象就是候选 A 的放大版。</p>
+        <div class="url">/outputs/xianyang-room.html</div>
+        <a class="go plain" href="/outputs/xianyang-room.html" target="_blank">打开校验台 →</a>
+      </div>
+    </article>
+
+  </div>
+
+  <footer>
+    <b>服务</b>：<code style="background:#F2E9D6;border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:12.5px">node scripts/preview-all.cjs 5400</code>（仅监听 127.0.0.1）——先找 <b>dist/</b>，再找仓库根目录，
+    所以产品应用和 <b>outputs/</b> 里的候选产物可以同端口访问。<br>
+    <b>原来的 5399</b> 只服务 dist/，仍然可用（纯产品应用视角）。
+  </footer>
+
+</div>
+</body>
+</html>

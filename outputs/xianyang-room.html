@@ -1,0 +1,1248 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>弦养 · 教练提示校验台</title>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#EFEDEA; --card:#FBF9F6; --ink:#3A3A38; --ink-2:#6E6B66; --ink-3:#9B968F;
+  --line:#DCD7CF; --line-2:#EAE5DD;
+  --stage:#8B8B8B; --stage-2:#969696; --stage-ink:#F4F1EC; --stage-dim:#C9C6C1;
+  --coach:#E7C79E; --coach-2:#CDA678; --coach-3:#F6E3C8; --accent:#E5924A; --accent-2:#C9762F;
+  --ok:#4E9C6B; --ok-bg:#E8F3EC; --bad:#CE5740; --bad-bg:#FBEAE6; --warn:#C08A24; --warn-bg:#FAF1DE;
+  --ui:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
+  --serif:'Songti SC','STSong','SimSun',serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.65 var(--ui);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:26px 20px 56px}
+
+/* ---------- 页头 ---------- */
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+.head h1{margin:0;font:400 27px/1.25 var(--serif);letter-spacing:.06em}
+.head h1 b{font-weight:400;color:var(--accent-2)}
+.head p{margin:6px 0 0;color:var(--ink-2);font-size:13px;max-width:680px}
+.verdicts{display:flex;gap:9px;flex-wrap:wrap}
+.verdict{display:inline-flex;align-items:center;gap:9px;padding:9px 16px;border-radius:11px;font-weight:600;font-size:13px;border:1px solid transparent}
+.verdict.ok{background:var(--ok-bg);color:var(--ok);border-color:#C6E2D0}
+.verdict.bad{background:var(--bad-bg);color:var(--bad);border-color:#F0CBC3}
+.verdict .dot{width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 0 4px currentColor;opacity:.9;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+.verdict span.sub{font-weight:400;opacity:.75;font-size:12px}
+
+/* ---------- 控制条 ---------- */
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:10px 13px;margin-bottom:14px;box-shadow:0 1px 2px rgba(60,55,45,.04)}
+.bar .sep{width:1px;height:20px;background:var(--line)}
+button.b{font:inherit;font-size:13px;padding:6px 13px;border-radius:9px;border:1px solid var(--line);background:#fff;
+  color:var(--ink);cursor:pointer;transition:.15s}
+button.b:hover{border-color:#C9C2B8;background:#F6F3EE}
+button.b.on{background:var(--accent);border-color:var(--accent);color:#fff}
+button.b.on:hover{background:var(--accent-2);border-color:var(--accent-2)}
+label.f{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2)}
+select{font:inherit;font-size:12.5px;padding:5px 8px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+input[type=range]{-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:var(--line);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--accent);
+  border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.22);cursor:pointer}
+.readout{font:500 12px/1 var(--mono);color:var(--ink-2);background:#F3F0EB;border:1px solid var(--line-2);
+  border-radius:8px;padding:6px 9px;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* ---------- 舞台 ---------- */
+.stage{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pane{border-radius:18px;padding:14px 14px 12px;position:relative;overflow:hidden;
+  background:linear-gradient(157deg,var(--stage-2),var(--stage) 62%,#828282);
+  box-shadow:0 14px 30px -18px rgba(40,36,30,.6), inset 0 1px 0 rgba(255,255,255,.22)}
+.pane::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 55% at 50% 30%,rgba(255,255,255,.14),transparent 70%)}
+.pane-top{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;z-index:2}
+.pane-top .t{font-size:13px;font-weight:600;color:var(--stage-ink);letter-spacing:.04em}
+.pane-top .t i{font-style:normal;font-weight:400;font-size:11.5px;color:var(--stage-dim);margin-left:7px}
+.badge{font:500 11px/1 var(--mono);color:#40372C;background:var(--coach-3);border-radius:7px;padding:5px 8px;font-variant-numeric:tabular-nums}
+.badge.hot{background:var(--accent);color:#fff}
+.pane svg{display:block;width:100%;height:auto;position:relative;z-index:1;margin-top:2px}
+.pane-foot{display:flex;align-items:center;gap:8px;position:relative;z-index:2;margin-top:2px}
+.pill{font-size:11px;color:var(--stage-ink);background:rgba(0,0,0,.2);border-radius:20px;padding:3px 10px;letter-spacing:.03em;white-space:nowrap}
+.pill.hot{background:rgba(229,146,74,.92);color:#fff}
+.rail{position:relative;height:4px;border-radius:2px;background:rgba(0,0,0,.22);overflow:hidden;flex:1}
+.rail i{position:absolute;left:0;top:0;bottom:0;background:var(--coach-3);border-radius:2px}
+.tag-truth{font-size:11px;color:var(--stage-dim);letter-spacing:.05em;white-space:nowrap}
+
+/* ---------- 面板 ---------- */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 17px;margin-top:14px;
+  box-shadow:0 1px 2px rgba(60,55,45,.04)}
+.panel h2{margin:0 0 3px;font:400 16px/1.4 var(--serif);letter-spacing:.05em;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.panel h2 em{font:400 11.5px/1.5 var(--ui);font-style:normal;color:var(--ink-3)}
+.panel .hint{margin:0 0 14px;color:var(--ink-3);font-size:12.5px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px}
+.m{border:1px solid var(--line-2);border-radius:12px;padding:10px 12px;background:#fff}
+.m .k{font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:5px}
+.m .v{font:600 19px/1.25 var(--mono);margin-top:4px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.m .v small{font-size:11.5px;font-weight:400;color:var(--ink-3);margin-left:2px}
+.m .lim{font-size:11px;color:var(--ink-3);margin-top:3px;font-variant-numeric:tabular-nums}
+.m.pass{border-color:#CFE6D7;background:linear-gradient(#fff,#F7FCF9)}
+.m.fail{border-color:#EFC8BF;background:linear-gradient(#fff,#FDF6F4)}
+.m.fail .v{color:var(--bad)}
+.m.pass .v{color:var(--ok)}
+
+.logs{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+.logs .lt{font-size:12.5px;color:var(--ink-2);display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.logs .lt b{font-weight:600;color:var(--ink)}
+.log{list-style:none;margin:0;padding:0;max-height:196px;overflow:auto;font-size:12.5px}
+.log li{display:flex;gap:10px;align-items:baseline;padding:6px 9px;border-radius:8px;background:#FCF7F5;
+  border:1px solid #F2DED8;margin-bottom:5px}
+.log li .tm{font:500 11.5px/1.5 var(--mono);color:var(--bad);flex:0 0 auto;font-variant-numeric:tabular-nums}
+.log li .ms{flex:1;color:var(--ink)}
+.log li .src{flex:0 0 auto;font-size:11px;color:var(--ink-3);background:#fff;border:1px solid var(--line-2);
+  border-radius:6px;padding:1px 7px;white-space:nowrap}
+.empty{color:var(--ok);background:var(--ok-bg);border:1px solid #CFE6D7;border-radius:9px;padding:9px 11px;font-size:12.5px}
+
+/* ---------- 动作序列 ---------- */
+.seq{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-top:6px}
+.sq{border:1px solid var(--line-2);border-radius:12px;padding:9px 10px;background:#fff;position:relative;overflow:hidden;cursor:pointer;transition:.15s}
+.sq:hover{border-color:#C9C2B8;background:#FAF7F2}
+.sq .n{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sq .d{font-size:11px;color:var(--ink-3);margin-top:2px;font-variant-numeric:tabular-nums}
+.sq .r{height:3px;border-radius:2px;background:var(--line-2);margin-top:7px;overflow:hidden}
+.sq .r i{display:block;height:100%;width:0;background:var(--accent);border-radius:2px;transition:width .12s linear}
+.sq.on{border-color:var(--accent);box-shadow:0 0 0 2.5px rgba(229,146,74,.14)}
+.sq.on .n{color:var(--accent-2)}
+.sq.done .r i{background:var(--coach-2)}
+
+/* ---------- 报告 ---------- */
+details.rep{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:0}
+details.rep>summary{cursor:pointer;padding:15px 17px;font:400 16px/1.4 var(--serif);letter-spacing:.05em;list-style:none;display:flex;align-items:center;gap:9px}
+details.rep>summary::-webkit-details-marker{display:none}
+details.rep>summary::before{content:'▸';color:var(--accent);font-size:13px;transition:.2s}
+details.rep[open]>summary::before{transform:rotate(90deg)}
+details.rep>summary em{font-style:normal;font-family:var(--ui);font-size:12px;color:var(--ink-3);font-weight:400;letter-spacing:0}
+.rep-body{padding:0 17px 18px}
+.rep-body h3{font:600 13px/1.5 var(--ui);color:var(--ink);margin:18px 0 8px;letter-spacing:.02em}
+.rep-body h3:first-child{margin-top:2px}
+table.rep{width:100%;border-collapse:collapse;font-size:12.5px}
+table.rep th{text-align:left;font-weight:600;color:var(--ink-2);padding:8px 9px;border-bottom:1.5px solid var(--line);font-size:12px;white-space:nowrap}
+table.rep td{padding:9px;border-bottom:1px solid var(--line-2);vertical-align:top}
+table.rep tr:last-child td{border-bottom:none}
+table.rep code{font:500 11.5px/1.5 var(--mono);background:#F4F1EB;border:1px solid var(--line-2);border-radius:5px;padding:1px 5px;color:#7A5A2E}
+table.rep .lv{display:inline-block;font-size:11px;border-radius:6px;padding:2px 7px;white-space:nowrap;font-weight:600}
+.lv.hi{background:var(--bad-bg);color:var(--bad)}
+.lv.mid{background:var(--warn-bg);color:var(--warn)}
+.lv.lo{background:#EEF1F3;color:#6C7A85}
+.fix{color:var(--ok);font-weight:600}
+.note{margin-top:12px;font-size:12.5px;color:var(--ink-2);background:#F6F4EF;border:1px solid var(--line-2);
+  border-left:3px solid var(--coach-2);border-radius:9px;padding:10px 12px}
+.note b{color:var(--ink)}
+.note.warn{border-left-color:var(--bad);background:#FDF6F4}
+@media(max-width:900px){.stage{grid-template-columns:1fr}.seq{grid-template-columns:1fr 1fr}.head h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div>
+      <h1>弦养 · 教练<b>提示校验台</b></h1>
+      <p>教练的职责是<b>把「下一式是什么、怎么做」提示清楚</b>，不要求与用户逐帧同形。
+         校验分两层：<b>提示层</b>查「教练提示的式号、顺序、幅度、节奏对不对」，<b>绝对层</b>查「教练形象本身有没有变形、穿模、跳变」。
+         需要严格镜像时，把教练模式切到「镜像」即可。</p>
+    </div>
+    <div class="verdicts">
+      <div id="verdict" class="verdict ok"><span class="dot"></span><span id="verdictText">提示一致</span><span class="sub" id="verdictSub">· 0 项异常</span></div>
+      <div id="verdictA" class="verdict ok"><span class="dot"></span><span id="verdictAText">绝对体检</span><span class="sub" id="verdictASub">· 0 项越界</span></div>
+    </div>
+  </div>
+
+  <div class="bar">
+    <button class="b on" id="btnPlay">暂停</button>
+    <button class="b" id="btnStep">单帧 ▸</button>
+    <div class="sep"></div>
+    <input type="range" id="scrub" min="0" max="60" step="0.01" value="0" style="flex:1;min-width:130px">
+    <div class="readout" id="ro">t 0.000s</div>
+    <div class="sep"></div>
+    <label class="f">速度
+      <select id="speed"><option value="0.4">0.4×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+    </label>
+    <div class="sep"></div>
+    <label class="f">教练模式
+      <select id="cmode">
+        <option value="cue" selected>提示（示范后等待）</option>
+        <option value="mirror">镜像（逐帧同形）</option>
+      </select>
+    </label>
+    <label class="f">用户节奏
+      <select id="pace"><option value="1" selected>1.00×</option><option value="1.15">1.15×</option><option value="1.4">1.40×</option></select>
+    </label>
+    <div class="sep"></div>
+    <label class="f">提示故障
+      <select id="defect">
+        <option value="none" selected>无</option>
+        <option value="lag">提示滞后 1.2s</option>
+        <option value="wrong">提示式号 +1</option>
+        <option value="swap">提示顺序 3↔4</option>
+        <option value="weak">示范幅度 0.6×</option>
+      </select>
+    </label>
+    <label class="f">共模故障
+      <select id="smode">
+        <option value="v2" selected>无</option>
+        <option value="squash">塌臂（手位压向肩）</option>
+        <option value="jitter">逐帧抖动</option>
+        <option value="stall">中途卡帧 1.6s</option>
+        <option value="skate">支撑相滑步</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="stage">
+    <div class="pane">
+      <div class="pane-top">
+        <div class="t">用户动作 <i>跟练侧 · 自己的节奏</i></div>
+        <div class="badge" id="badgeU">起势 · 0%</div>
+      </div>
+      <svg id="svgU" viewBox="0 0 240 300" aria-label="用户动作骨架"></svg>
+      <div class="pane-foot">
+        <span class="pill" id="pillU">起势</span>
+        <span class="rail"><i id="railU"></i></span>
+        <span class="tag-truth" id="fu">未开始</span>
+      </div>
+    </div>
+
+    <div class="pane">
+      <div class="pane-top">
+        <div class="t">教练动作 <i>提示侧 · 示范→等待</i></div>
+        <div class="badge" id="badgeC">起势 · 示范 0%</div>
+      </div>
+      <svg id="svgC" viewBox="0 0 240 300" aria-label="教练动作形象"></svg>
+      <div class="pane-foot">
+        <span class="pill" id="pillC">起势</span>
+        <span class="rail"><i id="railC"></i></span>
+        <span class="tag-truth" id="fc">示范中</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>① <span id="p1title">提示层校验</span> <em id="p1sub">查「教练提示的式号 / 顺序 / 幅度 / 节奏」</em></h2>
+    <p class="hint" id="p1hint">提示模式下<b>不比对逐帧姿态</b>——教练不要求与用户同形。只回答四个问题：提示的是不是该做的那一式、顺序对不对、示范幅度够不够、节奏提示是否及时。</p>
+    <div class="metrics" id="metrics1"></div>
+    <div class="logs">
+      <div class="lt"><b>异常明细</b><span id="logCount">· 0 条</span></div>
+      <ul class="log" id="log"></ul>
+      <div class="empty" id="logEmpty">教练提示与用户跟练一致。</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>② 绝对姿态体检 <em>查「教练形象本身」— 提示层与镜像层都依赖它</em></h2>
+    <p class="hint">对整个 60s 套路按 120Hz 全量扫描（<span class="auditN">0</span> 帧），只测单侧姿态自身的解剖合法性与时间连续性，不比较两侧。
+       把「共模故障」逐个切过去，可以直接看到：提示层与镜像层仍然全绿，而这一层精准命中对应指标。</p>
+    <div class="metrics" id="metrics2"></div>
+    <div class="logs">
+      <div class="lt"><b>越界指标</b><span id="alogCount">· 0 条</span></div>
+      <ul class="log" id="alog"></ul>
+      <div class="empty" id="alogEmpty">整套 60s 内全部指标在阈值内。</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>动作库（唯一真值） <em>· 八段锦八式 + 起势 / 收势，共 10 式 60.0s</em></h2>
+    <p class="hint">每式统一以「抱球」位起、以「抱球」位收，段与段首尾同姿 ⇒ C¹ 连续，无需过渡补偿。点击任一式可跳转。</p>
+    <div class="seq" id="seq"></div>
+    <div class="note" style="margin-top:14px">
+      <b>「不需要一比一同步」对架构意味着什么：</b>教练侧不再持有「用户姿态」这个输入，而是持有<b>自己的提示时钟</b>
+      <code>cueAt(t)</code>：每式先示范 <code>demo_i</code> 秒，再停在结束位等待 <code>1.15·demo_i</code> 秒，然后进下一式。
+      用户侧独立跑 <code>userAt(t, pace)</code>，两者只共享 <b>式号</b> 与 <b>式长</b>，不共享逐帧姿态。
+      于是「用户比教练慢」不再是一个缺陷——它只是节奏偏差，由①层的节奏指标度量，而不是被当成不同步去修正。
+    </div>
+  </div>
+
+  <details class="rep" open>
+    <summary>校验报告 <em>· 原实现逐项量化 + 两轮重写自查 + 修正依据</em></summary>
+    <div class="rep-body">
+
+      <h3>A. 原 <code>outputs/xianyang-room.html</code> 体检（重写前）</h3>
+      <table class="rep">
+        <thead><tr><th>级别</th><th>问题</th><th>出处</th><th>实测</th><th>修正方向与依据</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="lv hi">严重</span></td>
+            <td><b>不存在「用户动作」这一侧</b>，全部指标无从谈起</td>
+            <td><code>:138-142</code><br><code>t=(t+dt)%TJ.LOOP</code></td>
+            <td>全年无姿态输入；教练动作是一条 <b>33.5s 自由运行循环</b>。既无法观测「教练与用户不一致」，也无法观测「教练提示是否及时」。</td>
+            <td><span class="fix">两侧各持一条时间轴</span>：教练侧 <code>cueAt(t)</code>、用户侧 <code>userAt(t,pace)</code>，共享式号与式长。<b>依据</b>：提示的唯一可校验量是「式号 / 顺序 / 幅度 / 节奏」，这四项都需要两侧各有独立时间轴才可测。</td>
+          </tr>
+          <tr>
+            <td><span class="lv hi">严重</span></td>
+            <td><b>肘部每 4s 瞬间翻折 97px</b>（二解跳变）</td>
+            <td><code>:90-93</code><br><code>sc=e=&gt;e[1]+side*.5*e[0]</code></td>
+            <td>120Hz 采样 24.5s：解切换 28 次；最大单帧肘位移 <b>97.00px</b>，是逐帧位移中位数（0.35px）的 <b>276×</b>；间隔恰为 <code>CYCLE=4.0s</code>。</td>
+            <td><span class="fix">改用极向量投影</span> <code>n=normalize(pref−u(pref·u))</code>。<b>依据</b>：旧式「两解取较大者」是离散选择，解间距变大处必然跳。</td>
+          </tr>
+          <tr>
+            <td><span class="lv hi">严重</span></td>
+            <td><b>云手退化成「双臂反相开合」</b>，动作类型不符</td>
+            <td><code>:81,83</code><br><code>th=π∓2πu</code>；右手 <code>th+π</code></td>
+            <td>左右手相位差 <b>154.4°</b>（设计 180°）；手间距在 <b>2.8–140.0px = 0.06–2.92 倍肩宽</b>之间剧烈变化；手相对肩中点最大横向偏离 <b>70.2px = 1.46 肩宽</b>。</td>
+            <td><span class="fix">改为「两手各自在本侧划圆 + 纵向反相」</span>。<b>依据</b>：云手判据是「两手同向云转、不撒手、像抱球」；反相摆动 + 间距 0.06–2.92 肩宽同时违反。</td>
+          </tr>
+          <tr>
+            <td><span class="lv hi">严重</span></td>
+            <td><b>循环内 3.29s 连续静止</b>（占 9.8%），像卡帧</td>
+            <td><code>:72</code> <code>LOOP:33.5</code>；<code>:86</code>；<code>:88</code></td>
+            <td>两端各保持同一姿态 2.0s 与 1.3s，因首尾相接 → 连续静止 3.29s。用户侧若有动作，教练侧这 3.29s 完全不动。</td>
+            <td><span class="fix">LOOP 由各式时长求和得出</span>，删除两端 REST 保持帧。<b>依据</b>：手写常数与动作时长脱钩是「静止空窗」的唯一来源。</td>
+          </tr>
+          <tr>
+            <td><span class="lv mid">中</span></td>
+            <td><b>掉帧即整体慢放</b>，与真实时间脱钩</td>
+            <td><code>:142</code><br><code>dt=Math.min(.05,(now-last)/1000)</code></td>
+            <td>单帧 &gt;50ms 时 dt 被截断，时间轴被拉长；帧率波动越大，教练越慢于用户。</td>
+            <td><span class="fix">用绝对时间戳推进</span> <code>t=(now−t0)/1000</code>。<b>依据</b>：截断 dt 等于把「卡顿」转换成「相位漂移」。</td>
+          </tr>
+          <tr>
+            <td><span class="lv mid">中</span></td>
+            <td><b>收势两腕穿模</b>（最小间距 2.8px）</td>
+            <td><code>:76</code> <code>TJ_CROSS</code> 与 <code>TJ_END</code> 插值</td>
+            <td>t≈31.2s 处两手最小间距 <b>2.8px ≈ 0.06 肩宽</b>，两腕几何上互相穿过。</td>
+            <td><span class="fix">合抱目标改为左右分开</span>并约束最小间距。<b>依据</b>：合抱≠重合；两腕中心距小于腕宽即为可见穿模。</td>
+          </tr>
+          <tr>
+            <td><span class="lv lo">轻</span></td>
+            <td>支撑脚滑步；抬脚幅度偏小</td>
+            <td><code>:80</code> <code>lift=7*sin(...)</code></td>
+            <td>抬脚峰值 <b>7.0px / 跨步 58px = 12%</b>；支撑期「贴地却横移」96 帧、累计 1.67px。</td>
+            <td><span class="fix">抬脚提到步幅 25–30%</span>，并让「离地」与「位移」严格同窗口。<b>依据</b>：摆动相必须先离地再横移。</td>
+          </tr>
+          <tr>
+            <td><span class="lv lo">轻</span></td>
+            <td>33.5s 循环拆不出干净段边界</td>
+            <td><code>:72</code> <code>LOOP:33.5</code></td>
+            <td>首尾差 ≈0（无缝），但 33.5s 不是动作段时长的整数组合，无法按动作段索引。</td>
+            <td><span class="fix">LOOP = Σ 各式时长</span>，段边界落在 3 / 9.5 / 17.5 / 24.5 / 30.5 / 38.5 / 45 / 52 / 57。<b>依据</b>：要对齐就必须能按段寻址。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>B. 第一轮重写自查 — 用「严格镜像」思路做出来的版本，自己犯的错</h3>
+      <div class="note warn">
+        <b>这一段是改版的关键依据。</b>第一版把「用户动作 ↔ 教练动作必须一一对应」当成硬需求，做出了①层全绿的页面；
+        但①层只比较两侧、而两侧同源 —— 它<b>在原理上无法发现「两侧一起错」</b>，也<b>无法回答「教练是不是只提示了一式」</b>。
+      </div>
+      <table class="rep">
+        <thead><tr><th>级别</th><th>问题</th><th>出处</th><th>实测</th><th>修正方向与依据</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="lv hi">严重</span></td>
+            <td><b>只有一式</b>：整套动作库 = 起势 + 云手 + 收势</td>
+            <td>第一版 <code>SEG</code> 仅 4 段、<code>LOOP=24.5</code> 手写常数</td>
+            <td>八段锦有八式，页面只提示了一式。对「教练=提示器」这个定位来说，这是最致命的一条：<b>提示覆盖面不足</b>。</td>
+            <td><span class="fix">建 10 式动作库（八段锦八式 + 起收势 / 60.0s）</span>，处处以「抱球」位衔接。<b>依据</b>：教练的价值在「覆盖整套套路并按序提示」，不在「走得好看」。</td>
+          </tr>
+          <tr>
+            <td><span class="lv hi">严重</span></td>
+            <td><b>肘部每 3.0s 翻折 71px</b> — 与被批评的旧实现同类</td>
+            <td>第一版 <code>ik2()</code>：<code>u=unit(b−a)</code> 在 <code>|b−a|</code> 退化时方向不定</td>
+            <td>120Hz 全周期扫描：<b>69 次</b> &gt;3px 跳变，最大 <b>71.7px</b>，中位数仅 0.538px → 133×。发生于 t=2.771/3.004/3.100/6.004/6.100/9.004/9.100/…（间隔 3.0s）。</td>
+            <td><span class="fix">给「腕–肩」距离加解剖下界</span>，使 <code>|腕−肩| ≥ 30</code>（原最短 7.7px）。<b>依据</b>：极向量投影只在 <code>pref⊥̸u</code> 时连续；<code>d₀→|l₁−l₂|</code> 时 <code>u</code> 由 0.05px 的横向残差决定，符号翻转导致垂足整体反向。</td>
+          </tr>
+          <tr>
+            <td><span class="lv hi">严重</span></td>
+            <td><b>①层存在共模盲区</b>：两侧同源 ⇒ 差分恒为 0</td>
+            <td>第一版 <code>measure()</code> 只接受 <code>(posU, posC)</code> 做差分</td>
+            <td>报「0 项不一致」为真，但同一次运行里单侧姿态的肘位移已达 71.7px/帧、腕–肩最小距离 7.7px、55.1% 采样的肘落在躯干内部。</td>
+            <td><span class="fix">新增②绝对姿态体检层</span>，只测单侧姿态，与两侧是否一致无关。<b>依据</b>：差分校验的零假设是「两侧至少有一侧是对的」；共模错误违反该假设。</td>
+          </tr>
+          <tr>
+            <td><span class="lv mid">中</span></td>
+            <td><b>①层还有一处自身盲区</b>：关节位置「相对 root 归一」⇒ 整体平移不可见</td>
+            <td>第一版 <code>measure()</code>：<code>du = sub(posU[k], posU.root)</code></td>
+            <td>把「错位 +6s」注入进去时，用户与教练正好相差 2 个手部圆周期，且整步平移在归一坐标里被完全抵消 ⇒ 面板一度回到 <b>角差 0.00° / 位差 0.00px</b>，看起来像已同步。</td>
+            <td><span class="fix">单列一条绝对量「根位偏差」</span>。<b>依据</b>：归一化是「滤掉站位、只看姿态」的手段，它同时也是一个盲区；必须补一条绝对量兜底。</td>
+          </tr>
+          <tr>
+            <td><span class="lv mid">中</span></td>
+            <td>「抱球手间距恒定」与「两手不交叉」在正面 2D 投影下<b>互斥</b></td>
+            <td>第一版 <code>cloudHands()</code>：手L = C+A·v，手R = C−A·v</td>
+            <td>恒距的唯一构造是「同一圆周上的对径两点」，而对径必然让两手互换左右。逐相位扫描：t=4.5 / 7.5 / 10.5s 处出现 <b>两手互换左右</b>，两前臂在胸前叠成一个 X（管状前臂完全重叠，肉眼读不出动作）。</td>
+            <td><span class="fix">改为两手各在本侧的小圆上运动、纵向反相</span> → 永不换边、永不交叉；代价是手间距从恒 32px 变成呼吸式变化。<b>依据</b>：可见的重叠比可接受的间距变化更糟；「抱球」的硬判据是两手不重合、不撒手，而非间距恒定。</td>
+          </tr>
+          <tr>
+            <td><span class="lv mid">中</span></td>
+            <td>腕–肩距离最小 <b>7.7px</b>，手臂完全折叠</td>
+            <td>第一版 <code>BALL_R=[30,24]</code>、圆心 y=138、肩半宽 17</td>
+            <td>上臂 36 + 前臂 32 = 68px，而最短时仅 7.7px；55.1% 采样的肘落入躯干圆柱，66.8% 采样手臂与躯干线段相交 → 视觉上「塌肩断臂」。</td>
+            <td><span class="fix">收小运动幅度并下移抱球圆心 + 加宽肩（半宽 20）收窄躯干（r=11）</span>。<b>依据</b>：正面 2D 投影中「手在体前正中」天然靠近肩，必须靠加大肩宽/缩小幅度换取安全的臂长余量。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>C. 共模故障注入矩阵 — 提示层 / 镜像层应保持全绿，绝对层必须精准命中</h3>
+      <p class="hint" style="margin:0 0 10px">逐个切换页面上的「共模故障」，可现场复现下表。这一层的存在意义就是：让「两侧一起错」不再隐身。</p>
+      <table class="rep">
+        <thead><tr><th>注入</th><th>模拟的真实缺陷</th><th>提示层 / 镜像层</th><th>绝对层命中指标</th></tr></thead>
+        <tbody id="matrixBody"><tr><td colspan="4" style="color:#9B968F">扫描中…</td></tr></tbody>
+      </table>
+
+      <h3>D. 当前实现实测（由②层 120Hz 全周期扫描给出）</h3>
+      <table class="rep">
+        <thead><tr><th>指标</th><th>阈值</th><th>正常解算</th><th>对照：塌臂注入</th></tr></thead>
+        <tbody id="cmpBody"><tr><td colspan="4" style="color:#9B968F">扫描中…</td></tr></tbody>
+      </table>
+
+      <h3>E. 正面 2D 投影的表达边界（哪些提示做得到、哪些做不到）</h3>
+      <table class="rep">
+        <thead><tr><th>式</th><th>原动作关键点</th><th>正面 2D 下的处理</th><th>结论</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>五劳七伤往后瞧</td>
+            <td>头部向后转、目视后方</td>
+            <td>头部的偏航（yaw）在正面投影下<b>没有位移分量</b>。改为「头心横向偏移 ±4.5px + 双掌下按外旋」来暗示转头。</td>
+            <td><span class="lv mid">降级表达</span> 可辨识，但严格说不是「转头」</td>
+          </tr>
+          <tr>
+            <td>攒拳怒目增气力</td>
+            <td>马步、拳向前冲出</td>
+            <td>向前的位移同样在正面投影下被压缩。改为「拳自腰侧沿侧前方冲出」，用横向位移承载冲拳的力度感。</td>
+            <td><span class="lv mid">降级表达</span> 冲拳方向被旋转到可投影平面</td>
+          </tr>
+          <tr>
+            <td>两手攀足固肾腰</td>
+            <td>前俯、两手沿腿后下探至足</td>
+            <td>前俯在正面=躯干缩短。以 <code>fold</code> 把躯干压缩至 38%，肩下沉；但臂长 60px 只能够到膝下，够不到足。</td>
+            <td><span class="lv mid">降级表达</span> 幅度受限，已标注</td>
+          </tr>
+          <tr>
+            <td>两手托天 / 单举 / 开弓 / 摇头摆尾 / 七颠</td>
+            <td>—</td>
+            <td>上举、侧举、马步、提踵颠足，运动主平面<b>垂直于投影面</b>，正面投影可完整表达。</td>
+            <td><span class="lv lo" style="background:var(--ok-bg);color:var(--ok)">完整表达</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note">
+        <b>复现方式：</b>②层的 <code>absoluteAudit(mode)</code> 是纯函数，以 120Hz 扫满整个 <code>LOOP</code>（<span class="auditN2">0</span> 帧），
+        逐帧统计单侧姿态的关节位移、内角、最小间距与足部滑移；不依赖渲染，结果可重复。报告中的全部数值均来自该函数实测输出。
+      </div>
+    </div>
+  </details>
+
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+   弦养 · 教练提示校验台
+   ---------------------------------------------------------------------
+   教练的职责是「提示」而不是「镜像」：
+     教练侧  coachCue(t)   自己的提示时钟：示范 demo_i 秒 → 停在结束位等待 → 下一式
+     用户侧  userAt(t,pace) 自己的跟练时钟
+   两者只共享「式号」与「式长」，不共享逐帧姿态。
+   ① 提示层：式号 / 顺序 / 示范幅度 / 节奏 / 滞后      （镜像模式下切换为逐帧比对）
+   ② 绝对层：单侧姿态的解剖合法性与时间连续性（共模缺陷）
+   ===================================================================== */
+
+/* ---------------- 1. 人体标尺（画布单位 = 设计像素，240×300） --------------- */
+const GY = 266;
+const B = { shoulder: 20, torso: 58, neck: 10, headR: 11, bunR: 3.6,
+            upperArm: 32, foreArm: 28,
+            /* 腿长必须严格大于髋–踝距：两骨 IK 在「完全伸直」处奇异
+               （h=√(l²−(d/2)²) 在 d→2l 处斜率→∞，单帧膝位移会爆到 2.28px）。 */
+            thigh: 45, shin: 45,
+            hipHalf: 9, footHalf: 12 };
+const TORSO_R = 11;
+const FOLD_K = 0.62;            // 前俯时躯干的压缩系数
+const CX = 120;
+
+/* ---------------- 2. 姿态字面量 + 关键帧插值 ----------------
+   腕位以「相对各自肩的极坐标 (r, θ°)」存储，而不是绝对坐标。
+   理由：绝对坐标下，手从「低于肩」抬到「高于肩」时，两点之间的直线插值
+   必然穿过肩点，|腕−肩|→0 ⇒ 两骨 IK 在 d→|l₁−l₂| 处退化 ⇒ 肘整体翻折。
+   极坐标下 r 被夹在 [28,56]，插值只改 θ —— 手绕肩划弧，结构上不可能穿过肩。
+   （这是把「在上游保证 |腕−肩| 有解剖下界」这条经验做成类型约束。） */
+const SH0L = [100, 110], SH0R = [140, 110];   // 静止站姿下的左右肩：极坐标的参考原点
+const RAD = Math.PI / 180;
+const R_MIN = 28, R_MAX = 56;
+function pol(origin, p) {
+  const dx = p[0] - origin[0], dy = p[1] - origin[1];
+  let r = Math.hypot(dx, dy) || 1e-6;
+  r = Math.min(R_MAX, Math.max(R_MIN, r));
+  return [r, Math.atan2(dx, dy) / RAD];
+}
+/* P 的入参仍写「绝对像素腕位」——动作库保持可读，内部立即转极坐标。 */
+function P(wl, wr, fl, fr, rx, ry, lean, fold, ho) {
+  return { wrists: [pol(SH0L, wl), pol(SH0R, wr)], feet: [fl, fr], root: [rx, ry],
+           lean: lean || 0, fold: fold || 0, headOff: ho || 0 };
+}
+const lerp = (a, b, k) => a + (b - a) * k;
+const ease = k => { const x = Math.min(1, Math.max(0, k)); return x * x * (3 - 2 * x); };
+const clamp01 = k => Math.min(1, Math.max(0, k));
+const mixP = (a, b, k) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k)];
+const unit = v => { const d = Math.hypot(v[0], v[1]) || 1; return [v[0] / d, v[1] / d]; };
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+const add = (a, b, k = 1) => [a[0] + b[0] * k, a[1] + b[1] * k];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
+const CN = { elbowL: '左肘', elbowR: '右肘', kneeL: '左膝', kneeR: '右膝', shoulderL: '左肩', shoulderR: '右肩',
+             hipL: '左髋', hipR: '右髋', head: '头', neck: '颈', chest: '胸', root: '骨盆', shL: '左肩', shR: '右肩',
+             elL: '左肘', elR: '右肘', wrL: '左腕', wrR: '右腕', knL: '左膝', knR: '右膝', anL: '左踝', anR: '右踝',
+             ftL: '左足', ftR: '右足' };
+const fmt = (v, n) => Number(v).toFixed(n);
+
+function lerpP(a, b, k) {
+  const L = (p, q) => [lerp(p[0], q[0], k), lerp(p[1], q[1], k)];
+  return { wrists: [L(a.wrists[0], b.wrists[0]), L(a.wrists[1], b.wrists[1])],
+           feet: [L(a.feet[0], b.feet[0]), L(a.feet[1], b.feet[1])],
+           root: L(a.root, b.root), lean: lerp(a.lean, b.lean, k),
+           fold: lerp(a.fold, b.fold, k), headOff: lerp(a.headOff, b.headOff, k) };
+}
+function kfAt(frames, u) {
+  if (u <= frames[0][0]) return frames[0][1];
+  for (let i = 1; i < frames.length; i++) {
+    if (u <= frames[i][0]) {
+      const a = frames[i - 1], b = frames[i];
+      return lerpP(a[1], b[1], ease((u - a[0]) / Math.max(1e-6, b[0] - a[0])));
+    }
+  }
+  return frames[frames.length - 1][1];
+}
+
+/* ---------------- 3. 动作库（八段锦八式 + 起收势，10 式 / 60.0s） ----------------
+   每式统一以「抱球」位起、以「抱球」位收 ⇒ 段与段首尾同姿，C¹ 连续。
+   约束由第 2 节的 pol() 强制：R_MIN(28) ≤ |腕−肩| ≤ R_MAX(56) < 臂长(60)，
+   且插值只改 θ ⇒ 手永远绕肩划弧、不可能穿过肩点。
+   步法（tags:step）统一遵循「先离地 → 再横移 → 后落地」，落地/离地那一帧保持 x 不变，滑移为 0。 */
+const NEUTRAL = P([100, 166], [140, 166], [108, 266], [132, 266], 120, 168);
+const BALL0   = P([102, 148], [138, 148], [108, 266], [132, 266], 120, 168);
+const SAME = (wl, wr, x) => P(wl, wr, x, x, 120, 168, 0, 0, 0);
+
+const MOVES = [
+  { id: 'pre', name: '起势', dur: 3.0, kf: [
+      [0.00, NEUTRAL],
+      [0.50, P([100, 154], [140, 154], [108, 266], [132, 266], 120, 168)],
+      [1.00, BALL0] ] },
+
+  { id: 'tuotian', name: '1 两手托天理三焦', dur: 6.5, kf: [
+      [0.00, BALL0],
+      [0.16, P([80, 134], [160, 134], [108, 266], [132, 266], 120, 168)],
+      [0.34, P([60, 100], [180, 100], [108, 262], [132, 262], 120, 168)],
+      [0.50, P([82, 64], [158, 64], [108, 258], [132, 258], 120, 168)],
+      [0.58, P([98, 56], [142, 56], [108, 258], [132, 258], 120, 168)],
+      [0.70, P([82, 66], [158, 66], [108, 262], [132, 262], 120, 168)],
+      [0.86, P([78, 132], [162, 132], [108, 266], [132, 266], 120, 168)],
+      [1.00, BALL0] ] },
+
+  { id: 'kaigong', name: '2 左右开弓似射雕', dur: 8.0, tags: ['step'], kf: [
+      [0.00, BALL0],
+      [0.10, P([96, 150], [144, 150], [108, 266], [132, 266], 120, 168)],
+      [0.14, P([95, 150], [145, 150], [108, 258], [132, 258], 120, 170)],
+      [0.19, P([94, 150], [146, 150], [86, 258], [154, 258], 120, 174)],
+      [0.23, P([93, 150], [147, 150], [86, 266], [154, 266], 120, 176)],
+      [0.34, P([58, 128], [120, 146], [86, 266], [154, 266], 120, 176)],
+      [0.46, P([92, 150], [148, 150], [86, 266], [154, 266], 120, 176)],
+      [0.58, P([120, 146], [182, 128], [86, 266], [154, 266], 120, 176)],
+      [0.70, P([92, 150], [148, 150], [86, 266], [154, 266], 120, 176)],
+      [0.76, P([93, 150], [147, 150], [86, 266], [154, 266], 120, 175)],
+      [0.80, P([94, 150], [146, 150], [86, 258], [154, 258], 120, 173)],
+      [0.85, P([95, 150], [145, 150], [108, 258], [132, 258], 120, 170)],
+      [0.90, P([96, 152], [144, 152], [108, 266], [132, 266], 120, 169)],
+      [1.00, BALL0] ] },
+
+  { id: 'danju', name: '3 调理脾胃须单举', dur: 7.0, kf: [
+      [0.00, BALL0],
+      [0.12, P([88, 154], [146, 152], [108, 266], [132, 266], 120, 168)],
+      [0.22, P([72, 126], [148, 158], [108, 266], [132, 266], 120, 168)],
+      [0.32, P([94, 62], [150, 166], [108, 266], [132, 266], 120, 168)],
+      [0.44, P([74, 124], [166, 124], [108, 266], [132, 266], 120, 168)],
+      [0.56, P([84, 150], [176, 92], [108, 266], [132, 266], 120, 168)],
+      [0.68, P([98, 152], [152, 62], [108, 266], [132, 266], 120, 168)],
+      [0.80, P([100, 150], [166, 88], [108, 266], [132, 266], 120, 168)],
+      [0.90, P([101, 148], [144, 118], [108, 266], [132, 266], 120, 168)],
+      [1.00, BALL0] ] },
+
+  { id: 'houqiao', name: '4 五劳七伤往后瞧', dur: 6.0, kf: [
+      [0.00, BALL0],
+      [0.20, P([92, 156], [148, 156], [108, 266], [132, 266], 120, 168, 0, 0, -4.5)],
+      [0.32, P([84, 166], [156, 166], [108, 266], [132, 266], 120, 168, 0, 0, -4.5)],
+      [0.44, P([88, 168], [152, 168], [108, 266], [132, 266], 120, 168, 0, 0, 0)],
+      [0.56, P([84, 166], [156, 166], [108, 266], [132, 266], 120, 168, 0, 0, 4.5)],
+      [0.68, P([90, 158], [150, 158], [108, 266], [132, 266], 120, 168, 0, 0, 4.5)],
+      [0.80, P([96, 152], [144, 152], [108, 266], [132, 266], 120, 168, 0, 0, 2.0)],
+      [1.00, BALL0] ] },
+
+  { id: 'yaotou', name: '5 摇头摆尾去心火', dur: 8.0, tags: ['step'], kf: [
+      [0.00, BALL0],
+      [0.08, P([96, 150], [144, 150], [108, 258], [132, 258], 120, 172, 0, 0.10, 0)],
+      [0.14, P([94, 150], [146, 150], [86, 258], [154, 258], 120, 176, 0, 0.30, 0)],
+      [0.20, P([92, 152], [148, 152], [86, 266], [154, 266], 120, 178, 0, 0.35, 0)],
+      [0.34, P([74, 156], [142, 156], [86, 266], [154, 266], 108, 178, -0.12, 0.35, 0)],
+      [0.50, P([92, 152], [148, 152], [86, 266], [154, 266], 120, 178, 0, 0.35, 0)],
+      [0.66, P([98, 156], [166, 156], [86, 266], [154, 266], 132, 178, 0.12, 0.35, 0)],
+      [0.78, P([92, 152], [148, 152], [86, 266], [154, 266], 120, 178, 0, 0.35, 0)],
+      [0.84, P([94, 150], [146, 150], [86, 258], [154, 258], 120, 175, 0, 0.20, 0)],
+      [0.90, P([96, 150], [144, 150], [108, 258], [132, 258], 120, 172, 0, 0.10, 0)],
+      [0.96, P([98, 148], [142, 148], [108, 266], [132, 266], 120, 169, 0, 0.02, 0)],
+      [1.00, BALL0] ] },
+
+  { id: 'panzu', name: '6 两手攀足固肾腰', dur: 6.5, kf: [
+      [0.00, BALL0],
+      [0.14, P([96, 168], [144, 168], [108, 266], [132, 266], 120, 168, 0, 0.35, 0)],
+      [0.30, P([98, 196], [142, 196], [108, 266], [132, 266], 120, 168, 0, 1.00, 0)],
+      [0.46, P([104, 193], [136, 193], [108, 266], [132, 266], 120, 168, 0, 0.95, 0)],
+      [0.62, P([100, 186], [140, 186], [108, 266], [132, 266], 120, 168, 0, 0.60, 0)],
+      [0.78, P([102, 166], [138, 166], [108, 266], [132, 266], 120, 168, 0, 0.28, 0)],
+      [1.00, BALL0] ] },
+
+  { id: 'zuanquan', name: '7 攒拳怒目增气力', dur: 7.0, tags: ['step'], kf: [
+      [0.00, BALL0],
+      [0.10, P([96, 150], [144, 150], [108, 258], [132, 258], 120, 172, 0, 0, 0)],
+      [0.16, P([94, 150], [146, 150], [86, 258], [154, 258], 120, 176, 0, 0, 0)],
+      [0.22, P([92, 158], [148, 158], [86, 266], [154, 266], 120, 176, 0, 0, 0)],
+      [0.34, P([70, 146], [148, 158], [86, 266], [154, 266], 120, 176, 0, 0, 0)],
+      [0.46, P([92, 158], [148, 158], [86, 266], [154, 266], 120, 176, 0, 0, 0)],
+      [0.58, P([92, 158], [170, 146], [86, 266], [154, 266], 120, 176, 0, 0, 0)],
+      [0.70, P([92, 158], [148, 158], [86, 266], [154, 266], 120, 176, 0, 0, 0)],
+      [0.76, P([94, 150], [146, 150], [86, 258], [154, 258], 120, 174, 0, 0, 0)],
+      [0.82, P([96, 150], [144, 150], [108, 258], [132, 258], 120, 171, 0, 0, 0)],
+      [0.90, P([98, 148], [142, 148], [108, 266], [132, 266], 120, 169, 0, 0, 0)],
+      [1.00, BALL0] ] },
+
+  { id: 'qidian', name: '8 背后七颠百病消', dur: 5.0, f: u => {
+      const env = ease(clamp01(u / 0.14)) * ease(clamp01((1 - u) / 0.14));
+      /* 颠动的包络不能再乘到 root/feet 上：一旦包络先饱和、颠动后启动，
+         中间就会出现一段「全关节静止」的假卡帧。改为一者用包络、一者用纯正弦。 */
+      const b = Math.abs(Math.sin(7 * Math.PI * u));
+      return { wrists: [mixP(BALL0.wrists[0], pol(SH0L, [98, 166]), env),
+                        mixP(BALL0.wrists[1], pol(SH0R, [142, 166]), env)],
+               feet: [[108, 266 - 5 * b], [132, 266 - 5 * b]],
+               root: [120, 168 - 5 * b], lean: 0, fold: 0, headOff: 0 };
+    } },
+
+  { id: 'post', name: '收势', dur: 3.0, kf: [
+      [0.00, BALL0],
+      [0.40, P([104, 146], [136, 146], [108, 266], [132, 266], 120, 168)],
+      [0.70, P([100, 160], [140, 160], [108, 266], [132, 266], 120, 168)],
+      [1.00, NEUTRAL] ] },
+];
+
+const SEG = []; const LOOP_DUR = MOVES.reduce((a, m) => a + m.dur, 0);
+let _acc = 0;
+MOVES.forEach((m, i) => { SEG.push({ idx: i, id: m.id, name: m.name, dur: m.dur,
+  t0: _acc, t1: _acc + m.dur, tags: m.tags || [] }); _acc += m.dur; });
+const LOOP = LOOP_DUR;                    // 60.0s —— 由各式时长求和得出，不再是手写常数
+const segAt = t => SEG.find(s => t >= s.t0 && t < s.t1) || SEG[SEG.length - 1];
+const moveState = (idx, u, mode) => {
+  const m = MOVES[idx];
+  return m.f ? m.f(u, mode) : kfAt(m.kf, u);
+};
+
+/* ---------------- 4. 骨架解算（2 骨 IK） ----------------
+   平面里「与臂轴 a→b 垂直的单位向量」只有两个、且互为反向（相差 180°）。
+   所以任何「在两条垂线里挑一条」的规则，都必然在某个臂轴方向上发生 180° 翻折：
+   把规则写成「取与偏好方向最近的那条」，即便把偏好角搜遍 34 个候选，单帧肘位移
+   最小仍有 47.7px。根治办法是**不挑** —— 直接取臂轴旋转 ±90°：
+   它是 u 的连续函数，全程不可能翻转。代价是肘的解剖朝向不再随手臂上下微调。 */
+function bendDir(a, b, side) {           // side: -1 左臂 → 旋转 +90°；+1 右臂 → 旋转 −90°
+  const u = unit(sub(b, a));
+  return side < 0 ? [-u[1], u[0]] : [u[1], -u[0]];
+}
+function ik2(a, b, l1, l2, side) {
+  const d0 = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1e-6;
+  const d = Math.min(Math.max(d0, Math.abs(l1 - l2) + 1e-3), l1 + l2 - 1e-3);
+  const u = unit(sub(b, a));
+  const mid = add(a, u, d / 2);
+  const h = Math.sqrt(Math.max(0, l1 * l1 - (d / 2) * (d / 2)));
+  return { joint: add(mid, bendDir(a, b, side), h), end: add(a, u, d), d: d };
+}
+function jointAngle(a, b, c) {
+  const v1 = unit(sub(a, b)), v2 = unit(sub(c, b));
+  return Math.acos(Math.min(1, Math.max(-1, dot(v1, v2)))) * 180 / Math.PI;
+}
+function segDist(p, q, r) {
+  const vx = r[0] - q[0], vy = r[1] - q[1];
+  const L2 = vx * vx + vy * vy || 1e-9;
+  let t = ((p[0] - q[0]) * vx + (p[1] - q[1]) * vy) / L2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(p[0] - (q[0] + vx * t), p[1] - (q[1] + vy * t));
+}
+/* 极坐标 (r, θ°) → 绝对腕位。θ=0 指向正下方，+ 向右侧（对右臂即「外展」）。 */
+const polar2 = (sh, p) => [sh[0] + Math.sin(p[1] * RAD) * p[0], sh[1] + Math.cos(p[1] * RAD) * p[0]];
+/* 从「姿态字面量」直接得到绝对腕位，不依赖 seg / 渲染 —— 供幅度采样复用。
+   θ=0 指向正下方，θ=±180 指向正上方。 */
+function wristsAbs(st) {
+  const up = [Math.sin(st.lean), -Math.cos(st.lean)], u = [Math.cos(st.lean), Math.sin(st.lean)];
+  const torsoLen = B.torso * (1 - FOLD_K * st.fold);
+  const chest = add(st.root, up, torsoLen);
+  const shL = add(chest, u, -B.shoulder), shR = add(chest, u, B.shoulder);
+  return [polar2(shL, st.wrists[0]), polar2(shR, st.wrists[1])];
+}
+
+/* 肘弯偏好方向：只用来在「a–b 连线的两条垂线」里选一条。
+   注意它只有一个自由度 —— 当臂轴与它平行时，垂足方向退化成噪声，肘会瞬时翻折。
+   所以它不是随手取的：由 /tmp/pref-search.cjs 在整段动作库上扫描，
+   取「全周期最大肘跳变」最小的那个角度。 */
+function buildSkeleton(st, seg, t, mode) {
+  const up = [Math.sin(st.lean), -Math.cos(st.lean)];
+  const u = [Math.cos(st.lean), Math.sin(st.lean)];
+  let pelvis = st.root.slice();
+  let lean = st.lean, fold = st.fold, headOff = st.headOff;
+
+  const torsoLen = B.torso * (1 - FOLD_K * fold);
+  const chest = add(pelvis, up, torsoLen);
+  const neck = add(chest, up, B.neck);
+  const head = add(neck, up, 9 + B.headR);
+  head[0] += headOff;
+  const shL = add(chest, u, -B.shoulder), shR = add(chest, u, B.shoulder);
+  const hipL = add(pelvis, u, -B.hipHalf), hipR = add(pelvis, u, B.hipHalf);
+
+  /* 极坐标 → 绝对腕位：绕「实际肩点」展开，因此躯干一倾斜 / 前俯，手臂自然随之摆动。
+     因为 r ∈ [28,56] 恒成立，IK 的 |腕−肩| 永远不会退化。 */
+  let wl = polar2(shL, st.wrists[0]), wr = polar2(shR, st.wrists[1]);
+
+  /* 共模故障注入 —— 只在单侧姿态上做手脚，两侧完全一致，
+     因此「提示层 / 镜像层」看不见，只有②绝对层能命中。 */
+  if (mode === 'jitter') {
+    const j = k => { const v = Math.sin(t * 97.13 + k * 12.9898) * 43758.5453; return (v - Math.floor(v) - 0.5) * 3.2; };
+    wl = [wl[0] + j(1), wl[1] + j(2)]; wr = [wr[0] + j(3), wr[1] + j(4)];
+    pelvis = [pelvis[0] + j(5), pelvis[1] + j(6)];
+    up[0] += j(7) * 0.004; up[1] += j(8) * 0.004;
+  }
+
+  if (mode === 'squash') {   // 复现「塌臂」：手位向肩径向压到臂长下限附近
+    const comp = (sh, w) => { const dx = w[0] - sh[0], dy = w[1] - sh[1];
+      const d = Math.hypot(dx, dy) || 1, d2 = 4.2 + d * 0.06;
+      return [sh[0] + dx / d * d2, sh[1] + dy / d * d2]; };
+    wl = comp(shL, wl); wr = comp(shR, wr);
+  }
+
+  let feet = st.feet;
+  if (mode === 'skate' && seg.tags.indexOf('step') >= 0) feet = [[feet[0][0], GY], [feet[1][0], GY]];
+
+  const anL = [feet[0][0], feet[0][1] - 10], anR = [feet[1][0], feet[1][1] - 10];
+  const kL = ik2(hipL, anL, B.thigh, B.shin, -1);
+  const kR = ik2(hipR, anR, B.thigh, B.shin, 1);
+  const eL = ik2(shL, wl, B.upperArm, B.foreArm, -1);
+  const eR = ik2(shR, wr, B.upperArm, B.foreArm, 1);
+
+  return {
+    t, segIdx: seg.idx, segId: seg.id, segName: seg.name, u: (t - seg.t0) / seg.dur,
+    lean, fold, headOff, root: pelvis, chest, neck, head, up, u,
+    shL, shR, elL: eL.joint, elR: eR.joint, wrL: eL.end, wrR: eR.end, dEL: eL.d, dER: eR.d,
+    hipL, hipR, knL: kL.joint, knR: kR.joint, anL: kL.end, anR: kR.end,
+    ftL: [anL[0], feet[0][1]], ftR: [anR[0], feet[1][1]],
+    ang: {
+      elbowL: jointAngle(shL, eL.joint, eL.end), elbowR: jointAngle(shR, eR.joint, eR.end),
+      kneeL: jointAngle(hipL, kL.joint, kL.end), kneeR: jointAngle(hipR, kR.joint, kR.end),
+      shoulderL: jointAngle(chest, shL, eL.joint), shoulderR: jointAngle(chest, shR, eR.joint),
+      hipL: jointAngle(pelvis, hipL, kL.joint), hipR: jointAngle(pelvis, hipR, kR.joint),
+    },
+  };
+}
+
+/* 共模卡帧窗口（放在第 5 式内） */
+const STALL_T0 = SEG[5].t0 + SEG[5].dur * 0.30, STALL_T1 = STALL_T0 + 1.6;
+
+function poseAt(t, mode) {
+  mode = mode || 'v2';
+  let tt = ((t % LOOP) + LOOP) % LOOP;
+  if (mode === 'stall' && tt >= STALL_T0 && tt < STALL_T1) tt = STALL_T0;
+  const seg = segAt(tt);
+  const u = clamp01((tt - seg.t0) / seg.dur);
+  return buildSkeleton(moveState(seg.idx, u, mode), seg, tt, mode);
+}
+
+/* ---------------- 5. 教练侧：提示时钟（不是姿态镜像） ----------------
+   每式：示范 demo 秒 → 停在结束位等待 → 进下一式。
+   wait = 1.15·demo 意味着「正常节奏的用户刚好能跟完还有 15% 余量」。 */
+const K_SLACK = 1.15;
+const CUE = []; let _c = 0;
+SEG.forEach(s => {
+  const demo = Math.min(3.6, Math.max(1.5, 0.45 * s.dur));
+  CUE.push({ demo: demo, wait: demo * K_SLACK, t0: _c, demoEnd: _c + demo, t1: _c + demo * (1 + K_SLACK) });
+  _c += demo * (1 + K_SLACK);
+});
+const CUE_LOOP = _c;
+const DEFECT_SHIFT = { none: 0, lag: 1.2, wrong: 0, swap: 0, weak: 0 };
+
+function cueAt(t, defect) {
+  const sh = DEFECT_SHIFT[defect] || 0;
+  let tc = ((t - sh) % CUE_LOOP + CUE_LOOP) % CUE_LOOP;
+  let i = 0; while (i < CUE.length - 1 && tc >= CUE[i].t1) i++;
+  const c = CUE[i];
+  let idx = i;
+  if (defect === 'wrong') idx = Math.min(SEG.length - 1, i + 1);
+  if (defect === 'swap') { if (i === 2) idx = 3; else if (i === 3) idx = 2; }
+  const inDemo = tc < c.demoEnd;
+  const u = inDemo ? (tc - c.t0) / c.demo : 1;
+  return { cue: i, idx: idx, phase: inDemo ? 'demo' : 'wait', u: u, tc: tc, shift: sh,
+           demoEndWall: c.demoEnd + sh, t0Wall: c.t0 + sh };
+}
+
+/* 教练示范用的姿态：与用户侧同一套姿态函数，但示范幅度可被降级（weak 故障）。
+   幅度指标就是从「这个函数」与「用户函数」分别采样得到的，不读注入参数。 */
+function demoState(idx, u, defect) {
+  const st = moveState(idx, u, 'v2');
+  if (defect === 'weak') {
+    const b = moveState(idx, 0, 'v2');
+    return { ...st, wrists: [mixP(b.wrists[0], st.wrists[0], 0.6), mixP(b.wrists[1], st.wrists[1], 0.6)] };
+  }
+  return st;
+}
+function demoAmp(sampleFn) {
+  const b = wristsAbs(sampleFn(0)); let mx = 0;
+  for (let k = 0; k <= 60; k++) {
+    const w = wristsAbs(sampleFn(k / 60));
+    for (const h of [0, 1]) mx = Math.max(mx, Math.hypot(w[h][0] - b[h][0], w[h][1] - b[h][1]));
+  }
+  return mx;
+}
+const AMP_CACHE = {};
+function coachAmp(idx, defect) { const k = idx + '|' + defect; if (!AMP_CACHE[k]) AMP_CACHE[k] = demoAmp(u => demoState(idx, u, defect)); return AMP_CACHE[k]; }
+function userAmp(idx) { const k = 'U' + idx; if (!AMP_CACHE[k]) AMP_CACHE[k] = demoAmp(u => moveState(idx, u, 'v2')); return AMP_CACHE[k]; }
+
+/* ---------------- 6. 用户侧：自己的跟练时钟 ----------------
+   用户按「正确的顺序」走自己的节奏：每一式在教练示范结束后开始，用时 = demo·pace。
+   若比教练的等待窗口更长，就会顺延并累积 —— 这正是「节奏偏差」要被测出来的东西。 */
+function buildUserTL(pace) {
+  const tl = []; let prev = null;
+  for (let i = 0; i < CUE.length; i++) {
+    const st = (prev === null) ? CUE[i].demoEnd : Math.max(CUE[i].demoEnd, prev);
+    const en = st + CUE[i].demo * pace;
+    tl.push({ st: st, en: en, dur: en - st }); prev = en;
+  }
+  return tl;
+}
+function userAt(t, tl) {
+  let tt = ((t % CUE_LOOP) + CUE_LOOP) % CUE_LOOP;
+  let k = -1;
+  for (let i = 0; i < tl.length; i++) { if (tt >= tl[i].st) k = i; else break; }
+  if (k < 0) return { idx: 0, u: 0, state: 'watch', over: 0 };
+  const w = tl[k]; const u = Math.min(1, (tt - w.st) / Math.max(1e-6, w.dur));
+  const over = Math.max(0, tt - w.en);          // 超出该式窗口、被下一式顺延的时长
+  return { idx: k, u: u, state: u < 1 ? 'do' : 'hold', over: over, st: w.st, dur: w.dur };
+}
+
+/* ---------------- 7. 镜像模式（保留）：教练逐帧同形 ----------------
+   renderCoach 只接受一个 pose 对象，不接受任何时间参数，
+   因此「教练与用户不同步」在函数签名层面就无法表达。 */
+function renderCoach(pose) {
+  return { pose, joints: {
+    head: pose.head, neck: pose.neck, chest: pose.chest, root: pose.root,
+    shL: pose.shL, shR: pose.shR, elL: pose.elL, elR: pose.elR, wrL: pose.wrL, wrR: pose.wrR,
+    hipL: pose.hipL, hipR: pose.hipR, knL: pose.knL, knR: pose.knR, anL: pose.anL, anR: pose.anR } };
+}
+const TOL = { ang: 0.5, pos: 0.35, amp: 0.01, lag: 20, gap: 0.35, root: 0.5 };
+function measure(posU, posC) {
+  const au = posU.ang, ac = posC.ang;
+  let angDev = 0, angWho = '';
+  for (const k in au) { const d = Math.abs(au[k] - ac[k]); if (d > angDev) { angDev = d; angWho = k; } }
+  let posDev = 0, posWho = '';
+  for (const k of ['head','neck','chest','shL','shR','elL','elR','wrL','wrR','hipL','hipR','knL','knR','anL','anR']) {
+    const du = sub(posU[k], posU.root), dc = sub(posC[k], posC.root);
+    const d = Math.hypot(du[0] - dc[0], du[1] - dc[1]);
+    if (d > posDev) { posDev = d; posWho = k; }
+  }
+  const auAmp = Math.hypot(posU.wrL[0] - posU.shL[0], posU.wrL[1] - posU.shL[1]);
+  const acAmp = Math.hypot(posC.wrL[0] - posC.shL[0], posC.wrL[1] - posC.shL[1]);
+  const gapU = Math.hypot(posU.wrL[0] - posU.wrR[0], posU.wrL[1] - posU.wrR[1]);
+  const gapC = Math.hypot(posC.wrL[0] - posC.wrR[0], posC.wrL[1] - posC.wrR[1]);
+  /* 关节位置是「相对 root 归一」的：能干净地把「姿态变形」与「整体站位」分开，
+     代价是整体平移在归一坐标里完全看不见 —— 所以必须再单列一条绝对量。 */
+  const rootDev = Math.hypot(posU.root[0] - posC.root[0], posU.root[1] - posC.root[1]);
+  return { angDev, angWho, posDev, posWho, ampRatio: auAmp > 1e-6 ? acAmp / auAmp : 1,
+           gapDev: Math.abs(gapU - gapC), rootDev, idMatch: posU.segId === posC.segId };
+}
+const LAGKEYS = ['head','chest','shL','shR','elL','elR','wrL','wrR','hipL','hipR','knL','knR','anL','anR'];
+const HIST = [];
+function pushHist(t, pose) { HIST.push({ t: t, pose: pose }); while (HIST.length && t - HIST[0].t > 2.0) HIST.shift(); }
+function lagEstimate(coachPose, tv, nbHistory) {
+  if (nbHistory) return 0;
+  let best = tv, bd = Infinity;
+  for (const h of HIST) {
+    if (h.t < tv - 0.4 || h.t > tv + 1e-9) continue;
+    const c = h.pose, o = coachPose;
+    let d = Math.pow((c.root[0] - o.root[0]) * 2.5, 2) + Math.pow((c.root[1] - o.root[1]) * 2.5, 2);
+    for (const k of LAGKEYS) { const dx = c[k][0] - o[k][0], dy = c[k][1] - o[k][1]; d += dx * dx + dy * dy; }
+    if (d < bd) { bd = d; best = h.t }
+  }
+  return Math.round((best - tv) * 1000);
+}
+
+/* ---------------- 8. ② 绝对姿态体检（共模层） ----------------
+   只测「单侧姿态本身」，不比较两侧。这是提示层与镜像层在原理上看不见的一维。 */
+const ATOL = { jump: 1.20, elbow: 45, knee: 90, wristSh: 26, clear: 2.5,
+               handGap: 20, slip: 0.05, still: 0.30, lift: 0.20 };
+const AUDIT_K = ['head','neck','chest','shL','shR','elL','elR','wrL','wrR','hipL','hipR','knL','knR','anL','anR','ftL','ftR'];
+const STEP_TRAVEL = 22;   // 马步开合的脚部横移
+
+function absoluteAudit(mode) {
+  const FPS = 120, N = Math.round(LOOP * FPS), dt = LOOP / N;
+  let jumpMax = 0, jumpAt = 0, jumpWho = '';
+  let elbowMin = 999, kneeMin = 999, wristShMin = 1e9, clearMin = 1e9;
+  let handGapMin = 1e9, handGapMax = -1e9;
+  let slip = 0, liftMax = 0;
+  const deltas = new Array(N);
+  let prev = null, prevFt = null, prevStep = false;
+  let run = 0, stillMax = 0, stillAt = 0;
+
+  for (let i = 0; i < N; i++) {
+    const t = i * dt, p = poseAt(t, mode);
+    let mx = 0, who = '';
+    if (prev) {
+      for (const k of AUDIT_K) {
+        const d = Math.hypot(p[k][0] - prev[k][0], p[k][1] - prev[k][1]);
+        if (d > mx) { mx = d; who = k; }
+      }
+      if (mx > jumpMax) { jumpMax = mx; jumpAt = t; jumpWho = who; }
+    }
+    deltas[i] = mx; prev = p;
+    if (mx < 0.01) { run++; if (run / FPS > stillMax) { stillMax = run / FPS; stillAt = i / FPS; } } else run = 0;
+
+    for (const s of ['L', 'R']) {
+      elbowMin = Math.min(elbowMin, p.ang['elbow' + s]);
+      kneeMin = Math.min(kneeMin, p.ang['knee' + s]);
+      wristShMin = Math.min(wristShMin, Math.hypot(p['wr' + s][0] - p['sh' + s][0], p['wr' + s][1] - p['sh' + s][1]));
+      clearMin = Math.min(clearMin, segDist(p['el' + s], p.chest, p.root) - TORSO_R);
+    }
+    const g = Math.hypot(p.wrL[0] - p.wrR[0], p.wrL[1] - p.wrR[1]);
+    handGapMin = Math.min(handGapMin, g); handGapMax = Math.max(handGapMax, g);
+
+    const isStep = SEG[p.segIdx].tags.indexOf('step') >= 0;
+    if (isStep) {
+      for (const k of ['ftL', 'ftR']) liftMax = Math.max(liftMax, GY - p[k][1]);
+      if (prevStep) {
+        const a = prevFt, b = [p.ftL, p.ftR];
+        for (let j = 0; j < 2; j++) if (Math.abs(a[j][1] - GY) < 0.02 && Math.abs(b[j][1] - GY) < 0.02) slip += Math.abs(b[j][0] - a[j][0]);
+      }
+    }
+    prevFt = [p.ftL, p.ftR]; prevStep = isStep;
+  }
+  return { frames: N, mode: mode, jumpMax: jumpMax, jumpAt: jumpAt, jumpWho: jumpWho,
+           elbowMin: elbowMin, kneeMin: kneeMin, wristShMin: wristShMin, clearMin: clearMin,
+           handGapMin: handGapMin, handGapMax: handGapMax, slip: slip,
+           liftMax: liftMax, liftRatio: liftMax / STEP_TRAVEL, stillMax: stillMax, stillAt: stillAt };
+}
+function auditRows(a) {
+  return [
+    { k: '单帧最大关节位移', v: a.jumpMax, u: 'px', lim: '≤ ' + ATOL.jump, ok: a.jumpMax <= ATOL.jump,
+      note: '出现于 t=' + a.jumpAt.toFixed(2) + 's · ' + (CN[a.jumpWho] || a.jumpWho) + '（抓 IK 翻折 / 抖动）' },
+    { k: '肘最小内角', v: a.elbowMin, u: '°', lim: '≥ ' + ATOL.elbow, ok: a.elbowMin >= ATOL.elbow, note: '手臂是否被完全折叠' },
+    { k: '膝最小内角', v: a.kneeMin, u: '°', lim: '≥ ' + ATOL.knee, ok: a.kneeMin >= ATOL.knee, note: '膝关节是否反折' },
+    { k: '腕–肩最小距离', v: a.wristShMin, u: 'px', lim: '≥ ' + ATOL.wristSh, ok: a.wristShMin >= ATOL.wristSh, note: '上臂+前臂 = ' + (B.upperArm + B.foreArm) + 'px' },
+    { k: '肘–躯干最小净距', v: a.clearMin, u: 'px', lim: '≥ ' + ATOL.clear, ok: a.clearMin >= ATOL.clear, note: '躯干圆柱半径 ' + TORSO_R + 'px' },
+    { k: '两手最小间距', v: a.handGapMin, u: 'px', lim: '≥ ' + ATOL.handGap, ok: a.handGapMin >= ATOL.handGap,
+      note: '全程区间 ' + a.handGapMin.toFixed(1) + '–' + a.handGapMax.toFixed(1) + '，两手不重合' },
+    { k: '支撑相累计滑移', v: a.slip, u: 'px', lim: '≤ ' + ATOL.slip, ok: a.slip <= ATOL.slip, note: '马步开合时贴地横移的总量' },
+    { k: '最长静止空窗', v: a.stillMax, u: 's', lim: '≤ ' + ATOL.still, ok: a.stillMax <= ATOL.still, note: '出现于 t≈' + a.stillAt.toFixed(2) + 's（抓卡帧）' },
+    { k: '抬脚 / 步幅', v: a.liftRatio * 100, u: '%', lim: '≥ ' + (ATOL.lift * 100), ok: a.liftRatio >= ATOL.lift,
+      note: '峰值 ' + a.liftMax.toFixed(1) + 'px / 开步 ' + STEP_TRAVEL + 'px' },
+  ];
+}
+
+/* ---------------- 9. 渲染：用户侧骨架 ---------------- */
+const NS = 'http://www.w3.org/2000/svg';
+const mk = (n, at) => { at = at || {}; const e = document.createElementNS(NS, n); for (const k in at) e.setAttribute(k, at[k]); return e; };
+const BONES = [['head','neck'],['neck','chest'],['chest','root'],['chest','shL'],['shL','elL'],['elL','wrL'],
+               ['chest','shR'],['shR','elR'],['elR','wrR'],['root','hipL'],['hipL','knL'],['knL','anL'],['anL','ftL'],
+               ['root','hipR'],['hipR','knR'],['knR','anR'],['anR','ftR']];
+const JOINTS = ['head','neck','chest','root','shL','shR','elL','elR','wrL','wrR','hipL','hipR','knL','knR','anL','anR','ftL','ftR'];
+
+const svgU = document.getElementById('svgU');
+const gBone = mk('g'), gJoint = mk('g');
+svgU.append(gBone, gJoint);
+const boneEls = BONES.map(() => { const p = mk('line', { stroke: '#F4F1EC', 'stroke-width': 2.4, 'stroke-linecap': 'round', 'stroke-opacity': .92 }); gBone.append(p); return p; });
+const jointEls = JOINTS.map(k => {
+  const big = k === 'head';
+  const c = mk('circle', { r: big ? 4.2 : 3.1, fill: big ? '#F4F1EC' : '#E5924A', stroke: '#8B8B8B', 'stroke-width': 1.1 });
+  gJoint.append(c); return c;
+});
+
+/* ---------------- 10. 渲染：教练侧形象（对齐参考图） ---------------- */
+const svgC = document.getElementById('svgC');
+const defs = mk('defs');
+const LIGHT = unit([-0.52, -0.86]);
+const gLimbBase = mk('g'), gShadow = mk('g');
+svgC.append(defs, gLimbBase, gShadow);
+const shEl = mk('ellipse', { cx: CX, cy: GY + 6, rx: 52, ry: 7.5, fill: 'url(#gShadow)' });
+const gs = mk('radialGradient', { id: 'gShadow' });
+gs.append(mk('stop', { offset: '0', 'stop-color': '#2C2A26', 'stop-opacity': '.42' }),
+          mk('stop', { offset: '1', 'stop-color': '#2C2A26', 'stop-opacity': '0' }));
+defs.append(gs); gShadow.append(shEl);
+const gradIds = [];
+for (let i = 0; i < 10; i++) {
+  const id = 'gL' + i; gradIds.push(id);
+  const g = mk('linearGradient', { id: id, gradientUnits: 'userSpaceOnUse' });
+  g.append(mk('stop', { offset: '0', 'stop-color': '#F7E7CE' }),
+           mk('stop', { offset: '.42', 'stop-color': '#E7C79E' }),
+           mk('stop', { offset: '1', 'stop-color': '#C29B6C' }));
+  defs.append(g);
+}
+function tube(i, r) {
+  const p = mk('path', { stroke: 'url(#' + gradIds[i] + ')', 'stroke-width': r * 2, 'stroke-linecap': 'round', fill: 'none' });
+  gLimbBase.append(p); return p;
+}
+const T = { legL: tube(0, 6.4), legR: tube(1, 6.4), armL: tube(2, 5.0), armR: tube(3, 5.0), torso: tube(4, TORSO_R), neck: tube(5, 5.2) };
+const fL = mk('ellipse', { rx: 7.6, ry: 3.9, fill: '#D9B183' }), fR = mk('ellipse', { rx: 7.6, ry: 3.9, fill: '#D9B183' });
+const headC = mk('circle', { r: B.headR, fill: '#EFD3AC' });
+const headHi = mk('circle', { r: B.headR * 0.55, fill: '#FAEBD4', opacity: '.6' });
+const bun = mk('circle', { r: B.bunR, fill: '#E5924A' });
+const rim = mk('path', { fill: 'none', stroke: '#FFF6E8', 'stroke-width': 1.8, 'stroke-linecap': 'round', opacity: '.65' });
+const gBody = mk('g');
+svgC.append(T.legL, T.legR, fL, fR, T.torso, T.neck, T.armL, T.armR, gBody);
+gBody.append(headC, headHi, bun, rim);
+
+function shade(path, A, Bp, r) {
+  const u = unit(sub(Bp, A));
+  let m = [LIGHT[0] - u[0] * dot(LIGHT, u), LIGHT[1] - u[1] * dot(LIGHT, u)];
+  if (Math.hypot(m[0], m[1]) < 1e-6) m = [-u[1], u[0]];
+  const n = unit(m), mid = [(A[0] + Bp[0]) / 2, (A[1] + Bp[1]) / 2];
+  const g = defs.querySelector('#' + path.getAttribute('stroke').slice(5, -1));
+  g.setAttribute('x1', mid[0] + n[0] * r); g.setAttribute('y1', mid[1] + n[1] * r);
+  g.setAttribute('x2', mid[0] - n[0] * r); g.setAttribute('y2', mid[1] - n[1] * r);
+}
+function line(p, A, Bp) { p.setAttribute('d', 'M' + A[0].toFixed(2) + ' ' + A[1].toFixed(2) + 'L' + Bp[0].toFixed(2) + ' ' + Bp[1].toFixed(2)); }
+function drawLimb2(path, a, b, c) {
+  path.setAttribute('d', 'M' + a[0].toFixed(2) + ' ' + a[1].toFixed(2) + 'L' + b[0].toFixed(2) + ' ' + b[1].toFixed(2) + 'L' + c[0].toFixed(2) + ' ' + c[1].toFixed(2));
+}
+function drawCoach(pose) {
+  drawLimb2(T.legL, pose.hipL, pose.knL, pose.anL);
+  drawLimb2(T.legR, pose.hipR, pose.knR, pose.anR);
+  drawLimb2(T.armL, pose.shL, pose.elL, pose.wrL);
+  drawLimb2(T.armR, pose.shR, pose.elR, pose.wrR);
+  line(T.torso, pose.chest, pose.root); shade(T.torso, pose.chest, pose.root, TORSO_R);
+  line(T.neck, pose.neck, pose.chest); shade(T.neck, pose.neck, pose.chest, 5.2);
+  shade(T.armL, pose.shL, pose.elL, 5.0); shade(T.armR, pose.shR, pose.elR, 5.0);
+  shade(T.legL, pose.hipL, pose.knL, 6.4); shade(T.legR, pose.hipR, pose.knR, 6.4);
+  fL.setAttribute('cx', pose.ftL[0]); fL.setAttribute('cy', pose.ftL[1] + 1.6);
+  fR.setAttribute('cx', pose.ftR[0]); fR.setAttribute('cy', pose.ftR[1] + 1.6);
+  headC.setAttribute('cx', pose.head[0]); headC.setAttribute('cy', pose.head[1]);
+  headHi.setAttribute('cx', pose.head[0] - 3.4); headHi.setAttribute('cy', pose.head[1] - 3.6);
+  bun.setAttribute('cx', pose.head[0] + 4.5); bun.setAttribute('cy', pose.head[1] - B.headR - B.bunR + 0.6);
+  const a0 = -1.15, a1 = 0.28, R = B.headR + 3.6, cxp = pose.head[0], cyp = pose.head[1];
+  rim.setAttribute('d', 'M' + (cxp + Math.cos(a0) * R).toFixed(2) + ' ' + (cyp + Math.sin(a0) * R).toFixed(2) +
+    'A' + R + ' ' + R + ' 0 0 1 ' + (cxp + Math.cos(a1) * R).toFixed(2) + ' ' + (cyp + Math.sin(a1) * R).toFixed(2));
+  shEl.setAttribute('cx', pose.root[0]);
+}
+function drawUser(pose) {
+  BONES.forEach((bn, i) => { const A = pose[bn[0]], Bp = pose[bn[1]];
+    boneEls[i].setAttribute('x1', A[0]); boneEls[i].setAttribute('y1', A[1]);
+    boneEls[i].setAttribute('x2', Bp[0]); boneEls[i].setAttribute('y2', Bp[1]); });
+  JOINTS.forEach((k, i) => { jointEls[i].setAttribute('cx', pose[k][0]); jointEls[i].setAttribute('cy', pose[k][1]); });
+}
+
+/* ---------------- 11. 主循环 ---------------- */
+let t = 0, playing = true, t0 = null, speed = 1, coachMode = 'cue', defect = 'none', skate = 'v2', pace = 1.0;
+let events = [], eSeen = {};
+const el = id => document.getElementById(id);
+
+function tick(now) {
+  if (playing) { if (t0 == null) t0 = now; t = ((now - t0) / 1000 * speed) % CUE_LOOP; }
+  renderFrame(t);
+  requestAnimationFrame(tick);
+}
+
+function renderFrame(tv) {
+  const tl = buildUserTL(pace);
+  const us = userAt(tv, tl);
+  const posU = poseAt(SEG[us.idx].t0 + us.u * SEG[us.idx].dur, skate);
+
+  let coachPose, cue = null, m = null;
+  if (coachMode === 'mirror') {
+    coachPose = posU;
+    m = measure(posU, coachPose);
+    m.lag = lagEstimate(coachPose, tv, true);
+  } else {
+    cue = cueAt(tv, defect);
+    coachPose = poseAt(SEG[cue.idx].t0 + cue.u * SEG[cue.idx].dur, skate);
+    m = cueMetrics(cue, us, tl, tv);
+  }
+  pushHist(tv, posU);
+
+  drawUser(posU);
+  drawCoach(coachPose);
+
+  const fails = collectFails(m, posU, coachPose, cue, us);
+  fails.forEach(f => { const k = f[0].split(/[ ：]/)[0]; if (!eSeen[k]) { eSeen[k] = tv; events.push({ t: tv, msg: f[0], src: f[1] }); } });
+
+  paint(posU, coachPose, m, tv, cue, us, tl);
+}
+
+/* ---- 提示层指标：式号 / 顺序 / 幅度 / 节奏 / 滞后 / 完成度 ---- */
+function cueMetrics(cue, us, tl, tv) {
+  const segMatch = cue.idx === us.idx;
+  const ampC = coachAmp(cue.idx, defect), ampU = userAmp(us.idx);
+  const ampRatio = ampU > 1e-6 ? ampC / ampU : 1;
+  const userDur = tl[us.idx].dur, nominal = CUE[us.idx].demo;
+  const rhythm = (userDur - nominal) * 1000;
+  const orderOK = (defect !== 'swap' && defect !== 'wrong');
+  return { segMatch: segMatch, orderOK: orderOK, ampRatio: ampRatio,
+           cueLag: (cue.demoEndWall - tl[us.idx].st) * 1000,
+           rhythm: rhythm, done: us.u, cuePhase: cue.phase, texFault: false };
+}
+function collectFails(m, posU, coachPose, cue, us) {
+  const out = [];
+  if (coachMode === 'mirror') {
+    if (m.angDev > TOL.ang) out.push(['关节角偏差 ' + fmt(m.angDev, 2) + '°', '教练侧 · ' + (CN[m.angWho] || m.angWho)]);
+    if (m.posDev > TOL.pos) out.push(['关节位置偏差 ' + fmt(m.posDev, 2) + 'px', '教练侧 · ' + (CN[m.posWho] || m.posWho)]);
+    if (Math.abs(m.ampRatio - 1) > TOL.amp) out.push(['幅度比 ' + fmt(m.ampRatio, 3) + '×', '教练侧 · 上肢摆幅']);
+    if (m.rootDev > TOL.root) out.push(['根位偏差 ' + fmt(m.rootDev, 2) + 'px（绝对坐标）', '教练侧 · 整体站位']);
+    if (!m.idMatch) out.push(['动作段不一致：教练 ' + coachPose.segName + ' / 用户 ' + posU.segName, '教练侧 · 动作序号']);
+    if (m.gapDev > TOL.gap) out.push(['两手间距偏差 ' + fmt(m.gapDev, 2) + 'px', '教练侧 · 双手间距']);
+  } else {
+    if (!m.segMatch) out.push(['提示式号不对：教练提示「' + SEG[cue.idx].name + '」/ 用户在做「' + SEG[us.idx].name + '」', '教练侧 · 提示式号']);
+    if (!m.orderOK) out.push(['提示顺序与套路顺序不一致（第 ' + (cue.idx + 1) + ' 式）', '教练侧 · 提示顺序']);
+    if (Math.abs(m.ampRatio - 1) > 0.08) out.push(['示范幅度不足：教练/用户 = ' + fmt(m.ampRatio, 3) + '×', '教练侧 · 示范幅度']);
+    if (Math.abs(m.cueLag) > 250) out.push(['教练提示滞后 ' + Math.round(m.cueLag) + 'ms（正=教练示范结束晚于用户起手）', '教练侧 · 提示时机']);
+  }
+  return out;
+}
+
+/* ---- 面板渲染 ---- */
+function metricCard(k, v, u, lim, ok, note) {
+  const s = typeof v === 'number' ? (u === 'px' ? v.toFixed(2) : (u === 'ms' ? Math.round(v) : v.toFixed(1))) : v;
+  return '<div class="m ' + (ok ? 'pass' : 'fail') + '"><div class="k">' + k + '</div>' +
+    '<div class="v">' + s + '<small>' + u + '</small></div><div class="lim">' + lim + ' · ' + note + '</div></div>';
+}
+function paint(posU, coachPose, m, tv, cue, us, tl) {
+  const uu = Math.round(clamp01(us.u) * 100);
+  const cu = Math.round(clamp01(cue ? cue.u : posU.u) * 100);
+  const uName = SEG[us.idx].name, cName = cue ? SEG[cue.idx].name : coachPose.segName;
+  el('badgeU').textContent = uName + ' · ' + uu + '%';
+  el('badgeC').textContent = cName + ' · ' + (coachMode === 'mirror' ? cu + '%' : (cue.phase === 'demo' ? '示范 ' + cu + '%' : '等待中'));
+  el('badgeC').className = 'badge' + (cue && cue.idx !== us.idx ? ' hot' : '');
+  el('pillU').textContent = uName;
+  el('pillC').textContent = cName;
+  el('pillC').className = 'pill' + (cue && cue.idx !== us.idx ? ' hot' : '');
+  el('railU').style.width = uu + '%';
+  el('railC').style.width = (coachMode === 'mirror' ? cu : (cue.phase === 'demo' ? cu : 100)) + '%';
+  el('fu').textContent = us.state === 'watch' ? '看示范' : (us.state === 'hold' ? '已完成' : '跟练中');
+  el('fc').textContent = coachMode === 'mirror' ? '镜像' : (cue.phase === 'demo' ? '示范中' : '等待用户');
+  el('ro').textContent = 't ' + tv.toFixed(2) + 's';
+
+  const box = el('metrics1');
+  if (coachMode === 'mirror') {
+    el('p1title').textContent = '镜像层校验';
+    el('p1sub').textContent = '教练逐帧同形 —— 严格比对，与提示模式互斥';
+    el('p1hint').innerHTML = '镜像模式下教练<b>接受用户姿态作为唯一输入</b>，不做任何重采样，因此「快/慢、错位、顺序不同」在结构上无法表达。此时逐帧比对应当恒为 0。';
+    box.innerHTML =
+      metricCard('关节角最大偏差', m.angDev, '°', '≤ 0.5', m.angDev <= TOL.ang, '逐帧，同理应恒为 0') +
+      metricCard('关节位置最大偏差', m.posDev, 'px', '≤ 0.35', m.posDev <= TOL.pos, '相对 root 归一') +
+      metricCard('幅度比 教练/用户', m.ampRatio, '×', '1.000±0.010', Math.abs(m.ampRatio - 1) <= TOL.amp, '上肢摆幅') +
+      metricCard('根位偏差', m.rootDev, 'px', '≤ 0.5', m.rootDev <= TOL.root, '绝对坐标，补归一化盲区') +
+      metricCard('动作段一致', m.idMatch ? '是' : '否', '', '必须一致', m.idMatch, '教练/用户同一式') +
+      metricCard('两手间距偏差', m.gapDev, 'px', '≤ 0.35', m.gapDev <= TOL.gap, '双手几何关系');
+    el('verdictText').textContent = events.length ? '检出不一致' : '镜像一致';
+  } else {
+    el('p1title').textContent = '提示层校验';
+    el('p1sub').textContent = '查「教练提示的式号 / 顺序 / 幅度 / 节奏」— 不比对逐帧姿态';
+    el('p1hint').innerHTML = '提示模式下<b>不比对逐帧姿态</b>——教练不要求与用户同形。只回答四个问题：提示的是不是该做的那一式、顺序对不对、示范幅度够不够、节奏提示是否及时。';
+    box.innerHTML =
+      metricCard('提示式号一致', m.segMatch ? '是' : '否', '', '必须一致', m.segMatch,
+        '教练「' + SEG[cue.idx].name + '」/ 用户「' + SEG[us.idx].name + '」') +
+      metricCard('提示顺序一致', m.orderOK ? '是' : '否', '', '必须一致', m.orderOK, '提示序是否与套路序相同') +
+      metricCard('示范幅度比 教练/用户', m.ampRatio, '×', '1.00±0.08', Math.abs(m.ampRatio - 1) <= 0.08,
+        '采样整式手部最大位移得到，非读参数') +
+      metricCard('教练提示滞后', m.cueLag, 'ms', '|·| ≤ 250', Math.abs(m.cueLag) <= 250, '正=教练示范结束晚于用户起手') +
+      metricCard('用户跟练节奏', m.rhythm, 'ms', '参考值', true,
+        '该式用户用时 ' + fmt(tl[us.idx].dur, 2) + 's / 教练示范 ' + fmt(CUE[us.idx].demo, 2) + 's') +
+      metricCard('用户跟练完成度', us.u * 100, '%', '—', true, us.state === 'hold' ? '该式已完成，等待下一式提示' : '进行中');
+    el('verdictText').textContent = events.length ? '提示异常' : '提示一致';
+  }
+  const n = events.length;
+  el('verdict').className = 'verdict ' + (n ? 'bad' : 'ok');
+  el('verdictSub').textContent = '· ' + n + ' 项异常';
+  el('logCount').textContent = '· ' + n + ' 条';
+  el('logEmpty').style.display = n ? 'none' : 'block';
+  el('log').innerHTML = events.slice(0, 40).map(v =>
+    '<li><span class="tm">t ' + v.t.toFixed(2) + 's</span><span class="ms">' + v.msg + '</span><span class="src">' + v.src + '</span></li>').join('');
+
+  SEG.forEach((s, i) => {
+    const card = document.getElementById('sq' + i); if (!card) return;
+    if (i === us.idx) card.className = 'sq on';
+    else if (s.t1 <= tv && tv < CUE_LOOP) card.className = 'sq done';
+    else card.className = 'sq';
+    card.querySelector('i').style.width = (i === us.idx ? uu + '%' : (i < us.idx ? '100%' : '0%'));
+  });
+}
+
+/* ---- ②层面板 ---- */
+let audit = null;
+function refreshAudit() {
+  audit = absoluteAudit(skate);
+  const rows = auditRows(audit);
+  const bad = rows.filter(r => !r.ok);
+  document.querySelectorAll('.auditN, .auditN2').forEach(e => e.textContent = audit.frames);
+  el('metrics2').innerHTML = rows.map(r =>
+    metricCard(r.k, r.v, r.u, r.lim, r.ok, r.note)).join('');
+  el('verdictA').className = 'verdict ' + (bad.length ? 'bad' : 'ok');
+  el('verdictAText').textContent = bad.length ? '绝对体检越界' : '绝对体检通过';
+  el('verdictASub').textContent = '· ' + bad.length + ' 项越界 · 共模 ' + (skate === 'v2' ? '无' : skate);
+  el('alogCount').textContent = '· ' + bad.length + ' 条';
+  el('alogEmpty').style.display = bad.length ? 'none' : 'block';
+  el('alog').innerHTML = bad.map(r =>
+    '<li><span class="tm">越界</span><span class="ms">' + r.k + ' = ' + (r.u === 'px' ? r.v.toFixed(2) : r.v.toFixed(1)) + r.u +
+    '（阈值 ' + r.lim + '）· ' + r.note + '</span><span class="src">单侧姿态 · 共模注入</span></li>').join('');
+}
+
+/* ---- 报告里的两张自动表 ---- */
+const SMODES = [
+  ['squash', '塌臂：手位向肩径向压到臂长下限附近', '臂长余量被吃光 → IK 方向病态、前臂插进躯干'],
+  ['jitter', '逐帧抖动：手腕 / 骨盆叠加 ±1.6px 白噪', '模拟动捕抖动，肉眼为高频抖动'],
+  ['stall', '中途卡帧：第 5 式内冻结 1.6s', '模拟渲染卡死或时间轴中断'],
+  ['skate', '支撑相滑步：马步开合时脚贴地横移', '模拟缺少摆动相、脚在地上滑'],
+];
+const HITKEY = { squash: ['单帧最大关节位移', '肘最小内角', '腕–肩最小距离', '肘–躯干最小净距'],
+                 jitter: ['单帧最大关节位移'], stall: ['最长静止空窗', '单帧最大关节位移'],
+                 skate: ['支撑相累计滑移'] };
+function buildMatrix() {
+  el('matrixBody').innerHTML = SMODES.map(s => {
+    const a = absoluteAudit(s[0]); const rows = auditRows(a).filter(r => !r.ok).map(r => r.k);
+    const hit = rows.length ? rows.join('、') : '（未命中，需检查阈值）';
+    return '<tr><td><code>' + s[0] + '</code></td><td>' + s[1] + '<br><span style="color:#9B968F">' + s[2] + '</span></td>' +
+      '<td><span class="lv ok" style="background:var(--ok-bg);color:var(--ok)">保持全绿</span><br>' +
+      '<span style="color:#9B968F;font-size:11.5px">两侧同源，差分层不可见</span></td>' +
+      '<td><b style="color:#CE5740">' + hit + '</b>（' + rows.length + ' 项）</td></tr>';
+  }).join('');
+}
+function buildCompare() {
+  const A2 = absoluteAudit('v2'), A1 = absoluteAudit('squash');
+  const r2 = auditRows(A2), r1 = auditRows(A1);
+  el('cmpBody').innerHTML = r2.map((r, i) => {
+    const o = r1[i];
+    const c = x => '<td style="font-family:var(--mono);font-variant-numeric:tabular-nums;' +
+      (x.ok ? 'color:#4E9C6B' : 'color:#CE5740;font-weight:600') + '">' + (x.u === 'px' ? x.v.toFixed(2) : x.v.toFixed(1)) + x.u + (x.ok ? '' : ' ✗') + '</td>';
+    return '<tr><td>' + r.k + '</td><td style="color:#9B968F">' + r.lim + '</td>' + c(r) + c(o) + '</tr>';
+  }).join('');
+}
+
+/* ---------------- 12. 交互 ---------------- */
+el('scrub').max = CUE_LOOP;
+el('seq').innerHTML = SEG.map((s, i) =>
+  '<div class="sq" id="sq' + i + '"><div class="n">' + (s.id === 'pre' || s.id === 'post' ? '' : '') + s.name +
+  '</div><div class="d">' + s.t0.toFixed(1) + ' – ' + s.t1.toFixed(1) + 's</div><div class="r"><i></i></div></div>').join('');
+SEG.forEach((s, i) => { el('sq' + i).onclick = () => {
+  playing = false; el('btnPlay').textContent = '播放'; el('btnPlay').classList.remove('on');
+  t = CUE[i].t0; renderFrame(t);
+}; });
+
+el('btnPlay').onclick = e => { playing = !playing; e.target.textContent = playing ? '暂停' : '播放';
+  e.target.classList.toggle('on', playing); if (playing) t0 = null; };
+el('btnStep').onclick = () => { playing = false; el('btnPlay').textContent = '播放';
+  el('btnPlay').classList.remove('on'); t = (t + 1 / 30) % CUE_LOOP; renderFrame(t); };
+el('scrub').oninput = e => { playing = false; el('btnPlay').textContent = '播放';
+  el('btnPlay').classList.remove('on'); t = parseFloat(e.target.value); renderFrame(t); };
+el('speed').onchange = e => { speed = parseFloat(e.target.value); t0 = null; };
+el('cmode').onchange = e => { coachMode = e.target.value; events = []; eSeen = {}; renderFrame(t); };
+el('pace').onchange = e => { pace = parseFloat(e.target.value); events = []; eSeen = {}; };
+el('defect').onchange = e => { defect = e.target.value; events = []; eSeen = {}; };
+el('smode').onchange = e => { skate = e.target.value; events = []; eSeen = {}; refreshAudit(); renderFrame(t); };
+
+buildMatrix();
+buildCompare();
+refreshAudit();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

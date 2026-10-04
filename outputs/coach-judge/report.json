@@ -1,0 +1,51 @@
+{
+  "ranAt": "2026-10-03T23:28:37.061Z",
+  "urlJudge": "http://127.0.0.1:5399/s4/#/train?stage=1&mode=full&style=baduanjin&tone=gong&coachAttempt=3&coachDemo=3",
+  "urlPass": "http://127.0.0.1:5399/s4/#/train?stage=1&mode=full&style=baduanjin&tone=gong&coachDemo=1&coachAttempt=99&coachSim=2",
+  "urlTime": "http://127.0.0.1:5399/s4/#/train?stage=1&mode=full&style=baduanjin&tone=gong&coachGate=time&coachSoft=99&coachHard=3&coachGrace=2&coachDemo=1",
+  "observedSecJudge": 17,
+  "stepsSeenJudge": [
+    "第 1 式"
+  ],
+  "roundsSeen": [
+    2,
+    3,
+    4
+  ],
+  "demoMoved": 23,
+  "ghostMoved": 23,
+  "stepsSeenPass": [
+    "第 1 式",
+    "第 2 式",
+    "第 3 式",
+    "第 4 式"
+  ],
+  "stepsSeenTime": [
+    "第 1 式",
+    "第 2 式"
+  ],
+  "failures": 0,
+  "lines": [
+    "PASS  ① 进页即自动开启教练（.coach-bar 出现，未手动点）",
+    "PASS  ① 判定闸门下带 gate-judge 类",
+    "PASS  ① 摄像头同时在跑（video 有画面且未暂停）  -> 640x480 ready=4 paused=false",
+    "PASS  ① 教练小窗形象 = 房间版小人（白练功服 + 腰带结 + 拖影层），且已不再用 canvas",
+    "PASS  ①【核心】教练与摄像头**同时开始**：摄像头就绪那一刻，教练才刚进入示范（cp-demo）",
+    "PASS  ① 示范播完自动进入跟练（cp-follow）",
+    "PASS  ②【核心】判定闸门：16s 内式号从未变化（没通关就不换式）  -> 观察到：第 1 式",
+    "PASS  ② 完成度 HUD 未达标（判定确实没命中，不是「其实通关了」）",
+    "PASS  ③ 没通关期间系统是活的：出现多轮陪练计数  -> 轮次：2,3,4",
+    "PASS  ③ 教练示范一直在动（keepLooping：播完不停、继续循环）  -> 16s 内画面变化 23 次",
+    "PASS  ③ 摄像头上的标准骨架也在循环（活参照，不是定格）  -> 16s 内画面变化 23 次",
+    "PASS  ③ 判定闸门下永不出现「准备进入下一式」（宽限态）",
+    "PASS  ④ 判定闸门保留手动出口：「跳过本式」能推进到第 2 式  -> 现在：第 2 式",
+    "PASS  ④ 底部「教练指引」显示为「开」",
+    "PASS  A 场景无 JS 报错",
+    "PASS  ⑤【核心】通关后自动进入下一式（判定闸门不是卡死）  -> 先后经过：第 1 式 → 第 2 式 → 第 3 式 → 第 4 式",
+    "PASS  ⑤ 完成计数随之累加（.prog 不再是 0 / 8）  -> prog = 3 / 8",
+    "PASS  C 场景无 JS 报错",
+    "PASS  对照档：gate=time 时教练条带 gate-time 类",
+    "PASS  ④【反证】计时闸门下 9s 内确实会自动跳式（证明测试能测出「跳式」）  -> 观察到：第 1 式 / 第 2 式",
+    "PASS  B 场景无 JS 报错"
+  ]
+}

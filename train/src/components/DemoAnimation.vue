@@ -1,25 +1,37 @@
 <template>
-  <aside class="demo" :class="{ collapsed }">
-    <!-- 收起态：右侧小浮钮 -->
-    <button v-if="collapsed" class="float-btn" @click="toggleCollapse" title="展开试教动画">
+  <aside class="demo" :class="[{ collapsed }, variant, { docked }]">
+    <!-- 收起态：小浮钮 -->
+    <button v-if="collapsed && !docked" class="float-btn" @click="toggleCollapse" :title="variant === 'coach' ? '展开陪练教练' : '展开试教动画'">
       <span class="fb-ico">☯</span>
-      <span class="fb-txt">示范</span>
+      <span class="fb-txt">{{ variant === 'coach' ? '教练' : '示范' }}</span>
     </button>
 
     <!-- 展开态：悬浮卡片 -->
     <template v-else>
-      <div class="demo-head">
+      <div class="demo-head" v-if="!docked">
         <span class="dh-dot" :class="{ live: state === 'ready' && playing }"></span>
-        <span class="dh-title">示范动画</span>
+        <span class="dh-title">{{ variant === 'coach' ? '陪练教练' : '示范动画' }}</span>
         <span class="dh-phase" v-if="state === 'ready'">{{ phaseText }}</span>
-        <span class="dh-speed" v-if="state === 'ready' && speed !== 1">{{ speed }}×</span>
-        <button class="dh-btn" @click="toggleCollapse" title="收起（不关闭演示模式）">—</button>
+        <span class="dh-speed" v-if="state === 'ready' && speed !== 1 && variant !== 'coach'">{{ speed }}×</span>
+        <button class="dh-btn" @click="toggleCollapse" :title="variant === 'coach' ? '收起教练（跟练时不挡画面）' : '收起（不关闭演示模式）'">
+          {{ variant === 'coach' ? '收起' : '—' }}
+        </button>
       </div>
 
       <div class="demo-body">
         <!-- 舞台：连续柔和小人 / 加载占位 / 降级 -->
         <div class="cv-box" ref="box">
-          <canvas ref="cv" v-show="state === 'ready'"></canvas>
+          <!-- 教练小窗的形象 = 「房间版小人」（白练功服 / 腰带发髻 / 飘带拖影），
+               但**不带 3D 房间场景**。时间轴仍由本组件推进（t 每帧更新），
+               CoachFigure 只负责「按当前姿态重绘一帧」。 -->
+          <CoachFigure
+            v-if="useRoomFigure"
+            v-show="state === 'ready'"
+            :idx="figureIdx"
+            :u="t"
+            :frozen="frozen"
+          />
+          <canvas v-else ref="cv" v-show="state === 'ready'"></canvas>
 
           <div v-if="state === 'loading'" class="ph">
             <div class="ph-spin"></div>
@@ -36,7 +48,12 @@
           </div>
         </div>
 
-        <template v-if="state === 'ready'">
+        <!-- 教练模式：只显示「这一式叫什么」，控制项收归指引条，卡片尽量小、不挡画面 -->
+        <div v-if="variant === 'coach'" class="coach-cap">
+          {{ coachCaption }}
+        </div>
+
+        <template v-else-if="state === 'ready'">
           <div class="prog" ref="progEl" @click="seek">
             <div class="prog-fill" :style="{ width: pct * 100 + '%' }"></div>
             <div class="prog-cap" :style="{ left: pct * 100 + '%' }"></div>
@@ -81,12 +98,43 @@
 //   语音开始 → 动画从头播；语音暂停/结束 → 停在结束姿态或回到起始（可设）。
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { getAnim, DEFAULT_POSE, POSE_KEYS, PHASE_TEXT } from '../data/demoAnim'
+import CoachFigure from './CoachFigure.vue'
 
 const props = defineProps({
   move: { type: Object, default: null },
   animKey: { type: String, default: '' },
   voiceSpeaking: { type: Boolean, default: false },
+  /** 只播一遍：播到「结束姿态」即停住并派发 done（陪练教练用） */
+  once: { type: Boolean, default: false },
+  /** 递增即重播（陪练教练的「重看示范」用） */
+  replayToken: { type: Number, default: 0 },
+  /** 版式：drawer = 原有悬浮抽屉；coach = 陪练教练的紧凑停靠卡 */
+  variant: { type: String, default: 'drawer' },
+  /** 语音同步开关（教练模式下由状态机驱动播放，置 false 关掉内部语音联动） */
+  voiceSync: { type: Boolean, default: true },
+  /** 外部控制收起/展开；null = 由组件内部自管 */
+  collapsedOverride: { type: Boolean, default: null },
+  /** 停靠态：不浮在舞台上，而是作为普通文档流元素嵌进「动作指引条」里 */
+  docked: { type: Boolean, default: false },
+  /** 冻结态：示范阶段已结束（进入跟练/宽限），立刻定在结束姿态、显示「示范完毕」。
+      用于「状态机的示范保底时长」早于动画自然结束时，避免小窗还写着「示范中…」而大条已说「请跟我做」。 */
+  frozen: { type: Boolean, default: false },
+  /** 播完不停：示范到达结束姿态时仍派发一次 done（下游据此进入跟练），但不停止，
+      接着从头循环演示，作为「用户跟练时的活参照」。
+      用于「教练与摄像头同时开」——用户边看边做，随时可能通关，示范得一直在动。 */
+  keepLooping: { type: Boolean, default: false },
+  /** 形象来源：'auto' = coach 版式自动用「房间版小人」、drawer 仍用原来的疗养风小人；
+      'room' = 强制房间版小人；'plain' = 强制原来的疗养风小人（canvas）。 */
+  figure: { type: String, default: 'auto' },
+  /** 房间版式号：应用第 i 式(0-based) 传 i+1 —— 房间版头部多一个「起势」，名称逐条对齐。 */
+  figureIdx: { type: Number, default: 0 },
 })
+
+const emit = defineEmits(['done'])
+
+/** 是否用「房间版小人」当形象（教练小窗默认用；示范抽屉保持原来的疗养风小人） */
+const useRoomFigure = computed(() =>
+  props.figure === 'room' || (props.figure === 'auto' && props.variant === 'coach'))
 
 const SPEEDS = [0.5, 0.75, 1]
 const PLACEHOLDER_MS = 300
@@ -97,12 +145,13 @@ const progEl = ref(null)
 
 const state = ref('loading')
 const playing = ref(true)
-const loop = ref(true)
+const loop = ref(!props.once)
 const speed = ref(1)
-const endMode = ref('return')   // 默认回到起始继续循环：进页即自动循环播放，无需手动点
-const syncVoice = ref(true)
+const endMode = ref(props.once ? 'hold' : 'return')   // 默认回到起始继续循环：进页即自动循环播放，无需手动点
+const syncVoice = ref(props.voiceSync)
 const collapsed = ref(false)      // 悬浮抽屉默认展开（演示模式开启即见动画）
 const photoOk = ref(true)
+let doneFired = false             // once 模式下 done 只派发一次
 
 const t = ref(0)
 const anim = ref(null)
@@ -114,12 +163,15 @@ let ro = null
 let firstLoad = true
 
 // ---- 用户设置 ----
+// once（教练示范）模式下播放行为由状态机决定，不读用户偏好，避免被历史设置改回循环
 try {
   const saved = JSON.parse(localStorage.getItem('xianyang.demo') || '{}')
-  if (SPEEDS.includes(saved.speed)) speed.value = saved.speed
-  if (typeof saved.loop === 'boolean') loop.value = saved.loop
-  if (saved.endMode === 'return' || saved.endMode === 'hold') endMode.value = saved.endMode
-  if (typeof saved.syncVoice === 'boolean') syncVoice.value = saved.syncVoice
+  if (!props.once) {
+    if (SPEEDS.includes(saved.speed)) speed.value = saved.speed
+    if (typeof saved.loop === 'boolean') loop.value = saved.loop
+    if (saved.endMode === 'return' || saved.endMode === 'hold') endMode.value = saved.endMode
+    if (typeof saved.syncVoice === 'boolean') syncVoice.value = saved.syncVoice
+  }
 } catch { /* file:// 下不可写，忽略 */ }
 
 function persist() {
@@ -141,6 +193,13 @@ const seg = computed(() => {
   return ks[i + 1] || ks[ks.length - 1]
 })
 const phaseText = computed(() => PHASE_TEXT[seg.value?.phase] || '')
+/** 教练卡底部说明：keepLooping 时动画一直循环，不能再说「示范完毕」 */
+const coachCaption = computed(() => {
+  if (state.value === 'missing') return '无动画 · 看要领'
+  if (state.value !== 'ready') return '准备中…'
+  if (props.keepLooping) return playing.value ? '循环陪练中…' : '已暂停'
+  return playing.value ? '示范中…' : '示范完毕 · 请跟我做'
+})
 const phaseMarks = computed(() => [
   { label: '起始', on: seg.value?.phase === 'start' },
   { label: '发力', on: seg.value?.phase === 'work' },
@@ -152,26 +211,72 @@ const endKeyT = computed(() => {
   return k ? k.t : dur.value * 0.5
 })
 
+/** once 模式播到哪停住：最后一个「结束姿态」关键帧（没有则整段末尾） */
+const onceEndT = computed(() => {
+  const ks = anim.value?.keys || []
+  let t = null
+  for (const k of ks) if (k.phase === 'end') t = k.t
+  return t ?? (anim.value?.dur || 1)
+})
+
+function emitDone() {
+  if (doneFired) return
+  doneFired = true
+  emit('done')
+}
+
 // ---- 切式：立即换动画 ----
 watch(() => props.animKey, () => loadAnim())
+
+/** 教练「重看示范」：外部递增 replayToken 即重播 */
+watch(() => props.replayToken, () => { if (state.value === 'ready') replay() })
+
+/** 外部控制收起/展开（教练：示范时展开、跟练时收起） */
+watch(() => props.collapsedOverride, (v) => {
+  if (v === true || v === false) collapsed.value = v
+})
+
+/** 冻结：状态机判定示范阶段结束 → 立刻定在结束姿态（不等动画自己播完），文案随之变「示范完毕」 */
+watch(() => props.frozen, (v) => {
+  if (!v || state.value !== 'ready') return
+  if (props.keepLooping) return        // 持续循环陪练时不允许定格（定格就不动了）
+  if (props.once) {
+    t.value = onceEndT.value / dur.value
+    doneFired = true          // 已由外部判定结束，不再重复派发 done
+  }
+  playing.value = false
+})
+
+/** 切到「持续循环陪练」：示范刚停在结束姿态，这里把它重新跑起来 */
+watch(() => props.keepLooping, (v) => {
+  if (!v || state.value !== 'ready') return
+  if (!playing.value) playing.value = true
+})
 
 function loadAnim() {
   photoOk.value = true
   state.value = 'loading'
   t.value = 0
   playing.value = true
+  doneFired = false
   clearTimeout(loadTimer)
   loadTimer = setTimeout(() => {
     anim.value = getAnim(props.animKey)
     state.value = anim.value ? 'ready' : 'missing'
     firstLoad = false
     measure()
+    // 加载期间就已被判为「示范结束」：直接就位到结束姿态，不抢先播一遍
+    if (props.frozen && props.once && !props.keepLooping && state.value === 'ready') {
+      t.value = onceEndT.value / dur.value
+      playing.value = false
+      doneFired = true
+    }
   }, firstLoad ? 0 : PLACEHOLDER_MS)
 }
 
 // ---- 语音同步 ----
 watch(() => props.voiceSpeaking, (sp, prev) => {
-  if (!syncVoice.value || state.value !== 'ready') return
+  if (!props.voiceSync || !syncVoice.value || state.value !== 'ready') return
   if (sp && !prev) {
     t.value = 0
     playing.value = true
@@ -187,7 +292,12 @@ function togglePlay() {
   playing.value = !playing.value
   if (playing.value && !loop.value && t.value >= 0.999) t.value = 0
 }
-function replay() { if (state.value === 'ready') { t.value = 0; playing.value = true } }
+function replay() {
+  if (state.value !== 'ready') return
+  doneFired = false
+  t.value = 0
+  playing.value = true
+}
 function setSpeed(s) { speed.value = s; persist() }
 function setLoop(v) { loop.value = v; persist() }
 
@@ -209,7 +319,21 @@ function tick(ts) {
   lastTs = ts
   if (playing.value && state.value === 'ready' && anim.value) {
     t.value += (dt * speed.value) / dur.value
-    if (t.value >= 1) {
+    if (props.once) {
+      // 教练示范：播到「结束姿态」时通知外部「示范完成，请用户跟做」
+      const endT = onceEndT.value / dur.value
+      if (t.value >= endT) {
+        emitDone()
+        if (props.keepLooping) {
+          // 「教练与摄像头同时开」：派发完 done 不停，继续循环演示当活参照。
+          // 让它播到自然末尾再回卷（而不是立刻跳回 0），避免「结束姿态 → 起始姿态」的突跳。
+          if (t.value >= 1) t.value %= 1
+        } else {
+          t.value = endT
+          playing.value = false
+        }
+      }
+    } else if (t.value >= 1) {
       if (loop.value) t.value -= 1
       else { t.value = 1; playing.value = false }
     }
@@ -469,11 +593,58 @@ onBeforeUnmount(() => {
 }
 .sync-row input { accent-color: var(--zhu); }
 
+/* ===== 陪练教练变体：紧凑停靠卡 =====
+   示范时展开、跟练时收起成小药丸，尽量不遮挡摄像头主画面。
+   停靠在舞台左上角（.stage 为 position:relative）。 */
+.demo.coach {
+  right: auto;
+  left: 8px;
+  top: 30px;
+  width: 132px;
+  background: rgba(22, 18, 14, .9);
+}
+.demo.coach .demo-head { padding: 5px 6px; gap: 4px; }
+.demo.coach .dh-title { font-size: 10.5px; letter-spacing: .5px; }
+.demo.coach .dh-phase { font-size: 9px; }
+.demo.coach .dh-btn { padding: 1px 6px; font-size: 10px; }
+.demo.coach .demo-body { padding: 5px; gap: 4px; }
+.demo.coach .cv-box { height: 148px; border-radius: 8px; }
+.demo.coach .ph p { font-size: 9.5px; }
+.demo.coach .coach-cap {
+  font-size: 9.5px; text-align: center; color: var(--jin);
+  font-family: var(--font-ui); letter-spacing: .5px;
+}
+.demo.coach.collapsed { width: auto; }
+
+/* 停靠态：嵌进「动作指引条」的教练小窗（文档流内，绝不遮挡摄像头与设计稿 HUD） */
+.demo.coach.docked {
+  position: static;
+  width: 96px;
+  flex: 0 0 auto;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
+  backdrop-filter: none;
+}
+.demo.coach.docked .demo-body { padding: 0; gap: 3px; }
+.demo.coach.docked .cv-box {
+  height: 108px;
+  background: rgba(10, 8, 6, .38);
+  border: 1px solid rgba(232, 224, 208, .14);
+}
+
 /* 窄屏：抽屉改为底部升起，宽度略收，避开摄像头主画面上半 */
 @media (max-width: 980px) {
   .demo {
     right: 8px; left: 8px; top: auto; bottom: 118px; width: auto;
   }
   .cv-box { height: 260px; }
+
+  /* 教练卡即使窄屏也保持「左上角小卡」，不能变成底部大抽屉挡住跟练 */
+  .demo.coach {
+    left: 8px; right: auto; top: 30px; bottom: auto; width: 120px;
+  }
+  .demo.coach .cv-box { height: 132px; }
 }
 </style>

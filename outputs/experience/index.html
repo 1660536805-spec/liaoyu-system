@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>弦养 · 完整体验</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23FBF3E3'/%3E%3Ctext x='16' y='24' font-size='21' text-anchor='middle' fill='%23B0552E'%3E弦%3C/text%3E%3C/svg%3E" />
+<style>
+  :root{
+    --paper:#FBF3E3; --paper2:#FDF9EF; --ink:#2E2822; --sub:#7A6A5C;
+    --zhe:#B0552E; --zhe2:#CE7B48; --qing:#6E8F7C; --jin:#C9A97E; --line:#E6D9C2;
+    --serif:"Songti SC","STSong","SimSun",serif;
+    --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #FDF6E7 0%, transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, #F3E9D4 0%, transparent 55%),
+      var(--paper);
+    color:var(--ink); font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px; margin:0 auto; padding:56px 28px 90px}
+
+  /* ---- hero ---- */
+  .top{display:flex; align-items:center; gap:14px; margin-bottom:34px}
+  .seal{width:52px;height:52px;border-radius:12px;background:linear-gradient(160deg,#C4613A,#9C4526);
+    display:grid;place-items:center;color:#FBF3E3;font-family:var(--serif);font-size:30px;
+    box-shadow:0 6px 16px rgba(176,85,46,.28)}
+  .brand{font-family:var(--serif);font-size:19px;letter-spacing:.32em;color:var(--zhe);font-weight:700}
+  .brand small{display:block;font-family:var(--sans);font-size:12px;letter-spacing:.18em;color:var(--sub);font-weight:400;margin-top:3px}
+
+  h1{font-family:var(--serif);font-size:52px;line-height:1.16;margin:0 0 14px;letter-spacing:.04em}
+  h1 em{font-style:normal;color:var(--zhe)}
+  .lead{font-size:17px;line-height:1.9;color:var(--sub);max-width:620px;margin:0 0 30px}
+  .lead b{color:var(--ink)}
+
+  .cta{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:20px}
+  a.btn{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-size:16px;font-weight:600;
+    padding:15px 30px;border-radius:999px;transition:.18s transform,.18s box-shadow}
+  a.primary{background:linear-gradient(160deg,#C4613A,#A64A28);color:#FDF6EA;
+    box-shadow:0 10px 24px rgba(176,85,46,.30)}
+  a.primary:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(176,85,46,.38)}
+  a.ghost{background:var(--paper2);color:var(--zhe);border:1.5px solid var(--line)}
+  a.ghost:hover{border-color:var(--jin);transform:translateY(-2px)}
+  a.btn .arw{font-size:18px}
+
+  .note{margin:0 0 46px;padding:14px 18px;border-left:3px solid var(--qing);background:#F6F1E6;
+    border-radius:0 12px 12px 0;font-size:13.5px;line-height:1.85;color:var(--sub)}
+  .note b{color:var(--qing)}
+  .note code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+    background:#EFE7D6;color:#8A5A34;padding:2px 7px;border-radius:6px}
+
+  /* ---- path ---- */
+  .kicker{display:flex;align-items:center;gap:12px;margin:0 0 22px}
+  .kicker .ln{height:1px;flex:1;background:var(--line)}
+  .kicker h2{font-family:var(--serif);font-size:24px;margin:0;letter-spacing:.06em;font-weight:700}
+  .kicker .pct{font-size:12.5px;color:var(--sub);letter-spacing:.14em}
+
+  .rail{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;align-items:end}
+  .step{display:flex;flex-direction:column;align-items:center;text-align:center;text-decoration:none;color:inherit}
+  .step .ph{width:100%;border-radius:16px;overflow:hidden;background:#EFE6D3;border:1px solid var(--line);
+    box-shadow:0 8px 20px rgba(80,60,40,.10);transition:.2s transform,.2s box-shadow}
+  .step:hover .ph{transform:translateY(-4px);box-shadow:0 16px 30px rgba(80,60,40,.18)}
+  .step .ph img{display:block;width:100%}
+  .step .no{margin-top:13px;font-size:11px;letter-spacing:.2em;color:var(--jin);font-weight:700}
+  .step .nm{margin-top:5px;font-family:var(--serif);font-size:16px;font-weight:700}
+  .step .ds{margin-top:5px;font-size:12px;line-height:1.6;color:var(--sub)}
+  .step .arrow{position:relative}
+  .step::after{content:"";}
+
+  .foot{margin-top:52px;padding-top:26px;border-top:1px dashed var(--line);
+    display:flex;flex-wrap:wrap;gap:26px;font-size:13px;color:var(--sub)}
+  .foot .kv{display:flex;gap:8px;align-items:baseline}
+  .foot .kv b{color:var(--zhe);font-family:var(--serif);font-size:15px}
+  @media (max-width:900px){
+    .rail{grid-template-columns:repeat(3,1fr)}
+    h1{font-size:40px}
+  }
+  @media (max-width:560px){
+    .rail{grid-template-columns:repeat(2,1fr)}
+    .wrap{padding:36px 18px 70px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="seal">弦</div>
+    <div class="brand">弦养 XIANYANG<small>以身为琴 · 以动为弦</small></div>
+  </div>
+
+  <h1>完整体验：<em>从问诊到跟练</em></h1>
+  <p class="lead">
+    这是「弦养」的<strong>完整产品链路</strong>——不是零散的界面稿。点开就能一路走通：
+    节气问诊 · 今日推荐 · 练习准备 · <strong>带教练的实时跟练</strong>（摄像头姿态识别 + 八段锦判定）。
+  </p>
+
+  <div class="cta">
+    <a class="btn primary" href="/">开始完整体验 <span class="arw">→</span></a>
+    <a class="btn ghost" href="/s4/#/train?stage=point&amp;mode=full&amp;style=baduanjin&amp;tone=gong">直接进真跟练（含教练）</a>
+  </div>
+
+  <div class="note">
+    <b>摄像头：</b>本地 <code>localhost / 127.0.0.1</code> 可直接授权使用；手机想体验请用 HTTPS 链接，
+    或在同一 Wi-Fi 下用电脑局域网地址打开。「教练小窗」与摄像头<strong>同时开启</strong>，它循环示范当前式，
+    你做到位就自动进入下一式，没做到位就一直陪你练这一式。
+  </div>
+
+  <div class="kicker">
+    <h2>体验路径</h2><span class="ln"></span><span class="pct">6 步 · 约 3 分钟走完</span>
+  </div>
+
+  <div class="rail">
+    <a class="step" href="/">
+      <span class="ph"><img src="J-01-加载页.png" alt="加载页"></span>
+      <span class="no">01</span><span class="nm">加载页</span>
+      <span class="ds">点「进入弦养」</span>
+    </a>
+    <a class="step" href="/">
+      <span class="ph"><img src="J-02-问诊第2步.png" alt="问诊"></span>
+      <span class="no">02</span><span class="nm">体质问诊</span>
+      <span class="ds">7 步，选出最近的不适</span>
+    </a>
+    <a class="step" href="/">
+      <span class="ph"><img src="J-04-主界面.png" alt="今日推荐"></span>
+      <span class="no">03</span><span class="nm">今日推荐</span>
+      <span class="ds">霜降 · 推荐八段锦</span>
+    </a>
+    <a class="step" href="/?screen=intro">
+      <span class="ph"><img src="P-05-主壳练习屏.png" alt="练习准备"></span>
+      <span class="no">04</span><span class="nm">练习准备</span>
+      <span class="ds">选模式 / 阶段 · 开始动作预览</span>
+    </a>
+    <a class="step" href="/s4/#/train?stage=point&amp;mode=full&amp;style=baduanjin&amp;tone=gong">
+      <span class="ph"><img src="P-06-真跟练页.png" alt="真跟练"></span>
+      <span class="no">05</span><span class="nm">真跟练</span>
+      <span class="ds">教练小窗 + 摄像头识别</span>
+    </a>
+    <a class="step" href="/?screen=profile">
+      <span class="ph"><img src="J-06-我的.png" alt="我的"></span>
+      <span class="no">06</span><span class="nm">我的</span>
+      <span class="ds">阶段进度 · 身体数据</span>
+    </a>
+  </div>
+
+  <div class="foot">
+    <span class="kv"><b>8</b> 式八段锦 · 宫调</span>
+    <span class="kv"><b>2</b> 种练习模式（全套 8 式 / 招牌 3 式）</span>
+    <span class="kv"><b>实时</b> 姿态判定（MediaPipe，本地推理）</span>
+    <span class="kv"><b>教练</b> 循环示范 · 通关才进下一式</span>
+  </div>
+
+</div>
+</body>
+</html>

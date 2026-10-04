@@ -79,8 +79,8 @@ function saveBodyState(){try{localStorage.setItem('xy-body',JSON.stringify({body
 function loadBodyState(){try{var x=JSON.parse(localStorage.getItem('xy-body')||'null');if(!x||typeof x!=='object'||Array.isArray(x))return;if(x.body&&typeof x.body==='object'&&!Array.isArray(x.body))Object.keys(BODY_LIMITS).forEach(function(k){state.body[k]=bodyValue(k,x.body[k])});Object.keys(BODY_OPTIONS).forEach(function(k){if(Array.isArray(x[k]))state[k]=bodyChoices(k,x[k])});if(typeof x.recipe==='boolean')state.recipe=x.recipe}catch(_){} }
 
 /* ---------- 加载页 ---------- */
-function pgLoading(){return '<main class="sc center" style="padding-bottom:0;position:relative;min-height:100dvh;display:flex;flex-direction:column">'
- +'<div style="display:flex;justify-content:flex-end;padding-top:1.6rem"><button class="tbtn" style="background:rgba(253,250,242,.9);border:1px solid var(--line);border-radius:2rem;padding:.7rem 1.6rem" data-a="load-enter">示例 '+ic('chev','width:1.2rem;height:1.2rem')+'</button></div>'
+function pgLoading(){return '<main class="sc center loading-screen" style="padding-bottom:0;position:relative;min-height:100dvh;display:flex;flex-direction:column">' +'<div class="load-ambience" aria-hidden="true"><span class="load-cloud cloud-a"></span><span class="load-cloud cloud-b"></span><span class="load-note note-a">♪</span><span class="load-note note-b">♫</span><span class="load-petal petal-a">✿</span><span class="load-petal petal-b">✿</span></div>'
+ +'<div class="load-topbar" style="display:flex;justify-content:flex-end;padding-top:1.6rem"><button class="tbtn" style="background:rgba(253,250,242,.9);border:1px solid var(--line);border-radius:2rem;padding:.7rem 1.6rem" data-a="load-enter">示例 '+ic('chev','width:1.2rem;height:1.2rem')+'</button></div>'
  +'<div class="load-hero">'
  +'<div style="display:flex;justify-content:center">'+brand(8.2)+'</div>'
  +'<div class="dashline t-sub" style="margin-top:1.8rem;width:26rem">以身为琴，以动为弦</div>'

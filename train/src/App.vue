@@ -43,5 +43,11 @@ import AppTab from './components/AppTab.vue'
 .app:has(.train) {
   max-width: 100% !important;
   width: 100% !important;
+  /* 【跟练页不做整体放大】上面两条 zoom 会把 100dvh 的盒子再放大 1.32/1.42 倍，
+     于是整页比屏幕高出约 40%；而 body 是 overflow:hidden，多出来的部分既裁掉又滚不动
+     ——底部「自由练习 / 教练指引 开·关 / 跳过本式」这排按钮在桌面端直接点不到。
+     跟练页的排版本来就是按 100dvh 精算的（底边只剩 ~12px 余量），zoom:1 才是一屏正好。
+     其余页面照旧保留桌面放大。 */
+  zoom: 1;
 }
 </style>
