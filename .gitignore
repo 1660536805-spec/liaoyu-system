@@ -19,3 +19,22 @@ outputs/复刻截图/
 outputs/复刻截图v2/
 outputs/ui-compare/out/
 outputs/ui-compare/evidence/
+
+# ---- dist 内「运行时不读」的副本与废弃原型 ----
+# s4 构建(vite --outDir=../dist/s4)会把 train/public/* 复制到 dist/s4/，
+# 但应用一律请求根路径(/wasm、/models、/photos)，故 /s4/ 下的副本无人引用、不入库。
+dist/s4/wasm/
+dist/s4/models/
+dist/s4/photos/
+dist/s4/xianyang-ca.crt
+dist/s4/setup-cert.html
+dist/s4/stability.html
+dist/s4/fov-probe.html
+# 老版原型，已被 app.js / app.css 取代，全仓零引用
+dist/shell.js
+dist/shell.css
+dist/flow.js
+dist/flow.css
+
+# ---- 文档生成流水线的工作目录（tencent-docx 残留）----
+output/
