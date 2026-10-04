@@ -576,3 +576,49 @@ main:focus{outline:none}
 .sec-h .sec-note{font-weight:400}
 .vf-tx{display:block;align-content:center}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ==================== 浮层（设置 / 通知 / 帮助 / 详情 / 分享） ====================
+   只新增类，不改任何既有选择器；沿用产品既有色板与 --serif/--sans。 */
+body.xs-lock{overflow:hidden}
+.xs{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+.xs.show{pointer-events:auto}
+.xs-mask{position:absolute;inset:0;background:rgba(58,40,24,.42);opacity:0;transition:opacity .24s}
+.xs.show .xs-mask{opacity:1}
+.xs-panel{position:relative;width:100%;max-width:47rem;max-height:86dvh;display:flex;flex-direction:column;overflow:hidden;
+  background:var(--cream-2);border-radius:2rem 2rem 0 0;box-shadow:0 -1rem 3rem rgba(90,60,30,.22);
+  transform:translateY(102%);transition:transform .3s cubic-bezier(.2,.8,.25,1)}
+.xs.show .xs-panel{transform:translateY(0)}
+.xs-h{display:flex;align-items:center;gap:1rem;padding:1.3rem 1.6rem;border-bottom:1px solid var(--line);flex:none;
+  background:rgba(253,250,242,.97)}
+.xs-h b{flex:1;font-family:var(--serif);font-size:1.9rem;font-weight:700;color:var(--ink);letter-spacing:.06em}
+.xs-x{width:3.2rem;height:3.2rem;border-radius:50%;border:1px solid var(--line);background:var(--cream);
+  display:flex;align-items:center;justify-content:center;color:var(--brown);flex:none}
+.xs-x svg{width:1.7rem;height:1.7rem}
+.xs-b{padding:1.4rem 1.8rem 3rem;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.xs-row{display:flex;align-items:center;gap:1.2rem;padding:1.2rem 0;border-bottom:1px solid var(--line)}
+.xs-row:last-of-type{border-bottom:0}
+.xs-row .xs-lb,.xs-lb{flex:1;min-width:0}
+.xs-lb b{display:block;font-size:1.5rem;color:var(--brown)}
+.xs-lb span{display:block;font-size:1.15rem;color:var(--muted);line-height:1.6;margin-top:.3rem}
+.xs-range{width:14rem;flex:none;accent-color:var(--green)}
+.xs-item{padding:1.2rem 0;border-bottom:1px dashed var(--line)}
+.xs-item:last-child{border-bottom:0}
+.xs-item b{display:block;font-size:1.5rem;color:var(--brown)}
+.xs-item p{font-size:1.28rem;color:var(--text);line-height:1.85;margin-top:.5rem}
+.xs-li{position:relative;padding:.9rem 0 .9rem 2.4rem;font-size:1.28rem;color:var(--text);line-height:1.85}
+.xs-li::before{content:"";position:absolute;left:.5rem;top:1.7rem;width:.7rem;height:.7rem;border-radius:50%;background:var(--green)}
+.xs-note{font-size:1.18rem;color:var(--muted);line-height:1.85;background:var(--cream-3);
+  border:1px solid var(--line);border-radius:1rem;padding:1.1rem 1.3rem;margin-bottom:1.2rem}
+.xs-sub{font-size:1.3rem;font-weight:700;color:var(--brown);letter-spacing:.08em;margin:1.4rem 0 .2rem}
+.xs-shot{width:100%;height:auto;border-radius:1.2rem;border:1px solid var(--line);box-shadow:var(--shadow)}
+
+/* 新解锁交互的指针与反馈（纯增量） */
+.breath-row[data-a]{cursor:pointer}
+.breath-panel .strings [data-a]{cursor:pointer}
+.holdrow .pill[data-a]{cursor:pointer}
+.sec-h[data-a]{cursor:pointer}
+.bstep.on .c{background:rgba(214,232,216,.95);border-color:var(--green);box-shadow:0 0 0 .3rem rgba(94,124,107,.14)}
+.bstep.on b{color:var(--terra)}
+.holdrow .pill.on{background:var(--terra);border-color:var(--terra);color:#FDF9EF;box-shadow:0 .3rem .9rem rgba(176,85,46,.3)}
+.holdrow .pill.on b{color:#FDF9EF}
+.breath-panel .strings i.plucked,.breath-panel .strings em.plucked{filter:brightness(1.9)}
