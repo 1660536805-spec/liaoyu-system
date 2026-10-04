@@ -37,7 +37,7 @@ const svgEl = ref(null)
 let render = null
 
 /* ---------------------------------------------------------------- 房间版小人（原文） */
-  const TJ={UA:50,FA:48};
+  const TJ={UA:43.7,FA:38.3};   // 臂长 82 = (VB.upperArm+VB.foreArm)×VS = 60×1.367：必须与姿势数据同尺度。旧值 50/48（=98）比手离肩的距离(50~77)长一大截，肘会被永久折死（“胳膊奇怪”的根因）。
   const tjLerp=lerp, tjEase=ease;
   const tjAdd=add, tjP=p=>p[0].toFixed(1)+' '+p[1].toFixed(1), tjMixPt=mixP;
   const tjClamp=(v,a,b)=>v<a?a:v>b?b:v;

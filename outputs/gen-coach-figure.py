@@ -24,7 +24,8 @@ def seg(a, b):
     return [ln.rstrip('\r') for ln in lines[a - 1:b]]
 
 
-L_TJ = find(r'^const TJ=\{UA:50,FA:48\};')
+# 用宽松正则定位 TJ 行：数值会随“臂长与姿势数据对齐”而改，别再写死具体数字
+L_TJ = find(r'^const TJ=\{')
 L_FIG = find(r'^function tjFigure\(svg\)\{')
 L_FIG_END = find(r'^ return render;') + 1   # 含结尾的 }
 
