@@ -1,0 +1,379 @@
+/* ============================================================================
+   弦养 · 桌面版布局层（desktop.css）
+   ----------------------------------------------------------------------------
+   定位：**纯新增**。整份文件除极少数中性辅助类外，全部包在
+         @media (min-width: 960px) 里 —— 手机档（<960px）不参与渲染，
+         与 app.css 既有选择器零冲突，因此手机端的渲染后 DOM / 像素必须逐字符不变。
+
+   与 app.css 的关系
+     · app.css 是「941×1672 设计稿 → 470pt 手机列」的 1:1 复刻，rem 基准 = 设计稿 10pt。
+       它把整个应用锁在 .phone{max-width:47rem} 的一根竖列里。
+     · 本文件在桌面档做三件事：
+         ① 开壳：body 变成 [深色侧栏 224/248px] + [内容列] 的网格；
+         ② 放大设计系统：rem 10px → 11px / 12px（全站等比放大，间距字号同时变宽松）；
+         ③ 逐屏重排：用 #app[data-screen="X"] 把 9 屏各自铺成两列，
+            全出血块（hero / stage / 横幅）收成圆角面板。
+     · 「两列」不是靠 nth-child 硬凑行高，而是由 desktop.js 在渲染后把子节点
+       分装进 .dt-col 包装层（见 desktop.js 的 LAYOUT 表）。
+       desktop.js 缺席时本文件自然退化为「单列 + 放大」，不会散架。
+
+   断点
+     <960px        手机 / 竖屏平板 —— 本文件完全不介入
+     ≥960px        桌面档（侧栏 224px，内容列 ≤1100px）
+     ≥1280px       宽屏档（侧栏 248px，内容列 ≤1200px）
+     ≥1700px       大屏档（内容列 ≤1340px，rem 提到 12px）
+     ≥1920px 且高 ≤900px  （1080p 常见「矮窗口」）单独压一档内容列，避免一屏只看到半张卡
+   ============================================================================ */
+
+@media (min-width: 960px) {
+  html { font-size: 11px; }               /* 必须在 app.css 的 470px 媒体查询之后 */
+
+  :root {
+    --dt-rail: 224px;                     /* 侧栏宽 */
+    --dt-max: 1100px;                     /* 内容列最大宽 */
+    --dt-pad: clamp(20px, 2.1vw, 34px);   /* 内容列左右内边距 */
+    --dt-gap: 2.4rem;                     /* 列间距 / 卡间距 */
+    --dt-side-bg: linear-gradient(180deg, #2c2219 0%, #1d1610 100%);
+    --dt-side-fg: #e6d8c0;
+    --dt-side-dim: #9c8b74;
+    --dt-side-hi: #c9a063;
+  }
+
+  /* ---------- ① 开壳：body 网格 ---------- */
+  body.dt-on {
+    display: grid;
+    grid-template-columns: var(--dt-rail) minmax(0, 1fr);
+    align-items: start;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+  /* 侧栏不在场时（desktop.js 未加载 / 未到断点）绝不隐藏底部导航 */
+  body.dt-on .nav { display: none; }
+
+  /* 侧栏由 desktop.js 注入到 <body>，位于 #app 之前 */
+  .dt-side {
+    grid-column: 1;
+    align-self: start;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    padding: 2.6rem 1.4rem 2rem;
+    background: var(--dt-side-bg);
+    color: var(--dt-side-fg);
+    box-shadow: 1px 0 0 rgba(201, 160, 99, .16), 12px 0 40px rgba(40, 26, 12, .18);
+    z-index: 30;
+  }
+
+  /* ---------- 侧栏：品牌 ---------- */
+  .dt-brand { display: flex; align-items: center; gap: 1.1rem; padding: 0 .6rem 2.4rem; }
+  .dt-brand .glyph {
+    width: 4.4rem; height: 4.4rem; flex: none; border-radius: 1.1rem;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-size: 2.4rem; font-weight: 700;
+    color: #fbeede; background: #b0552e;
+    box-shadow: 0 .4rem 1rem rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 235, 210, .35);
+  }
+  .dt-brand b {
+    display: block; font-family: var(--serif); font-size: 2.5rem; font-weight: 700;
+    letter-spacing: .16em; color: #f6ead6; line-height: 1.1;
+  }
+  .dt-brand i {
+    display: block; font-style: normal; font-size: 1rem; letter-spacing: .34em;
+    color: var(--dt-side-dim); margin-top: .3rem;
+  }
+
+  /* ---------- 侧栏：主导航 ---------- */
+  .dt-nav { display: flex; flex-direction: column; gap: .5rem; }
+  .dt-nav button {
+    display: flex; align-items: center; gap: 1.2rem; width: 100%;
+    min-height: 4.6rem; padding: 0 1.3rem; border-radius: 1.2rem;
+    font-size: 1.45rem; letter-spacing: .06em; color: var(--dt-side-dim);
+    background: none; transition: background .16s, color .16s;
+  }
+  .dt-nav button svg { width: 2.1rem; height: 2.1rem; flex: none; }
+  .dt-nav button:hover { background: rgba(255, 245, 230, .07); color: var(--dt-side-fg); }
+  .dt-nav button.on {
+    color: #fff3e2;
+    background: linear-gradient(180deg, rgba(176, 85, 46, .95), rgba(143, 63, 31, .95));
+    box-shadow: 0 .4rem 1.1rem rgba(0, 0, 0, .32), inset 0 1px 0 rgba(255, 235, 210, .22);
+  }
+  .dt-nav button.on svg { color: #ffe6cd; }
+
+  /* 「开始练」在侧栏里做成一个强调块 */
+  .dt-nav .dt-cta {
+    margin: .8rem 0 .4rem; min-height: 5.2rem; color: #fdf1e2;
+    background: linear-gradient(180deg, rgba(255, 245, 230, .1), rgba(255, 245, 230, .04));
+    border: 1px solid rgba(201, 160, 99, .38);
+  }
+  .dt-nav .dt-cta:hover { background: rgba(201, 160, 99, .18); }
+  .dt-nav .dt-cta .yin {
+    width: 2.6rem; height: 2.6rem; flex: none; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #5a5148, #241c14 70%);
+    display: flex; align-items: center; justify-content: center; color: #f3e9d5;
+  }
+  .dt-nav .dt-cta .yin svg { width: 1.7rem; height: 1.7rem; }
+
+  /* ---------- 侧栏：底部工具区 ---------- */
+  .dt-side-foot { margin-top: auto; padding-top: 2rem; display: flex; flex-direction: column; gap: .3rem; }
+  .dt-side-foot::before { content: ""; height: 1px; background: rgba(201, 160, 99, .2); margin: 0 .6rem 1.4rem; }
+  .dt-side-foot button {
+    display: flex; align-items: center; gap: 1rem; width: 100%;
+    min-height: 3.8rem; padding: 0 1.3rem; border-radius: 1rem;
+    font-size: 1.25rem; color: var(--dt-side-dim); text-align: left;
+  }
+  .dt-side-foot button svg { width: 1.7rem; height: 1.7rem; flex: none; }
+  .dt-side-foot button:hover { background: rgba(255, 245, 230, .07); color: var(--dt-side-fg); }
+  .dt-side-foot .ver { cursor: default; color: #7d6e5b; font-size: 1.1rem; letter-spacing: .08em; }
+  .dt-side-foot .ver:hover { background: none; }
+
+  /* ---------- ② 内容列 ---------- */
+  #app.phone {
+    grid-column: 2;
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: visible;                 /* 桌面用整页滚动，别在列内再开一层 */
+    background-image: url("/art/cloud.jpg");
+    background-size: 38rem;
+    background-attachment: local;
+  }
+  #app.phone > main {
+    padding-left: var(--dt-pad);
+    padding-right: var(--dt-pad);
+    padding-top: 2.6rem;                 /* 桌面不再贴顶：让卡片/横幅两侧都有留白 */
+    max-width: var(--dt-max);
+    margin-inline: auto;
+    width: 100%;
+  }
+  /* 桌面不再需要给底部导航留位 */
+  .navpad { padding-bottom: 3rem; }
+
+  /* 全出血块收成圆角面板：原来靠 -1.55rem 贴边，桌面内容列有内边距，贴边会溢出 */
+  .hero, .a-hero, .intro-hero, .bd-hero { margin-left: 0 !important; margin-right: 0 !important; border-radius: 2rem; overflow: hidden; }
+  .stage { margin-left: 0 !important; margin-right: 0 !important; border-radius: 2rem; overflow: hidden; }
+  .done-hbg { right: 0 !important; }
+
+  /* ---------- ③ 逐屏两列（.dt-col 由 desktop.js 注入） ---------- */
+  #app[data-screen="question"] > main,
+  #app[data-screen="audio"] > main,
+  #app[data-screen="home"] > main,
+  #app[data-screen="intro"] > main,
+  #app[data-screen="done"] > main,
+  #app[data-screen="profile"] > main,
+  #app[data-screen="body"] > main,
+  #app[data-screen="inquiry"] > main {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+    align-content: start;
+    column-gap: var(--dt-gap);
+    row-gap: var(--dt-gap);
+  }
+  .dt-col { display: flex; flex-direction: column; gap: var(--dt-gap); min-width: 0; }
+  .dt-col > * { margin-top: 0 !important; }        /* 列内卡片的 margin-top 交给 gap 统一管 */
+  .dt-col > .hero,
+  .dt-col > .intro-hero,
+  .dt-col > .bd-hero,
+  .dt-col > .a-hero { flex: 1 1 auto; }            /* 海报列拉满，与邻列等高 */
+
+  /* --- 问答页：左「进度 + 题干」，右「六宫选项」 --- */
+  #app[data-screen="question"] > main { grid-template-columns: minmax(240px, .78fr) minmax(0, 1.22fr); }
+  #app[data-screen="question"] > main > .top { grid-column: 1 / -1; }
+  #app[data-screen="question"] > main > div:last-child { grid-column: 2; margin-top: .6rem; }
+  #app[data-screen="question"] .qgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem; }
+  #app[data-screen="question"] .qcard img { aspect-ratio: 4 / 3; }
+  #app[data-screen="question"] .dt-col > .center:first-child { margin-top: 0 !important; }
+
+  /* --- 音疗页：顶部横幅通栏；左「播放器 + 曲单」，右「调养方向 + 呼吸」 --- */
+  #app[data-screen="audio"] > main { grid-template-columns: minmax(0, 1.04fr) minmax(0, .96fr); }
+  #app[data-screen="audio"] > main > .a-hero,
+  #app[data-screen="audio"] > main > div:not(.dt-col),
+  #app[data-screen="audio"] > main > p { grid-column: 1 / -1; }
+  #app[data-screen="audio"] .a-hero { height: 24rem; }
+  #app[data-screen="audio"] .organ-row { gap: 1rem; }
+  #app[data-screen="audio"] .track + .track { margin-top: .4rem; }
+
+  /* --- 首页：左「今日节气海报」，右「推荐 + 模式 + 引文」 --- */
+  #app[data-screen="home"] > main { grid-template-columns: minmax(0, 1.02fr) minmax(0, .98fr); }
+  #app[data-screen="home"] .hero { height: auto; min-height: 46rem; }
+  #app[data-screen="home"] .disc-wrap { margin-top: 0; }
+  #app[data-screen="home"] .modebar { margin-top: 0; }
+  #app[data-screen="home"] .quotebar { margin-top: 0; }
+
+  /* --- 练习准备页：左「海报 + 环境取景」，右「模式 + 阶段」；底部按钮通栏 --- */
+  #app[data-screen="intro"] > main { grid-template-columns: minmax(0, .96fr) minmax(0, 1.04fr); }
+  #app[data-screen="intro"] > main > .top,
+  #app[data-screen="intro"] > main > .cam-row { grid-column: 1 / -1; }
+  #app[data-screen="intro"] .intro-hero { height: auto; min-height: 34rem; }
+  #app[data-screen="intro"] .intro-hero img.fig { height: 31rem; right: 1.2rem; }
+  #app[data-screen="intro"] .cam-row { margin-top: 0; }
+  #app[data-screen="intro"] .cam-row .btn { min-height: 5.6rem; }
+
+  /* --- 结束页：左「分数 + 琴谱」，右「反馈 + 食养 + 操作」 --- */
+  #app[data-screen="done"] > main { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  #app[data-screen="done"] > main > .top { grid-column: 1 / -1; }
+  #app[data-screen="done"] .done-hbg { width: 34rem; height: 30rem; }
+  #app[data-screen="done"] .fb-grid { grid-template-columns: 1fr 1fr; }
+  #app[data-screen="done"] .done-btns { margin-top: 0; }
+  #app[data-screen="done"] .fret { padding-top: 2rem; padding-bottom: 1.6rem; }
+
+  /* --- 我的页：左「身份 + 身体数据」，右「历史 / 阶段 + 设置」 --- */
+  #app[data-screen="profile"] > main { grid-template-columns: minmax(0, 1.06fr) minmax(0, .94fr); }
+  #app[data-screen="profile"] > main > .top { grid-column: 1 / -1; }
+  #app[data-screen="profile"] .halfgrid { margin-top: 0; }
+  #app[data-screen="profile"] .setlist { margin-top: 0; }
+  /* 三项指标 + 「查看详情」按钮：桌面用网格，按钮列按内容自适应，不被 flex 挤扁 */
+  #app[data-screen="profile"] .bstats {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    align-items: center; column-gap: .4rem;
+  }
+  #app[data-screen="profile"] .bstats > div:last-child { border-left: 1px solid var(--line); padding-left: 1.4rem; }
+  #app[data-screen="profile"] .bstats > div:last-child .btn { white-space: nowrap; padding: 0 1.8rem; }
+  #app[data-screen="profile"] .bstat .v { font-size: 2.4rem; }
+
+  /* --- 身体数据页：左「海报 + 基础信息 + 损伤」，右「目标 + 饮食 + 食谱 + 保存」 --- */
+  #app[data-screen="body"] > main { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  #app[data-screen="body"] > main > .top { grid-column: 1 / -1; }
+  #app[data-screen="body"] .bd-hero { height: auto; min-height: 22rem; }
+  #app[data-screen="body"] .chips { margin-top: 1.2rem; }
+  #app[data-screen="body"] .save-wrap { margin-top: 0; }
+
+  /* --- 问询页（智能体对话）：左「页头 + 说明」，右「对话卡 + 声明」 --- */
+  #app[data-screen="inquiry"] > main { grid-template-columns: minmax(0, .62fr) minmax(0, 1.38fr); }
+  #app[data-screen="inquiry"] .ask-head { position: sticky; top: 3rem; align-self: start; }
+  /* 左列只有 ~230–330px，「问询 · 弦养顾问 + 智能体徽标」一行放不下：
+     让整行折行、徽标不拆字，比被 flex 挤成两行窄条好看 */
+  #app[data-screen="inquiry"] .ask-brand { flex-wrap: wrap; row-gap: .7rem; }
+  #app[data-screen="inquiry"] .ask-badge { white-space: nowrap; }
+  #app[data-screen="inquiry"] .ask-sub { max-width: 34rem; }
+  #app[data-screen="inquiry"] .ask-card { margin-top: 0; }
+  #app[data-screen="inquiry"] .ask-list { min-height: 34rem; max-height: 46vh; }
+  #app[data-screen="inquiry"] .ask-note { margin-top: 0; }
+  #app[data-screen="inquiry"] .ask-b { max-width: 74%; }
+  #app[data-screen="inquiry"] .ask-chips { gap: 1rem; }
+
+  /* --- 加载页：左「品牌 + 加载 + 进入」，右「古琴大图」 --- */
+  /* --- 加载页：左「品牌 + 加载 + 进入」留白，右「古琴大图」整整半幅出血 ---
+     手机档这张图是贴在底边的一条满幅横带（app.css: .load-guqin{position:absolute;inset:auto 0 0}）。
+     桌面把它扶正成右半幅通高竖版 —— 这是最能吃掉宽视口、也最像"落地页"的排法。
+     代价是照片自带底色会露出一道硬竖缝，所以左侧用一段长羽化把它化进宣纸底。 */
+  #app[data-screen="loading"] > main.loading-screen {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+    grid-template-rows: auto 1fr;
+    align-items: center;
+    column-gap: 0;
+    padding-top: 0;
+    padding-right: 0;                    /* 让右半幅图出血到视口右缘 */
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  #app[data-screen="loading"] .load-ambience { display: none; }
+  #app[data-screen="loading"] .load-topbar {
+    grid-area: 1 / 1 / 2 / 3; padding-top: 2.6rem; padding-right: var(--dt-pad);
+    z-index: 3;                          /* 「示例」按钮要浮在图上 */
+  }
+  #app[data-screen="loading"] .load-hero { grid-area: 2 / 1 / 3 / 2; padding-top: 0; padding-right: var(--dt-gap); }
+  #app[data-screen="loading"] .load-guqin {
+    grid-area: 1 / 2 / 3 / 3; position: relative !important;
+    left: auto !important; right: auto !important; top: auto !important; bottom: auto !important;
+    align-self: stretch; justify-self: stretch; margin: 0;
+    width: 100%; height: 100%; overflow: hidden;
+  }
+  #app[data-screen="loading"] .load-guqin img {
+    display: block; width: 100% !important; height: 100% !important; max-width: none !important;
+    object-fit: cover; object-position: 56% 64%;
+    /* 只羽化左侧这一条接缝；上/右/下都出血到视口边缘，不需要收边。
+       注：这里**不用** mix-blend-mode —— 实测在 .loading-screen{isolation:isolate} 下
+       叠底背景是透明的、等于没生效，留着只会让人误以为它在起作用。 */
+    -webkit-mask-image: linear-gradient(92deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .25) 8%, rgba(0, 0, 0, .7) 17%, #000 30%);
+    mask-image: linear-gradient(92deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .25) 8%, rgba(0, 0, 0, .7) 17%, #000 30%);
+  }
+
+  /* --- 跟练页：舞台居中放大，工具条与教练面板贴舞台两侧，控制区居中 --- */
+  #app[data-screen="practice"] .stage { height: clamp(440px, 62vh, 640px); margin-top: 2rem; }
+  #app[data-screen="practice"] .stage img.fig,
+  #app[data-screen="practice"] .stage .skel { height: calc(100% - 2.6rem); }
+  #app[data-screen="practice"] .stage img.fig { bottom: 1.2rem; }
+  #app[data-screen="practice"] .side { left: 2rem; top: 50%; transform: translateY(-50%); }
+  #app[data-screen="practice"] .breath-panel { right: 2rem; top: 50%; transform: translateY(-50%); }
+  #app[data-screen="practice"] .bubble { top: 3rem; right: 14rem; max-width: 24rem; font-size: 1.35rem; }
+  #app[data-screen="practice"] .pdots,
+  #app[data-screen="practice"] .holdrow,
+  #app[data-screen="practice"] .ctrl { max-width: 880px; margin-left: auto; margin-right: auto; }
+  #app[data-screen="practice"] .pdots { margin-top: 2.6rem; }
+  #app[data-screen="practice"] .pinfo { padding: 1.8rem 2.2rem; }
+  #app[data-screen="practice"] .pstat { width: 8rem; }
+
+  /* ---------- 浮层：底部抽屉 → 右侧抽屉 ---------- */
+  .xs { align-items: stretch; justify-content: flex-end; }
+  .xs-panel {
+    max-width: 560px; width: min(560px, 92vw);
+    height: 100vh;
+    height: 100dvh; max-height: none;
+    border-radius: 2rem 0 0 2rem;
+    transform: translateX(102%);
+    box-shadow: -1.4rem 0 4rem rgba(58, 40, 24, .28);
+  }
+  .xs.show .xs-panel { transform: translateX(0); }
+  .xs-h { padding: 1.8rem 2.2rem; }
+  .xs-b { padding: 1.8rem 2.2rem 3.4rem; }
+  .xs-range { width: 18rem; }
+
+  /* 加载页是开屏，藏掉侧栏、整幅铺满（data-dt-screen 由 desktop.js 写在 body 上） */
+  body.dt-on[data-dt-screen="loading"] { grid-template-columns: minmax(0, 1fr); }
+  body.dt-on[data-dt-screen="loading"] .dt-side { display: none; }
+  body.dt-on[data-dt-screen="loading"] #app.phone { grid-column: 1; }
+
+  /* ---------- 通用微调 ---------- */
+  .toast { bottom: 3.4rem; font-size: 1.4rem; }
+  .icbtn { width: 3.4rem; height: 3.4rem; }
+  .icbtn:hover { background: #fffdf7; }
+  @media (hover: hover) {
+    .card { transition: box-shadow .18s, transform .18s; }
+    .qcard:hover, .organ:hover, .modecard:hover, .stagecard:hover, .track:hover { box-shadow: var(--shadow-lg); }
+    .btn:hover { filter: brightness(1.04); }
+  }
+}
+
+/* ============================================================================
+   宽屏 / 大屏加档
+   ============================================================================ */
+@media (min-width: 1280px) {
+  :root { --dt-rail: 248px; --dt-max: 1200px; }
+  .dt-nav button { min-height: 4.8rem; font-size: 1.5rem; }
+}
+
+/* 960–1279px：内容列被两列分掉之后单列只剩 ~365–490px，
+   首页的「八段锦 / 五禽戏 / 帮我选」三段模式条里文字是 white-space:nowrap，
+   挤压不下去 → 实测 1024 宽时右列会溢出 24px（出现横向滚动条）。
+   这里让它折行成 2+1，行距交给 row-gap。此屏之外不产生任何影响。 */
+@media (min-width: 960px) and (max-width: 1279px) {
+  #app[data-screen="home"] .modebar { flex-wrap: wrap; row-gap: .6rem; }
+  #app[data-screen="home"] .mseg { flex: 1 1 44%; }
+}
+
+@media (min-width: 1700px) {
+  html { font-size: 12px; }
+  :root { --dt-max: 1340px; --dt-rail: 264px; }
+}
+
+/* 1080p「矮窗口」：内容列收窄一点、间距压一档，保证一屏能看到主要信息 */
+@media (min-width: 960px) and (max-height: 820px) {
+  :root { --dt-gap: 2rem; }
+  #app[data-screen="practice"] .stage { height: clamp(400px, 56vh, 560px); }
+  #app[data-screen="home"] .hero { min-height: 40rem; }
+}
+
+/* 超高屏（竖屏大显示器 / 竖放 4K）：内容列放宽，避免中间一条细带 */
+@media (min-width: 960px) and (min-height: 1400px) {
+  :root { --dt-max: 1240px; }
+}
