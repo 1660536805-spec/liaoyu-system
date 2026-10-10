@@ -50,7 +50,7 @@ let render = null
      它是时间的连续函数，结构上不可能翻折。每式开头按「肘向外」播种。 */
   function tjIK(s,h,side,mem){
     const dx=h[0]-s[0],dy=h[1]-s[1],d0=Math.hypot(dx,dy)||1;
-    const d=Math.min(Math.max(d0,Math.abs(TJ.UA-TJ.FA)+.5),TJ.UA+TJ.FA-.5);
+    const d=Math.min(Math.max(d0,Math.abs(TJ.UA-TJ.FA)+.5),TJ.UA+TJ.FA-1e-3);   // 上界放到 UA+FA：否则肘内角被数学封顶在 167.3°，永远差 12.7° 伸不直（-1e-3 避免 acos 取到 1.0000001）
     const ux=dx/d0,uy=dy/d0;
     const c=Math.acos(tjClamp((TJ.UA*TJ.UA+d*d-TJ.FA*TJ.FA)/(2*TJ.UA*d),-1,1)),a=Math.atan2(uy,ux);
     const e1=[s[0]+TJ.UA*Math.cos(a+c),s[1]+TJ.UA*Math.sin(a+c)];

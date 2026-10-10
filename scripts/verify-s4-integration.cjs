@@ -124,9 +124,13 @@ function probe(url) {
   }
 
   // ---------- 5. 资源直连 ----------
+  // 入口 JS/CSS 的 hash 每次构建都会变，不能写死；直接从 dist/s4/index.html 读当前引用。
+  const idxHtml = fs.readFileSync(path.join(__dirname, '..', 'dist', 's4', 'index.html'), 'utf8')
+  const entryAssets = [...idxHtml.matchAll(/assets\/([A-Za-z0-9_\-.]+\.(?:js|css))/g)]
+    .map((m) => '/s4/assets/' + m[1])
   const assets = [
     '/', '/s4/', '/s4/index.html',
-    '/s4/assets/index-5t9HS_Aa.js', '/s4/assets/index-DIKAWIsy.css',
+    ...entryAssets,
     '/s4/models/pose_landmarker_lite.task', '/s4/wasm/vision_wasm_internal.wasm',
     '/s4/guqin/1-xiang-C2.ogg', '/s4/audio/meihua.mp3',
   ]

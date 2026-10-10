@@ -185,8 +185,8 @@ const dur = computed(() => {
   // 教练房间版小人：用**房间版动作库的作者时长**（ROOM_MOVES[idx].dur）当整段时长，
   // 让 u 的推进速度与房间版逐帧一致（否则 8 式各自被拉长/压短）。
   // drawer（非房间版小人）仍用 demoAnim 的时长。
-  if (useRoomFigure.value && figureIdx.value != null) {
-    const rm = ROOM_MOVES[figureIdx.value]
+  if (useRoomFigure.value && props.figureIdx != null) {
+    const rm = ROOM_MOVES[props.figureIdx]
     if (rm && rm.dur > 0) return rm.dur
   }
   return anim.value?.dur || 1

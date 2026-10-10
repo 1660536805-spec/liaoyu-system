@@ -1,9 +1,9 @@
 {
-  "ranAt": "2026-10-03T23:28:37.061Z",
-  "urlJudge": "http://127.0.0.1:5399/s4/#/train?stage=1&mode=full&style=baduanjin&tone=gong&coachAttempt=3&coachDemo=3",
-  "urlPass": "http://127.0.0.1:5399/s4/#/train?stage=1&mode=full&style=baduanjin&tone=gong&coachDemo=1&coachAttempt=99&coachSim=2",
-  "urlTime": "http://127.0.0.1:5399/s4/#/train?stage=1&mode=full&style=baduanjin&tone=gong&coachGate=time&coachSoft=99&coachHard=3&coachGrace=2&coachDemo=1",
-  "observedSecJudge": 17,
+  "ranAt": "2026-10-10T11:36:03.601Z",
+  "urlJudge": "http://127.0.0.1:5400/s4/#/train?stage=1&mode=full&style=baduanjin&tone=gong&coachAttempt=3&coachDemo=3",
+  "urlPass": "http://127.0.0.1:5400/s4/#/train?stage=1&mode=full&style=baduanjin&tone=gong&coachDemo=1&coachAttempt=99&coachSim=2",
+  "urlTime": "http://127.0.0.1:5400/s4/#/train?stage=1&mode=full&style=baduanjin&tone=gong&coachGate=time&coachSoft=99&coachHard=3&coachGrace=2&coachDemo=1",
+  "observedSecJudge": 16,
   "stepsSeenJudge": [
     "第 1 式"
   ],

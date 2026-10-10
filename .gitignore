@@ -26,6 +26,8 @@ outputs/ui-compare/evidence/
 dist/s4/wasm/
 dist/s4/models/
 dist/s4/photos/
+# dist/s4/art/ 与根目录 dist/art/ 逐字节相同（12 文件 2.6M）；主壳/子应用请求的都是根路径 /art/。
+dist/s4/art/
 dist/s4/xianyang-ca.crt
 dist/s4/setup-cert.html
 dist/s4/stability.html

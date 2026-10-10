@@ -456,6 +456,122 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 system-ui,-app
 .coach[data-phase="grace"] [data-cact="done"],.coach[data-phase="grace"] [data-cact="extend"],.coach[data-phase="grace"] [data-cact="skip"]{display:inline-block}
 .coach[data-phase="allDone"] [data-cact="restart"]{display:inline-block}
 @media(max-width:760px){.coach button,.room-ctl button{padding:9px 14px;font-size:14px}.coach button.ghost{margin-left:0}}
+
+/* ── 拆动作控制台（八段锦 10 式：一次一动，可上一个 / 下一个 / 重放） ── */
+.room-ctl{margin-top:18px;display:grid;gap:11px}
+.room-ctl .ctl-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.room-ctl .ctl-idx{font-size:13px;letter-spacing:.08em;color:#5D6E7A;font-variant-numeric:tabular-nums}
+.room-ctl .ctl-name{font-family:var(--serif);font-size:clamp(21px,2.6vw,27px);color:#1E2E3B;letter-spacing:.05em}
+.room-ctl .ctl-hint{margin:0;font-size:15px;color:#41535F;min-height:1.7em}
+.room-ctl .ctl-btns{display:flex;gap:10px;flex-wrap:wrap}
+.room-ctl button{appearance:none;border:1px solid #B9C7D1;background:#fff;color:#24323C;font-family:inherit;font-size:15px;line-height:1;padding:10px 18px;border-radius:999px;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .08s}
+.room-ctl button:hover{background:#E4EAEE}
+.room-ctl button:active{transform:translateY(1px)}
+.room-ctl button:focus-visible{outline:2px solid #2B777B;outline-offset:2px}
+.room-ctl button.primary{background:#2B777B;border-color:#2B777B;color:#fff}
+.room-ctl button.primary:hover{background:#256A6E}
+.room-ctl button[aria-pressed="true"]{background:#24323C;border-color:#24323C;color:#fff}
+.room-ctl .ctl-prog{height:3px;border-radius:999px;background:#DCE5E7;overflow:hidden}
+.room-ctl .ctl-prog i{display:block;height:100%;width:0;background:#2B777B}
+
+/* ── 陪练教练：示范 → 跟练 → 等完成 → 自动进下一步 ── */
+.coach{margin-top:18px;display:grid;gap:11px}
+.coach[hidden],.room-ctl[hidden]{display:none}
+.coach .coach-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.coach .coach-step{font-size:13px;letter-spacing:.08em;color:#5D6E7A;font-variant-numeric:tabular-nums}
+.coach .coach-name{font-family:var(--serif);font-size:clamp(21px,2.6vw,27px);color:#1E2E3B;letter-spacing:.05em}
+.coach .coach-chip{font-size:13px;line-height:1;padding:6px 12px;border-radius:999px;border:1px solid currentColor;font-weight:600;letter-spacing:.06em;color:#5D6E7A}
+.coach .coach-tip{margin:0;font-size:15px;color:#41535F;min-height:1.7em}
+.coach .coach-bar{height:5px;border-radius:999px;background:#DCE5E7;overflow:hidden}
+.coach .coach-bar i{display:block;height:100%;width:0;background:#2B777B}
+.coach .coach-btns{display:flex;gap:10px;flex-wrap:wrap}
+.coach button{appearance:none;border:1px solid #B9C7D1;background:#fff;color:#24323C;font-family:inherit;font-size:15px;line-height:1;padding:10px 18px;border-radius:999px;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .08s}
+.coach button:hover:not(:disabled){background:#E4EAEE}
+.coach button:active:not(:disabled){transform:translateY(1px)}
+.coach button:focus-visible{outline:2px solid #2B777B;outline-offset:2px}
+.coach button:disabled{opacity:.38;cursor:default}
+.coach button.primary{background:#2B777B;border-color:#2B777B;color:#fff}
+.coach button.primary:hover:not(:disabled){background:#256A6E}
+.coach button.ghost{margin-left:auto;border-style:dashed;color:#5D6E7A}
+.coach .coach-note{margin:0;font-size:13px;line-height:1.7;color:#6C7C88}
+/* 阶段配色：示范=湖蓝 跟练=暖金 宽限=赭石 完成=青瓷玉 */
+.coach[data-phase="demo"] .coach-chip{color:#2B777B}
+.coach[data-phase="demo"] .coach-bar i{background:#2B777B}
+.coach[data-phase="follow"] .coach-chip{color:#8A6520}
+.coach[data-phase="follow"] .coach-bar i{background:#D9A53C}
+.coach[data-phase="grace"] .coach-chip{color:#A34A24}
+.coach[data-phase="grace"] .coach-bar i{background:#C1663A}
+.coach[data-phase="stepDone"] .coach-chip,.coach[data-phase="allDone"] .coach-chip{color:#4A7362}
+.coach[data-phase="stepDone"] .coach-bar i,.coach[data-phase="allDone"] .coach-bar i{background:#6E8F7C}
+@keyframes coach-pulse{0%,100%{box-shadow:0 0 0 0 rgba(217,165,60,0)}50%{box-shadow:0 0 0 6px rgba(217,165,60,.20)}}
+.coach[data-phase="follow"] .coach-chip{animation:coach-pulse 2.2s ease-in-out infinite}
+/* 按阶段只显示该阶段可用的按钮 */
+.coach .coach-btns>button{display:none}
+.coach [data-cact="free"]{display:inline-block}
+.coach[data-phase="idle"] [data-cact="start"]{display:inline-block}
+.coach[data-phase="demo"] [data-cact="skip"]{display:inline-block}
+.coach[data-phase="follow"] [data-cact="done"],.coach[data-phase="follow"] [data-cact="redemo"],.coach[data-phase="follow"] [data-cact="skip"]{display:inline-block}
+.coach[data-phase="grace"] [data-cact="done"],.coach[data-phase="grace"] [data-cact="extend"],.coach[data-phase="grace"] [data-cact="skip"]{display:inline-block}
+.coach[data-phase="allDone"] [data-cact="restart"]{display:inline-block}
+@media(max-width:760px){.coach button,.room-ctl button{padding:9px 14px;font-size:14px}.coach button.ghost{margin-left:0}}
+
+/* ── 拆动作控制台（八段锦 10 式：一次一动，可上一个 / 下一个 / 重放） ── */
+.room-ctl{margin-top:18px;display:grid;gap:11px}
+.room-ctl .ctl-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.room-ctl .ctl-idx{font-size:13px;letter-spacing:.08em;color:#5D6E7A;font-variant-numeric:tabular-nums}
+.room-ctl .ctl-name{font-family:var(--serif);font-size:clamp(21px,2.6vw,27px);color:#1E2E3B;letter-spacing:.05em}
+.room-ctl .ctl-hint{margin:0;font-size:15px;color:#41535F;min-height:1.7em}
+.room-ctl .ctl-btns{display:flex;gap:10px;flex-wrap:wrap}
+.room-ctl button{appearance:none;border:1px solid #B9C7D1;background:#fff;color:#24323C;font-family:inherit;font-size:15px;line-height:1;padding:10px 18px;border-radius:999px;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .08s}
+.room-ctl button:hover{background:#E4EAEE}
+.room-ctl button:active{transform:translateY(1px)}
+.room-ctl button:focus-visible{outline:2px solid #2B777B;outline-offset:2px}
+.room-ctl button.primary{background:#2B777B;border-color:#2B777B;color:#fff}
+.room-ctl button.primary:hover{background:#256A6E}
+.room-ctl button[aria-pressed="true"]{background:#24323C;border-color:#24323C;color:#fff}
+.room-ctl .ctl-prog{height:3px;border-radius:999px;background:#DCE5E7;overflow:hidden}
+.room-ctl .ctl-prog i{display:block;height:100%;width:0;background:#2B777B}
+
+/* ── 陪练教练：示范 → 跟练 → 等完成 → 自动进下一步 ── */
+.coach{margin-top:18px;display:grid;gap:11px}
+.coach[hidden],.room-ctl[hidden]{display:none}
+.coach .coach-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.coach .coach-step{font-size:13px;letter-spacing:.08em;color:#5D6E7A;font-variant-numeric:tabular-nums}
+.coach .coach-name{font-family:var(--serif);font-size:clamp(21px,2.6vw,27px);color:#1E2E3B;letter-spacing:.05em}
+.coach .coach-chip{font-size:13px;line-height:1;padding:6px 12px;border-radius:999px;border:1px solid currentColor;font-weight:600;letter-spacing:.06em;color:#5D6E7A}
+.coach .coach-tip{margin:0;font-size:15px;color:#41535F;min-height:1.7em}
+.coach .coach-bar{height:5px;border-radius:999px;background:#DCE5E7;overflow:hidden}
+.coach .coach-bar i{display:block;height:100%;width:0;background:#2B777B}
+.coach .coach-btns{display:flex;gap:10px;flex-wrap:wrap}
+.coach button{appearance:none;border:1px solid #B9C7D1;background:#fff;color:#24323C;font-family:inherit;font-size:15px;line-height:1;padding:10px 18px;border-radius:999px;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .08s}
+.coach button:hover:not(:disabled){background:#E4EAEE}
+.coach button:active:not(:disabled){transform:translateY(1px)}
+.coach button:focus-visible{outline:2px solid #2B777B;outline-offset:2px}
+.coach button:disabled{opacity:.38;cursor:default}
+.coach button.primary{background:#2B777B;border-color:#2B777B;color:#fff}
+.coach button.primary:hover:not(:disabled){background:#256A6E}
+.coach button.ghost{margin-left:auto;border-style:dashed;color:#5D6E7A}
+.coach .coach-note{margin:0;font-size:13px;line-height:1.7;color:#6C7C88}
+/* 阶段配色：示范=湖蓝 跟练=暖金 宽限=赭石 完成=青瓷玉 */
+.coach[data-phase="demo"] .coach-chip{color:#2B777B}
+.coach[data-phase="demo"] .coach-bar i{background:#2B777B}
+.coach[data-phase="follow"] .coach-chip{color:#8A6520}
+.coach[data-phase="follow"] .coach-bar i{background:#D9A53C}
+.coach[data-phase="grace"] .coach-chip{color:#A34A24}
+.coach[data-phase="grace"] .coach-bar i{background:#C1663A}
+.coach[data-phase="stepDone"] .coach-chip,.coach[data-phase="allDone"] .coach-chip{color:#4A7362}
+.coach[data-phase="stepDone"] .coach-bar i,.coach[data-phase="allDone"] .coach-bar i{background:#6E8F7C}
+@keyframes coach-pulse{0%,100%{box-shadow:0 0 0 0 rgba(217,165,60,0)}50%{box-shadow:0 0 0 6px rgba(217,165,60,.20)}}
+.coach[data-phase="follow"] .coach-chip{animation:coach-pulse 2.2s ease-in-out infinite}
+/* 按阶段只显示该阶段可用的按钮 */
+.coach .coach-btns>button{display:none}
+.coach [data-cact="free"]{display:inline-block}
+.coach[data-phase="idle"] [data-cact="start"]{display:inline-block}
+.coach[data-phase="demo"] [data-cact="skip"]{display:inline-block}
+.coach[data-phase="follow"] [data-cact="done"],.coach[data-phase="follow"] [data-cact="redemo"],.coach[data-phase="follow"] [data-cact="skip"]{display:inline-block}
+.coach[data-phase="grace"] [data-cact="done"],.coach[data-phase="grace"] [data-cact="extend"],.coach[data-phase="grace"] [data-cact="skip"]{display:inline-block}
+.coach[data-phase="allDone"] [data-cact="restart"]{display:inline-block}
+@media(max-width:760px){.coach button,.room-ctl button{padding:9px 14px;font-size:14px}.coach button.ghost{margin-left:0}}
 </style></head>
 <body>
 <div class="room-wrap"><div id="app"></div></div>
@@ -525,9 +641,19 @@ const clamp01 = k => Math.min(1, Math.max(0, k));
 const mixP = (a, b, k) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k)];
 const add = (a, b, k = 1) => [a[0] + b[0] * k, a[1] + b[1] * k];
 
+/* 腕位是极坐标 [r,θ]。θ 插值必须走「最短弧」：
+   θ 的两端若跨 ±180° 分界线（托天式左腕：0.50 帧 −163.5°、0.58 帧 +180°），
+   直接线性插值会让手绕肩**多转 343°**（途中经过「手朝下」）⇒ 单帧位移 29 单位、
+   循环播放时画面猛抽一下。这里把 b 的 θ 就近折到 a 的同一圈，令 Δθ 落入 (−180,180]
+   再插值 —— 与上面 pol() 注释里「插值只改 θ，手绕肩划弧」的意图完全一致。 */
+function lerpWrist(a, b, k) {
+  let d = b[1] - a[1];
+  if (d > 180) d -= 360; else if (d < -180) d += 360;
+  return [lerp(a[0], b[0], k), a[1] + d * k];
+}
 function lerpP(a, b, k) {
   const L = (p, q) => [lerp(p[0], q[0], k), lerp(p[1], q[1], k)];
-  return { wrists: [L(a.wrists[0], b.wrists[0]), L(a.wrists[1], b.wrists[1])],
+  return { wrists: [lerpWrist(a.wrists[0], b.wrists[0], k), lerpWrist(a.wrists[1], b.wrists[1], k)],
            feet: [L(a.feet[0], b.feet[0]), L(a.feet[1], b.feet[1])],
            root: L(a.root, b.root), lean: lerp(a.lean, b.lean, k),
            fold: lerp(a.fold, b.fold, k), headOff: lerp(a.headOff, b.headOff, k) };
@@ -590,9 +716,9 @@ const MOVES = [
   { id: 'danju', name: '调理脾胃须单举', hint: '一手向上举、一手向下按；上举不过头，下按到腰侧。', dur: 7.0, kf: [
       [0.00, BALL0],
       [0.12, P([88, 154], [146, 152], [108, 266], [132, 266], 120, 168)],
-      [0.22, P([72, 126], [148, 158], [108, 266], [132, 266], 120, 168)],
+      [0.20, P([72, 126], [148, 158], [108, 266], [132, 266], 120, 168)],
       [0.32, P([94, 56], [150, 166], [108, 266], [132, 266], 120, 168)],
-      [0.44, P([74, 124], [166, 124], [108, 266], [132, 266], 120, 168)],
+      [0.46, P([74, 124], [166, 124], [108, 266], [132, 266], 120, 168)],
       [0.56, P([84, 150], [176, 92], [108, 266], [132, 266], 120, 168)],
       [0.68, P([98, 152], [152, 56], [108, 266], [132, 266], 120, 168)],
       [0.80, P([100, 150], [166, 88], [108, 266], [132, 266], 120, 168)],
