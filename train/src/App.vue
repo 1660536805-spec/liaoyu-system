@@ -10,8 +10,8 @@ import AppTab from './components/AppTab.vue'
 import { useRouter } from 'vue-router'
 
 // ───────────────────────────────────────────────────────────────────────────
-// 【本次新增 · 纯追加】?ia=art 开关：把根路径落到「七步问卷·宣纸插画卡」。
-//   /s4/?ia=art  →  /s4/#/onboarding-v2
+// 【本次新增 · 纯追加】?ia=art 开关：把根路径落到「预览中枢」。
+//   /s4/?ia=art  →  /s4/#/preview   （中枢里再点进文化内核 / 融合壳 / 新问卷）
 //
 // 不带 ?ia=art 时，根路径根本进不到这里 —— main.js 的守卫会先把它整页跳回主壳。
 // 所以对「默认进入」这条路径而言，本段代码永远不执行，行为与改造前完全一致。
@@ -20,7 +20,7 @@ const router = useRouter()
 try {
   const ia = new URL(window.location.href).searchParams.get('ia')
   if (ia === 'art' && router.currentRoute.value.path === '/') {
-    router.replace('/onboarding-v2')
+    router.replace('/preview')
   }
 } catch {
   /* 无 window / URL 解析失败：保持默认行为 */

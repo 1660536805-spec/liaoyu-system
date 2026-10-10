@@ -15,11 +15,13 @@ import TrainView from './views/TrainView.vue'
 // 下面这份白名单原先是「只有 /train」，现在只多了上面三条。
 // 其余一切路径的规则完全不变：仍一律整页跳回主壳。
 // ───────────────────────────────────────────────────────────────────────────
+//   /preview        预览中枢（上三条的索引页；同样不在任何导航里）
 const CultureLabView = () => import('./views/CultureLabView.vue')
 const ProtShellView = () => import('./views/ProtShellView.vue')
 const OnboardingV2 = () => import('./views/OnboardingV2.vue')
+const PreviewHubView = () => import('./views/PreviewHubView.vue')
 
-const KEEP_IN_APP = new Set(['/train', '/culture', '/prot', '/onboarding-v2'])
+const KEEP_IN_APP = new Set(['/train', '/culture', '/prot', '/onboarding-v2', '/preview'])
 
 // 只有显式带 ?ia=art 才为真。不带时，下面的守卫一切照旧。
 function wantsArtIA() {
@@ -58,6 +60,7 @@ const routes = [
   { path: '/culture', component: CultureLabView },
   { path: '/prot', component: ProtShellView },
   { path: '/onboarding-v2', component: OnboardingV2 },
+  { path: '/preview', component: PreviewHubView },
   { path: '/:pathMatch(.*)*', component: Blank },
 ]
 
