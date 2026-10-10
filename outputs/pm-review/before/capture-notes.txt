@@ -1,0 +1,15 @@
+shell/loading  requested=loading actual=loading  shell-loading.png
+shell/question  requested=question actual=question  shell-question.png
+shell/audio  requested=audio actual=audio  shell-audio.png
+shell/home  requested=home actual=home  shell-home.png
+shell/intro  requested=intro actual=intro  shell-intro.png
+shell/practice  requested=practice actual=practice  shell-practice.png
+shell/done  requested=done actual=done  shell-done.png
+shell/profile  requested=profile actual=profile  shell-profile.png
+shell/body  requested=body actual=body  shell-body.png
+intro 页 [data-a=start-practice] 数量 = 1
+intro→s4 实际落地 URL = /s4/#/train?stage=point&mode=full&style=baduanjin&tone=gong
+主壳 practice 屏内的动作 = {"s4Link":["exit-practice"],"hasText":false}
+主壳控制台报错 = []
+s4-train-mobile probe = {"coach":false,"coachBar":true,"coachCanvas":null,"figurePoints":20,"video":"640x480 ready=4 paused=false"}
+s4-train-desktop probe = {"coach":false,"coachBar":true,"coachCanvas":null,"figurePoints":20,"video":"640x480 ready=4 paused=false"}

@@ -8,7 +8,7 @@
     "dev:https": "cross-env XIANYANG_HTTPS=1 vite --host",
     "build": "vite build",
     "preview": "vite preview --host",
-    "test": "node src/engine/judge.test.mjs && node scripts/render.test.mjs && node scripts/coach.test.mjs && node scripts/roomFigure.test.mjs",
+    "test": "node src/engine/judge.test.mjs && node scripts/render.test.mjs && node scripts/coach.test.mjs && node scripts/roomFigure.test.mjs && node scripts/framing.test.mjs",
     "test:judge": "node src/engine/judge.test.mjs",
     "test:render": "node scripts/render.test.mjs",
     "test:coach": "node scripts/coach.test.mjs",

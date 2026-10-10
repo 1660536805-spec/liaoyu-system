@@ -1,0 +1,156 @@
+# 可合入文件清单（源 → 目标）
+# 生成自 git ls-tree 树比对；目标路径均已校验在 main 中不存在
+# 条目数: 74   目标冲突数: 0
+#
+  1. [liaoyu0-1] app/src/session/trainingSession.js
+     -> train/src/session/trainingSession.js   # 会话状态机
+  2. [liaoyu0-1] app/src/session/trainingSession.test.mjs
+     -> train/src/session/trainingSession.test.mjs
+  3. [liaoyu0-1] app/src/session/localAudio.js
+     -> train/src/session/localAudio.js   # 本地音频播放器
+  4. [liaoyu0-1] app/src/session/localAudio.test.mjs
+     -> train/src/session/localAudio.test.mjs
+  5. [liaoyu0-1] app/src/engine/cameraRequest.js
+     -> train/src/engine/cameraRequest.js   # 摄像头请求代际守卫
+  6. [liaoyu0-1] app/src/engine/cameraRequest.test.mjs
+     -> train/src/engine/cameraRequest.test.mjs
+  7. [liaoyu0-1] app/src/stores/profile.js
+     -> train/src/stores/profile.js   # 身体资料存储
+  8. [liaoyu0-1] app/src/stores/profile.test.mjs
+     -> train/src/stores/profile.test.mjs
+  9. [liaoyu0-1] app/src/stores/records.test.mjs
+     -> train/src/stores/records.test.mjs   # 记录存储测试
+ 10. [liaoyu0-1] app/src/styles/legacy-ui.css
+     -> train/src/styles/legacy-ui.css   # 主壳设计系统
+ 11. [liaoyu0-1] app/scripts/build.test.mjs
+     -> train/scripts/build.test.mjs
+ 12. [liaoyu0-1] app/scripts/flow.test.mjs
+     -> train/scripts/flow.test.mjs
+ 13. [liaoyu0-1] app/scripts/release-smoke.mjs
+     -> train/scripts/release-smoke.mjs
+ 14. [liaoyu0-1] docs/superpowers/specs/2026-10-04-liaoyu-integration-design.md
+     -> train//superpowers/specs/2026-10-04-liaoyu-integration-design.md   # 集成设计文档
+ 15. [liaoyu0-1] docs/superpowers/plans/2026-10-04-liaoyu-integration.md
+     -> train//superpowers/plans/2026-10-04-liaoyu-integration.md   # 集成计划文档
+ 16. [liaoyu0-1] app/src/views/LegacySplashView.vue
+     -> train/src/views/LegacySplashView.vue   # 主壳 Splash 屏 Vue 版
+ 17. [liaoyu0-1] app/src/views/LegacyQuestionsView.vue
+     -> train/src/views/LegacyQuestionsView.vue   # 主壳 Questions 屏 Vue 版
+ 18. [liaoyu0-1] app/src/views/LegacySoundView.vue
+     -> train/src/views/LegacySoundView.vue   # 主壳 Sound 屏 Vue 版
+ 19. [liaoyu0-1] app/src/views/LegacyHomeView.vue
+     -> train/src/views/LegacyHomeView.vue   # 主壳 Home 屏 Vue 版
+ 20. [liaoyu0-1] app/src/views/LegacyIntroView.vue
+     -> train/src/views/LegacyIntroView.vue   # 主壳 Intro 屏 Vue 版
+ 21. [liaoyu0-1] app/src/views/LegacyFinishView.vue
+     -> train/src/views/LegacyFinishView.vue   # 主壳 Finish 屏 Vue 版
+ 22. [liaoyu0-1] app/src/views/LegacyProfileView.vue
+     -> train/src/views/LegacyProfileView.vue   # 主壳 Profile 屏 Vue 版
+ 23. [liaoyu0-1] app/src/views/LegacyBodyView.vue
+     -> train/src/views/LegacyBodyView.vue   # 主壳 Body 屏 Vue 版
+ 24. [liaoyu0-1] app/public/art/card-landscape.jpg
+     -> train/public/art/card-landscape.jpg   # 宣纸插画（与 culture 同 blob，只取一份）
+ 25. [liaoyu0-1] app/public/art/cloud.jpg
+     -> train/public/art/cloud.jpg   # 宣纸插画（与 culture 同 blob，只取一份）
+ 26. [liaoyu0-1] app/public/art/figure-cloud.png
+     -> train/public/art/figure-cloud.png   # 宣纸插画（与 culture 同 blob，只取一份）
+ 27. [liaoyu0-1] app/public/art/figure-pose.png
+     -> train/public/art/figure-pose.png   # 宣纸插画（与 culture 同 blob，只取一份）
+ 28. [liaoyu0-1] app/public/art/guqin.png
+     -> train/public/art/guqin.png   # 宣纸插画（与 culture 同 blob，只取一份）
+ 29. [liaoyu0-1] app/public/art/landscape.jpg
+     -> train/public/art/landscape.jpg   # 宣纸插画（与 culture 同 blob，只取一份）
+ 30. [liaoyu0-1] app/public/art/q-back.jpg
+     -> train/public/art/q-back.jpg   # 宣纸插画（与 culture 同 blob，只取一份）
+ 31. [liaoyu0-1] app/public/art/q-food.jpg
+     -> train/public/art/q-food.jpg   # 宣纸插画（与 culture 同 blob，只取一份）
+ 32. [liaoyu0-1] app/public/art/q-mood.jpg
+     -> train/public/art/q-mood.jpg   # 宣纸插画（与 culture 同 blob，只取一份）
+ 33. [liaoyu0-1] app/public/art/q-neck.jpg
+     -> train/public/art/q-neck.jpg   # 宣纸插画（与 culture 同 blob，只取一份）
+ 34. [liaoyu0-1] app/public/art/q-none.jpg
+     -> train/public/art/q-none.jpg   # 宣纸插画（与 culture 同 blob，只取一份）
+ 35. [liaoyu0-1] app/public/art/q-sleep.jpg
+     -> train/public/art/q-sleep.jpg   # 宣纸插画（与 culture 同 blob，只取一份）
+ 36. [delivery-20261004-culture] src/culture/knowledge.js
+     -> train/src/culture/knowledge.js   # 五套传统学说数字化
+ 37. [delivery-20261004-culture] src/culture/plug.js
+     -> train/src/culture/plug.js   # 可插拔插件总线 PlugBus
+ 38. [delivery-20261004-culture] src/culture/api.js
+     -> train/src/culture/api.js   # 对外 SDK 门面
+ 39. [delivery-20261004-culture] src/views/CultureLabView.vue
+     -> train/src/views/CultureLabView.vue   # 文化内核实验室
+ 40. [delivery-20261004-culture] src/views/OnboardingV2.vue
+     -> train/src/views/OnboardingV2.vue   # 七步问卷插画卡
+ 41. [delivery-20261004-culture] src/views/ProtShellView.vue
+     -> train/src/views/ProtShellView.vue   # 设计稿×真引擎融合壳
+ 42. [delivery-20261004-culture] scripts/shot-culture.mjs
+     -> train/scripts/shot-culture.mjs   # 走查：/#/culture
+ 43. [delivery-20261004-culture] scripts/shot-prot.mjs
+     -> train/scripts/shot-prot.mjs   # 走查：/#/prot
+ 44. [delivery-20261004-culture] scripts/pkg-smoke.test.mjs
+     -> train/scripts/pkg-smoke.test.mjs   # 交付包冒烟
+ 45. [保持同 blob 即可（liaoyu 已覆盖）] public/art/card-landscape.jpg
+     -> train/public/art/card-landscape.jpg
+ 46. [保持同 blob 即可（liaoyu 已覆盖）] public/art/cloud.jpg
+     -> train/public/art/cloud.jpg
+ 47. [保持同 blob 即可（liaoyu 已覆盖）] public/art/figure-cloud.png
+     -> train/public/art/figure-cloud.png
+ 48. [保持同 blob 即可（liaoyu 已覆盖）] public/art/figure-pose.png
+     -> train/public/art/figure-pose.png
+ 49. [保持同 blob 即可（liaoyu 已覆盖）] public/art/guqin.png
+     -> train/public/art/guqin.png
+ 50. [保持同 blob 即可（liaoyu 已覆盖）] public/art/landscape.jpg
+     -> train/public/art/landscape.jpg
+ 51. [保持同 blob 即可（liaoyu 已覆盖）] public/art/q-back.jpg
+     -> train/public/art/q-back.jpg
+ 52. [保持同 blob 即可（liaoyu 已覆盖）] public/art/q-food.jpg
+     -> train/public/art/q-food.jpg
+ 53. [保持同 blob 即可（liaoyu 已覆盖）] public/art/q-mood.jpg
+     -> train/public/art/q-mood.jpg
+ 54. [保持同 blob 即可（liaoyu 已覆盖）] public/art/q-neck.jpg
+     -> train/public/art/q-neck.jpg
+ 55. [保持同 blob 即可（liaoyu 已覆盖）] public/art/q-none.jpg
+     -> train/public/art/q-none.jpg
+ 56. [保持同 blob 即可（liaoyu 已覆盖）] public/art/q-sleep.jpg
+     -> train/public/art/q-sleep.jpg
+ 57. [delivery-20261004-culture] public/prot/app.css
+     -> train/public/prot/app.css   # 原型外壳
+ 58. [delivery-20261004-culture] public/prot/app.js
+     -> train/public/prot/app.js   # 原型外壳
+ 59. [delivery-20261004-culture] public/prot/art/card-landscape.jpg
+     -> train/public/prot/art/card-landscape.jpg   # 原型外壳素材
+ 60. [delivery-20261004-culture] public/prot/art/cloud.jpg
+     -> train/public/prot/art/cloud.jpg   # 原型外壳素材
+ 61. [delivery-20261004-culture] public/prot/art/figure-cloud.png
+     -> train/public/prot/art/figure-cloud.png   # 原型外壳素材
+ 62. [delivery-20261004-culture] public/prot/art/figure-pose.png
+     -> train/public/prot/art/figure-pose.png   # 原型外壳素材
+ 63. [delivery-20261004-culture] public/prot/art/guqin.png
+     -> train/public/prot/art/guqin.png   # 原型外壳素材
+ 64. [delivery-20261004-culture] public/prot/art/landscape.jpg
+     -> train/public/prot/art/landscape.jpg   # 原型外壳素材
+ 65. [delivery-20261004-culture] public/prot/art/q-back.jpg
+     -> train/public/prot/art/q-back.jpg   # 原型外壳素材
+ 66. [delivery-20261004-culture] public/prot/art/q-food.jpg
+     -> train/public/prot/art/q-food.jpg   # 原型外壳素材
+ 67. [delivery-20261004-culture] public/prot/art/q-mood.jpg
+     -> train/public/prot/art/q-mood.jpg   # 原型外壳素材
+ 68. [delivery-20261004-culture] public/prot/art/q-neck.jpg
+     -> train/public/prot/art/q-neck.jpg   # 原型外壳素材
+ 69. [delivery-20261004-culture] public/prot/art/q-none.jpg
+     -> train/public/prot/art/q-none.jpg   # 原型外壳素材
+ 70. [delivery-20261004-culture] public/prot/art/q-sleep.jpg
+     -> train/public/prot/art/q-sleep.jpg   # 原型外壳素材
+ 71. [delivery-20261004-culture] public/prot/index.html
+     -> train/public/prot/index.html   # 原型外壳
+ 72. [delivery-20261004-culture] docs/七步问卷宣纸插画卡IA.md
+     -> docs/七步问卷宣纸插画卡IA.md   # IA 文档
+ 73. [delivery-20261004-culture] package-for-team/QA清单.md
+     -> train/package-for-team/QA清单.md
+ 74. [delivery-20261004-culture] package-for-team/演示脚本.md
+     -> train/package-for-team/演示脚本.md
+
+## 取用命令模板
+# git -C /tmp/liaoyu-remote show origin/<branch>:<源路径> > <目标路径>
+# 严禁使用 git merge / git checkout 批量覆盖；每个目标路径必须先确认不存在。

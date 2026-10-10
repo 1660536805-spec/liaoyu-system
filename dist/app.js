@@ -6,6 +6,7 @@ var root, state={
   screen:'loading', first:true,
   qIndex:0, qSel:null,
   answers:[], organ:0, track:0,
+  quiz:null,                      // 问诊结果（localStorage['xy-quiz']），驱动推荐
   mode:0, rec:0, imode:0, istage:0,
   progress:0, running:false,
   side:0, breath:0, hold:0,
@@ -192,6 +193,83 @@ var DESIGN={xp:360,xpMax:600,streak:7,stageDone:3,
   bars:[34,52,40,66,48,78,58,90,70,100]};
 function ymdd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function today(){return ymdd(new Date())}
+
+/* ==================== 今日节气 / 农历（真实日期，不再写死「霜降 · 10月23日」） ====================
+   节气：太阳视黄经法（Meeus《Astronomical Algorithms》25 章）算 24 节气交节时刻，
+        视黄经误差 < 0.01°，对应时刻误差约 ±10 分钟；与 2025/2026 公开历书逐项核对一致。
+   农历：直接用浏览器内置中国历 Intl('zh-CN-u-ca-chinese')，不自抄数据表（易错、易过期）。
+   两者都只做展示用途，不做择时/医疗判断。 */
+var LUNAR_DAY=['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十','廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
+var _lunFmt=null;
+function lunarDate(d){try{
+  if(!_lunFmt)_lunFmt=new Intl.DateTimeFormat('zh-CN-u-ca-chinese',{year:'numeric',month:'long',day:'numeric'});
+  var g={};_lunFmt.formatToParts(d).forEach(function(p){g[p.type]=p.value});
+  var n=parseInt(g.day,10);
+  return {month:g.month||'',day:LUNAR_DAY[n-1]||('初'+n),yearName:g.yearName||''};
+}catch(_){return null}}
+function jdFromDate(y,m,dd,h){if(m<=2){y-=1;m+=12}var A=Math.floor(y/100),B=2-A+Math.floor(A/4);
+  return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+dd+B-1524.5+(h||0)/24}
+function jdToYMD(jd){var z=jd+0.5,Z=Math.floor(z),F=z-Z,A=Z;
+  if(Z>=2299161){var a=Math.floor((Z-1867216.25)/36524.25);A=Z+1+a-Math.floor(a/4)}
+  var B=A+1524,C=Math.floor((B-122.1)/365.25),D=Math.floor(365.25*C),E=Math.floor((B-D)/30.6001);
+  var day=B-D-Math.floor(30.6001*E)+F,month=E<14?E-1:E-13,year=month>2?C-4716:C-4715;
+  return {y:year,m:month,d:Math.floor(day)}}
+function sunLong(jd){var T=(jd-2451545)/36525,R=Math.PI/180;
+  var L0=280.46646+36000.76983*T+0.0003032*T*T,M=357.52911+35999.05029*T-0.0001537*T*T,Mr=M*R;
+  var C=(1.914602-0.004817*T-0.000014*T*T)*Math.sin(Mr)+(0.019993-0.000101*T)*Math.sin(2*Mr)+0.000289*Math.sin(3*Mr);
+  var om=(125.04-1934.136*T)*R,la=L0+C-0.00569-0.00478*Math.sin(om);
+  return ((la%360)+360)%360}
+var TERMS=[['小寒',285],['大寒',300],['立春',315],['雨水',330],['惊蛰',345],['春分',0],['清明',15],['谷雨',30],['立夏',45],['小满',60],['芒种',75],['夏至',90],['小暑',105],['大暑',120],['立秋',135],['处暑',150],['白露',165],['秋分',180],['寒露',195],['霜降',210],['立冬',225],['小雪',240],['大雪',255],['冬至',270]];
+function termInstant(year,i){var tg=TERMS[i][1],jd=jdFromDate(year,1,6,0)+i*15.22;
+  for(var k=0;k<12;k++){var df=sunLong(jd)-tg;df=((df+180)%360+360)%360-180;if(Math.abs(df)<1e-7)break;jd-=df/0.9856}
+  return jdToYMD(jd+8/24)}
+function currentTerm(d){var y=d.getFullYear(),now=y*10000+(d.getMonth()+1)*100+d.getDate(),best=null;
+  for(var yy=y-1;yy<=y+1;yy++)for(var i=0;i<24;i++){var t=termInstant(yy,i),k=t.y*10000+t.m*100+t.d;
+    if(k<=now&&(!best||k>best.k))best={k:k,i:i,t:t}}
+  return {name:TERMS[best.i][0],index:best.i,m:best.t.m,d:best.t.d}}
+/* 季节：按节气序号划分（小寒=0…冬至=23） */
+function seasonOfTerm(i){return (i>=2&&i<=7)?'春':((i>=8&&i<=13)?'夏':((i>=14&&i<=19)?'秋':'冬'))}
+/* 节气一句话：物候 + 当下调养建议（自撰描述文字，不冒充古籍引文） */
+var TERM_DESC={
+ 小寒:['小寒时处二三九，','宜静养藏精、避寒就温。'],
+ 大寒:['寒气之逆极，','宜温补固本，静待春回。'],
+ 立春:['东风解冻，蛰虫始振，','正是舒展肝气的好时节。'],
+ 雨水:['天一生水，润物无声，','宜健脾祛湿，调畅情志。'],
+ 惊蛰:['春雷始鸣，万物复苏，','宜舒展筋骨，唤醒阳气。'],
+ 春分:['昼夜均分，寒暑相平，','宜平衡阴阳，不偏不倚。'],
+ 清明:['气清景明，万物皆显，','宜疏肝理气，调畅身心。'],
+ 谷雨:['雨生百谷，春将尽时，','宜健脾祛湿，为入夏储备。'],
+ 立夏:['斗指东南，万物至此皆长大，','宜养心安神，静心敛汗。'],
+ 小满:['麦粒渐满，未至大满，','宜清热利湿，忌贪凉饮冷。'],
+ 芒种:['有芒之谷，至此可种，','宜晚睡早起，午间小憩。'],
+ 夏至:['日长之至，阳极生阴，','宜养阳护阴，勿过汗耗气。'],
+ 小暑:['温风至，蟋蟀居壁，','宜心静纳凉，午后少动。'],
+ 大暑:['湿热交蒸，一年最盛，','宜清热解暑，顾护脾胃。'],
+ 立秋:['云天收夏色，木叶动秋声，','宜润燥养肺，收敛神气。'],
+ 处暑:['暑气至此而止，','宜早卧早起，缓和秋乏。'],
+ 白露:['露凝而白，昼夜温差渐大，','宜添衣护肺，勿贪凉露体。'],
+ 秋分:['昼夜再度均分，秋色平分，','宜润肺生津，收敛心神。'],
+ 寒露:['露气寒冷，将凝为霜，','宜养阴润燥，护好颈足。'],
+ 霜降:['霜结为霜，万物内敛，','正是调养身心的好时节。'],
+ 立冬:['水始冰，地始冻，','宜藏养阳气，早卧晚起。'],
+ 小雪:['天地闭塞，转入严寒，','宜温润滋补，静养心神。'],
+ 大雪:['仲冬始至，雪盛冰坚，','宜避寒保暖，蓄养精气。'],
+ 冬至:['日短之至，阴极阳生，','宜进补养藏，静候一阳来复。']};
+/* 季节引文：只用四时总纲原文，出处确凿（《素问·四气调神大论》） */
+var SEASON_POEM={春:['春三月，此谓发陈。','《素问·四气调神大论》'],
+ 夏:['夏三月，此谓蕃秀。','《素问·四气调神大论》'],
+ 秋:['秋三月，此谓容平。','《素问·四气调神大论》'],
+ 冬:['冬三月，此谓闭藏。','《素问·四气调神大论》']};
+/* 供首页/结束页共用的一次性快照 */
+function todayContext(){var d=new Date(),T=currentTerm(d),L=lunarDate(d);
+  return {date:d,T:T,season:seasonOfTerm(T.index),desc:TERM_DESC[T.name],
+    lunar:L,gLunar:(d.getMonth()+1)+'月'+d.getDate()+'日',
+    lunarText:L?(L.month+L.day):''}}
+/* 季节化的食养「为什么推荐」（不再写死霜降） */
+var SEASON_RECIPE_WHY={春:'春季肝气偏旺、易生内热，百合润燥、莲子养心，练后温服，有助于安神入睡。',
+ 夏:'夏季心火易旺、汗多耗气，百合润燥、莲子养心，练后温服，有助于清心解暑。',
+ 秋:'秋季燥气偏盛，百合润燥、莲子养心，练后温服，有助于安神入睡。',
+ 冬:'冬季寒气主令、宜温润内守，百合润燥、莲子养心，练后温服，有助于养阴安神。'}
 function loadRecords(){try{var x=JSON.parse(localStorage.getItem('xy-records')||'[]');state.records=Array.isArray(x)?x.filter(function(r){return r&&typeof r.d==='string'}):[]}catch(_){state.records=[]}}
 function saveRecords(){try{localStorage.setItem('xy-records',JSON.stringify(state.records));return true}catch(_){return false}}
 function recordStats(){var R=state.records,sec=0,poses=0,days={};
@@ -239,29 +317,108 @@ function pgLoading(){return '<main class="sc center loading-screen" style="paddi
  +'<div class="load-guqin" style="margin-top:auto"><img src="/art/guqin.png" alt="" style="height:30rem"></div>'
  +'</main>'}
 
-/* ---------- 问答页 ---------- */
-function pgQuestion(){var cards=[
-  ['q-neck.jpg','颈肩','容易酸痛、僵硬<br>肩颈不适'],
-  ['q-back.jpg','腰背','容易酸胀、疲劳<br>久坐不适'],
-  ['q-food.jpg','脾胃','容易胀气、消化不良<br>食欲不稳'],
-  ['q-sleep.jpg','睡眠','入睡困难、易醒<br>睡眠质量差'],
-  ['q-mood.jpg','情绪','容易焦虑、烦躁<br>压力较大'],
-  ['q-none.jpg','没有','目前没有明显不适<br>想整体调养']]
+/* ---------- 问答页：7 步真问诊（原先是同一道题重复 7 次） ----------
+   旧实现的题面与选项都硬编码在 for 循环之外，循环只生成进度条，
+   于是「1/7 ~ 7/7」全是「你最近哪里容易不舒服?」+ 同一组 6 张卡
+   （实测见 outputs/pm-review/probe-quiz.cjs）。这里改成 7 道**递进**的真题，
+   并且答案真的参与推荐：部位 → 音疗方向；时段/情绪 → 今日调式；
+   时长/受限部位/期望强度 → 练哪一套（3 式还是 8 式）与从哪个阶段开始。 */
+var QUIZ=[
+ {title:'最近哪里容易不舒服?',
+  hint:'你的回答将帮助我们为你生成<br>更合适的今日练习推荐，调和身心，专属定制。',
+  opts:[['q-neck.jpg','颈肩','容易酸痛、僵硬<br>肩颈不适'],
+        ['q-back.jpg','腰背','容易酸胀、疲劳<br>久坐不适'],
+        ['q-food.jpg','脾胃','容易胀气、消化不良<br>食欲不稳'],
+        ['q-sleep.jpg','睡眠','入睡困难、易醒<br>睡眠质量差'],
+        ['q-mood.jpg','情绪','容易焦虑、烦躁<br>压力较大'],
+        ['q-none.jpg','没有','目前没有明显不适<br>想整体调养']]},
+ {title:'最近睡得怎么样?',
+  hint:'睡眠与情绪、精力最直接相关，先说清这一项。',
+  opts:[['q-sleep.jpg','入睡难','躺下很久才睡得着'],
+        ['q-mood.jpg','易醒多梦','夜里常醒，梦多'],
+        ['q-none.jpg','基本能睡整觉','一觉到天亮'],
+        ['q-back.jpg','时好时坏','没有规律，说不清']]},
+ {title:'最近的情绪偏哪一种?',
+  hint:'情绪紧的时候，肩背也容易跟着紧。',
+  opts:[['q-mood.jpg','容易焦虑','总在担心还没发生的事'],
+        ['q-neck.jpg','容易烦躁','一点小事就想发火'],
+        ['q-none.jpg','比较平稳','没什么大的起伏'],
+        ['q-food.jpg','压力较大','事情多，停不下来']]},
+ {title:'一天里，什么时候最没精神?',
+  hint:'按你最容易犯困或乏力的时段来选。',
+  opts:[['q-none.jpg','上午','一早起来就觉得累'],
+        ['q-food.jpg','午后','吃过午饭就犯困'],
+        ['q-back.jpg','傍晚','下班前后最疲惫'],
+        ['q-mood.jpg','晚上','白天还行，晚上才累']]},
+ {title:'今天能拿出多少时间练?',
+  hint:'时间长短都算练，先选一个能坚持下来的。',
+  opts:[['q-none.jpg','5 分钟','午休间隙就能做完'],
+        ['q-neck.jpg','10 分钟','认真做完一套'],
+        ['q-back.jpg','12 分钟以上','想完整走一遍八式'],
+        ['q-food.jpg','还说不准','今天不确定，先给建议']]},
+ {title:'身上有没有要避开的部位?',
+  hint:'有伤或不适的部位，动作幅度会替你调小。',
+  opts:[['q-neck.jpg','颈肩不适','转颈、耸肩要轻一些'],
+        ['q-back.jpg','腰背不适','前屈、后仰要慢一些'],
+        ['q-food.jpg','膝盖不适','马步蹲得浅一些'],
+        ['q-none.jpg','没什么限制','正常跟着做就可以']]},
+ {title:'今天想要什么强度?',
+  hint:'最后一步，决定这次练得松一点还是紧一点。',
+  opts:[['q-none.jpg','轻柔舒缓','以放松为主，别太累'],
+        ['q-food.jpg','适中规律','按部就班做完就好'],
+        ['q-back.jpg','想活动开','希望微微出点汗'],
+        ['q-mood.jpg','说不上来','你帮我定']]}
+];
+/* 每个选项在推荐里的短名（用于「我的」与首页那句「按你的回答…」） */
+var QUIZ_TAG=[
+ ['颈肩','腰背','脾胃','睡眠','情绪','无明显不适'],
+ ['入睡难','易醒多梦','睡得还行','睡得不规律'],
+ ['容易焦虑','容易烦躁','情绪平稳','压力较大'],
+ ['上午没劲','午后犯困','傍晚疲惫','晚上才累'],
+ ['5 分钟','10 分钟','12 分钟以上','时间未定'],
+ ['颈肩需避让','腰背需避让','膝盖需避让','无限制'],
+ ['想轻柔','想适中','想活动开','强度待定']];
+/* 答案 → 推荐。只决定「练什么 / 练多久 / 从哪开始」，不做任何医疗判断。 */
+function recommendFromAnswers(a){
+  var part=nv(a[0],5),sleep=nv(a[1],3),mood=nv(a[2],3),energy=nv(a[3],3),
+      time=nv(a[4],3),limit=nv(a[5],3),intent=nv(a[6],3)
+  // ① 音疗方向 → 音疗页五个脏腑按钮：0 心 / 1 肝 / 2 脾 / 3 肺 / 4 肾
+  var organ=[3,4,2,0,1,2][part]
+  // ② 今日调式 → 首页三张推荐：0 宫·平和承载 / 1 徵·轻快舒扬 / 2 羽·沉静滋养
+  var rec=0
+  if(sleep===0||sleep===1||energy===3||part===3)rec=2          // 睡不好 / 晚上才累 / 主诉睡眠 → 羽调
+  else if(energy===1||mood===1||part===0)rec=1                 // 午后犯困 / 易烦躁 / 主诉颈肩 → 徵调
+  // ③ 练哪一套：1=招牌 3 式（约 5 分钟） 0=全套 8 式（约 12 分钟）
+  var imode=(time===0||time===1)?1:((time===3&&intent===0)?1:0)
+  // ④ 从哪个阶段开始：有受限部位一律从「点」起手
+  var istage=(limit!==3)?0:(time===2?2:(time===1?1:0))
+  var tags=[]
+  for(var i=0;i<QUIZ_TAG.length;i++){var v=a[i];if(typeof v==='number'&&QUIZ_TAG[i][v])tags.push(QUIZ_TAG[i][v])}
+  return {answers:a.slice(0,QUIZ.length),organ:organ,rec:rec,imode:imode,istage:istage,tags:tags}
+}
+function nv(v,d){return typeof v==='number'?v:d}
+function saveQuiz(q){try{localStorage.setItem('xy-quiz',JSON.stringify(q))}catch(_){}}
+function loadQuiz(){try{var q=JSON.parse(localStorage.getItem('xy-quiz')||'null')
+  if(q&&typeof q==='object'&&Array.isArray(q.answers)){state.quiz=q;return true}}catch(_){}return false}
+/* 把推荐落到界面状态上（首页推荐 / 音疗方向 / 练习准备页的默认值） */
+function applyQuiz(q){if(!q)return
+  state.organ=q.organ;state.rec=q.rec;state.imode=q.imode;state.istage=q.istage}
+function pgQuestion(){var Q=QUIZ[Math.min(state.qIndex,QUIZ.length-1)]||QUIZ[0]
  var steps='';
- for(var i=0;i<7;i++){if(i)steps+='<span class="sline'+(i<=state.qIndex?' done':'')+'"></span>'
+ for(var i=0;i<QUIZ.length;i++){if(i)steps+='<span class="sline'+(i<=state.qIndex?' done':'')+'"></span>'
   steps+='<span class="snode '+(i<state.qIndex?'done':(i===state.qIndex?'cur':''))+'">'+(i<state.qIndex?ic('check','width:1rem;height:1rem'):'')+'</span>'}
  return '<main class="sc" style="min-height:100dvh;display:flex;flex-direction:column;padding-bottom:3rem">'
  +'<div class="top"><button class="icbtn" data-a="back">'+ic('back')+'</button><span></span><span></span></div>'
  +'<div class="center" style="margin-top:.6rem">'+brand(4.6)+'</div>'
  +'<div class="dashline t-sub center" style="margin-top:1rem">让传统之美，滋养当下的你</div>'
- +'<div class="stepper"><span class="num">'+(state.qIndex+1)+' <i>/ 7</i></span><div class="steps">'+steps+'</div></div>'
- +'<div class="center" style="margin-top:2.6rem;font-family:var(--serif);font-size:2.5rem;font-weight:700;color:var(--ink);letter-spacing:.08em">你最近哪里容易不舒服?</div>'
- +'<p class="center" style="font-size:1.35rem;color:var(--muted);margin-top:1.2rem;line-height:1.8">你的回答将帮助我们为你生成<br>更合适的今日练习推荐，调和身心，专属定制。</p>'
- +'<div class="qgrid">'+cards.map(function(c,i){return '<button class="qcard'+(state.qSel===i?' sel':'')+'" data-a="qsel" data-i="'+i+'">'
+ +'<div class="stepper"><span class="num">'+(state.qIndex+1)+' <i>/ '+QUIZ.length+'</i></span><div class="steps">'+steps+'</div></div>'
+ +'<div class="center" style="margin-top:2.6rem;font-family:var(--serif);font-size:2.5rem;font-weight:700;color:var(--ink);letter-spacing:.08em">'+Q.title+'</div>'
+ +'<p class="center" style="font-size:1.35rem;color:var(--muted);margin-top:1.2rem;line-height:1.8">'+Q.hint+'</p>'
+ +'<div class="qgrid">'+Q.opts.map(function(c,i){return '<button class="qcard'+(state.qSel===i?' sel':'')+'" data-a="qsel" data-i="'+i+'">'
    +'<span class="ck">'+ic('check')+'</span><img src="/art/'+c[0]+'" alt=""><h4>'+c[1]+'</h4><p>'+c[2]+'</p></button>'}).join('')+'</div>'
  +'<div style="display:flex;align-items:center;gap:1.2rem;margin-top:auto;padding-top:2.6rem">'
  +'<button class="btn btn-gho" style="width:auto;padding:0 2.2rem" data-a="q-prev">'+ic('chevl','width:1.5rem;height:1.5rem')+'上一步</button>'
- +'<button class="btn" style="flex:1" data-a="q-next">下一步 '+ic('chev','width:1.5rem;height:1.5rem')+'</button>'
+ +'<button class="btn" style="flex:1" data-a="q-next">'+(state.qIndex<QUIZ.length-1?'下一步':'看推荐')+' '+ic('chev','width:1.5rem;height:1.5rem')+'</button>'
  +'<button class="tbtn" data-a="q-skip">跳过 '+ic('chev','width:1.2rem;height:1.2rem')+'</button></div>'
  +'</main>'}
 
@@ -331,18 +488,22 @@ function nav(cur,four){var h='<nav class="nav">'
  return h}
 
 /* ---------- 首页 ---------- */
-function pgHome(){var recs=[
-  ['八段锦 · 宫调','平和承载 · 12分钟','舒展身心，适合日常练习，调和气息，安定情绪。','八段锦动作柔和，调息养气，帮助舒缓压力、改善睡眠，适合在霜降时节调养身心。',['舒缓减压','调和气息','适合日常']],
+function pgHome(){var C=todayContext()
+ var recs=[
+  ['八段锦 · 宫调','平和承载 · 12分钟','舒展身心，适合日常练习，调和气息，安定情绪。','八段锦动作柔和，调息养气，帮助舒缓压力、改善睡眠，适合在'+C.T.name+'时节调养身心。',['舒缓减压','调和气息','适合日常']],
   ['八段锦 · 徵调','轻快舒扬 · 10分钟','活跃气血，适合午后练习，振奋心情。','徵调音色明快，配合开弓动作，帮助活血提神，适合午后精力不足时练习。',['提升活力','舒畅心情','适合午后']],
   ['八段锦 · 羽调','沉静滋养 · 14分钟','安定心神，适合夜晚练习，助眠安睡。','羽调深沉静谧，配合攀足动作，帮助放松腰肾，适合夜晚睡前安神。',['安神助眠','滋养腰肾','适合夜晚']]]
  var r=recs[state.rec%recs.length]
+ /* 问诊答过就不再是「人人一样」的推荐：把用户自己的答案摆到「为什么推荐给你」前面 */
+ var why=(state.quiz&&state.quiz.tags&&state.quiz.tags.length)
+   ?('按你的回答（'+state.quiz.tags.slice(0,2).join(' · ')+'），'+r[3]) : r[3]
  return '<main class="sc navpad" style="display:flex;flex-direction:column;min-height:100dvh">'
  +'<div class="hero"><img class="bg" src="/art/landscape.jpg" alt=""><div class="fade"></div>'
   +'<div class="in">'+brand(5.6)
   +'<div class="t-sub">— 让传统之美，滋养当下的你 —</div>'
-  +'<div class="jq">今日 · <span class="o">霜降</span></div>'
-  +'<div class="date">10月23日 农历九月初三</div>'
-  +'<p class="desc">霜结为霜，万物内敛，<br>正是调养身心的好时节。</p></div></div>'
+  +'<div class="jq">今日 · <span class="o">'+C.T.name+'</span></div>'
+  +'<div class="date">'+C.gLunar+(C.lunarText?(' 农历'+C.lunarText):'')+'</div>'
+  +'<p class="desc">'+C.desc[0]+'<br>'+C.desc[1]+'</p></div></div>'
  +'<div class="center" style="margin-top:1.6rem"><span class="dashline" style="display:inline-flex;font-size:1.6rem;font-weight:700;color:var(--brown);letter-spacing:.2em">'+knot()+'今日推荐</span></div>'
  +'<div class="disc-wrap"><button class="disc" data-a="go-intro">'
   +'<svg class="play" viewBox="0 0 24 24" aria-hidden="true" style="width:4.6rem;height:4.6rem;color:#FFF4E4;margin-bottom:.4rem">'+ic('play').replace('<svg viewBox="0 0 24 24" aria-hidden="true">','').replace('</svg>','')+'</svg>'
@@ -353,12 +514,12 @@ function pgHome(){var recs=[
   +'<button class="swap" data-a="swap-rec">'+ic('refresh')+'换一个</button></div>'
  +'<div class="rec-cols"><div class="l"><h4>'+r[0]+'</h4><div class="meta">'+r[1]+'</div><p>'+r[2]+'</p>'
   +'<div class="tagrow">'+r[4].map(function(t){return '<span class="tag">'+t+'</span>'}).join('')+'</div></div>'
- +'<div class="r"><h4>为什么推荐给你</h4><p>'+r[3]+'</p></div></div>'
+ +'<div class="r"><h4>为什么推荐给你</h4><p>'+why+'</p></div></div>'
  +'<div class="modebar">'
   +'<button class="mseg'+(state.mode===0?' on':'')+'" data-a="mode" data-i="0"><span class="ic">'+ic('medit')+'</span><span class="tx"><b>八段锦</b><span>经典·全身调养</span></span>'+(state.mode===0?'<span class="ckc">'+ic('check')+'</span>':'')+'</button>'
   +'<button class="mseg'+(state.mode===1?' on':'')+'" data-a="mode" data-i="1"><span class="ic">'+ic('deer')+'</span><span class="tx"><b>五禽戏</b><span>灵动·强筋养气</span></span></button>'
   +'<button class="mseg'+(state.mode===2?' on':'')+'" data-a="mode" data-i="2"><span class="ic">'+ic('dice')+'</span><span class="tx"><b>帮我选</b><span>智能推荐练习</span></span><span class="arr">›</span></button></div>'
- +'<div class="quotebar"><img src="/art/card-landscape.jpg" alt=""><p>霜降水返壑，风落木归山。<i>——《月令七十二候集解》</i></p><img src="/art/q-none.jpg" style="filter:hue-rotate(15deg)" alt=""></div>'
+ +'<div class="quotebar"><img src="/art/card-landscape.jpg" alt=""><p>'+SEASON_POEM[C.season][0]+'<i>——'+SEASON_POEM[C.season][1]+'</i></p><img src="/art/q-none.jpg" style="filter:hue-rotate(15deg)" alt=""></div>'
  +nav('home')+'</main>'}
 
 /* ---------- 八段锦进入页（练习准备） ---------- */
@@ -380,11 +541,11 @@ function pgIntro(){
   +'<div class="mode-grid">'
    +'<button class="modecard'+(state.imode===0?' sel':'')+'" data-a="imode" data-i="0"><span class="ck">'+ic('check')+'</span>'
     +'<img class="pic" src="/art/figure-pose.png" alt="">'
-    +'<div class="tt">全套 <b class="big">8</b> 式</div><div class="meta">约12分钟</div>'
+    +'<div class="tt">全套 <b class="big">8</b> 式</div><div class="meta">约12分钟 · 做到位即进下一式</div>'
     +'<div class="hr"></div><p>完整体验、循序渐进<br>调身养气，身心更佳</p></button>'
    +'<button class="modecard'+(state.imode===1?' sel':'')+'" data-a="imode" data-i="1">'+(state.imode===1?'<span class="ck">'+ic('check')+'</span>':'<span class="rd"></span>')
     +'<img class="pic" src="/art/card-landscape.jpg" alt="">'
-    +'<div class="tt">招牌 <b class="big">3</b> 式</div><div class="meta">约5分钟</div>'
+    +'<div class="tt">招牌 <b class="big">3</b> 式</div><div class="meta">约5分钟 · 做到位即进下一式</div>'
     +'<div class="hr"></div><p>精选核心，轻松跟练<br>快速放松，唤醒状态</p></button>'
   +'</div></section>'
  +'<section class="card i-sec"><div class="sec-h">'+knot()+'选择练习阶段<span class="sec-note">从"点"到"线"再到"面"，循序渐进，稳步提升</span></div>'
@@ -407,7 +568,7 @@ function pgIntro(){
 /* ---------- 八段锦八式内容（真实动作要点 / 常见问题；式↔弦沿用 train/src/data/strings.json） ---------- */
 var PRACTICE_INFO=[
  {name:'双手托天理三焦',preview:'抬头上托，舒展胸廓，感受三焦通畅。',string:1,
-  points:['十指交叉于腹前，掌心向上，缓缓上托至头顶','上托时配合吸气，两臂伸直，肩沉肘坠','目视手背，足跟可微微提起，体会周身拔伸','下落时呼气，双手经体侧按至腹前'],
+  points:['十指交叉于腹前，掌心向上，缓缓上托至头顶','上托时配合吸气，尽量向上伸展，不必强求绷直，肩沉肘坠','目视手背，足跟可微微提起，体会周身拔伸','下落时呼气，双手经体侧按至腹前'],
   faq:[['手举不直怎么办？','先求松沉再求高度：肩要沉、肘要坠，宁可矮一点，也不要耸肩硬顶。'],
        ['要不要踮脚？','初学只做上托即可；站稳之后再加脚跟微提，避免晃动。']]},
  {name:'左右开弓似射雕',preview:'马步拉弓，打开胸背，气机一开一合。',string:2,
@@ -480,45 +641,92 @@ function pgPractice(){var i=state.progress,poses=practicePoses(),info=PRACTICE_I
  +'</main>'}
 
 /* ---------- 结束页 ---------- */
-function pgDone(){var colors=[['#7FA08C','准确'],['#D9B25F','偏差'],['#C4472F','未命中']]
+/* 真实结果来源：s4 跟练时由 train/src/stores/shellBridge.js 写入 localStorage['xy-last-session']。
+   改前这里是写死的 89 分 / 12 分钟 / 146·162 与 seed=7 的伪随机点阵；
+   现在没有真实会话就一律显示「—」，不编分数、不编时长、不编偏差。 */
+function lastSession(){try{var s=JSON.parse(localStorage.getItem('xy-last-session')||'null')
+  if(s&&typeof s==='object'&&typeof s.moves==='number')return s}catch(_){}
+ return null}
+var ND_EMPTY='#E7DCC6';
+var TONE_CN={gong:'宫调',shang:'商调',jue:'角调',zhi:'徵调',yu:'羽调'};
+function doneAvg(S){var a=(S&&S.scores&&S.scores.length)?S.scores:[]
+ if(!a.length)return null
+ return Math.round(a.reduce(function(x,y){return x+(+y||0)},0)/a.length)}
+/* 第 n 弦对应的完成度：第 n 式 → 第 n 弦；第 8 式（收势）＝七弦齐鸣，与 pluckForStep 同一套对应关系 */
+function stringScore(S,si){if(!S||!S.scores||!S.scores.length)return null
+ var a=S.scores
+ if(si<a.length)return (+a[si]||0)/100
+ if(a.length>=8)return (+a[7]||0)/100
+ return null}
+function pgDone(){var S=lastSession(),st=recordStats(),sk=streak()
+ var avg=doneAvg(S),hasReal=!!S,hasScore=avg!=null
  var seed=7;function rnd(){seed=(seed*9301+49297)%233280;return seed/233280}
+ /* 点阵：逐点仍按改前的「两次 rnd 消耗」取 left（坐标与改前逐点一致，布局不动），
+    只把颜色由伪随机改成该弦的真实完成度；无识别结果时统一为空白色。 */
  var rows='';for(var r=0;r<7;r++){var ns=''
-  for(var n=0;n<7;n++){var p=rnd();var c=p<.62?'#7FA08C':(p<.87?'#D9B25F':'#C4472F');ns+='<span class="nd" style="left:'+(6+rnd()*88)+'%;background:'+c+'"></span>'}
+  for(var n=0;n<7;n++){var p=rnd();var c=ND_EMPTY
+   if(hasScore){var v=stringScore(S,r);if(v!=null)c=v>=.75?'#7FA08C':(v>=.5?'#D9B25F':'#C4472F')}
+   ns+='<span class="nd" style="left:'+(6+rnd()*88)+'%;background:'+c+'"></span>'}
   rows+='<div class="srow">'+ns+'</div>'}
+ var colors=[['#7FA08C','准确'],['#D9B25F','偏差'],['#C4472F','未命中']]
+ var grade=hasScore?(avg>=85?'良好':(avg>=70?'尚可':'待提升')):'未评估'
+ var h4=hasScore?(avg>=85?'琴音渐稳，心气调和':(avg>=70?'渐入佳境，仍有空间':'起步即修行，慢即是快')):'本次未做动作识别'
+ var blurb=hasScore?(avg>=85?'节奏基本准确，动作平稳自然，继续保持，下次会更好！'
+   :(avg>=70?'整体完成度不错；对完成度偏低的式放慢半拍、把动作做到位，比做快更有效。'
+   :'本次完成度偏低：先求动作到位，再求连贯。跟着示范慢练，会比赶进度进步更快。'))
+  :'没有采集到姿态数据，所以不显示评分；练习时长与完成动作数照实记录在下方。'
+ var note=hasScore?'本页数据来自本次跟练的真实记录：完成动作数、练习时长、逐式完成度均由识别结果统计。'
+  :(hasReal?'本页的练习时长与完成动作数来自本次跟练；本次未启用动作识别，因此不显示评分。'
+  :'还没有跟练记录：本页所有指标显示「—」，不做任何推测。想拿到真实成绩，请到跟练页开启摄像头。')
+ var off=hasScore?(295*(1-Math.min(100,Math.max(0,avg))/100)):295
+ var secs=hasReal?Math.max(0,Math.round(S.seconds||0)):0
+ var minTxt=hasReal?(secs>=60?(Math.round(secs/60)+'<i>分钟</i>'):(secs+'<i>秒</i>')):'—'
+ var moveTxt=hasReal?(S.moves+'<i>/ '+(S.total||8)+'</i>'):'—'
+ var moveSmall=hasScore?('平均完成度 '+avg+'%'):(hasReal?'未做动作识别':'暂无记录')
+ var skTxt=sk>0?(sk+'<i>天</i>'):'—'
+ var nextIdx=hasReal?Math.min(7,S.moves):0
+ var goal=hasScore?('继续练习「'+POSES[nextIdx]+'」，把完成度提到 '+Math.min(99,Math.max(avg+5,85))+'% 以上。')
+  :('先从「'+POSES[nextIdx]+'」开始：跟着示范做满一遍；再去跟练页开启识别，就有逐式完成度可看。')
+ var fixTxt=hasScore?'逐式完成度见上方琴谱：完成度偏低的式，放慢半拍把动作做到位，胜过加快做完。'
+  :'本次未做动作识别，无法判断个体动作偏差；请以跟练页里教练的实时提示为准。'
+ var howTxt='保持呼吸自然，以肘带手、指尖放松；每个动作到末端略停一瞬，再缓缓收回。'
+ var trackSub=hasReal?((S.moves+' / '+(S.total||8)+' 式已完成')+(S.tone&&TONE_CN[S.tone]?(' · '+TONE_CN[S.tone]):'')):(practicePoses().length+' 式预览 · '+TRACKS[0].tone)
+ var recLead=hasReal?'结合本次的练习时长与完成度，推荐温服一碗百合莲子羹，有助于舒缓情绪、宁心安神，让身心更好地恢复。'
+  :'练习后温服一碗百合莲子羹，有助于舒缓情绪、宁心安神，让身心更好地恢复。'
  return '<main class="sc" style="padding-bottom:3.4rem;position:relative">'
  +'<img class="done-hbg" src="/art/landscape.jpg" alt="">'
  +'<div class="top"><button class="icbtn" data-a="back">'+ic('back')+'</button><span></span><button class="icbtn" data-a="share-sheet" aria-label="分享琴谱">'+ic('share')+'</button></div>'
  +'<div style="margin-top:1rem;position:relative">'+brand(4)+'</div>'
  +'<div class="t-sub" style="margin-top:.6rem;position:relative">以琴养心，日日精进</div>'
- +'<h1 class="done-h" style="position:relative">动作预览完成</h1><p class="sec-note" style="position:relative">以下评分与建议为示例，未进行动作识别或测量。</p>'
+ +'<h1 class="done-h" style="position:relative">'+(hasReal?'跟练完成':'动作预览完成')+'</h1><p class="sec-note" style="position:relative">'+note+'</p>'
  +'<p class="done-p" style="position:relative">一曲既终，心自安然。<br>弦音有度，步履生香。</p>'
  +'<section class="card score-card"><div class="ring">'
   +'<svg viewBox="0 0 124 124"><circle cx="62" cy="62" r="52" fill="none" stroke="#EADCC2" stroke-width="9"/>'
-  +'<circle cx="62" cy="62" r="52" fill="none" stroke="#5E7C6B" stroke-width="9" stroke-linecap="round" stroke-dasharray="295" stroke-dashoffset="59" transform="rotate(-90 62 62)"/>'
+  +'<circle cx="62" cy="62" r="52" fill="none" stroke="#5E7C6B" stroke-width="9" stroke-linecap="round" stroke-dasharray="295" stroke-dashoffset="'+off+'" transform="rotate(-90 62 62)"/>'
   +'<circle cx="62" cy="10" r="5" fill="#FDF9EF" stroke="#C9A063" stroke-width="2.5"/></svg>'
-  +'<div class="in"><b>89<i>分</i></b><span>良好</span></div></div>'
-  +'<div class="score-r"><h4>琴音渐稳，心气调和</h4><p>节奏基本准确，音色平稳自然，继续保持，下次会更好！</p>'
+  +'<div class="in"><b>'+(hasScore?(avg+'<i>分</i>'):'—')+'</b><span>'+grade+'</span></div></div>'
+  +'<div class="score-r"><h4>'+h4+'</h4><p>'+blurb+'</p>'
   +'<div class="statrow">'
-   +'<div class="st"><span class="lb">'+ic('timer')+'练习时长</span><div class="v">12<i>分钟</i></div><small>专注投入</small></div>'
-   +'<div class="st"><span class="lb">'+ic('bars')+'命中数</span><div class="v">146<i>/162</i></div><small>准确率 90%</small></div>'
-   +'<div class="st"><span class="lb">'+ic('cal')+'连续打卡</span><div class="v">7<i>天</i></div><small>持之以恒</small></div></div></div></section>'
+   +'<div class="st"><span class="lb">'+ic('timer')+'练习时长</span><div class="v">'+minTxt+'</div><small>'+(hasReal?'专注投入':'暂无记录')+'</small></div>'
+   +'<div class="st"><span class="lb">'+ic('bars')+(hasReal?'完成动作':'命中数')+'</span><div class="v">'+moveTxt+'</div><small>'+moveSmall+'</small></div>'
+   +'<div class="st"><span class="lb">'+ic('cal')+'连续打卡</span><div class="v">'+skTxt+'</div><small>'+(sk>0?'持之以恒':'暂无记录')+'</small></div></div></div></section>'
  +'<section class="card trackcard"><span class="sq">'+ic('music')+'</span>'
-  +'<div class="tx"><b>'+TRACKS[0].title+' <i>›</i></b><span>'+practicePoses().length+' 式预览 · '+TRACKS[0].tone+'</span></div>'
+  +'<div class="tx"><b>'+TRACKS[0].title+' <i>›</i></b><span>'+trackSub+'</span></div>'
   +'<button class="rep" data-a="play-full" aria-label="完整回放'+TRACKS[0].title+'">'+ic(musicPlaying()&&musKey()==='meihua'?'pause':'play')+(musicPlaying()&&musKey()==='meihua'?'暂停回放':'完整回放')+'</button></section>'
  +'<div class="fret"><span class="lab">一二三四五六七</span>'+rows
-  +'<div class="legend">'+colors.map(function(c){return '<span><i style="background:'+c[0]+'"></i>'+c[1]+'</span>'}).join('')+'</div></div>'
+  +'<div class="legend">'+(hasScore?colors.map(function(c){return '<span><i style="background:'+c[0]+'"></i>'+c[1]+'</span>'}).join(''):('<span><i style="background:'+ND_EMPTY+'"></i>'+(hasReal?'本次未做动作识别':'暂无跟练记录')+'</span>'))+'</div></div>'
  +'<section class="card" style="padding:1.6rem;margin-top:1.6rem">'
   +'<div class="sec-h">'+knot()+'练习反馈<button class="sec-note" data-a="analysis">查看详细分析 ›</button></div>'
   +'<div class="fb-grid">'
-   +'<div class="fb"><span class="fimg"><img src="/art/figure-pose.png" alt=""></span><b>动作纠错</b><p>右手按弦时手腕略高，建议放松肩颈，手腕自然下沉。</p></div>'
-   +'<div class="fb"><span class="fimg"><img src="/art/guqin.png" alt=""></span><b>改正方法</b><p>练习时保持手臂放松以肘带手，注意指尖发力，控制力度。</p></div>'
-   +'<div class="fb"><span class="ic">'+ic('target')+'</span><b>明日目标</b><p>继续练习本曲第3段，提升节奏稳定性，尝试达到 90% 以上。</p></div>'
+   +'<div class="fb"><span class="fimg"><img src="/art/figure-pose.png" alt=""></span><b>动作纠错</b><p>'+fixTxt+'</p></div>'
+   +'<div class="fb"><span class="fimg"><img src="/art/guqin.png" alt=""></span><b>改正方法</b><p>'+howTxt+'</p></div>'
+   +'<div class="fb"><span class="ic">'+ic('target')+'</span><b>明日目标</b><p>'+goal+'</p></div>'
    +'<div class="fb"><span class="ic">'+ic('lotus')+'</span><b>鼓励话语</b><p>今日的坚持，让心更平静。每一次，皆是进步，继续加油！</p></div></div></section>'
  +'<section class="card" style="padding:1.6rem;margin-top:1.4rem">'
   +'<div class="sec-h">'+knot()+'今日食养推荐<button class="sec-note" data-a="recipe">顺时而食，滋养身心 ›</button></div>'
   +'<div class="food"><div class="picw"><img src="/art/q-food.jpg" alt=""></div>'
   +'<div class="tx"><b>百合莲子羹</b><div class="tags"><span class="tag grn">养心安神</span><span class="tag org">润燥助眠</span><span class="tag">适合今日</span></div>'
-  +'<p>根据你今日的练习状态，推荐滋养心神的百合莲子羹，有助于舒缓情绪、宁心安神，帮助提升睡眠质量，让身心更好地恢复。</p></div></div></section>'
+  +'<p>'+recLead+'</p></div></div></section>'
  +'<div class="done-btns"><button class="btn btn-green" data-a="finish" style="flex:1.2">'+ic('check','width:2rem;height:2rem')+'完成打卡</button>'
   +'<button class="btn btn-gho" data-a="again">'+ic('refresh','width:1.8rem;height:1.8rem;color:#6B4226')+'再练一次</button>'
   +'<button class="btn btn-gho" data-a="share-sheet">'+ic('share','width:1.8rem;height:1.8rem;color:#6B4226')+'分享琴谱</button></div>'
@@ -658,14 +866,20 @@ function aboutHTML(){return '<div class="xs-item"><b>弦养 · Xianyang v1.0.0</
   +'<div class="xs-item"><b>已接入的真实能力</b><p>古琴曲目播放（2 首真人录音）、七弦散音试音与「动作→琴弦」触发、练习打卡与本地记录、头像更换、分享图导出。</p></div>'
   +'<div class="xs-item"><b>仍未接入（界面已如实标注）</b><p>五禽戏素材、设备体征（心率 / 睡眠）、线上账号与云同步。</p></div>'
   +'<div class="xs-note">素材署名：七弦散音 · RafaelCaro · CC BY 4.0；《梅花三弄》· RafaelCaro · CC BY 4.0；《醉渔唱晚》· 卫仲乐 1934 · archive.org CC0。</div>'}
-function analysisHTML(){var poses=practicePoses();
+function analysisHTML(){var poses=practicePoses();var S=lastSession(),avg=doneAvg(S);
+  var head=avg!=null
+    ? '<div class="xs-note">本次跟练真实记录 · 平均完成度 '+avg+'% · 用时 '+fmtDur(S.seconds||0)+' · 完成 '+S.moves+' / '+(S.total||8)+' 式。下表为逐式完成度（识别结果），仅作参考，不替代医嘱。</div>'
+    : '<div class="xs-note">最近一次跟练'+(S?('记录了 '+S.moves+' / '+(S.total||8)+' 式、用时 '+fmtDur(S.seconds||0)+'，但未做动作识别，所以没有评分'):'还没有记录')+'。下面是本套动作的式序与要领；真实判定请在跟练页进行。</div>';
   var rows=poses.map(function(n,i){var p=PRACTICE_INFO[i]||{};
-    return '<div class="xs-item"><b>第 '+(i+1)+' 式 · '+n+'</b><p>对应'+(p.string?('第 '+p.string+' 弦'):'七弦齐鸣')+'。要领：'+((p.points||[])[0]||'')+'</p></div>'}).join('');
-  return '<div class="xs-note">本页是主壳界面预览（静态复刻），未做动作识别与测量；下面是本次的式序与要领，真实判定请在跟练页进行。</div>'+rows
+    var sc=stringScore(S,i);
+    return '<div class="xs-item"><b>第 '+(i+1)+' 式 · '+n+'</b><p>对应'+(p.string?('第 '+p.string+' 弦'):'七弦齐鸣')+'。要领：'+((p.points||[])[0]||'')
+      +(sc!=null?('　完成度 '+Math.round(sc*100)+'%'):'　完成度 —')+'</p></div>'}).join('');
+  return head+rows
    +'<button class="btn" data-a="goto-s4" style="margin-top:1.4rem">去真实跟练页（摄像头 + 教练）</button>'}
-function recipeHTML(){return '<div class="xs-item"><b>百合莲子羹</b><p>材料：干百合 15g、去芯莲子 20g、粳米 40g、冰糖少许。</p></div>'
+function recipeHTML(){var C=todayContext();
+  return '<div class="xs-item"><b>百合莲子羹</b><p>材料：干百合 15g、去芯莲子 20g、粳米 40g、冰糖少许。</p></div>'
   +'<div class="xs-item"><b>做法</b><p>莲子温水泡 1 小时；与粳米同煮 30 分钟；下百合同煮 10 分钟；起锅前加冰糖调味。</p></div>'
-  +'<div class="xs-item"><b>为什么今天推荐</b><p>霜降时节燥气偏盛，百合润燥、莲子养心，练后温服，有助于安神入睡。（食养建议，不替代医嘱）</p></div>'
+  +'<div class="xs-item"><b>为什么今天推荐</b><p>'+C.T.name+'时节 · '+SEASON_RECIPE_WHY[C.season]+'（食养建议，不替代医嘱）</p></div>'
   +'<div class="xs-item"><b>换着吃</b><p>山药小米粥（健脾）、银耳雪梨汤（润肺）——同样顺时而食。</p></div>'}
 function stageHTML(){var st=recordStats(),on=st.n?Math.min(8,st.days+2):DESIGN.stageDone;
   return '<div class="xs-note">八段锦 · 中级阶段共 8 节。进度按练习天数推进，当前 '+on+' / 8。</div>'
@@ -758,8 +972,14 @@ document.addEventListener('click',function(e){
     case 'back':go(state.screen==='body'?'profile':'home');break
     case 'qsel':state.qSel=+el.getAttribute('data-i');state.answers[state.qIndex]=state.qSel;paint();break
     case 'q-prev':if(state.qIndex>0){state.qIndex--;state.qSel=typeof state.answers[state.qIndex]==='number'?state.answers[state.qIndex]:null;paint()}else go('home');break
-    case 'q-next':if(typeof state.qSel!=='number'){toast('请选择一项后再继续');return}state.answers[state.qIndex]=state.qSel;if(state.qIndex<6){state.qIndex++;state.qSel=typeof state.answers[state.qIndex]==='number'?state.answers[state.qIndex]:null;paint()}else go('home');break
-    case 'q-skip':go('home');break
+    case 'q-next':{if(typeof state.qSel!=='number'){toast('请选择一项后再继续');return}
+      state.answers[state.qIndex]=state.qSel
+      if(state.qIndex<QUIZ.length-1){state.qIndex++;state.qSel=typeof state.answers[state.qIndex]==='number'?state.answers[state.qIndex]:null;paint();break}
+      /* 第 7 题答完才结算：答案真的参与推荐（音疗方向 / 今日调式 / 练哪一套 / 从哪个阶段起），并存本机 */
+      var qz=recommendFromAnswers(state.answers);state.quiz=qz;saveQuiz(qz);applyQuiz(qz);go('home')
+      toast('已按你的回答定制 · '+['全套 8 式','招牌 3 式'][qz.imode]+' · 从「'+['点','线','面'][qz.istage]+'」起 · 音疗方向「'+['心','肝','脾','肺','肾'][qz.organ]+'」')
+      break}
+    case 'q-skip':state.answers=[];go('home');break
     /* ---- 导航 ---- */
     case 'nav-audio':go('audio');break
     case 'nav-home':go('home');break
@@ -770,7 +990,18 @@ document.addEventListener('click',function(e){
     case 'swap-rec':state.rec=(state.rec+1)%3;paint();toast('已换一份推荐：'+['宫调 · 平和承载','徵调 · 轻快舒扬','羽调 · 沉静滋养'][state.rec]);break
     case 'mode':{var mi=el.dataset.i;
       if(mi==='1'){openSheet('五禽戏','<div class="xs-item"><b>素材未随包交付</b><p>五禽戏（虎鹿熊猿鸟）目前没有动作示范素材与判定标定，所以没有开放练习入口——界面上如实标注，不做假按钮。</p></div><button class="btn" data-a="goto-s4" style="margin-top:1.4rem">去练八段锦（真实跟练页）</button>');break}
-      if(mi==='2'){state.rec=Math.floor(Math.random()*3);state.mode=0;paint();toast('帮你选好了：八段锦 · '+['宫调 · 平和承载','徵调 · 轻快舒扬','羽调 · 沉静滋养'][state.rec]);break}
+      if(mi==='2'){
+        /* 「帮我选」真读问诊结果：state.quiz 由 loadQuiz() 在启动时载入（见 init()），
+           applyQuiz 会把 organ/rec/imode/istage 落到界面状态上。
+           没做过问诊时不随机、不假装算过 —— 如实说按最稳妥的默认给。 */
+        if(state.quiz&&typeof state.quiz.rec==='number'){
+          applyQuiz(state.quiz);state.mode=0;paint();
+          toast('已按你的问诊回答推荐：八段锦 · '+['宫调 · 平和承载','徵调 · 轻快舒扬','羽调 · 沉静滋养'][state.rec]+' · 从「'+['点','线','面'][state.istage]+'」起');
+        }else{
+          state.mode=0;paint();
+          toast('还没做问诊 · 先按最稳妥的「八段锦 · 宫调」；做完首页那几道题会更贴合你');
+        }
+        break}
       state.mode=0;paint();break}
     /* ---- 练习准备 ---- */
     case 'imode':state.imode=+el.getAttribute('data-i');paint();break
@@ -831,8 +1062,11 @@ document.addEventListener('click',function(e){
     case 'next-step':if(state.progress<practicePoses().length-1){state.progress++;paint();pluckForStep(state.progress)}else{state.running=false;stopMusic();go('done')}break
     /* ---- 结束页 ---- */
     case 'finish':{var fs=state.sessionStart?(Date.now()-state.sessionStart)/1000:0;
+      /* 预览页的停留时长也是真实花掉的时间，照实累加（与 s4 侧 shellBridge 写的记录按自然日相加）。
+         state.sessionStart 未设置（例如从 URL 直接进结束页）时不补任何时长。 */
       var rr=checkin(practicePoses().length,fs);stopMusic();go('home');
-      toast(rr.first?('打卡成功 · 第 1 次打卡 · 连续 '+rr.streak+' 天'):('打卡成功 · 累计 '+rr.n+' 次 · 连续 '+rr.streak+' 天'+(rr.ok?'':'（本机存储不可用）')));
+      toast(rr.first?('打卡成功 · 第 1 次打卡 · 连续 '+rr.streak+' 天 · 今日 '+fmtDur(rr.rec.sec))
+        :('打卡成功 · 累计 '+rr.n+' 次 · 连续 '+rr.streak+' 天 · 今日 '+fmtDur(rr.rec.sec)+(rr.ok?'':'（本机存储不可用）')));
       break}
     case 'again':state.progress=0;state.running=true;state.sessionStart=Date.now();go('practice');pluckForStep(0);break
     case 'analysis':openSheet('练习详细分析',analysisHTML());break
@@ -873,6 +1107,7 @@ document.addEventListener('keydown',function(e){
 function init(){
   root=document.getElementById('app')
   root.classList.add('phone');loadBodyState();loadAudioPref();loadRecords();loadProfile();
+  loadQuiz();applyQuiz(state.quiz);   // 上次问诊的答案要能记住，并继续驱动推荐
   var q=new URLSearchParams(location.search)
   if(q.get('first')==='1'){try{localStorage.removeItem('xy-state')}catch(_){}}
   var sv=q.get('screen');if(sv&&PAGES[sv]){state.screen=sv}

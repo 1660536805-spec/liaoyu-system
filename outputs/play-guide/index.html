@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>弦养 · 本机跑起来怎么玩</title>
+<style>
+  :root{ --xuan:#FBF3E3; --xuan2:#FDF9EF; --zhu:#B0552E; --zhu2:#CE7B48; --qing:#6E8F7C; --jin:#C9A97E;
+         --ink:#3A322B; --ink2:#6B5F53; --line:#E6DCCB; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--xuan);color:var(--ink);line-height:1.75;
+       font-family:"PingFang SC","Source Han Sans SC","Microsoft YaHei",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1020px;margin:0 auto;padding:38px 24px 70px}
+  h1{font-family:"Songti SC",Georgia,serif;font-size:30px;margin:0 0 6px}
+  .sub{color:var(--ink2);font-size:14px;margin-bottom:24px}
+  h2{font-family:"Songti SC",Georgia,serif;font-size:20px;margin:32px 0 10px;padding-left:11px;border-left:4px solid var(--zhu2)}
+  .card{background:var(--xuan2);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin:13px 0}
+  .hero{border-left:4px solid var(--qing)}
+  .cmd{display:block;background:#2C2A27;color:#F4EFE6;padding:12px 16px;border-radius:10px;margin:10px 0;
+       font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;overflow-x:auto;white-space:pre}
+  code{background:rgba(58,50,43,.07);padding:1px 6px;border-radius:5px;font-size:13px;
+       font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  table{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:rgba(201,169,126,.16);font-weight:600}
+  .steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+  .steps li{counter-increment:s;position:relative;padding:8px 0 8px 42px;border-bottom:1px dashed var(--line)}
+  .steps li:last-child{border-bottom:0}
+  .steps li::before{content:counter(s);position:absolute;left:0;top:9px;width:26px;height:26px;border-radius:50%;
+       background:var(--zhu2);color:#fff;text-align:center;line-height:26px;font-size:13px;font-weight:600}
+  .shot{margin:12px 0 22px}
+  .shot img{max-width:100%;border:1px solid var(--line);border-radius:10px;display:block}
+  .shot p{margin:6px 0 0;font-size:13px;color:var(--ink2)}
+  .twoup{display:flex;gap:16px;flex-wrap:wrap}
+  .twoup .shot{flex:1 1 300px}
+  .warn{background:rgba(176,85,46,.07);border-color:rgba(176,85,46,.3)}
+  .foot{margin-top:30px;padding-top:14px;border-top:1px dashed var(--line);color:var(--ink2);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>弦养 · 本机跑起来怎么玩</h1>
+  <div class="sub">已经在无头浏览器里把下面每一步都真跑过一遍：<b>0 报错</b>，教练小人、摄像头识别画面、打卡流程全部正常。你照做即可。</div>
+
+  <h2>一、起来（两步）</h2>
+  <div class="card hero">
+    <p style="margin-top:0"><b>方式 A · 双击</b>（推荐）</p>
+    <p>在访达里打开 <code>/Users/leo/WorkBuddy/疗愈</code>，双击 <b>启动预览.command</b>。会自动起服务并打开浏览器；关掉那个终端窗口即停止。</p>
+    <p style="margin-bottom:4px"><b>方式 B · 粘一行命令</b>（若双击被系统拦）</p>
+    <span class="cmd">cd /Users/leo/WorkBuddy/疗愈 &amp;&amp; node scripts/preview-all.cjs 5400</span>
+    <p style="margin-bottom:0">然后浏览器打开 <code>http://127.0.0.1:5400/</code>。停止：在该终端按 <code>Control-C</code>。</p>
+  </div>
+  <div class="card warn">
+    <p style="margin:0"><b>为什么必须你来点这一下：</b>这台机器上，我启动的后台进程在每次操作结束后都会被回收（已实测两次，交给 macOS 的 launchd 托管也被权限拦下），所以服务没法从我这边常驻。你用自己的终端跑，它就一直是活的。</p>
+  </div>
+
+  <h2>二、四个入口</h2>
+  <table>
+    <tr><th>入口</th><th>地址</th><th>是什么</th></tr>
+    <tr><td>主壳（产品应用）</td><td><code>/</code></td><td>加载页 → 7 步体质问诊 → 首页 → 引导 → 打卡。音乐、分享图、我的记录都在这里</td></tr>
+    <tr><td>真跟练页</td><td><code>/s4/#/train</code></td><td>MediaPipe 姿态识别 + 陪练教练。**必须给摄像头权限**</td></tr>
+    <tr><td>启动台</td><td><code>/outputs/preview/</code></td><td>一张页面上所有候选产物与产品应用的入口，用来避免「点错入口」</td></tr>
+    <tr><td>完整体验</td><td><code>/outputs/experience/</code></td><td>产品风格的推荐动线</td></tr>
+  </table>
+
+  <h2>三、玩一遍的完整动线（实测截图）</h2>
+  <ol class="steps">
+    <li>打开 <code>/</code>，等加载页出现，点「进入弦养」。</li>
+    <li>问诊 7 题：<b>每题先点一张卡，再点「下一题」</b>（不选会提示「请选择一项后再继续」）。</li>
+    <li>落到首页（今日 · 节气 / 今日推荐）。</li>
+    <li>想看听的部分 → 底部「音疗」；想练 → 「开始练」进引导页，选<b>模式（全套 8 式 / 招牌 3 式）</b>与<b>阶段（点 / 线 / 面）</b>。</li>
+    <li>点「开始动作预览」→ 跳到真正的跟练页 <code>/s4/#/train</code>。</li>
+    <li>跟练页：左上教练小窗循环示范，右侧是你自己的摄像头画面。**判定闸门**——动作做到位才进下一式，没通就一直练这一式（点「跳过本式」可手动过）。</li>
+  </ol>
+
+  <div class="twoup">
+    <div class="shot"><img src="01-加载页.png" alt="加载页" /><p>① 加载页</p></div>
+    <div class="shot"><img src="02-问诊-第1题.png" alt="问诊" /><p>② 体质问诊（选卡 → 下一题）</p></div>
+  </div>
+  <div class="shot"><img src="04-选模式与阶段.png" alt="引导页" /><p>③ 引导页：选模式与阶段，底部就是去真跟练的口子</p></div>
+  <div class="shot"><img src="05-音疗页.png" alt="音疗页" /><p>④ 音疗页：曲库只列真能播的两首；七弦散音可点</p></div>
+  <div class="shot"><img src="06-s4跟练页.png" alt="跟练页（手机版）" /><p>⑤ 真跟练页（手机尺寸）：上方教练小窗 + 摄像头识别画面 + 底部「教练指引 / 自由练习」</p></div>
+  <div class="shot"><img src="08-桌面端并排.png" alt="桌面端并排" /><p>⑥ 桌面端（≥768px）自动变成「教练画面 / 摄像头画面」等宽等高并排</p></div>
+
+  <h2>四、两个必知的小事</h2>
+  <div class="card">
+    <ul style="margin:0">
+      <li><b>摄像头</b>：跟练页首次进入浏览器会问权限，点「允许」。不想开也能用——页面上有「点一下也算响（摄像头不可用）」的兜底按钮。</li>
+      <li><b>声音</b>：浏览器不允许自动播放，进页面后<b>点一下</b>任意播放/琴弦才会响。音疗页列出的曲子都是真有干净音源的。</li>
+    </ul>
+  </div>
+
+  <div class="foot">
+    实测脚本：<code>outputs/play-guide/guide.cjs</code>（走完加载→问诊→首页→引导→s4 跟练→启动台，并截 8 张图）。<br/>
+    服务脚本：<code>scripts/preview-all.cjs</code>（一个端口同时提供 dist/ 与 outputs/）。
+  </div>
+</div>
+</body>
+</html>

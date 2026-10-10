@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>诊断 · 教练小人胳膊为什么还是「怪」</title>
+<style>
+  :root{ --xuan:#FBF3E3; --xuan2:#FDF9EF; --zhu:#B0552E; --zhu2:#CE7B48; --qing:#6E8F7C; --jin:#C9A97E; --ink:#3A322B; --ink2:#6B5F53; --line:#E6DCCB; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--xuan);color:var(--ink);
+       font-family:"PingFang SC","Source Han Sans SC","Microsoft YaHei",system-ui,sans-serif;
+       line-height:1.75;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 26px 72px}
+  h1{font-family:"Songti SC",Georgia,serif;font-size:31px;margin:0 0 6px;letter-spacing:.5px}
+  .sub{color:var(--ink2);font-size:14px;margin-bottom:26px}
+  .badge{display:inline-block;font-size:12px;padding:2px 10px;border-radius:99px;background:rgba(110,143,124,.14);color:#3F6A57;margin-left:8px;vertical-align:2px}
+  h2{font-family:"Songti SC",Georgia,serif;font-size:21px;margin:34px 0 12px;padding-left:11px;border-left:4px solid var(--zhu2)}
+  .card{background:var(--xuan2);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:14px 0}
+  .verdict{border-left:4px solid var(--qing)}
+  table{border-collapse:collapse;width:100%;font-size:14px;margin:6px 0}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left}
+  th{background:rgba(201,169,126,.16);font-weight:600}
+  td.num{font-variant-numeric:tabular-nums;font-family:ui-monospace,Menlo,monospace}
+  .bad{color:#B4452E;font-weight:600}
+  .ok{color:#3F6A57;font-weight:600}
+  code{background:rgba(58,50,43,.06);padding:1px 6px;border-radius:5px;font-size:13px;
+       font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  img{max-width:100%;border-radius:10px;border:1px solid var(--line);display:block;margin:12px 0}
+  ul{margin:8px 0 8px 4px;padding-left:20px}
+  li{margin:5px 0}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:11px 0;background:#fff}
+  .opt b{color:var(--zhu)}
+  .rec{background:rgba(110,143,124,.09);border-color:rgba(110,143,124,.45)}
+  .foot{margin-top:34px;padding-top:16px;border-top:1px dashed var(--line);color:var(--ink2);font-size:13px}
+  .kpi{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 2px}
+  .kpi div{flex:1 1 150px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 14px}
+  .kpi b{display:block;font-size:23px;color:var(--zhu);font-variant-numeric:tabular-nums;line-height:1.3}
+  .kpi span{font-size:12.5px;color:var(--ink2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>教练小人胳膊：为什么「修过了还是怪」<span class="badge">诊断 · 非改动</span></h1>
+  <div class="sub">对象：跟练页 <code>/s4/#/train</code> 左上角「循环陪练中」小窗里的白练功服小人（＝房间版小人）。本页只出结论与证据，未改任何产品代码。</div>
+
+  <h2>一、先回答「为什么还是这样」</h2>
+  <div class="card verdict">
+    <p style="margin-top:0"><b>因为这一轮之后，它一次都没再被改过。</b>修复确实已经落地，而且我逐项验证过：</p>
+    <table>
+      <tr><th>检查项</th><th>结果</th></tr>
+      <tr><td>源码臂长常量</td><td class="ok">已修 —— <code>room.js:224</code> 与 <code>CoachFigure.vue:40</code> 都是 <code>TJ={UA:43.7,FA:38.3}</code>（总 82）</td></tr>
+      <tr><td>构建产物 <code>dist/s4</code></td><td class="ok">已跟上 —— <code>assets/index-COFFjIT7.js</code> 里就是 43.7/38.3（构建 11:23，晚于源改动 11:22）</td></tr>
+      <tr><td>git 状态</td><td class="ok">HEAD = <code>9539a45</code>，包含修复提交 <code>c3ee790</code>；GitHub / Gitee 双远端同步、无落后、无本地未提交改动</td></tr>
+      <tr><td>是否被别处覆盖</td><td class="ok">没有 —— 教练小窗固定用房间版小人（<code>variant="coach"</code> → 房间版），不存在「回落到旧火柴小人」的分支</td></tr>
+    </table>
+    <p style="margin-bottom:0">所以：如果你看到的是旧样子，最可能是<b>浏览器缓存了旧页面</b>（请硬刷新 <code>Cmd+Shift+R</code>）；否则你看到的，就是「修复后」的真实样子 —— 也就是本页下面要说的问题：<b>那次修复只解决了「尺度错了」，没解决「手离肩太近」。</b></p>
+  </div>
+
+  <h2>二、到底还怪在哪（逐帧量化）</h2>
+  <div class="card">
+    <p style="margin-top:0">我直接解析 SVG 里手臂路径的三个端点（肩 / 肘 / 腕），在整段动画里逐帧算<b>肘内夹角</b>（180°＝完全伸直，90°＝直角折）：「两手托天」一个循环取样 719 帧。</p>
+    <div class="kpi">
+      <div><b>93.9°</b><span>肘内夹角 · 中位数（理想 ≈150–170°）</span></div>
+      <div><b>64.5°</b><span>最小值（最折的一帧）</span></div>
+      <div><b>133.5°</b><span>最大值（也伸不直）</span></div>
+      <div><b>65%</b><span>的帧肘角 &lt; 110°（判为「折着」）</span></div>
+    </div>
+    <p>肉眼对应的就是这两处：</p>
+    <ul>
+      <li><b>手垂在肩正下方时，上臂被迫向外弓出去</b> —— 上臂水平、小臂垂直下坠，成「∏」形，也就是「肘外支棱」。</li>
+      <li><b>举过头顶时肘仍折约 90° 向外翻</b>，手腕周围还出现一圈<b>发光小圆环</b>（拖影塌缩成闭环）。</li>
+    </ul>
+    <img src="AB-A-82-f3.png" alt="现版：肘外支棱（∏形）" />
+    <img src="AB-A-82-f2.png" alt="现版：举顶时肘仍折 90°" />
+  </div>
+
+  <h2>三、根因：手臂比「手到肩的距离」长太多</h2>
+  <div class="card">
+    <p style="margin-top:0">小人的手臂是<b>两段式 IK</b>：给定「肩点」和「手心目标点」，反解肘的位置。关键数字：</p>
+    <table>
+      <tr><th>量</th><th>值（本页坐标系）</th><th>说明</th></tr>
+      <tr><td>臂长（上臂＋小臂）</td><td class="num">82</td><td><code>43.7 + 38.3</code>，＝数据侧 60 × 缩放 1.367</td></tr>
+      <tr><td>动作库给的「手到肩」距离上限</td><td class="num bad">76.6</td><td><code>R_MAX=56</code>(v3) × 1.367 —— <b>比臂长还短</b></td></tr>
+      <tr><td>「抱球」等中性姿的手到肩距离</td><td class="num bad">≈ 51</td><td><code>R_MIN~28</code> 附近，手几乎正对肩下方</td></tr>
+      <tr><td>实测一帧（肩→肘 / 肘→腕 / 肩→腕）</td><td class="num">43.7 / 32.9 / 59.1</td><td>肩到腕只有 59，远小于 82</td></tr>
+    </table>
+    <p>结论：<b>手到肩的距离被动作库限制在 76.6 以内，而手臂长 82</b>。两段骨头必须弯起来才能「够短」，于是肘在数学上<b>永远伸不直</b>（上限只有约 138°）；手位越贴近身体，肘被弓出去得越厉害。</p>
+    <p style="margin-bottom:0">⚠️ 这不是渲染 bug，也不是这轮引入的 —— <b>房间版原页面是同一套数值、同一个结果</b>（教练小人是逐行搬过来的）。换句话说：<b>「怪」是这套动作库的手位设计自带的</b>，上次改臂长只是把「尺度错位」纠正了，让它从「折死」变成「折着」。</p>
+  </div>
+
+  <h2>四、A/B 实测：把它改回原件臂长，会更怪</h2>
+  <div class="card">
+    <p style="margin-top:0">我把产物<b>复制到 /tmp</b>（未碰仓库）临时把臂长改回原件的 98，同一时刻并排实拍。结论：<b>臂长 98 折得更狠</b>（同样的手位、更长的骨头 ⇒ 肘角更小），所以上一轮「98 → 82」的方向是对的，<b>不应该回退</b>。</p>
+    <img src="诊断-教练胳膊-现版vs原件.png" alt="现版(82) vs 原件(98) 同一时刻对照" />
+  </div>
+
+  <h2>五、可选的三条路（需要你点一条，我不擅自动前端）</h2>
+  <div class="opt rec">
+    <b>A · 让手位离肩更远（推荐，治本）</b><br/>
+    调动作库里手位半径的下限/中性姿位置，让「抱球」等姿的手往前、往外一点，肘自然接近 120–150°，不再弓成「∏」。
+    代价：动作剪影会变（手会离开躯干一点），需要重建 <code>dist/s4</code>，并对未触碰的屏做逐像素回归。
+  </div>
+  <div class="opt">
+    <b>B · 只做绘制微调（保守）</b><br/>
+    把绘制用的肩点/躯干高与动作库算肩严格对齐（现差约 3 个单位），并把手腕那圈「发光圆环」在拖影塌缩时收掉。
+    视觉收益小、风险最低、不动动作本身。
+  </div>
+  <div class="opt">
+    <b>C · 保持现状，只做说明</b><br/>
+    认定这是房间版风格的一部分，不做改动，把上面这份诊断留档。
+  </div>
+  <div class="foot">
+    证据与脚本：<code>outputs/coach-judge/diag-elbow.cjs</code>（逐帧肘角）、<code>diag-arm-ab.cjs</code>（A/B 实拍）、
+    <code>outputs/room-baduanjin/diag-orig-vs-now.cjs</code>。对照数据：<code>outputs/room-baduanjin/original-backup.html</code>（原件，臂长 98）。
+  </div>
+</div>
+</body>
+</html>

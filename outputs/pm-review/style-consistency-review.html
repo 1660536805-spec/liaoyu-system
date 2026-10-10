@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>弦养 · 智能推荐机制与动作一致性核查</title>
+<style>
+:root{
+  --paper:#FBF3E3; --paper2:#FDF9EF; --ink:#3A332A; --ink2:#6B6154; --ink3:#9A8F7E;
+  --zhu:#B0552E; --zhu2:#CE7B48; --jade:#6E8F7C; --jade2:#7FA08C;
+  --jin:#C9A97E; --jin2:#E9B85F;
+  --line:rgba(58,51,42,.14); --line2:rgba(58,51,42,.07);
+  --bad:#B0392E; --badbg:rgba(176,57,46,.07);
+  --warn:#A9762A; --warnbg:rgba(169,118,42,.09);
+  --ok:#4F7A5E; --okbg:rgba(79,122,94,.08);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  font-size:15px; line-height:1.85;
+}
+.wrap{max-width:1020px;margin:0 auto;padding:56px 28px 96px}
+
+/* ---------- 头部 ---------- */
+.hd{border-bottom:2px solid var(--zhu);padding-bottom:22px;margin-bottom:14px}
+.kicker{font-size:12.5px;letter-spacing:.34em;color:var(--zhu);font-weight:600;margin-bottom:12px}
+h1{font-family:"Songti SC","STSong",serif;font-size:33px;line-height:1.36;margin:0 0 12px;font-weight:700;letter-spacing:.01em}
+.lede{color:var(--ink2);font-size:15px;margin:0;max-width:80ch}
+.meta{margin-top:16px;font-size:12.5px;color:var(--ink3);display:flex;gap:20px;flex-wrap:wrap}
+.meta b{color:var(--ink2);font-weight:600}
+
+/* ---------- 章节 ---------- */
+h2{font-family:"Songti SC","STSong",serif;font-size:23px;margin:56px 0 6px;font-weight:700;
+   display:flex;align-items:baseline;gap:12px}
+h2 .n{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#fff;background:var(--zhu);
+      padding:2px 9px;border-radius:5px;letter-spacing:.06em;position:relative;top:-3px;font-weight:600}
+h2::after{content:"";flex:1;height:1px;background:var(--line);margin-left:6px}
+h3{font-size:16.5px;margin:32px 0 10px;font-weight:700;color:var(--ink)}
+h3::before{content:"";display:inline-block;width:3px;height:15px;background:var(--jade);
+           margin-right:9px;border-radius:2px;position:relative;top:1.5px}
+h4{font-size:14.5px;margin:22px 0 8px;font-weight:700;color:var(--ink2)}
+p{margin:0 0 13px}
+ul,ol{margin:0 0 13px;padding-left:1.45em}
+li{margin:5px 0}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+     background:rgba(58,51,42,.06);padding:1.5px 5px;border-radius:4px;color:#7A4A2C}
+strong{font-weight:700}
+a{color:var(--zhu);text-decoration:none;border-bottom:1px solid rgba(176,85,46,.3)}
+
+/* ---------- 卡 / 表 ---------- */
+.card{background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin:18px 0}
+.card.tip{border-left:3px solid var(--jade);background:var(--okbg)}
+.card.warn{border-left:3px solid var(--warn);background:var(--warnbg)}
+.card.bad{border-left:3px solid var(--bad);background:var(--badbg)}
+.card h4{margin-top:0}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.5px;
+      background:var(--paper2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line2);vertical-align:top}
+th{background:rgba(58,51,42,.05);font-weight:700;font-size:12.5px;color:var(--ink2);
+   letter-spacing:.03em;white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:rgba(201,169,126,.07)}
+td.num{font-family:ui-monospace,Menlo,monospace;text-align:right;white-space:nowrap}
+.y{color:var(--ok);font-weight:700}
+.n{color:var(--bad);font-weight:700}
+.w{color:var(--warn);font-weight:700}
+
+/* 徽标 */
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:1.5px 8px;border-radius:20px;
+     letter-spacing:.02em;white-space:nowrap}
+.tag.ok{background:var(--okbg);color:var(--ok);border:1px solid rgba(79,122,94,.28)}
+.tag.warn{background:var(--warnbg);color:var(--warn);border:1px solid rgba(169,118,42,.3)}
+.tag.bad{background:var(--badbg);color:var(--bad);border:1px solid rgba(176,57,46,.28)}
+.tag.info{background:rgba(110,143,124,.1);color:var(--jade);border:1px solid rgba(110,143,124,.3)}
+
+/* 差异点条目 */
+.finding{background:var(--paper2);border:1px solid var(--line);border-radius:12px;
+         margin:16px 0;overflow:hidden}
+.finding > .fh{display:flex;align-items:center;gap:11px;padding:13px 18px;
+               background:rgba(58,51,42,.045);border-bottom:1px solid var(--line2)}
+.finding .id{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:700;
+             background:var(--zhu);color:#fff;padding:2px 8px;border-radius:5px;letter-spacing:.05em}
+.finding .ft{font-weight:700;font-size:15px;flex:1}
+.finding .fb{padding:16px 18px}
+.finding .fb > :last-child{margin-bottom:0}
+.finding.d2 .id{background:var(--ink3)}
+.finding.d3 .id{background:var(--bad)}
+.finding.d4 .id{background:var(--warn)}
+.finding.d5 .id{background:var(--warn)}
+.finding.d6 .id{background:var(--bad)}
+.finding.d7 .id{background:var(--ink3)}
+.finding.d8 .id{background:var(--ink3)}
+.lbl{display:inline-block;font-size:11.5px;font-weight:700;color:var(--ink3);
+     letter-spacing:.08em;margin-right:7px}
+
+/* 流程图 */
+.flow{display:flex;flex-direction:column;gap:0;margin:20px 0}
+.frow{display:flex;align-items:stretch;gap:0}
+.fbox{flex:1;background:var(--paper2);border:1px solid var(--line);border-radius:10px;
+      padding:13px 15px;font-size:13.5px}
+.fbox b{display:block;font-size:12px;color:var(--ink3);letter-spacing:.06em;margin-bottom:5px;font-weight:700}
+.fbox .expr{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#7A4A2C;line-height:1.75}
+.farrow{display:flex;align-items:center;justify-content:center;color:var(--jin);
+        font-size:18px;padding:7px 0}
+.farrow.down{justify-content:flex-start;padding-left:calc(50% - 9px)}
+.matrix-note{font-size:12.5px;color:var(--ink3);margin-top:8px}
+
+/* 证据块 */
+.ev{background:#2A2521;color:#D9CFC0;border-radius:10px;padding:16px 18px;margin:16px 0;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.8;
+    overflow-x:auto;white-space:pre}
+.ev .k{color:#8FBF9E}
+.ev .r{color:#E08A78}
+.ev .d{color:#8A8078}
+
+/* 建议 */
+.rec{display:flex;gap:14px;padding:15px 0;border-bottom:1px solid var(--line2)}
+.rec:last-child{border-bottom:none}
+.rec .pri{flex:0 0 54px;font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:700;
+          padding-top:2px}
+.rec.p0 .pri{color:var(--bad)}
+.rec.p1 .pri{color:var(--warn)}
+.rec.p2 .pri{color:var(--ink3)}
+.rec .rc{flex:1}
+.rec .rc b{display:block;margin-bottom:3px}
+.rec .rc p{margin:0;font-size:13.5px;color:var(--ink2)}
+
+footer{margin-top:70px;padding-top:20px;border-top:1px solid var(--line);
+       font-size:12.5px;color:var(--ink3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+@media (max-width:720px){
+  .wrap{padding:36px 18px 70px}
+  h1{font-size:26px} h2{font-size:19.5px}
+  table{font-size:12.5px} th,td{padding:7px 8px}
+  .frow{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hd">
+    <div class="kicker">弦养 · 产品核查</div>
+    <h1>智能推荐机制说明<br>与「五禽戏 / 太极 / 八段锦 × 虚拟形象」一致性核查</h1>
+    <p class="lede">本报告回答两个问题：① 软件当前<strong>依据什么</strong>给用户推荐功法与音乐；② 三大功法在<strong>应用里的动作</strong>与<strong>虚拟形象演示的动作</strong>，在名称、顺序、幅度、时长、节奏五个维度上是否一一对应。全部结论均来自源码与实机探针，附证据行。</p>
+    <div class="meta">
+      <span><b>核查方法</b> 源码逐行比对 + Playwright 实机探针 + 逐帧数值诊断</span>
+      <span><b>实测页</b> /s4/#/train?style=baduanjin|wuqinxi|taiji</span>
+      <span><b>状态</b> 仅核查与建议，<b>未改动任何前端代码</b></span>
+    </div>
+  </div>
+
+  <!-- ================= 结论速览 ================= -->
+  <h2><span class="n">00</span>结论速览</h2>
+
+  <div class="card tip">
+    <h4>推荐机制的一句话事实</h4>
+    <p style="margin:0">软件<strong>不是</strong>读设备体征来推荐的。它读的是用户<strong>自己回答的 7 道问诊题</strong>（主壳）与<strong>节气 + 上次选的音调/拳种</strong>（s4）。设备体征（心率 / 睡眠）在主壳里已被<strong>如实标注为「未接入」</strong>——这一点做得是对的，没有拿假数据糊弄。</p>
+  </div>
+
+  <div class="card bad">
+    <h4>动作一致性的一句话事实</h4>
+    <p style="margin:0"><strong>只有八段锦是「真对应」的</strong>：8 式名称、顺序与教练小窗里那个房间版小人逐条对齐。<strong>五禽戏与太极在整个产品里没有任何可动的虚拟形象</strong>——实机进去，教练小窗是一个空占位框，写着「该式暂无示范动画……图片也未找到」。</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>功法</th><th>动作数据</th><th>虚拟形象（教练小窗）</th><th>名称</th><th>顺序</th><th>幅度</th><th>时长/节奏</th><th>整体</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>八段锦</b></td>
+        <td>8 式<br><span style="color:var(--ink3);font-size:12px">moves.json</span></td>
+        <td>房间版小人 SVG<br><span style="color:var(--ink3);font-size:12px">10 式关键帧 · 实机在动</span></td>
+        <td class="y">✓ 一致</td><td class="y">✓ 一致</td>
+        <td class="w">△ 偏折</td><td class="w">△ 三方不一致</td>
+        <td><span class="tag ok">可用</span></td>
+      </tr>
+      <tr>
+        <td><b>五禽戏</b></td>
+        <td>5 式<br><span style="color:var(--ink3);font-size:12px">styles.js（标记「已上线」）</span></td>
+        <td><b>无</b><br><span style="color:var(--ink3);font-size:12px">降级占位 · 照片 404</span></td>
+        <td class="w">△ 有名字无形象</td><td class="w">△ 无形象可演</td>
+        <td class="n">— 不可评</td><td class="n">— 不可评</td>
+        <td><span class="tag bad">口径矛盾</span></td>
+      </tr>
+      <tr>
+        <td><b>太极</b></td>
+        <td>1 式（起势）<br><span style="color:var(--ink3);font-size:12px">styles.js（status: partial）</span></td>
+        <td><b>无</b><br><span style="color:var(--ink3);font-size:12px">降级占位 · 照片 404</span></td>
+        <td class="n">仅 1 式</td><td class="n">无</td>
+        <td class="n">— 不可评</td><td class="n">— 不可评</td>
+        <td><span class="tag bad">界面不可见</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="matrix-note">「幅度」「时长/节奏」两列的可评性：五禽戏与太极因为压根没有动画，谈不上幅度与节奏的匹配，因此标「不可评」而非「不一致」。</p>
+
+  <!-- ================= 第一部分：推荐机制 ================= -->
+  <h2><span class="n">01</span>软件如何推荐功法与音乐</h2>
+
+  <p>产品里存在<strong>两套并行、互不读取</strong>的推荐链路。它们各自成立，但结果可能互相打架——这是下面要指出的第一个结构性问题。</p>
+
+  <h3>链路 A · 主壳问诊推荐（7 题 → 四项决策）</h3>
+  <p>用户走完 7 道递进问诊题后，<code>recommendFromAnswers()</code> 把答案压成四个维度。代码位置 <code>dist/app.js</code>：</p>
+
+  <div class="flow">
+    <div class="fbox">
+      <b>输入 · 7 道问诊题</b>
+      睡眠 · 精力 · 情绪 · 不适部位 · 时段 · 练习意图 · 单次时长限制
+    </div>
+    <div class="farrow down">↓</div>
+    <div class="fbox">
+      <b>器官映射 · organ</b>
+      <span class="expr">organ = [3,4,2,0,1,2][part]&nbsp;&nbsp;// 0心 1肝 2脾 3肺 4肾</span>
+    </div>
+    <div class="farrow down">↓</div>
+    <div class="fbox">
+      <b>① 音疗方向 · rec（决定宫/商/角/徵/羽调）</b>
+      <span class="expr">if (sleep≤1 || energy===3 || part===3) rec = 2;&nbsp;&nbsp;// → 羽调 · 沉静滋养<br>else if (energy===1 || mood===1 || part===0) rec = 1;&nbsp;&nbsp;// → 徵调 · 轻快舒扬<br>否则 rec = 0;&nbsp;&nbsp;// → 宫调 · 平和承载</span>
+    </div>
+    <div class="farrow down">↓</div>
+    <div class="frow" style="gap:14px">
+      <div class="fbox">
+        <b>② 练习形态 · imode</b>
+        <span class="expr">imode = 1 → 招牌 3 式<br>imode = 0 → 全套 8 式</span>
+      </div>
+      <div class="fbox">
+        <b>③ 起始阶段 · istage</b>
+        <span class="expr">0 = 点（学架子）<br>1 = 线（找气感）<br>2 = 面（入静）</span>
+      </div>
+    </div>
+    <div class="farrow down">↓</div>
+    <div class="fbox">
+      <b>输出 · 落进 localStorage，驱动首页/音疗页/准备页</b>
+      <span class="expr">applyQuiz() → 首页推荐卡文案 + 音疗页曲目 + 准备页默认档位</span>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>用户自答特征</th><th>音疗方向</th><th>练习形态</th><th>起始阶段</th></tr></thead>
+    <tbody>
+      <tr><td>睡眠差 / 精力极低 / 不适在肺部</td><td><b>羽调</b>·沉静滋养</td><td rowspan="3">由时段与意图决定<br>（夜间或短时 → 招牌 3 式）</td><td rowspan="3">由时长限制决定<br>（不设限 → 点；限时 → 线/面）</td></tr>
+      <tr><td>精力偏低 / 情绪低落 / 不适在心</td><td><b>徵调</b>·轻快舒扬</td></tr>
+      <tr><td>其余情况（默认）</td><td><b>宫调</b>·平和承载</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card warn">
+    <h4>⚠️ 主壳的「帮我选」按钮不读问诊答案</h4>
+    <p>首页「帮我选」按下后执行的是 <code>state.rec = Math.floor(Math.random() * 3)</code>——<strong>纯随机换一个音调</strong>，与用户的身体状态、与刚才答的 7 道题没有任何关系。这个按钮的文案（「智能推荐练习」）与它的行为不匹配。</p>
+  </div>
+
+  <h3>链路 B · s4 首页「今日推荐」（节气 + 记忆偏好）</h3>
+  <p>s4 子应用首页另有一个推荐卡，来源完全不同（<code>train/src/views/HomeView.vue</code>）：</p>
+  <ul>
+    <li><b>节气</b>：<code>currentTerm()</code>（Meeus 太阳视黄经算法）→ 决定首页引言与「主××」标签</li>
+    <li><b>音调</b>：<code>localStorage['xianyang.tone']</code> → 取 <code>TONE_HOME</code> 里的 what / why / 体验标签</li>
+    <li><b>拳种</b>：<code>localStorage['xianyang.style']</code></li>
+    <li><b>用时</b>：<code>Σ moves[].sec + 30s</code> → 八段锦 7×90+60+30 = 690s ≈ <b>「约 12 分钟」</b></li>
+  </ul>
+
+  <div class="card bad">
+    <h4>⚠️ s4 的「帮我选」也是假的</h4>
+    <p style="margin:0">代码写的是 <code>const sid = selectedStyle === 'auto' ? 'baduanjin' : selectedStyle</code>。也就是说选中「帮我选」后，推荐卡<strong>永远显示「八段锦」</strong>——不读问诊答案、不读节气、不读任何状态，只是一个内容固定的占位。</p>
+  </div>
+
+  <div class="card warn">
+    <h4>⚠️ 两条链路互不相通</h4>
+    <p style="margin:0">主壳问诊算出的「羽调 + 招牌 3 式」不会传到 s4 首页；s4 首页选的音调也不会回写问诊结论。用户在主壳被推荐一套、进 s4 看到另一套，是当前设计的常态。此外，主壳进入 s4 的固定入口把参数写死为 <code>style=baduanjin&amp;tone=gong</code>，所以<strong>问诊算出的「羽调」在真跟练页里并不会生效</strong>。</p>
+  </div>
+
+  <!-- ================= 第二部分：一致性核查 ================= -->
+  <h2><span class="n">02</span>动作一致性核查：五个维度逐一比对</h2>
+
+  <p>同一式动作在产品里其实有<strong>四份彼此独立的数据源</strong>。先把它们摆清楚，后面所有差异都能归位到其中某两份之间。</p>
+
+  <table>
+    <thead><tr><th>#</th><th>数据源</th><th>文件</th><th>它是什么</th><th>谁在用它</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>①</td><td><b>拳种表</b></td><td><code>train/src/data/moves.json</code></td>
+        <td>式名 / 要领 tip / 口令 cue / 弦号 / <code>sec</code> / 照片路径</td>
+        <td>顶栏式名、弦位、语音口令、首页用时估算</td>
+      </tr>
+      <tr>
+        <td>②</td><td><b>真人标定</b></td><td><code>train/src/data/baduanjin-8.json</code></td>
+        <td>从真人视频用 MediaPipe 逐帧提取的姿态时间线（33 关键点，30fps）</td>
+        <td>判定引擎的「真值」——判断用户做没做到位</td>
+      </tr>
+      <tr>
+        <td>③</td><td><b>房间版小人</b></td><td><code>train/src/data/roomMoves.js</code></td>
+        <td>10 式关键帧（起势 + 应用 8 式 + 收势），描述腕/足/躯干/前俯/头偏</td>
+        <td><b>教练小窗真正画的姿态</b>（经 CoachFigure.vue）</td>
+      </tr>
+      <tr>
+        <td>④</td><td><b>疗养风小人</b></td><td><code>train/src/data/demoAnim.js</code></td>
+        <td>8 式参数化姿态（肩角/肘弯/前屈/提踵…）</td>
+        <td>当前<strong>只用来决定「一帧播多久 / 何时算示范结束」</strong>；它绘制的 canvas 小人实际上不会被渲染</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>实拍对照 · 三种功法的教练小窗长什么样</h3>
+  <p>同一台机器、同一视口（470×900 @2x）、同一时刻的教练条实拍。左右两张的差别就是本轮核查最直观的结论。</p>
+  <div style="display:grid;grid-template-columns:1fr;gap:14px;margin:18px 0">
+    <figure style="margin:0;background:var(--paper2);border:1px solid var(--line);border-radius:10px;padding:12px">
+      <img src="compare/coachwin-baduanjin.png" alt="八段锦教练小窗" style="width:100%;display:block;border-radius:6px">
+      <figcaption style="font-size:12.5px;color:var(--ink2);margin-top:9px"><b>八段锦</b>（style=baduanjin）— 房间版小人在动，7 弦。<span class="tag ok">可用</span><br>
+        <span style="color:var(--ink3)">注意小人的手臂：肘部外弓、前臂内折——这正是 §2.2 量化的「肘数学上伸不直」。</span></figcaption>
+    </figure>
+    <figure style="margin:0;background:var(--paper2);border:1px solid var(--line);border-radius:10px;padding:12px">
+      <img src="compare/coachwin-wuqinxi.png" alt="五禽戏教练小窗" style="width:100%;display:block;border-radius:6px">
+      <figcaption style="font-size:12.5px;color:var(--ink2);margin-top:9px"><b>五禽戏</b>（style=wuqinxi）— 式名是「虎举」，小窗是<b>空占位</b>，5 弦。<span class="tag bad">无形象</span><br>
+        <span style="color:var(--ink3)">降级文案 40 余字塞进 96×108 的框里，溢出糊成一片字块。</span></figcaption>
+    </figure>
+    <figure style="margin:0;background:var(--paper2);border:1px solid var(--line);border-radius:10px;padding:12px">
+      <img src="compare/coachwin-taiji.png" alt="太极教练小窗" style="width:100%;display:block;border-radius:6px">
+      <figcaption style="font-size:12.5px;color:var(--ink2);margin-top:9px"><b>太极</b>（style=taiji，仅能手输 URL 达到）— 式名「起势」，同样是空占位。<span class="tag bad">界面不可见</span></figcaption>
+    </figure>
+  </div>
+
+  <h3>2.1 名称与顺序：八段锦完全一致，另两个没有形象可对</h3>
+
+  <p>八段锦的对应关系是<strong>逐条严格对齐</strong>的，这一点没有问题：</p>
+
+  <table>
+    <thead><tr><th>应用第 N 式（0-based）</th><th>拳种表名称</th><th>房间版下标</th><th>房间版名称</th><th>一致</th></tr></thead>
+    <tbody>
+      <tr><td class="num">0</td><td>双手托天理三焦</td><td class="num">1</td><td>两手托天理三焦</td><td class="y">✓</td></tr>
+      <tr><td class="num">1</td><td>左右开弓似射雕</td><td class="num">2</td><td>左右开弓似射雕</td><td class="y">✓</td></tr>
+      <tr><td class="num">2</td><td>调理脾胃须单举</td><td class="num">3</td><td>调理脾胃须单举</td><td class="y">✓</td></tr>
+      <tr><td class="num">3</td><td>五劳七伤往后瞧</td><td class="num">4</td><td>五劳七伤往后瞧</td><td class="y">✓</td></tr>
+      <tr><td class="num">4</td><td>摇头摆尾去心火</td><td class="num">5</td><td>摇头摆尾去心火</td><td class="y">✓</td></tr>
+      <tr><td class="num">5</td><td>两手攀足固肾腰</td><td class="num">6</td><td>两手攀足固肾腰</td><td class="y">✓</td></tr>
+      <tr><td class="num">6</td><td>攒拳怒目增气力</td><td class="num">7</td><td>攒拳怒目增气力</td><td class="y">✓</td></tr>
+      <tr><td class="num">7</td><td>背后七颠百病消</td><td class="num">8</td><td>背后七颠百病消</td><td class="y">✓</td></tr>
+    </tbody>
+  </table>
+  <p class="matrix-note">映射公式 <code>roomIndexForAppStep(i) = min(9, i + 1)</code>——房间版头部多一个「起势」，所以整体后移一位。名称与顺序<b>零差异</b>。</p>
+
+  <h3>2.2 幅度：房间版小人的肘部在数学上永远伸不直</h3>
+  <p>这不是渲染 bug，而是<strong>动作库手位设计</strong>带来的先天约束。对 721 帧逐帧解算左右肘内夹角：</p>
+
+  <table>
+    <thead><tr><th>指标</th><th>左臂</th><th>右臂</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr><td>最小肘内角</td><td class="num">64.5°</td><td class="num">64.5°</td><td>折得最狠的一帧</td></tr>
+      <tr><td>中位肘内角</td><td class="num">93.9°</td><td class="num">93.9°</td><td><b>典型状态是接近直角</b></td></tr>
+      <tr><td>最大肘内角</td><td class="num">133.5°</td><td class="num">133.5°</td><td>极限也到不了 180°（伸直）</td></tr>
+      <tr><td>&lt;110° 的帧占比</td><td class="num"><b>64.6%</b></td><td class="num"><b>64.6%</b></td><td>近三分之二的帧手臂是明显弯的</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card warn">
+    <h4>根因</h4>
+    <p style="margin:0">小人的臂长被设为 <code>上臂 43.7 + 前臂 38.3 = 82</code>（与姿势数据同尺度）。而动作库规定「手到肩」的距离<strong>上限约 76.6</strong>，中性「抱球」手位只有约 <code>51</code>。<strong>手离肩的距离 ＜ 臂长 ⇒ 肘必然有折角</strong>，数学上无解。上臂被迫外弓成「∏」形。</p>
+  </div>
+
+  <div class="card bad">
+    <h4>对跟练体验的影响</h4>
+    <p style="margin:0">八段锦第 1、2 式（托天、开弓）的卖点就是「把手臂拉到最长、拔伸肩背」。而主壳动作要点里写的是「<strong>两臂伸直，肩沉肘坠</strong>」。用户看到的示范却是弯着胳膊——<strong>示范幅度小于文字要领</strong>。对「照着学架子」的新手，这是直接的动作误导。</p>
+  </div>
+
+  <h3>2.3 时长与节奏：同一式有两份时长数据，实际播放只认其中一份</h3>
+  <p><code>demoAnim.js</code> 的 <code>dur</code> 决定真实播放速度（<code>t += dt / dur</code>），而 <code>roomMoves.js</code> 的 <code>dur</code> 被导出成 <code>ROOM_MOVES</code> 后<strong>没有任何模块 import</strong>——是一份死元数据。后果是房间版小人被按另一套节律播放：</p>
+
+  <table>
+    <thead><tr><th>式</th><th>拳种表 sec<br><span style="font-weight:400;color:var(--ink3)">（仅用于估算）</span></th><th>demoAnim dur<br><span style="font-weight:400;color:var(--ink3)">实际播放</span></th><th>房间版自述 dur<br><span style="font-weight:400;color:var(--ink3)">无人使用</span></th><th>播放 / 自述</th></tr></thead>
+    <tbody>
+      <tr><td>1 双手托天理三焦</td><td class="num">90</td><td class="num">5.2</td><td class="num">6.5</td><td class="num w">0.80×</td></tr>
+      <tr><td>2 左右开弓似射雕</td><td class="num">90</td><td class="num">6.4</td><td class="num">8.0</td><td class="num w">0.80×</td></tr>
+      <tr><td>3 调理脾胃须单举</td><td class="num">90</td><td class="num">6.0</td><td class="num">7.0</td><td class="num w">0.86×</td></tr>
+      <tr><td>4 五劳七伤往后瞧</td><td class="num">90</td><td class="num">5.8</td><td class="num">6.0</td><td class="num">0.97×</td></tr>
+      <tr><td>5 摇头摆尾去心火</td><td class="num">90</td><td class="num">5.6</td><td class="num">8.0</td><td class="num n">0.70×</td></tr>
+      <tr><td>6 两手攀足固肾腰</td><td class="num">90</td><td class="num">4.6</td><td class="num">6.5</td><td class="num n">0.71×</td></tr>
+      <tr><td>7 攒拳怒目增气力</td><td class="num">90</td><td class="num">6.2</td><td class="num">7.0</td><td class="num w">0.89×</td></tr>
+      <tr><td>8 背后七颠百病消</td><td class="num">60</td><td class="num">7.0</td><td class="num">5.0</td><td class="num n">1.40×</td></tr>
+      <tr style="background:rgba(58,51,42,.045)"><td><b>合计</b></td><td class="num"><b>690</b></td><td class="num"><b>46.8</b></td><td class="num"><b>54.0</b></td><td class="num w"><b>0.867×</b></td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>影响</strong>：第 5、6 式被加速约 30%。其中「两手攀足固肾腰」要在 4.6 秒内完成「前屈到底 + 缓慢直起」，而目标人群多是腰背不适者——<strong>示范比应当的节奏快了近三成</strong>，容易让人跟着发力过猛。反向地，第 8 式「背后七颠」被放慢 40%（7 次顿足摊到 7 秒，约 1 秒一次），这个反而更合理。</p>
+
+  <div class="card warn">
+    <h4>⚠️ 补充：拳种表的 90 秒/式从未参与跟练</h4>
+    <p style="margin:0"><code>moves.json</code> 里的 <code>sec: 90</code> 只在 s4 首页用来算出「约 12 分钟」，<strong>跟练页完全不读它</strong>。实际节奏由判定闸门驱动：动作没通关就永远停在这一式，通关才进下一式，<strong>没有时间预算</strong>。所以首页承诺「约 12 分钟」，实际可能是 3 分钟（一路通关），也可能是 30 分钟（卡在第 1 式）。这是设计选择，但准备页应当说明。</p>
+  </div>
+
+  <h3>2.4 定格点：7 式的收势段会在「单遍播放」下被截掉</h3>
+  <p>在「只播一遍」模式（计时闸门 <code>?coachGate=time</code>）下，动画停在<strong>最后一个标了 <code>phase:'end'</code> 的关键帧</strong>，而不是归一化进度 u = 1.0：</p>
+
+  <table>
+    <thead><tr><th>式</th><th>定格点 u</th><th>被跳过的尾部</th><th>后果</th></tr></thead>
+    <tbody>
+      <tr><td>1 双手托天</td><td class="num">0.769</td><td class="num n">23.1%</td><td rowspan="7">停在“手臂下落途中 / 身体直起一半”，而卡片文案已显示「示范完毕·请跟我做」</td></tr>
+      <tr><td>2 左右开弓</td><td class="num">0.750</td><td class="num n">25.0%</td></tr>
+      <tr><td>3 调理脾胃</td><td class="num">0.800</td><td class="num n">20.0%</td></tr>
+      <tr><td>4 五劳七伤</td><td class="num">0.793</td><td class="num n">20.7%</td></tr>
+      <tr><td>5 摇头摆尾</td><td class="num">0.768</td><td class="num n">23.2%</td></tr>
+      <tr><td>6 两手攀足</td><td class="num">0.652</td><td class="num n">34.8%</td></tr>
+      <tr><td>7 攒拳怒目</td><td class="num">0.806</td><td class="num n">19.4%</td></tr>
+    </tbody>
+  </table>
+  <p class="matrix-note">默认的判定闸门（<code>keepLooping = true</code>）不停格、会跑满整圈，所以<strong>这条只在计时闸门下暴露</strong>。但计时闸门是保留的 A/B 对照档，也是用户可能碰到的降级路径。</p>
+
+  <!-- ================= 第三部分：差异点清单 ================= -->
+  <h2><span class="n">03</span>差异点清单：具体位置、影响与建议</h2>
+
+  <div class="finding d1">
+    <div class="fh"><span class="id">D1</span><span class="ft">五禽戏的「存在性」在主壳与 s4 之间自相矛盾</span><span class="tag bad">口径冲突</span></div>
+    <div class="fb">
+      <p><span class="lbl">现象</span>同一个功法，两个界面给出相反的说法。</p>
+      <ul>
+        <li><b>主壳</b>（<code>dist/app.js</code> 首页「五禽戏」按钮）：弹层写明「<strong>素材未随包交付</strong>——五禽戏（虎鹿熊猿鸟）目前没有动作示范素材与判定标定，所以没有开放练习入口」。<span class="tag ok">这是诚实且正确的做法</span></li>
+        <li><b>s4</b>（<code>train/src/data/styles.js</code>）：<code>status: 'ready'</code>、<code>badge: '已上线'</code>，5 式带完整 tip / cue / 照片路径；首页还给它一个可点的胶囊按钮。</li>
+      </ul>
+      <p><span class="lbl">实测</span>在 s4 首页选「五禽戏」后：走「启动摄像头并起式」<strong>不会</strong>进入五禽戏（准备页把功法硬编码为八段锦）；但走「查看预录演示」会把 <code>wuqinxi</code> 带进跟练页，此时教练小窗显示一个空占位框。</p>
+      <div class="ev">【style=wuqinxi】
+  当前式名 .cb-name : 第 1 式 · 虎举
+  弦数 .string      : 5
+  教练小窗【可见】SVG 小人: <span class="r">false</span> (DOM 内 true, path 数 37)
+  降级占位【可见】.ph.miss : <span class="r">true</span>
+  占位文案 : 示意 该式暂无示范动画，已降级为静态图示<span class="r">（图片也未找到，请参考语音要领）</span>
+  教练卡底说明 : 无动画 · 看要领
+  照片请求 : [<span class="r">"404 /photos/wq01.jpg"</span>]</div>
+      <p><span class="lbl">影响</span>用户在主壳被明确告知「没有」，进 s4 却看到「已上线」并能点进去，点进去看到空框。<strong>两次失信叠加</strong>：一是「已上线」是假的，二是连降级用的静态照片也没随包交付，占位框里只剩「图片也未找到」。</p>
+      <p><span class="lbl">附带缺陷</span>这行降级文案有 40 余字，而教练小窗只有 <b>96×108</b>。实拍可见文字<strong>溢出并糊成一片字块</strong>（见对照截图 <code>coachwin-wuqinxi.png</code>），反而比没有提示更让人困惑。</p>
+      <p><span class="lbl">建议</span>二选一，不要并存：<b>(a)</b> 把 s4 的五禽戏胶囊改为禁用态（灰显 + 角标「开发中」），与主壳口径统一；<b>(b)</b> 或把主壳弹层文案改为「练习素材开发中，当前仅八段锦可练」，两处都指向同一句。另需把 <code>/photos/*.jpg</code> 决定是补上还是删掉路径——留着 404 的引用比没有更糟。</p>
+    </div>
+  </div>
+
+  <div class="finding d2">
+    <div class="fh"><span class="id">D2</span><span class="ft">太极在所有界面里都不可见，只能靠手输 URL 进入</span><span class="tag info">幽灵功能</span></div>
+    <div class="fb">
+      <p><span class="lbl">现象</span>主壳功法切换段只有三个按钮：八段锦 / 五禽戏 / 帮我选——<strong>没有太极</strong>（全文检索「太极」在主壳 <code>dist/app.js</code> 里零命中）。s4 首页胶囊也只有八段锦与五禽戏两个。太极只存在于 <code>styles.js</code> 里，且只有 1 式（起势）。</p>
+      <p><span class="lbl">实测</span><code>?style=taiji</code> 可达（<code>resolveStyle</code> 放行 <code>partial</code> 状态），进页后同样是空占位：</p>
+      <div class="ev">【style=taiji】
+  当前式名 .cb-name : 第 1 式 · 起势
+  教练小窗【可见】SVG 小人: <span class="r">false</span>
+  降级占位【可见】.ph.miss : <span class="r">true</span>
+  照片请求 : [<span class="r">"404 /photos/tj01.jpg"</span>]</div>
+      <p><span class="lbl">影响</span>对普通用户影响为零（碰不到）；但它是评审/演示时的隐患——一旦有人深链进来看，会看到一个只有 1 式、且没有动画的残缺页面。同时它会给维护者「太极已经开始了」的错觉。</p>
+      <p><span class="lbl">建议</span>要么把太极正式纳入胶囊并明确标注「仅起势可用」，要么在 <code>styles.js</code> 里把 <code>status</code> 改成 <code>pending</code>（<code>resolveStyle</code> 会自动拒绝），让它在代码层面也真的不可达。<b>推荐后者</b>——口径与行为一致，成本一行。</p>
+    </div>
+  </div>
+
+  <div class="finding d3">
+    <div class="fh"><span class="id">D3</span><span class="ft">虚拟形象与功法解耦：五禽戏时，被隐藏的小人其实在演八段锦</span><span class="tag bad">沉默缺陷</span></div>
+    <div class="fb">
+      <p><span class="lbl">现象</span>教练小窗的形象索引 <code>roomFigureIdx</code> <strong>只由式序决定，与功法无关</strong>：</p>
+      <div class="ev">TrainView.vue:468
+const roomFigureIdx = computed(() =&gt; roomIndexForAppStep(stepIdx.value))
+                             <span class="d">// 恒指向 roomMoves.js 那张【八段锦】10 式表</span></div>
+      <p>实测：五禽戏第 1 式「虎举」时，DOM 里那个被 <code>v-show</code> 藏起来的 SVG，用的仍然是 <code>roomPose(1)</code>，也就是<strong>「两手托天理三焦」</strong>的姿态。</p>
+      <p><span class="lbl">为什么现在没暴露</span>因为动画键是 <code>${style.id}-${step+1}</code>，即 <code>wuqinxi-1</code>；而 <code>DEMO_ANIMS</code> 里只有 <code>baduanjin-1..8</code>，查不到 ⇒ <code>state = 'missing'</code> ⇒ <code>v-show</code> 把小人藏了。<strong>「无动画」这个闸门恰好掩盖了「动画是错的」这个问题。</strong></p>
+      <p><span class="lbl">影响</span>目前无可见影响。<b>但这是一个沉默的耦合陷阱</b>：任何人只要往 <code>DEMO_ANIMS</code> 里补一条 <code>wuqinxi-1</code>（而这看起来是"顺手就做了"的事），小人会立刻开始<strong>用托天的动作去演示虎举</strong>——没有任何报错、没有任何警告，只有视觉上的错。</p>
+      <p><span class="lbl">建议</span>把映射改成带功法的形式，非八段锦显式返回 <code>null</code>，并让 <code>CoachFigure</code> 在 <code>null</code> 时不渲染：</p>
+      <div class="ev"><span class="d">// 建议改法（示意）</span>
+function roomFigureIdxFor(styleId, stepIdx){
+  if (styleId !== 'baduanjin') return null   <span class="d">// 没有专属形象就明说没有</span>
+  return Math.min(9, stepIdx + 1)
+}</div>
+    </div>
+  </div>
+
+  <div class="finding d4">
+    <div class="fh"><span class="id">D4</span><span class="ft">同一式存在两份时长数据，实际播放按其中一份，偏差最大 40%</span><span class="tag warn">数据冗余</span></div>
+    <div class="fb">
+      <p><span class="lbl">现象</span><code>demoAnim.js</code> 与 <code>roomMoves.js</code> 各写了一份每式时长，前者决定播放、后者无人引用。详见 §2.3 对照表：播放/自述比值在 <b>0.70×</b> 到 <b>1.40×</b> 之间，合计 46.8s vs 54.0s。</p>
+      <p><span class="lbl">影响</span>「摇头摆尾」「两手攀足」被加速约 30%，对腰背不适人群偏快；第 8 式被放慢 40%（这个方向是对的）。</p>
+      <p><span class="lbl">建议</span>让时长只有一个权威来源。最小改动：在 <code>DemoAnimation</code> 里，当版式为 <code>coach</code> 时把 <code>dur</code> 取 <code>ROOM_MOVES[idx].dur</code>（顺便把这份死元数据接活）；或者反过来删掉 <code>roomMoves.js</code> 的 <code>dur</code> 字段，只留 <code>demoAnim</code> 一份，并把比值差异当作有意的时间轴压缩记录下来。</p>
+    </div>
+  </div>
+
+  <div class="finding d5">
+    <div class="fh"><span class="id">D5</span><span class="ft">单遍播放模式下，7 式的收势段被截掉 19%~35%</span><span class="tag warn">时序缺陷</span></div>
+    <div class="fb">
+      <p><span class="lbl">现象</span>定格点取「最后一个 <code>phase:'end'</code> 关键帧」，8 式里有 7 式的定格点落在 u ≈ 0.65~0.81，收势/归位段没播完就定格了（详见 §2.4）。</p>
+      <p><span class="lbl">影响</span>仅在计时闸门（<code>?coachGate=time</code>）与降级路径下出现。用户看到小人停在"手臂下落途中"，而卡片已写「示范完毕·请跟我做」——<strong>文案与画面不同步</strong>。默认判定闸门因为持续循环，不受影响。</p>
+      <p><span class="lbl">建议</span>把归位段也标成 <code>phase:'end'</code>（语义上也确实属于结束段），或把 <code>onceEndT</code> 改为 <code>Math.max(最后一个 end 帧, dur)</code>。一行改动，且不触碰任何版式。</p>
+    </div>
+  </div>
+
+  <div class="finding d6">
+    <div class="fh"><span class="id">D6</span><span class="ft">示范幅度小于文字要领：肘部数学上伸不直（64.6% 的帧 &lt;110°）</span><span class="tag bad">内容约束</span></div>
+    <div class="fb">
+      <p><span class="lbl">现象</span>房间版小人 721 帧逐帧解算：肘内角中位 <b>93.9°</b>、极限 <b>133.5°</b>、<b>64.6%</b> 的帧小于 110°。</p>
+      <p><span class="lbl">归因</span>臂长 82（43.7+38.3），而动作库手位到肩的距离<strong>上限约 76.6</strong>、中性抱球位仅约 <b>51</b>。<b>手离肩比臂长短 ⇒ 肘必然弯</b>。这是动作库手位设计的先天属性，不是渲染 bug——房间版原页也是同样的表现。</p>
+      <p><span class="lbl">影响</span>托天、开弓这类以「拔伸」为卖点的式子，示范是弯着胳膊的；而主壳动作要点写的是「两臂伸直，肩沉肘坠」。<strong>用户照着学架子会被误导</strong>。</p>
+      <p><span class="lbl">建议</span>三条路，按代价排序：<b>(a) 标注优先</b>——在动作要点里把「两臂伸直」改成「手臂尽量向上伸展，不必强求绷直」，让文字与示范一致，零风险；<b>(b) 对齐绘制</b>——把绘制侧肩点与解算肩点对齐、并收掉腕部发光圆环，视觉上"看起来更直"，改动小；<b>(c) 治本</b>——改动作库让手位离肩更远（<code>R_MAX</code> 与各式中性手位），需要重建产物 + 逐像素回归，属第三批，须先确认。</p>
+    </div>
+  </div>
+
+  <div class="finding d7">
+    <div class="fh"><span class="id">D7</span><span class="ft">首页承诺「约 12 分钟」，跟练页没有时间预算</span><span class="tag warn">承诺落差</span></div>
+    <div class="fb">
+      <p><span class="lbl">现象</span><code>moves.json</code> 的 <code>sec</code>（7×90 + 60 = 690s）只在 s4 首页用来估算时长；跟练页完全不读，节奏由判定闸门驱动——没通关永远停在这一式，没有倒计时放行。</p>
+      <p><span class="lbl">影响</span>同一套八段锦，用户可能 3 分钟走完、也可能 30 分钟卡在第 1 式。首页的「约 12 分钟」因此无法兑现。</p>
+      <p><span class="lbl">建议</span>不改逻辑，只补文案：准备页「约 12 分钟」后加一句「实际时长随掌握程度变化，做到位即进下一式」。或把「约 12 分钟」改成「8 式 · 一次一遍」这类不含时间承诺的表述。</p>
+    </div>
+  </div>
+
+  <div class="finding d8">
+    <div class="fh"><span class="id">D8</span><span class="ft">主壳的练习屏是静态复刻页，百分比是写死的</span><span class="tag info">易混淆</span></div>
+    <div class="fb">
+      <p><span class="lbl">现象</span><code>dist/app.js</code> 的 <code>pgPractice()</code> 里，上半身 <b>92%</b> / 下半身 <b>88%</b> / 取景 <b>22%</b> 全是硬编码字符串，与任何识别结果无关。</p>
+      <p><span class="lbl">影响</span>通过 <code>?screen=practice</code> 直达能看到这组"假"数据。它本身就是一张 1:1 复刻的设计稿页，但如果用户（或评审）误以为这是真跟练，会立刻发现「数字不动」。真正的跟练在 s4。</p>
+      <p><span class="lbl">建议</span>这条与本轮第一、二批已完成的改动相关：s4 跟练页顶栏已接真实可见度（无人时显示「—」、条宽 0%）。剩下的只是<strong>主壳这一屏要不要加一句「效果预览」标注</strong>——归入第三批待确认项，本轮不动。</p>
+    </div>
+  </div>
+
+  <!-- ================= 第四部分：建议汇总 ================= -->
+  <h2><span class="n">04</span>建议汇总（按风险与代价排序）</h2>
+
+  <p>下面每一项都标注了改动范围。<b>P0 全部是文案与开关级别，不触碰任何已冻结版式</b>；P1 是一致性修复，改动集中在 <code>train/</code> 内的数据与映射；P2 需要内容侧输入，触发产物重建。</p>
+
+  <div class="card">
+    <div class="rec p0">
+      <div class="pri">P0-1</div>
+      <div class="rc"><b>统一五禽戏的口径（D1）</b>
+        <p>主壳说「未交付」、s4 说「已上线」——两处必须一致。建议 s4 胶囊改禁用态 + 「开发中」角标。同时决定 <code>/photos/*.jpg</code> 是补资源还是删引用。</p></div>
+    </div>
+    <div class="rec p0">
+      <div class="pri">P0-2</div>
+      <div class="rc"><b>太极显式下线（D2）</b>
+        <p><code>styles.js</code> 里把太极 <code>status</code> 从 <code>partial</code> 改为 <code>pending</code>，一行改动即可让它真正不可达，消除「幽灵功法」。</p></div>
+    </div>
+    <div class="rec p0">
+      <div class="pri">P0-3</div>
+      <div class="rc"><b>两个「帮我选」要么真选、要么改文案（§01）</b>
+        <p>主壳是随机换音调，s4 是固定回落到八段锦。若不打算接逻辑，至少把副文案从「智能推荐练习」改掉，避免承诺过度。</p></div>
+    </div>
+    <div class="rec p0">
+      <div class="pri">P0-4</div>
+      <div class="rc"><b>补齐时长与幅度的文字口径（D6a / D7）</b>
+        <p>动作要点里「两臂伸直」→「尽量向上伸展，不必强求绷直」；准备页「约 12 分钟」后加一句「做到位即进下一式」。纯文案，零风险。</p></div>
+    </div>
+    <div class="rec p1">
+      <div class="pri">P1-1</div>
+      <div class="rc"><b>形象索引带上功法（D3）</b>
+        <p><code>roomFigureIdxFor(styleId, stepIdx)</code>，非八段锦返回 <code>null</code>。这是本次核查发现的<b>最高价值修复</b>——把一颗埋在未来的雷拆掉。</p></div>
+    </div>
+    <div class="rec p1">
+      <div class="pri">P1-2</div>
+      <div class="rc"><b>时长只留一个权威来源（D4）</b>
+        <p>让 <code>coach</code> 版式的 <code>dur</code> 取 <code>ROOM_MOVES[idx].dur</code>，或删掉重复字段。同时复核第 5、6 式的节奏是否偏快。</p></div>
+    </div>
+    <div class="rec p1">
+      <div class="pri">P1-3</div>
+      <div class="rc"><b>修掉定格截尾（D5）</b>
+        <p>归位段补 <code>phase:'end'</code>，或 <code>onceEndT</code> 兜底到整段末尾。</p></div>
+    </div>
+    <div class="rec p2">
+      <div class="pri">P2-1</div>
+      <div class="rc"><b>补内容：五禽戏 5 式 / 太极 24 式的动作定义（D1 / D2）</b>
+        <p>需要 PM 输出「式名 + 要领 + 可见性需求 + 关键帧」。在此之前，<b>维持现状的「如实标注、不做假按钮」就是正确做法</b>——主壳这一处做得很好，应当保持。</p></div>
+    </div>
+    <div class="rec p2">
+      <div class="pri">P2-2</div>
+      <div class="rc"><b>幅度治本（D6c）</b>
+        <p>改动作库手位与 <code>R_MAX</code>，让手臂真的能伸直。触发产物重建 + 2730 个保真数值复核 + 逐像素回归，属第三批，须先出对照图确认。</p></div>
+    </div>
+  </div>
+
+  <!-- ================= 附录 ================= -->
+  <h2><span class="n">05</span>核查方法与证据留存</h2>
+
+  <table>
+    <thead><tr><th>用途</th><th>文件</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>逐功法实机探针</td><td><code>outputs/pm-review/probe-styles.cjs</code></td><td>对 3 个 style 打开跟练页，读式名/弦数/小窗可见性/占位文案/3 秒姿态快照数/照片 HTTP 状态</td></tr>
+      <tr><td>小窗截图（3 张）</td><td><code>outputs/pm-review/compare/coachwin-*.png</code></td><td>baduanjin / wuqinxi / taiji 各自的教练条实拍</td></tr>
+      <tr><td>肘角逐帧诊断</td><td><code>outputs/coach-judge/diag-elbow.cjs</code></td><td>721 帧左右肘内角分布（min/p25/med/p75/max/&lt;110° 占比）</td></tr>
+      <tr><td>保真校验</td><td><code>outputs/coach-judge/verify-room-parity.mjs</code></td><td>2730 个姿态数值与房间版原件的差异数</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card tip">
+    <h4>本次核查未做任何前端改动</h4>
+    <p style="margin:0">全部结论均来自<b>读取与实测</b>。上述 P0/P1 建议是否执行、以什么顺序执行，请确认后再动手；P2 涉及产物重建与逐像素回归，按既有约定需先出对照图。</p>
+  </div>
+
+  <footer>
+    <span>弦养 · 智能推荐与动作一致性核查报告</span>
+    <span>核查范围：dist/app.js · train/src（styles / moves / demoAnim / roomMoves / CoachFigure / DemoAnimation / TrainView / HomeView / PrepareView）</span>
+  </footer>
+
+</div>
+</body>
+</html>

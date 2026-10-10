@@ -1,0 +1,58 @@
+{
+  "state": {
+    "url": "http://127.0.0.1:5477/s4/#/train?stage=point&mode=full&style=baduanjin&tone=gong",
+    "coach": true,
+    "video": {
+      "w": 640,
+      "paused": false,
+      "rs": 4
+    }
+  },
+  "wentS4": true,
+  "byRoot": {
+    "(root)": 1,
+    "app.css": 1,
+    "app.js": 1,
+    "art": 5,
+    "s4": 5,
+    "assets": 1,
+    "wasm": 2,
+    "models": 1
+  },
+  "topLevelRequests": [
+    "/",
+    "/app.css",
+    "/app.js",
+    "/art/landscape.jpg",
+    "/art/figure-pose.png",
+    "/art/card-landscape.jpg",
+    "/art/q-mood.jpg",
+    "/art/cloud.jpg",
+    "/assets/fallback.mp4",
+    "/wasm/vision_wasm_internal.js",
+    "/wasm/vision_wasm_internal.wasm",
+    "/models/pose_landmarker_lite.task"
+  ],
+  "all": [
+    "/",
+    "/app.css",
+    "/app.js",
+    "/art/landscape.jpg",
+    "/art/figure-pose.png",
+    "/art/card-landscape.jpg",
+    "/art/q-mood.jpg",
+    "/art/cloud.jpg",
+    "__MARK__:主壳 intro 屏",
+    "/s4/",
+    "/s4/assets/index-COFFjIT7.js",
+    "/s4/assets/index-1R9bbfmR.css",
+    "/s4/assets/bg-shanshui.jpg",
+    "/s4/assets/bg-home.jpg",
+    "/assets/fallback.mp4",
+    "/wasm/vision_wasm_internal.js",
+    "/wasm/vision_wasm_internal.wasm",
+    "/models/pose_landmarker_lite.task",
+    "__MARK__:s4 跟练页"
+  ],
+  "errors": []
+}

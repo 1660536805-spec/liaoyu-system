@@ -38,3 +38,8 @@ dist/flow.css
 
 # ---- 文档生成流水线的工作目录（tencent-docx 残留）----
 output/
+
+# ---- 大体积工作产物（不入库：合计 >50MB，含 110MB 演示视频 / 姿态抽帧）----
+outputs/video/
+outputs/truth-pack/
+outputs/activate-all/out/

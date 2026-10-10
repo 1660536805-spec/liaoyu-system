@@ -282,6 +282,180 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 system-ui,-app
 .coach[data-phase="grace"] [data-cact="done"],.coach[data-phase="grace"] [data-cact="extend"],.coach[data-phase="grace"] [data-cact="skip"]{display:inline-block}
 .coach[data-phase="allDone"] [data-cact="restart"]{display:inline-block}
 @media(max-width:760px){.coach button,.room-ctl button{padding:9px 14px;font-size:14px}.coach button.ghost{margin-left:0}}
+
+/* ── 拆动作控制台（八段锦 10 式：一次一动，可上一个 / 下一个 / 重放） ── */
+.room-ctl{margin-top:18px;display:grid;gap:11px}
+.room-ctl .ctl-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.room-ctl .ctl-idx{font-size:13px;letter-spacing:.08em;color:#5D6E7A;font-variant-numeric:tabular-nums}
+.room-ctl .ctl-name{font-family:var(--serif);font-size:clamp(21px,2.6vw,27px);color:#1E2E3B;letter-spacing:.05em}
+.room-ctl .ctl-hint{margin:0;font-size:15px;color:#41535F;min-height:1.7em}
+.room-ctl .ctl-btns{display:flex;gap:10px;flex-wrap:wrap}
+.room-ctl button{appearance:none;border:1px solid #B9C7D1;background:#fff;color:#24323C;font-family:inherit;font-size:15px;line-height:1;padding:10px 18px;border-radius:999px;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .08s}
+.room-ctl button:hover{background:#E4EAEE}
+.room-ctl button:active{transform:translateY(1px)}
+.room-ctl button:focus-visible{outline:2px solid #2B777B;outline-offset:2px}
+.room-ctl button.primary{background:#2B777B;border-color:#2B777B;color:#fff}
+.room-ctl button.primary:hover{background:#256A6E}
+.room-ctl button[aria-pressed="true"]{background:#24323C;border-color:#24323C;color:#fff}
+.room-ctl .ctl-prog{height:3px;border-radius:999px;background:#DCE5E7;overflow:hidden}
+.room-ctl .ctl-prog i{display:block;height:100%;width:0;background:#2B777B}
+
+/* ── 陪练教练：示范 → 跟练 → 等完成 → 自动进下一步 ── */
+.coach{margin-top:18px;display:grid;gap:11px}
+.coach[hidden],.room-ctl[hidden]{display:none}
+.coach .coach-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.coach .coach-step{font-size:13px;letter-spacing:.08em;color:#5D6E7A;font-variant-numeric:tabular-nums}
+.coach .coach-name{font-family:var(--serif);font-size:clamp(21px,2.6vw,27px);color:#1E2E3B;letter-spacing:.05em}
+.coach .coach-chip{font-size:13px;line-height:1;padding:6px 12px;border-radius:999px;border:1px solid currentColor;font-weight:600;letter-spacing:.06em;color:#5D6E7A}
+.coach .coach-tip{margin:0;font-size:15px;color:#41535F;min-height:1.7em}
+.coach .coach-bar{height:5px;border-radius:999px;background:#DCE5E7;overflow:hidden}
+.coach .coach-bar i{display:block;height:100%;width:0;background:#2B777B}
+.coach .coach-btns{display:flex;gap:10px;flex-wrap:wrap}
+.coach button{appearance:none;border:1px solid #B9C7D1;background:#fff;color:#24323C;font-family:inherit;font-size:15px;line-height:1;padding:10px 18px;border-radius:999px;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .08s}
+.coach button:hover:not(:disabled){background:#E4EAEE}
+.coach button:active:not(:disabled){transform:translateY(1px)}
+.coach button:focus-visible{outline:2px solid #2B777B;outline-offset:2px}
+.coach button:disabled{opacity:.38;cursor:default}
+.coach button.primary{background:#2B777B;border-color:#2B777B;color:#fff}
+.coach button.primary:hover:not(:disabled){background:#256A6E}
+.coach button.ghost{margin-left:auto;border-style:dashed;color:#5D6E7A}
+.coach .coach-note{margin:0;font-size:13px;line-height:1.7;color:#6C7C88}
+/* 阶段配色：示范=湖蓝 跟练=暖金 宽限=赭石 完成=青瓷玉 */
+.coach[data-phase="demo"] .coach-chip{color:#2B777B}
+.coach[data-phase="demo"] .coach-bar i{background:#2B777B}
+.coach[data-phase="follow"] .coach-chip{color:#8A6520}
+.coach[data-phase="follow"] .coach-bar i{background:#D9A53C}
+.coach[data-phase="grace"] .coach-chip{color:#A34A24}
+.coach[data-phase="grace"] .coach-bar i{background:#C1663A}
+.coach[data-phase="stepDone"] .coach-chip,.coach[data-phase="allDone"] .coach-chip{color:#4A7362}
+.coach[data-phase="stepDone"] .coach-bar i,.coach[data-phase="allDone"] .coach-bar i{background:#6E8F7C}
+@keyframes coach-pulse{0%,100%{box-shadow:0 0 0 0 rgba(217,165,60,0)}50%{box-shadow:0 0 0 6px rgba(217,165,60,.20)}}
+.coach[data-phase="follow"] .coach-chip{animation:coach-pulse 2.2s ease-in-out infinite}
+/* 按阶段只显示该阶段可用的按钮 */
+.coach .coach-btns>button{display:none}
+.coach [data-cact="free"]{display:inline-block}
+.coach[data-phase="idle"] [data-cact="start"]{display:inline-block}
+.coach[data-phase="demo"] [data-cact="skip"]{display:inline-block}
+.coach[data-phase="follow"] [data-cact="done"],.coach[data-phase="follow"] [data-cact="redemo"],.coach[data-phase="follow"] [data-cact="skip"]{display:inline-block}
+.coach[data-phase="grace"] [data-cact="done"],.coach[data-phase="grace"] [data-cact="extend"],.coach[data-phase="grace"] [data-cact="skip"]{display:inline-block}
+.coach[data-phase="allDone"] [data-cact="restart"]{display:inline-block}
+@media(max-width:760px){.coach button,.room-ctl button{padding:9px 14px;font-size:14px}.coach button.ghost{margin-left:0}}
+
+/* ── 拆动作控制台（八段锦 10 式：一次一动，可上一个 / 下一个 / 重放） ── */
+.room-ctl{margin-top:18px;display:grid;gap:11px}
+.room-ctl .ctl-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.room-ctl .ctl-idx{font-size:13px;letter-spacing:.08em;color:#5D6E7A;font-variant-numeric:tabular-nums}
+.room-ctl .ctl-name{font-family:var(--serif);font-size:clamp(21px,2.6vw,27px);color:#1E2E3B;letter-spacing:.05em}
+.room-ctl .ctl-hint{margin:0;font-size:15px;color:#41535F;min-height:1.7em}
+.room-ctl .ctl-btns{display:flex;gap:10px;flex-wrap:wrap}
+.room-ctl button{appearance:none;border:1px solid #B9C7D1;background:#fff;color:#24323C;font-family:inherit;font-size:15px;line-height:1;padding:10px 18px;border-radius:999px;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .08s}
+.room-ctl button:hover{background:#E4EAEE}
+.room-ctl button:active{transform:translateY(1px)}
+.room-ctl button:focus-visible{outline:2px solid #2B777B;outline-offset:2px}
+.room-ctl button.primary{background:#2B777B;border-color:#2B777B;color:#fff}
+.room-ctl button.primary:hover{background:#256A6E}
+.room-ctl button[aria-pressed="true"]{background:#24323C;border-color:#24323C;color:#fff}
+.room-ctl .ctl-prog{height:3px;border-radius:999px;background:#DCE5E7;overflow:hidden}
+.room-ctl .ctl-prog i{display:block;height:100%;width:0;background:#2B777B}
+
+/* ── 陪练教练：示范 → 跟练 → 等完成 → 自动进下一步 ── */
+.coach{margin-top:18px;display:grid;gap:11px}
+.coach[hidden],.room-ctl[hidden]{display:none}
+.coach .coach-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.coach .coach-step{font-size:13px;letter-spacing:.08em;color:#5D6E7A;font-variant-numeric:tabular-nums}
+.coach .coach-name{font-family:var(--serif);font-size:clamp(21px,2.6vw,27px);color:#1E2E3B;letter-spacing:.05em}
+.coach .coach-chip{font-size:13px;line-height:1;padding:6px 12px;border-radius:999px;border:1px solid currentColor;font-weight:600;letter-spacing:.06em;color:#5D6E7A}
+.coach .coach-tip{margin:0;font-size:15px;color:#41535F;min-height:1.7em}
+.coach .coach-bar{height:5px;border-radius:999px;background:#DCE5E7;overflow:hidden}
+.coach .coach-bar i{display:block;height:100%;width:0;background:#2B777B}
+.coach .coach-btns{display:flex;gap:10px;flex-wrap:wrap}
+.coach button{appearance:none;border:1px solid #B9C7D1;background:#fff;color:#24323C;font-family:inherit;font-size:15px;line-height:1;padding:10px 18px;border-radius:999px;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .08s}
+.coach button:hover:not(:disabled){background:#E4EAEE}
+.coach button:active:not(:disabled){transform:translateY(1px)}
+.coach button:focus-visible{outline:2px solid #2B777B;outline-offset:2px}
+.coach button:disabled{opacity:.38;cursor:default}
+.coach button.primary{background:#2B777B;border-color:#2B777B;color:#fff}
+.coach button.primary:hover:not(:disabled){background:#256A6E}
+.coach button.ghost{margin-left:auto;border-style:dashed;color:#5D6E7A}
+.coach .coach-note{margin:0;font-size:13px;line-height:1.7;color:#6C7C88}
+/* 阶段配色：示范=湖蓝 跟练=暖金 宽限=赭石 完成=青瓷玉 */
+.coach[data-phase="demo"] .coach-chip{color:#2B777B}
+.coach[data-phase="demo"] .coach-bar i{background:#2B777B}
+.coach[data-phase="follow"] .coach-chip{color:#8A6520}
+.coach[data-phase="follow"] .coach-bar i{background:#D9A53C}
+.coach[data-phase="grace"] .coach-chip{color:#A34A24}
+.coach[data-phase="grace"] .coach-bar i{background:#C1663A}
+.coach[data-phase="stepDone"] .coach-chip,.coach[data-phase="allDone"] .coach-chip{color:#4A7362}
+.coach[data-phase="stepDone"] .coach-bar i,.coach[data-phase="allDone"] .coach-bar i{background:#6E8F7C}
+@keyframes coach-pulse{0%,100%{box-shadow:0 0 0 0 rgba(217,165,60,0)}50%{box-shadow:0 0 0 6px rgba(217,165,60,.20)}}
+.coach[data-phase="follow"] .coach-chip{animation:coach-pulse 2.2s ease-in-out infinite}
+/* 按阶段只显示该阶段可用的按钮 */
+.coach .coach-btns>button{display:none}
+.coach [data-cact="free"]{display:inline-block}
+.coach[data-phase="idle"] [data-cact="start"]{display:inline-block}
+.coach[data-phase="demo"] [data-cact="skip"]{display:inline-block}
+.coach[data-phase="follow"] [data-cact="done"],.coach[data-phase="follow"] [data-cact="redemo"],.coach[data-phase="follow"] [data-cact="skip"]{display:inline-block}
+.coach[data-phase="grace"] [data-cact="done"],.coach[data-phase="grace"] [data-cact="extend"],.coach[data-phase="grace"] [data-cact="skip"]{display:inline-block}
+.coach[data-phase="allDone"] [data-cact="restart"]{display:inline-block}
+@media(max-width:760px){.coach button,.room-ctl button{padding:9px 14px;font-size:14px}.coach button.ghost{margin-left:0}}
+
+/* ── 拆动作控制台（八段锦 10 式：一次一动，可上一个 / 下一个 / 重放） ── */
+.room-ctl{margin-top:18px;display:grid;gap:11px}
+.room-ctl .ctl-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.room-ctl .ctl-idx{font-size:13px;letter-spacing:.08em;color:#5D6E7A;font-variant-numeric:tabular-nums}
+.room-ctl .ctl-name{font-family:var(--serif);font-size:clamp(21px,2.6vw,27px);color:#1E2E3B;letter-spacing:.05em}
+.room-ctl .ctl-hint{margin:0;font-size:15px;color:#41535F;min-height:1.7em}
+.room-ctl .ctl-btns{display:flex;gap:10px;flex-wrap:wrap}
+.room-ctl button{appearance:none;border:1px solid #B9C7D1;background:#fff;color:#24323C;font-family:inherit;font-size:15px;line-height:1;padding:10px 18px;border-radius:999px;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .08s}
+.room-ctl button:hover{background:#E4EAEE}
+.room-ctl button:active{transform:translateY(1px)}
+.room-ctl button:focus-visible{outline:2px solid #2B777B;outline-offset:2px}
+.room-ctl button.primary{background:#2B777B;border-color:#2B777B;color:#fff}
+.room-ctl button.primary:hover{background:#256A6E}
+.room-ctl button[aria-pressed="true"]{background:#24323C;border-color:#24323C;color:#fff}
+.room-ctl .ctl-prog{height:3px;border-radius:999px;background:#DCE5E7;overflow:hidden}
+.room-ctl .ctl-prog i{display:block;height:100%;width:0;background:#2B777B}
+
+/* ── 陪练教练：示范 → 跟练 → 等完成 → 自动进下一步 ── */
+.coach{margin-top:18px;display:grid;gap:11px}
+.coach[hidden],.room-ctl[hidden]{display:none}
+.coach .coach-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.coach .coach-step{font-size:13px;letter-spacing:.08em;color:#5D6E7A;font-variant-numeric:tabular-nums}
+.coach .coach-name{font-family:var(--serif);font-size:clamp(21px,2.6vw,27px);color:#1E2E3B;letter-spacing:.05em}
+.coach .coach-chip{font-size:13px;line-height:1;padding:6px 12px;border-radius:999px;border:1px solid currentColor;font-weight:600;letter-spacing:.06em;color:#5D6E7A}
+.coach .coach-tip{margin:0;font-size:15px;color:#41535F;min-height:1.7em}
+.coach .coach-bar{height:5px;border-radius:999px;background:#DCE5E7;overflow:hidden}
+.coach .coach-bar i{display:block;height:100%;width:0;background:#2B777B}
+.coach .coach-btns{display:flex;gap:10px;flex-wrap:wrap}
+.coach button{appearance:none;border:1px solid #B9C7D1;background:#fff;color:#24323C;font-family:inherit;font-size:15px;line-height:1;padding:10px 18px;border-radius:999px;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .08s}
+.coach button:hover:not(:disabled){background:#E4EAEE}
+.coach button:active:not(:disabled){transform:translateY(1px)}
+.coach button:focus-visible{outline:2px solid #2B777B;outline-offset:2px}
+.coach button:disabled{opacity:.38;cursor:default}
+.coach button.primary{background:#2B777B;border-color:#2B777B;color:#fff}
+.coach button.primary:hover:not(:disabled){background:#256A6E}
+.coach button.ghost{margin-left:auto;border-style:dashed;color:#5D6E7A}
+.coach .coach-note{margin:0;font-size:13px;line-height:1.7;color:#6C7C88}
+/* 阶段配色：示范=湖蓝 跟练=暖金 宽限=赭石 完成=青瓷玉 */
+.coach[data-phase="demo"] .coach-chip{color:#2B777B}
+.coach[data-phase="demo"] .coach-bar i{background:#2B777B}
+.coach[data-phase="follow"] .coach-chip{color:#8A6520}
+.coach[data-phase="follow"] .coach-bar i{background:#D9A53C}
+.coach[data-phase="grace"] .coach-chip{color:#A34A24}
+.coach[data-phase="grace"] .coach-bar i{background:#C1663A}
+.coach[data-phase="stepDone"] .coach-chip,.coach[data-phase="allDone"] .coach-chip{color:#4A7362}
+.coach[data-phase="stepDone"] .coach-bar i,.coach[data-phase="allDone"] .coach-bar i{background:#6E8F7C}
+@keyframes coach-pulse{0%,100%{box-shadow:0 0 0 0 rgba(217,165,60,0)}50%{box-shadow:0 0 0 6px rgba(217,165,60,.20)}}
+.coach[data-phase="follow"] .coach-chip{animation:coach-pulse 2.2s ease-in-out infinite}
+/* 按阶段只显示该阶段可用的按钮 */
+.coach .coach-btns>button{display:none}
+.coach [data-cact="free"]{display:inline-block}
+.coach[data-phase="idle"] [data-cact="start"]{display:inline-block}
+.coach[data-phase="demo"] [data-cact="skip"]{display:inline-block}
+.coach[data-phase="follow"] [data-cact="done"],.coach[data-phase="follow"] [data-cact="redemo"],.coach[data-phase="follow"] [data-cact="skip"]{display:inline-block}
+.coach[data-phase="grace"] [data-cact="done"],.coach[data-phase="grace"] [data-cact="extend"],.coach[data-phase="grace"] [data-cact="skip"]{display:inline-block}
+.coach[data-phase="allDone"] [data-cact="restart"]{display:inline-block}
+@media(max-width:760px){.coach button,.room-ctl button{padding:9px 14px;font-size:14px}.coach button.ghost{margin-left:0}}
 </style></head>
 <body>
 <div class="room-wrap"><div id="app"></div></div>
@@ -327,12 +501,13 @@ const VB = { shoulder: 20, torso: 58, upperArm: 32, foreArm: 28 };
 const VFOLD_K = 0.62;
 const RAD = Math.PI / 180;
 const VSH0L = [100, 110], VSH0R = [140, 110];   // 静止站姿下的左右肩：极坐标参考原点
-const R_MIN = 28, R_MAX = 56;
+const R_MIN = 28, R_MAX = 60;   // 上界 = 真实臂长（VB.upperArm+VB.foreArm = 60）。旧值 56 比臂长短 7%，导致「该伸直的手位」数学上永远伸不直（肘内角封顶 ~138°）。
 
 /* 腕位以「相对各自肩的极坐标 (r,θ°)」存储，而不是绝对坐标。
    理由：绝对坐标下，手从「低于肩」抬到「高于肩」时，两点之间的直线插值必然
    穿过肩点，|腕−肩|→0 ⇒ 两骨 IK 在 d→|l₁−l₂| 处退化 ⇒ 肘整体翻折。
-   极坐标下 r 被夹在 [28,56] < 臂长(60)，插值只改 θ —— 手绕肩划弧。 */
+   极坐标下 r 被夹在 [28,60]，**上界取「真实臂长」60**（= VB.upperArm+VB.foreArm），
+   使托天 / 开弓 / 悬垂这些「本来就该伸直」的手位真的能到全展；插值只改 θ —— 手绕肩划弧。 */
 function pol(origin, p) {
   const dx = p[0] - origin[0], dy = p[1] - origin[1];
   let r = Math.hypot(dx, dy) || 1e-6;
@@ -377,7 +552,7 @@ function wristsAbs(st) {
 }
 
 /* 每式统一以「抱球」位起、以「抱球」位收 ⇒ 势与势首尾同姿，切换不跳。 */
-const NEUTRAL = P([100, 166], [140, 166], [108, 266], [132, 266], 120, 168);
+const NEUTRAL = P([100, 170], [140, 170], [108, 266], [132, 266], 120, 168);   // 悬垂：手离肩 60（= 臂长全展）
 const BALL0   = P([102, 148], [138, 148], [108, 266], [132, 266], 120, 168);
 
 const MOVES = [
@@ -390,8 +565,8 @@ const MOVES = [
       [0.00, BALL0],
       [0.16, P([80, 134], [160, 134], [108, 266], [132, 266], 120, 168)],
       [0.34, P([60, 100], [180, 100], [108, 262], [132, 262], 120, 168)],
-      [0.50, P([82, 64], [158, 64], [108, 258], [132, 258], 120, 168)],
-      [0.58, P([98, 56], [142, 56], [108, 258], [132, 258], 120, 168)],
+      [0.50, P([84, 56], [156, 56], [108, 258], [132, 258], 120, 168)],
+      [0.58, P([100, 50], [140, 50], [108, 258], [132, 258], 120, 168)],
       [0.70, P([82, 66], [158, 66], [108, 262], [132, 262], 120, 168)],
       [0.86, P([78, 132], [162, 132], [108, 266], [132, 266], 120, 168)],
       [1.00, BALL0] ] },
@@ -402,9 +577,9 @@ const MOVES = [
       [0.14, P([95, 150], [145, 150], [108, 258], [132, 258], 120, 170)],
       [0.19, P([94, 150], [146, 150], [86, 258], [154, 258], 120, 174)],
       [0.23, P([93, 150], [147, 150], [86, 266], [154, 266], 120, 176)],
-      [0.34, P([46, 118], [120, 146], [86, 266], [154, 266], 120, 176)],
+      [0.34, P([40, 118], [120, 146], [86, 266], [154, 266], 120, 176)],
       [0.46, P([92, 150], [148, 150], [86, 266], [154, 266], 120, 176)],
-      [0.58, P([120, 146], [194, 118], [86, 266], [154, 266], 120, 176)],
+      [0.58, P([120, 146], [200, 118], [86, 266], [154, 266], 120, 176)],
       [0.70, P([92, 150], [148, 150], [86, 266], [154, 266], 120, 176)],
       [0.76, P([93, 150], [147, 150], [86, 266], [154, 266], 120, 175)],
       [0.80, P([94, 150], [146, 150], [86, 258], [154, 258], 120, 173)],
@@ -416,10 +591,10 @@ const MOVES = [
       [0.00, BALL0],
       [0.12, P([88, 154], [146, 152], [108, 266], [132, 266], 120, 168)],
       [0.22, P([72, 126], [148, 158], [108, 266], [132, 266], 120, 168)],
-      [0.32, P([94, 62], [150, 166], [108, 266], [132, 266], 120, 168)],
+      [0.32, P([94, 56], [150, 166], [108, 266], [132, 266], 120, 168)],
       [0.44, P([74, 124], [166, 124], [108, 266], [132, 266], 120, 168)],
       [0.56, P([84, 150], [176, 92], [108, 266], [132, 266], 120, 168)],
-      [0.68, P([98, 152], [152, 62], [108, 266], [132, 266], 120, 168)],
+      [0.68, P([98, 152], [152, 56], [108, 266], [132, 266], 120, 168)],
       [0.80, P([100, 150], [166, 88], [108, 266], [132, 266], 120, 168)],
       [0.90, P([101, 148], [144, 118], [108, 266], [132, 266], 120, 168)],
       [1.00, BALL0] ] },
@@ -476,8 +651,8 @@ const MOVES = [
       /* 颠动包络不能再乘到 root/feet 上：包络先饱和、颠动后启动，中间会出现一段
          「全关节静止」的假卡帧。改为一者用包络、一者用纯正弦。 */
       const b = Math.abs(Math.sin(7 * Math.PI * u));
-      return { wrists: [mixP(BALL0.wrists[0], pol(VSH0L, [98, 166]), env),
-                        mixP(BALL0.wrists[1], pol(VSH0R, [142, 166]), env)],
+      return { wrists: [mixP(BALL0.wrists[0], pol(VSH0L, [98, 170]), env),
+                        mixP(BALL0.wrists[1], pol(VSH0R, [142, 170]), env)],
                feet: [[108, 266 - 5 * b], [132, 266 - 5 * b]],
                root: [120, 168 - 5 * b], lean: 0, fold: 0, headOff: 0 };
     } },
@@ -509,7 +684,7 @@ function roomPose(idx, u) {
 /* ============================================================================
    二、小人绘制（沿用原房间里的造型：白色练功服、腰带、发髻、飘带）
    ========================================================================= */
-const TJ={UA:50,FA:48};
+const TJ={UA:43.7,FA:38.3};   // 臂长 82 = (VB.upperArm+VB.foreArm)×VS = 60×1.367：必须与姿势数据同尺度。旧值 50/48（=98）比手离肩的距离(50~77)长一大截，肘会被永久折死（“胳膊奇怪”的根因）。
 const tjLerp=lerp, tjEase=ease;
 const tjAdd=add, tjP=p=>p[0].toFixed(1)+' '+p[1].toFixed(1), tjMixPt=mixP;
 const tjClamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -522,7 +697,7 @@ const tjClamp=(v,a,b)=>v<a?a:v>b?b:v;
    它是时间的连续函数，结构上不可能翻折。每式开头按「肘向外」播种。 */
 function tjIK(s,h,side,mem){
   const dx=h[0]-s[0],dy=h[1]-s[1],d0=Math.hypot(dx,dy)||1;
-  const d=Math.min(Math.max(d0,Math.abs(TJ.UA-TJ.FA)+.5),TJ.UA+TJ.FA-.5);
+  const d=Math.min(Math.max(d0,Math.abs(TJ.UA-TJ.FA)+.5),TJ.UA+TJ.FA-1e-3);   // 上界放到 UA+FA：否则肘内角被数学封顶在 167.3°，永远差 12.7° 伸不直（-1e-3 避免 acos 取到 1.0000001）
   const ux=dx/d0,uy=dy/d0;
   const c=Math.acos(tjClamp((TJ.UA*TJ.UA+d*d-TJ.FA*TJ.FA)/(2*TJ.UA*d),-1,1)),a=Math.atan2(uy,ux);
   const e1=[s[0]+TJ.UA*Math.cos(a+c),s[1]+TJ.UA*Math.sin(a+c)];

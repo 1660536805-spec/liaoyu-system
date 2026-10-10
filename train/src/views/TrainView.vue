@@ -38,20 +38,20 @@
         <div class="m-card">
           <span class="m-icon">👤</span>
           <span class="m-title">上半身</span>
-          <span class="m-val green">92%</span>
-          <div class="m-bar"><span style="width: 92%"></span></div>
+          <span class="m-val green">{{ pctOf(vis.up) }}</span>
+          <div class="m-bar"><span :style="{ width: barW(vis.up) }"></span></div>
         </div>
         <div class="m-card">
           <span class="m-icon"></span>
           <span class="m-title">下半身</span>
-          <span class="m-val green">88%</span>
-          <div class="m-bar"><span style="width: 88%"></span></div>
+          <span class="m-val green">{{ pctOf(vis.low) }}</span>
+          <div class="m-bar"><span :style="{ width: barW(vis.low) }"></span></div>
         </div>
         <div class="m-card">
           <span class="m-icon">🔍</span>
           <span class="m-title">取景完整度</span>
-          <span class="m-val zhu">92%</span>
-          <div class="m-bar zhu-bar"><span style="width: 92%"></span></div>
+          <span class="m-val zhu">{{ pctOf(vis.frame) }}</span>
+          <div class="m-bar zhu-bar"><span :style="{ width: barW(vis.frame) }"></span></div>
         </div>
       </div>
     </div>
@@ -282,6 +282,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { getStyle, resolveStyle } from '../data/styles'
 import { getTone } from '../data/tones'
 import { createPoseEngine, drawPose, drawGhostPose, KEY_POINTS, HEAD_POINTS, listCameras, RESOLUTIONS, FRAMES } from '../engine/poseEngine'
+import { framingMetrics, diagText, pctText, barWidth } from '../engine/framing'
 import standardPoses from '../data/baduanjin-8.json'
 import { headPose, bodyPose, createTurnTracker } from '../engine/pose'
 import { MoveJudge, NAMES, THRESHOLD } from '../engine/judge'
@@ -289,8 +290,10 @@ import { pluck, chordAll, unlockAudio, preloadSamples } from '../engine/guqin'
 import { FallbackSwitch, frameAlive, FALLBACK_SRC, FALLBACK_CFG } from '../engine/fallback'
 import { createCoach, PHASE } from '../engine/coach'
 // 房间版动作库：教练小窗的形象换成「房间版拆动作」里那个白练功服小人（见 CoachFigure.vue）
-import { roomIndexForAppStep } from '../data/roomMoves.js'
+// —— 只有八段锦有房间版小人，其余拳种由 roomFigureIdxFor 返回 null（不画小人）
+import { roomFigureIdxFor } from '../data/coachFigure.js'
 import { saveRecord } from '../stores/records'
+import { pushToShell } from '../stores/shellBridge'
 import CamSettings from '../components/CamSettings.vue'
 import VoiceSettings from '../components/VoiceSettings.vue'
 import DemoAnimation from '../components/DemoAnimation.vue'
@@ -365,6 +368,7 @@ const stepIdx = ref(0)          // 当前第几式（0~7）
 const doneSet = ref(new Set())  // 已完成的式
 const litStrings = ref([])      // 当前亮起的弦
 const liveScore = ref(0)        // 当前式实时分 0~1
+const sessionStartAt = ref(Date.now())   // 本次跟练开始时刻：结束页/打卡要报真实用时
 
 let engine = null
 let judge = null
@@ -459,10 +463,11 @@ const coachDemoToken = ref(0)   // 递增 → 教练示范动画从 0 重播一�
 
 const coachAnimKey = computed(() => (coachOn.value ? `${style.value.id}-${stepIdx.value + 1}` : ''))
 
-/** 教练小窗用的「房间版式号」：房间版是「起势 + 应用的 8 式 + 收势」，
-    名称逐条对齐，所以应用第 i 式(0-based) → 房间版 i+1。
-    （见 train/src/data/roomMoves.js 的 roomIndexForAppStep）*/
-const roomFigureIdx = computed(() => roomIndexForAppStep(stepIdx.value))
+/** 教练小窗用的「房间版式号」：只有八段锦有对应的房间版小人（起势 + 8 式 + 收势），
+    应用第 i 式(0-based) → 房间版 i+1。其余拳种没有形象 → 返回 null，
+    由 DemoAnimation 拦截、干脆不渲染小人（而不是错画成八段锦的动作）。
+    （见 train/src/data/coachFigure.js 的 roomFigureIdxFor）*/
+const roomFigureIdx = computed(() => roomFigureIdxFor(style.value.id, stepIdx.value))
 
 const nextMove = computed(() => moves.value[stepIdx.value + 1] || null)
 
@@ -525,31 +530,45 @@ const coachCue = computed(() => {
 // ---- 取景诊断：实时算关键点可见度，据此给引导 ----
 // 真机实测（2026-10-02）：近距离时膝/踝 visibility≈0.02，肩/肘/腕≈1.0。
 // 判定器已改为上半身可判，但站太近会让上半身占比过小、抖动变大，故仍要给距离提示。
-const vis = reactive({ text: '', bad: false })
+// 顶部指标卡（上半身 / 下半身 / 取景完整度）全部读这里的真实值；
+// 没检测到人体时显示「—」——原先写死的 92%/88%/92% 已移除。
+const vis = reactive({ text: '', bad: false, seen: false, up: 0, low: 0, frame: 0 })
+// 指标卡文案/条宽统一走 framing.js（没人体 → 「—」/ 0%），
+// 数值口径见 src/engine/framing.js，断言见 scripts/framing.test.mjs。
+const pctOf = (x) => pctText(x, vis.seen)
+const barW = (x) => barWidth(x, vis.seen)
 const showGuide = ref(true)
 const guideText = ref('')
 
+// 兜底（预录视频）顶上时没有真实识别结果：指标卡回到「—」，
+// 不拿上一帧的旧数字充数（否则等于换了张假数据给用户看）。
+watch(fbActive, (on) => {
+  if (!on) return
+  vis.seen = false; vis.up = 0; vis.low = 0; vis.frame = 0
+  vis.text = '未检测到人体'; vis.bad = true
+})
+
 function updateDiag(landmarks) {
-  if (!landmarks || landmarks.length < 29) {
-    vis.text = '未检测到人体'
+  const m = framingMetrics(landmarks)
+  if (!m) {
+    vis.text = diagText(null)
     vis.bad = true
+    vis.seen = false
+    vis.up = 0; vis.low = 0; vis.frame = 0
     guideText.value = '站到镜头前，让上半身和双手完整入镜'
     return
   }
-  const v = (i) => landmarks[i]?.visibility ?? 0
-  const up = (v(11) + v(12) + v(13) + v(14) + v(15) + v(16)) / 6      // 上半身
-  const low = (v(25) + v(26) + v(27) + v(28)) / 4                    // 下半身
-  // 肩宽占画面比例：太小说明站太远，太大说明太近
-  const shoW = Math.hypot(landmarks[11].x - landmarks[12].x, landmarks[11].y - landmarks[12].y)
-  vis.text = `上半身 ${(up * 100).toFixed(0)}% · 下半身 ${(low * 100).toFixed(0)}% · 取景 ${(shoW * 100).toFixed(0)}%`
+  vis.seen = true
+  vis.up = m.up; vis.low = m.low; vis.frame = m.frame
+  vis.text = diagText(m)
 
-  if (up < 0.55) {
+  if (m.up < 0.55) {
     vis.bad = true
     guideText.value = '光线不足或离得太远，请靠近一些并面向光源'
-  } else if (shoW > 0.42) {
+  } else if (m.shoW > 0.42) {
     vis.bad = true
     guideText.value = '离得太近了，请退后一步，让双手完整入镜'
-  } else if (low < 0.25) {
+  } else if (m.low < 0.25) {
     vis.bad = false
     guideText.value = '上半身已够用（八式判定不依赖腿脚），可退后一步让画面更稳'
   } else {
@@ -1170,6 +1189,20 @@ function advance() {
   resetStep()
   announcer.onMove(stepIdx.value + 1, totalMoves.value)   // 播报新动作名
   coachEnter(stepIdx.value, 'advance')                    // 新式重新从「教练示范」开始
+  pushToShell(snapshotSession())                          // 每过一式就把真实进度同步给主壳
+}
+
+// 本次跟练的「事实快照」：真实用时 + 已完成式 + 逐式完成度
+// 同一场（sid = 开始时刻）反复上报，主壳按增量累加时长，不会翻倍。
+function snapshotSession() {
+  return {
+    sid: String(sessionStartAt.value),
+    moves: [...doneSet.value],
+    names: NAMES.filter((_, i) => doneSet.value.has(i)),
+    tone: tone.value?.key || '',
+    seconds: Math.max(0, Math.round((Date.now() - sessionStartAt.value) / 1000)),
+    scores: judge ? [...(judge.lastScores || [])] : [],
+  }
 }
 
 function finish() {
@@ -1178,7 +1211,13 @@ function finish() {
   stopAutoAdvance()
   exitFallback('一曲完成')
   engine?.stop()
-  saveRecord({ moves: [...doneSet.value], names: NAMES.filter((_, i) => doneSet.value.has(i)) })
+  // 真实用时 + 逐式完成度：
+  //   · seconds 取自进页面后的真实时长（原先 minutes 恒传默认值 0，等于没记时长）
+  //   · scores 取判定器逐式分数；预录兜底/手动模式下没有识别结果 → 空数组，
+  //     主壳据此显示「—」，不编分数。
+  const s = snapshotSession()
+  saveRecord({ moves: s.moves, names: s.names, tone: s.tone, minutes: Math.round(s.seconds / 60), seconds: s.seconds })
+  pushToShell(s)
 }
 
 function skip() {                 // 三级兜底之一：跳过本式也算完成
@@ -1226,7 +1265,7 @@ function manualMode() {          // 三级兜底之三：关摄像头，改为�
   camLabel.value = '手动模式'
 }
 
-function quit() { exitFallback('退出跟练'); engine?.dispose(); toShell('/?screen=home') }
+function quit() { pushToShell(snapshotSession()); exitFallback('退出跟练'); engine?.dispose(); toShell('/?screen=home') }
 
 // 标准骨架：按当前式取真值，让人看见「这一式标准动作是怎么做的」。
 // 只对八段锦生效（真值只有这 8 式）。

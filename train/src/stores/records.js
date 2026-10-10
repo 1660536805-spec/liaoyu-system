@@ -31,7 +31,7 @@ export function lastRecord() {
 
 const pad2 = (n) => String(n).padStart(2, '0')
 
-export function saveRecord({ moves = [], names = [], tone = '', minutes = 0 } = {}) {
+export function saveRecord({ moves = [], names = [], tone = '', minutes = 0, seconds = 0 } = {}) {
   const d = new Date()
   const rec = {
     ts: d.getTime(),
@@ -44,6 +44,7 @@ export function saveRecord({ moves = [], names = [], tone = '', minutes = 0 } = 
     names,
     tone,                     // 这一套用的五音基调（解释层，仅用于展示，不参与播放）
     minutes,                  // 实际练习时长（分钟），0 表示未记录
+    seconds: Math.max(0, Math.round(seconds) || 0),   // 实际练习秒数（比 minutes 精细，回写主壳用）
   }
   const list = read()
   list.push(rec)

@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>弦养 · 产品评审与改善建议（PM 视角）</title>
+<style>
+  :root{
+    --paper:#FBF3E3; --paper2:#FDF9EF; --ink:#3A2A1C; --brown:#6B4226; --muted:#97836D;
+    --terra:#B0552E; --terra2:#CE7B48; --jade:#6E8F7C; --jade2:#7FA08C; --gold:#C9A97E; --gold2:#E9B85F;
+    --line:#E3D3B7; --red:#C4472F;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"PingFang SC","Microsoft YaHei","Source Han Sans SC",system-ui,sans-serif;
+    font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:56px 28px 96px}
+  h1,h2,h3,h4{font-family:"Songti SC","STSong",serif;font-weight:700;margin:0}
+  h1{font-size:40px;letter-spacing:.02em}
+  h2{font-size:25px;margin:0 0 6px}
+  h3{font-size:19px;margin:0 0 8px}
+  h4{font-size:15px;margin:0 0 6px}
+  p{margin:0 0 10px}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+    background:#F2E7D5;color:#7A4A24;padding:1px 5px;border-radius:4px}
+  .seal{display:inline-block;background:var(--terra);color:#FDF6EA;font-size:12px;
+    font-family:"Songti SC",serif;padding:2px 7px;border-radius:3px;letter-spacing:.1em;vertical-align:middle}
+  header{border-bottom:2px solid var(--line);padding-bottom:26px;margin-bottom:34px}
+  .sub{color:var(--muted);font-size:14px;margin-top:8px}
+  .meta{color:var(--muted);font-size:13px;margin-top:14px;display:flex;gap:18px;flex-wrap:wrap}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:26px 0 8px}
+  .kpi{background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .kpi b{display:block;font-size:24px;font-family:"Songti SC",serif;color:var(--brown);line-height:1.2}
+  .kpi span{font-size:12.5px;color:var(--muted)}
+  section{margin-top:46px}
+  .sec-h{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:22px}
+  .sec-h .n{font-family:"Songti SC",serif;color:var(--gold);font-size:22px}
+  .lead{background:var(--paper2);border:1px solid var(--line);border-left:4px solid var(--terra);
+    border-radius:10px;padding:18px 22px;margin-bottom:18px}
+  .lead ol{margin:8px 0 0;padding-left:22px}
+  .card{background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:16px}
+  .card.p0{border-left:4px solid var(--red)}
+  .card.p1{border-left:4px solid var(--terra2)}
+  .card.p2{border-left:4px solid var(--jade)}
+  .pill{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px;margin-right:8px;vertical-align:2px}
+  .pill.p0{background:#F6DDD6;color:#8E2F1E}
+  .pill.p1{background:#F7E6D5;color:#8A4A1E}
+  .pill.p2{background:#DDE8E1;color:#3D5D4C}
+  .pill.ok{background:#DDE8E1;color:#3D5D4C}
+  .row{display:grid;grid-template-columns:96px 1fr;gap:10px;margin:8px 0 0;font-size:14px}
+  .row dt{color:var(--muted);font-size:12.5px;padding-top:2px}
+  .row dd{margin:0}
+  .ev{color:var(--muted);font-size:12.5px}
+  .shot{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0 4px}
+  .shot figure{margin:0;flex:0 0 auto}
+  .shot img{display:block;border:1px solid var(--line);border-radius:10px;background:#fff}
+  .shot .phone{width:200px}
+  .shot .wide{width:100%;max-width:640px}
+  .shot figcaption{font-size:12px;color:var(--muted);margin-top:6px;max-width:640px}
+  table{border-collapse:collapse;width:100%;font-size:14px;margin-top:6px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:#F4E9D8;font-size:13px;color:var(--brown)}
+  td.c{text-align:center;white-space:nowrap}
+  .tick{color:var(--jade);font-weight:700}
+  .cross{color:var(--red);font-weight:700}
+  .warn{color:var(--terra2);font-weight:700}
+  .callout{background:#F6EDDD;border:1px dashed var(--gold);border-radius:10px;padding:14px 18px;font-size:14px;color:#6B4A2A}
+  footer{margin-top:56px;border-top:2px solid var(--line);padding-top:20px;color:var(--muted);font-size:13px}
+  ul{margin:6px 0 8px;padding-left:20px}
+  li{margin:4px 0}
+  @media (max-width:760px){ .kpis{grid-template-columns:repeat(2,1fr)} h1{font-size:30px} .row{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>弦养 <span class="seal">评审</span></h1>
+  <div class="sub">产品评审与改善建议 · 以产品经理视角审「整体应用」</div>
+  <div class="meta">
+    <span>评审日期：2026-10-10</span>
+    <span>评审对象：主壳 <code>dist/</code> + 跟练子应用 <code>dist/s4/</code></span>
+    <span>方法：读源码 + 真机走查 + 运行时探针</span>
+    <span>本轮不改任何前端代码</span>
+  </div>
+</header>
+
+<!-- ============ 结论 ============ -->
+<section style="margin-top:26px">
+  <div class="lead">
+    <h3 style="margin-bottom:10px">一句话结论</h3>
+    <p><b>界面完成度很高，但「看起来是真的」和「真的是真的」之间还有一段距离。</b>
+    产品有一个非常亮眼的品质：<b>109 个可点元素 0 个死按钮</b>，没接的能力还会自动标成「暂未接入」并如实告知——
+    这个诚实度超过了绝大多数参赛作品。</p>
+    <p>真正的问题不在"缺功能"，而在<b>三处"假的比真的还显眼"</b>：首页节气日期是写死的、跟练页最显眼的三个百分比是常量、
+    问诊 7 题问完就丢。这三件事都会在评委/用户追问一句之后崩塌，而且修复成本都极低。</p>
+    <p style="margin-bottom:0"><b>如果本轮只做三件事：</b></p>
+    <ol>
+      <li>把首页「今日 · 霜降 / 10月23日」换成真实节气与日期 <span class="ev">（低风险、当天可完成）</span></li>
+      <li>把跟练页顶栏那三个百分比绑到真实可见度，未检测到人体就显示「—」<span class="ev">（低风险、半天）</span></li>
+      <li>让问诊 7 题的答案真正影响推荐（曲目 / 式数 / 强度），或干脆收敛成 3 题偏好设置 <span class="ev">（中成本）</span></li>
+    </ol>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><b>0<span style="font-size:14px;color:var(--muted)"> / 109</span></b><span>死按钮占比（主壳全屏）</span></div>
+    <div class="kpi"><b>9<span style="font-size:14px;color:var(--muted)"> 屏</span></b><span>主壳设计稿 1:1 复刻</span></div>
+    <div class="kpi"><b>1<span style="font-size:14px;color:var(--muted)"> / 18</span></b><span>s4 对外放行的页面数</span></div>
+    <div class="kpi"><b>3<span style="font-size:14px;color:var(--muted)"> 处</span></b><span>写死节气的文案位置</span></div>
+  </div>
+</section>
+
+<!-- ============ 现状盘点 ============ -->
+<section>
+  <div class="sec-h"><span class="n">一</span><h2>现状盘点：真、假、未接入</h2></div>
+  <p>评审第一件事是把"真的"和"看着像真的"分开。下表是本轮逐项核验的结果（证据为源码行号 / 运行时探针）。</p>
+
+  <table>
+    <thead><tr><th style="width:180px">能力</th><th style="width:88px">真实性</th><th>依据</th></tr></thead>
+    <tbody>
+      <tr><td>动作识别（MediaPipe 姿态）</td><td class="c"><span class="tick">真</span></td>
+        <td>无头实测视频流 <code>640×480 ready=4 paused=false</code>，<code>figurePoints=20</code>；判定阈值 0.55 真实生效</td></tr>
+      <tr><td>本式完成度 <code>liveScore</code></td><td class="c"><span class="tick">真</span></td>
+        <td><code>TrainView.vue:201,238</code> 显示「完成度 X%」，来源 <code>:1135 judge.lastScores</code></td></tr>
+      <tr><td>跟练页「上半身/下半身/取景完整度」三个百分比</td><td class="c"><span class="cross">假</span></td>
+        <td><code>TrainView.vue:40–54</code> 静态写死 <code>92% / 88% / 92%</code>，从不绑定</td></tr>
+      <tr><td>主壳「练习」屏的 92% / 88% / 22%</td><td class="c"><span class="cross">假</span></td>
+        <td><code>app.js:462–464</code> 硬编码；绿色骨架是固定坐标 <code>app.js:451–453</code></td></tr>
+      <tr><td>首页节气与日期</td><td class="c"><span class="cross">假</span></td>
+        <td><code>app.js:343–344</code> 写死「今日 · 霜降 / 10月23日 农历九月初三」，今天实际是 10-10</td></tr>
+      <tr><td>结束页 89 分 / 12 分钟 / 146·162 / 连续 7 天</td><td class="c"><span class="cross">假</span></td>
+        <td><code>app.js:499–504</code> 常量；琴谱点阵为种子伪随机 <code>app.js:483–487 (seed=7)</code>。页面已有一行免责说明 <span class="tick">(加分项)</span></td></tr>
+      <tr><td>「我的」身体数据（心率 72 / 睡眠 6.5 / 评分 92）</td><td class="c"><span class="warn">示例</span></td>
+        <td><code>app.js:547</code> 等；界面右上角已标「示例指标 · 未连接设备」<span class="tick">(加分项)</span></td></tr>
+      <tr><td>问诊 7 题的答案</td><td class="c"><span class="cross">空转</span></td>
+        <td><code>state.answers</code> 仅在问诊内部流转（<code>app.js:757–761</code>），不影响推荐、不入库、不进分析</td></tr>
+      <tr><td>打卡记录 / 头像 / 身体数据 / 音频偏好</td><td class="c"><span class="tick">真</span></td>
+        <td>localStorage 真实读写；结束页写入的是真实式数与真实停留秒数（<code>app.js:833</code>）</td></tr>
+      <tr><td>古琴曲库播放（2 首真录音）+ 七弦散音</td><td class="c"><span class="tick">真</span></td>
+        <td>曲库只列有干净音源的 2 首，无不可播按钮——红线守得住 <span class="tick">(加分项)</span></td></tr>
+      <tr><td>呼吸引导 4-6-4 / 保持倒计时 / 点弦试音</td><td class="c"><span class="tick">真</span></td>
+        <td><code>app.js:720–747</code> 真实计时器与音频触发</td></tr>
+      <tr><td>五禽戏 / 设备体征 / 线上账号</td><td class="c"><span class="warn">已标注未接入</span></td>
+        <td><code>app.js:657–660 aboutHTML</code>；未接入的按钮运行时被自动打标，点击弹「暂未接入」<span class="tick">(加分项)</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="shot">
+    <figure><img class="phone" src="shell-home.png" alt="首页"><figcaption>首页：请注意黄金位置的「今日 · 霜降 / 10月23日 农历九月初三」——与真实日期无关。</figcaption></figure>
+    <figure><img class="phone" src="shell-done.png" alt="结束页"><figcaption>结束页：89 分 / 12 分钟 / 146·162 全为常量，点阵为 seed=7 伪随机。顶部那行免责说明是这个应用最诚实的一处细节。</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============ P0 ============ -->
+<section>
+  <div class="sec-h"><span class="n">二</span><h2>P0 · 信任与正确性（建议本轮就修）</h2></div>
+
+  <div class="card p0">
+    <h3><span class="pill p0">P0-1</span>首页的「今日节气」是写死的</h3>
+    <div class="row"><dt>现象</dt><dd>首页黄金位显示「今日 · 霜降」，副行「10月23日 农历九月初三」。评审当天是 <b>2026-10-10</b>，节气早已不是霜降，日期也完全对不上。</dd></div>
+    <div class="row"><dt>证据</dt><dd><code>dist/app.js:343–344</code>；同一串内容还出现在 <code>:361</code>（首页引用条「霜降水返壑…」）、<code>:668</code>（结束页食养理由）、<code>:335</code>（推荐理由文案）——<b>共 4 处</b>。</dd></div>
+    <div class="row"><dt>影响</dt><dd>这是首页第一眼看到的字。养生类产品最忌"连今天是什么日子都不知道"，一旦被指出，后面所有"顺时而食、节气调养"的说法都会被连带怀疑。</dd></div>
+    <div class="row"><dt>建议</dt><dd>接一个纯本地的节气计算（24 节气日期表 + 当前年份即可，无需任何接口）：节气名、公历日期、农历日期、节气释义、引用诗句、食养推荐全部随节气切换。四段文案做成一张 <code>SOLAR_TERMS</code> 表。</dd></div>
+    <div class="row"><dt>成本 / 风险</dt><dd><b>低</b>（一个函数 + 4 处引用）/ 低（纯文本替换，不动版式；改动后按既有流程做逐像素回归，未触碰的屏必须 0 差异）。</dd></div>
+  </div>
+
+  <div class="card p0">
+    <h3><span class="pill p0">P0-2</span>跟练页最显眼的三个百分比是假常量</h3>
+    <div class="row"><dt>现象</dt><dd>真跟练页顶栏「上半身 92% / 下半身 88% / 取景完整度 92%」永远是这三个数，跟画面里有没有人毫无关系（假摄像头下"未检测到人体"时依然是 92/88/92）。</dd></div>
+    <div class="row"><dt>证据</dt><dd><code>train/src/views/TrainView.vue:40–54</code> 是静态标记，数值与进度条宽度都写死。</dd></div>
+    <div class="row"><dt>但真实数据是有的</dt><dd>同一个文件里 <code>updateDiag()</code>（<code>:528–558</code>）用 MediaPipe 关键点真实算出上半身 / 下半身可见度与肩宽占比，结果写进 <code>vis.text</code>（<code>:97</code> 的 <code>.diag</code> 诊断条），并驱动底部文字提示；真实成绩还有一个「完成度 <code>liveScore</code>%」（<code>:201, 238</code>）。<b>也就是说：真数据算出来了，只是没接到最显眼的那张卡上。</b></dd></div>
+    <div class="row"><dt>影响</dt><dd>动作识别是这产品的核心承诺。把常量放在最显眼处、把真实值藏在诊断条里，等于主动制造一个"一眼假"的把柄。反过来，把真值接上去，评委现场就能看到数字随人动而变——这是最划算的一次改动。</dd></div>
+    <div class="row"><dt>建议</dt><dd>三个数改绑 <code>vis</code> 实时值；<b>未检测到人体时显示「—」而不是 92%</b>；取景完整度保留红/绿告警配色，并让它的颜色驱动条件与 <code>updateDiag</code> 的判定保持一致。</dd></div>
+    <div class="row"><dt>成本 / 风险</dt><dd><b>极低</b>（3 个插值）/ 低。</dd></div>
+  </div>
+
+  <div class="card p0">
+    <h3><span class="pill p0">P0-3</span>主壳「练习」屏与真跟练页的数字一模一样，容易被当成识别结果</h3>
+    <div class="row"><dt>现象</dt><dd>主壳那张练习屏（名画 + 人物图 + 绿色骨架 + 92%/88%/取景 22%）看起来就是"识别中"的界面，但它<b>不启动摄像头、不做任何识别</b>，骨架是写死的折线坐标。</dd></div>
+    <div class="row"><dt>证据</dt><dd><code>app.js:451–453</code>（固定骨架点）、<code>:462–464</code>（92/88/22）；<code>:806–807</code> 进入这一屏时的 toast 原文：「示例演示：设计稿静态复刻页，未启动摄像头；真练请点「开始动作预览」」。</dd></div>
+    <div class="row"><dt>影响</dt><dd>用户在主壳练完一整轮（点"下一个"到第 8 式）后会进结束页看到 89 分，全程没有任何真实测量。这条路径是<b>最容易让人误以为"AI 在看我"</b>的路径，也是投诉风险最高的一条。更麻烦的是：这张屏里唯一的真练入口藏在左侧 tab「动作示范」里，而主按钮是"下一个"。</dd></div>
+    <div class="row"><dt>建议</dt><dd>给它一个明确的定位——<b>「动作图解 / 要领」页</b>，而不是"识别页"：<ul>
+      <li>去掉三个百分比（换成"第 N 式 · 对应第 N 弦 · 要领摘要"这类真实信息）；</li>
+      <li>骨架若保留，改为"示意骨架"并加注说明，或与人物图对齐（现在骨架浮在画面正中、人物在右侧，明显错位）；</li>
+      <li>把「动作示范」提升为主按钮（"去真跟练"），与首页动线里的「开始动作预览」统一成同一个词。</li></ul></dd></div>
+    <div class="row"><dt>成本 / 风险</dt><dd><b>中</b>（改文案与版式，需逐像素回归）/ <b>中</b>——涉及已冻结的设计稿版式，建议先给你看改动前后的对照图再决定。</dd></div>
+  </div>
+
+  <div class="shot">
+    <figure><img class="phone" src="shell-practice.png" alt="主壳练习屏"><figcaption>主壳练习屏：92% / 88% / 22% 全是常量，骨架为固定坐标且与人物错位（骨架在画面中央，人物在右侧）。左侧 tab「动作示范」才是去真跟练的入口。</figcaption></figure>
+    <figure><img class="wide" src="s4-train-desktop.png" alt="s4 真跟练页桌面端"><figcaption>s4 真跟练页（桌面）：顶栏同样是写死的 92% / 88% / 92%；左是陪练教练（深色房间），右是摄像头画面（荧光绿）——与主壳的宣纸色系是两个世界。</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============ P1 ============ -->
+<section>
+  <div class="sec-h"><span class="n">三</span><h2>P1 · 数据闭环与激励（下一轮）</h2></div>
+
+  <div class="card p1">
+    <h3><span class="pill p1">P1-1</span>问诊问了 7 题，一题都没用上</h3>
+    <div class="row"><dt>现象</dt><dd>7 步问诊完整可用（含上一步 / 跳过 / 未选拦截），答案存进 <code>state.answers</code>……然后就结束了。</dd></div>
+    <div class="row"><dt>追查补记</dt><dd><span class="pill p0">后补</span>实地走查发现更严重的一层：<b>这 7 步其实是同一道题重复了 7 次</b>——题干固定为「你最近哪里容易不舒服？」，4 个选项固定为「颈肩 / 腰背 / 睡眠 / 情绪」，进度只是 <code>第 N 步 / 7</code> 在变。用户答到第 3 遍就会发现"这题我刚答过"，是比"问了不用"更直接的信任损伤。本轮 P1-1 已顺带换成 7 道递进题（部位 → 睡眠 → 情绪 → 精力 → 可投入时长 → 身体限制 → 最想改善）。</dd></div>
+    <div class="row"><dt>证据</dt><dd>全文件搜索 <code>answers</code> 只有 5 处：定义、重置、选择、上一步回填、下一步校验（<code>app.js:8,757,759,760,761</code>）。<b>没有任何一处读取它来影响首页推荐、曲目或练习参数。</b></dd></div>
+    <div class="row"><dt>影响</dt><dd>"问了不用"比"不问"更伤体验——用户认真做完 7 题，回到首页发现推荐纹丝不动。这也让首页那个「为什么推荐给你」的说明变成了没法自圆其说的话术。</dd></div>
+    <div class="row"><dt>建议</dt><dd>二选一，别停在中间：<ul>
+      <li><b>(A) 真用起来：</b>答案 → 推荐映射（五音入五脏的脏象 → 首选曲目；肩颈/腰背 → 首选式序；睡眠 → 练习时段建议），首页推荐卡直接展示"因为你说了 X，所以推荐 Y"；同时把答案存进 localStorage，让「我的」能回看。</li>
+      <li><b>(B) 收缩：</b>把 7 题砍到 3 题（最想改善 / 每天可投入时长 / 身体限制），定位成"快速偏好设置"，问完立刻落在首页推荐上。</li></ul></dd></div>
+    <div class="row"><dt>成本 / 风险</dt><dd><b>中</b>（(B) 更低）/ 低。</dd></div>
+  </div>
+
+  <div class="card p1">
+    <h3><span class="pill p1">P1-2</span>激励曲线 4 次打卡就顶到头</h3>
+    <div class="row"><dt>现象</dt><dd>模拟 5 次真实打卡后：「我的」显示 <b>600 / 600</b>（已满格）、阶段进度 <b>7 / 8 节</b>、已练 5 天。也就是说连续练 4 天就把经验条练满了。</dd></div>
+    <div class="row"><dt>证据</dt><dd><code>app.js:191 DESIGN{xp:360, xpMax:600, stageDone:3}</code>；<code>:529 xp = 360 + 打卡次数×60</code> ⇒ 第 4 次即 600；<code>:532/:670 阶段进度 = 打卡天数 + 2</code> ⇒ 第 5 天 7/8。</dd></div>
+    <div class="row"><dt>影响</dt><dd>留存机制的生命周期只有 3–5 天，之后就无目标可追。对"日日精进"的产品定位是直接矛盾。</dd></div>
+    <div class="row"><dt>建议</dt><dd>改成以真实投入量推进：<b>经验 = 累计练习分钟数 + 累计完成式数（加权）</b>；阶段按"每节需要 N 次有效练习（含完成度门槛）"解锁；把「已练 N 天」与「连续 N 天」在文案上彻底分开（现在两个数在真实数据下会撞在一起）。</dd></div>
+    <div class="row"><dt>成本 / 风险</dt><dd><b>中</b>（一处公式 + 文案）/ 低。</dd></div>
+  </div>
+
+  <div class="card p1">
+    <h3><span class="pill p1">P1-3</span>结束页把"假成绩"写进了真实记录</h3>
+    <div class="row"><dt>现象</dt><dd>结束页的分数、时长、命中数是假的（有免责说明，做得对），但点「完成打卡」时写入的是主壳这次静态浏览的式数与停留秒数——于是「我的」里就出现了一条"看起来练过、其实没练"的记录。</dd></div>
+    <div class="row"><dt>证据</dt><dd><code>app.js:499–504</code>（假成绩）、<code>:833–836</code>（<code>checkin(式数, 真实秒数)</code> 写入 localStorage）。</dd></div>
+    <div class="row"><dt>建议</dt><dd>两条路都行，选一条：<ul>
+      <li><b>打通：</b>把 s4 真跟练的结果（完成度、实际完成的式数、时长）通过 URL 参数或 localStorage 回写给主壳，结束页显示的就是真结果；</li>
+      <li><b>分开：</b>主壳结束页明确标成"示意页"，且<b>不提供打卡按钮</b>，打卡只在真跟练结束后发生。</li></ul>现在这种"标注了是假的、但仍然允许记进真实档案"的中间态最危险。</dd></div>
+    <div class="row"><dt>成本 / 风险</dt><dd><b>中</b> / 低。</dd></div>
+  </div>
+
+  <div class="shot">
+    <figure><img class="phone" src="shell-profile-with-records.png" alt="有真实记录时的我的页"><figcaption>模拟 5 次真实打卡后：600/600 已满格、阶段 7/8。同时注意「身体数据」仍是示例值（72 / 6.5 / 92），真数据与示例数据出现在同一屏。</figcaption></figure>
+    <figure><img class="phone" src="shell-profile.png" alt="无记录时的我的页"><figcaption>全新用户（零记录）第一次进「我的」：直接看到 360/600、连续 7 天、阶段 3/8、身心评分 92——这是"别人的成绩"，且没有任何"示例"标注（身体数据有，进度条没有）。</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============ P2 ============ -->
+<section>
+  <div class="sec-h"><span class="n">四</span><h2>P2 · 工程与一致性（持续还债）</h2></div>
+
+  <div class="card p2">
+    <h3><span class="pill p2">P2-1</span>一个产品两套前端、两套视觉语言</h3>
+    <div class="row"><dt>现状</dt><dd>主壳是 <b>无源码工程</b>（直接手改 <code>dist/app.js</code> 884 行 + <code>app.css</code> 624 行，9 张设计稿 1:1 复刻）；s4 是完整的 Vue3 + Vite 工程，但<b>对外只放行 <code>/train</code> 一个页面</b>（其余 17 个视图会被弹回主壳）。</dd></div>
+    <div class="row"><dt>视觉断层</dt><dd>主壳：宣纸米 <code>#FBF3E3</code> / 赭石 <code>#B0552E</code> / 青瓷玉 <code>#6E8F7C</code>。s4：<code>theme-color #16130f</code>（近黑）+ 荧光绿摄像头画面 + 深色小人。两侧并排时不像同一个产品。</dd></div>
+    <div class="row"><dt>影响</dt><dd>① 主壳每次改动都要做逐像素回归，"能改"的成本极高，产品迭代速度被锁死；② 两套 UI 各有一套「首页 / 音疗 / 我的」，数据不互通；③ s4 里 17 个不可达视图仍在源码与产物里，构建、克隆、CI 全都在为它们付费（仓库 165MB，最大单文件 21.6MB wasm）。</dd></div>
+    <div class="row"><dt>建议</dt><dd>分三步，别一次动大手术：<ul>
+      <li><b>短期（本周可做）：</b>给主壳补一个最小构建层——把 <code>app.js</code> 拆成模块 + 一个 esbuild 打包脚本，产物保持字节等价。这样后续改动不必再手改压缩产物。</li>
+      <li><b>中期：</b>给 s4 做一次与主壳一致的配色映射（摄像头区域的荧光绿 → 青瓷玉系；深色房间 → 暮色宣纸），先把"同一产品"的观感立起来。</li>
+      <li><b>明确边界：</b>要么把主壳逐步迁进 s4 技术栈合二为一，要么正式宣布"主壳 = 品牌外壳（冻结），所有新功能只进 s4"，并把 s4 的 17 个死视图从产物里剔除以缩小体积。</li></ul></dd></div>
+    <div class="row"><dt>成本 / 风险</dt><dd><b>中高</b> / 中（涉及架构，建议单独排期）。</dd></div>
+  </div>
+
+  <div class="card p2">
+    <h3><span class="pill p2">P2-2</span>没有账号，所有"长期数据"随时会清零</h3>
+    <div class="row"><dt>现象</dt><dd>打卡记录、身体数据、头像、音频偏好全部只存在本机 localStorage；界面已如实说明「本机演示版没有线上账号，换设备不会同步」。</dd></div>
+    <div class="row"><dt>影响</dt><dd>"连续打卡 7 天""累计 58 分钟"这类最有说服力的数据，清一次浏览器缓存就没了；换手机、换浏览器都归零。作为参赛作品可以接受，作为产品不能。</dd></div>
+    <div class="row"><dt>建议</dt><dd>低成本版：加「导出 / 导入我的数据（JSON）」两个按钮，至少让数据可迁移；正式版：接轻量账号（手机号 / 微信登录 + 云同步打卡记录）。</dd></div>
+    <div class="row"><dt>成本 / 风险</dt><dd>导出导入 <b>低</b>；账号体系 <b>中高</b>。</dd></div>
+  </div>
+
+  <div class="card p2">
+    <h3><span class="pill p2">P2-3</span>细节清单（低成本、可批量处理）</h3>
+    <ul>
+      <li>主壳练习屏骨架与人物图<b>明显错位</b>（骨架在画面中央，人物在右侧）——见截图。</li>
+      <li>跟练页「取景完整度」的告警配色与真实判定条件不一致：92% 也是红色进度条，颜色失去了信息量。</li>
+      <li>桌面端并排布局下，教练画面里的文字（如「循环陪练中…」）有裁切；「当前式名」标签与卡片边缘叠在一起。</li>
+      <li>启动台里 s4 的链接是 <code>?stage=1</code>，而主壳生成的参数是 <code>stage=point|line|arc</code>——两处参数口径不一致，建议统一。</li>
+      <li>s4 的 18 个视图中，与主壳重复的「首页 / 音疗 / 我的」共三处，且 s4 的「我的」还有一处写死的 92 分（<code>MeView.vue:75</code>），建议随 P2-1 一并处理。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 路线 ============ -->
+<section>
+  <div class="sec-h"><span class="n">五</span><h2>建议的迭代路线</h2></div>
+  <table>
+    <thead><tr><th style="width:112px">批次</th><th style="width:200px">主题</th><th>内容</th><th style="width:120px">验收口径</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>第一批</b><br><span class="ev">当天可完成</span></td>
+        <td>把"假的比真的显眼"清零</td>
+        <td>P0-1 真实节气日期 · P0-2 三个百分比接真实可见度（无人显示「—」）</td>
+        <td>改前后逐像素回归：未触碰的屏 0.000% 差异</td>
+      </tr>
+      <tr>
+        <td><b>第二批</b><br><span class="ev">约一周</span></td>
+        <td>把闭环接上</td>
+        <td>P1-1 问诊答案落地（推荐映射 + 入库）· P1-3 结束页只显示真结果 / 或取消假打卡</td>
+        <td>走查脚本：7 题不同答案 → 首页推荐确实不同</td>
+      </tr>
+      <tr>
+        <td><b>第三批</b><br><span class="ev">约一周</span></td>
+        <td>激励与主壳定位</td>
+        <td>P1-2 重标定经验/阶段曲线 · P0-3 主壳练习屏重定位为「动作图解」</td>
+        <td>模拟 30 天打卡不封顶；主壳练习屏无百分比残留</td>
+      </tr>
+      <tr>
+        <td><b>第四批</b><br><span class="ev">单独排期</span></td>
+        <td>架构与视觉统一</td>
+        <td>P2-1 主壳最小构建层 / 视觉配色映射 / s4 死视图清理 · P2-2 数据导出导入</td>
+        <td>构建产物字节等价；s4 产物体积显著下降</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout" style="margin-top:16px">
+    <b>节奏建议：</b>前两批都是"小改动、高收益"，且都不改版式骨架，风险可控；第三批开始触碰已冻结的设计稿版式，
+    建议每一条都先出<b>改前 / 改后对照图</b>，你确认后再落地。
+  </div>
+</section>
+
+<!-- ============ 本轮改动与验收 ============ -->
+<section>
+  <div class="sec-h"><span class="n">六</span><h2>本轮改动与验收（第一、二批已落地）</h2></div>
+  <div class="lead">
+    <p style="margin-bottom:6px"><b>批准范围：</b>P0-1、P0-2、P1-1、P1-3 直接做；P0-3、P1-2 属第三批（会动已冻结的设计稿版式），<b>本轮未动</b>，待对照图确认后再落地。</p>
+    <p style="margin-bottom:0"><b>验收口径（项目红线）：</b>未触碰的屏，改前 vs 改后必须零差异。因为像素比对会被动效干扰，本轮改用<b>两条独立的证据</b>：
+    ① 渲染后 DOM 逐字符比对（不受动效影响）；② 逐像素 diff，但先用「同一套代码再采一次」量出噪声地板，再看差异是否超出。</p>
+  </div>
+
+  <table>
+    <thead><tr><th style="width:64px">条目</th><th style="width:210px">改了什么</th><th>怎么验收（可复跑）</th><th style="width:96px">结果</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="c"><b>P0-1</b></td>
+        <td>首页「今日节气 / 农历 / 节气文案 / 季节引文」由写死改为真实计算</td>
+        <td><code>solar-term.cjs</code> 对 2025–2027 三年 24 节气逐项与公开历书核对；农历走浏览器内置中国历 <code>Intl('zh-CN-u-ca-chinese')</code>；<code>probe-today.cjs</code> 读页面实际文案</td>
+        <td class="c"><span class="tick">通过</span><br><span class="ev">实测显示<br>「今日 · 寒露」<br>「10月10日 农历九月初一」</span></td>
+      </tr>
+      <tr>
+        <td class="c"><b>P0-2</b></td>
+        <td>s4 顶栏「上半身 / 下半身 / 取景完整度」由写死 92% / 88% / 92% 改为读真实关键点</td>
+        <td>抽纯函数 <code>train/src/engine/framing.js</code> + <code>framing.test.mjs</code>（16 项）；<code>probe-s4-vis.cjs</code> 在真实页面读三个值</td>
+        <td class="c"><span class="tick">通过</span><br><span class="ev">无人时三项<br>一律「—」、<br>条宽 0%</span></td>
+      </tr>
+      <tr>
+        <td class="c"><b>P1-1</b></td>
+        <td>7 步问诊改为 7 道不同的递进题；答案真的参与推荐（音疗方向 / 今日调式 / 练哪一套 / 从哪个阶段起），并存本机</td>
+        <td><code>probe-quiz.cjs</code> 跑两套人设端到端：7 步题面互不相同、第 7 步按钮文案、四项映射、首页「按你的回答」、音疗页与准备页选中态、刷新后仍生效</td>
+        <td class="c"><span class="tick">通过</span><br><span class="ev">结算提示实测<br>「已按你的回答定制<br>· 招牌 3 式 · 从「点」起<br>· 音疗方向「肺」」</span></td>
+      </tr>
+      <tr>
+        <td class="c"><b>P1-3</b></td>
+        <td>结束页不再显示写死的 89 分 / 12 分钟 / 146·162 / 随机点阵；改读 s4 真跟练回写的真实结果，没有真实会话就显示「—」</td>
+        <td>新增主壳 ↔ s4 单向结果桥 <code>train/src/stores/shellBridge.js</code>；<code>probe-done.cjs</code> 覆盖三种状态（零记录 / 有记录无识别 / 有识别分数）共 42 项断言</td>
+        <td class="c"><span class="tick">通过</span><br><span class="ev">42 / 0<br>点阵 49 个<br>坐标逐点未动</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:26px">① 未触碰的屏：渲染后 DOM 逐字符相同</h3>
+  <p class="ev">脚本 <code>dom-snap.cjs</code>（导出各屏渲染后 DOM）+ <code>dom-diff.cjs</code>（比对）。比像素更强：不受动效、光栅化抖动影响。</p>
+  <table>
+    <thead><tr><th style="width:120px">屏</th><th style="width:110px">结论</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td class="c">loading</td><td class="c"><span class="tick">逐字符相同</span></td><td>2781 字符</td></tr>
+      <tr><td class="c">audio</td><td class="c"><span class="tick">逐字符相同</span></td><td>12501 字符</td></tr>
+      <tr><td class="c">intro</td><td class="c"><span class="tick">逐字符相同</span></td><td>6793 字符</td></tr>
+      <tr><td class="c">practice</td><td class="c"><span class="tick">逐字符相同</span></td><td>8381 字符</td></tr>
+      <tr><td class="c">profile</td><td class="c"><span class="tick">逐字符相同</span></td><td>8021 字符</td></tr>
+      <tr><td class="c">body</td><td class="c"><span class="tick">逐字符相同</span></td><td>11787 字符</td></tr>
+      <tr><td class="c">home</td><td class="c"><span class="warn">有意改动</span></td><td>5 / 181 个标签块：节气名、日期、节气文案、推荐结语、季节引文</td></tr>
+      <tr><td class="c">question</td><td class="c"><span class="warn">有意改动</span></td><td>1 / 142 个标签块：题干文案</td></tr>
+      <tr><td class="c">done</td><td class="c"><span class="warn">有意改动</span></td><td>只改数据与文案；<b>49 个琴谱点阵的 left 坐标逐个一致</b>（布局未动，只换颜色）</td></tr>
+    </tbody>
+  </table>
+  <p class="ev" style="margin-top:10px">另：<code>app.css</code> 改前 / 改后均为 47283 字符，<b>样式表一个字节都没动</b>。</p>
+
+  <h3 style="margin-top:26px">② 逐像素 diff：差异必须先超过「噪声地板」才算数</h3>
+  <p class="ev">脚本 <code>regress.cjs</code>。噪声地板 = 用<b>同一套代码</b>再采一次，量出该屏自身的不确定性。关键是：loading 页有云 / 花瓣 / 转圈动效，
+  practice 页端点有光栅化抖动，<b>同版本连采就能差几百像素</b>——不设地板就会把它们误判成"改坏了"。</p>
+  <table>
+    <thead><tr><th style="width:150px">屏</th><th style="width:120px">改前 vs 改后</th><th style="width:110px">噪声地板</th><th>判定</th></tr></thead>
+    <tbody>
+      <tr><td class="c">loading</td><td class="c">1491 像素 / 0.088%</td><td class="c">547</td><td>在噪声以内（动效相位差）</td></tr>
+      <tr><td class="c">practice</td><td class="c">36 像素 / 0.002%</td><td class="c">0</td><td>远低于阈值 64（DOM 已证明逐字符相同）</td></tr>
+      <tr><td class="c">audio / intro / body / profile / profile-with-records</td><td class="c">0–1 像素</td><td class="c">0</td><td><span class="tick">零差异</span></td></tr>
+      <tr><td class="c">home / question / done</td><td class="c">0.76% / 0.78% / 24.3%</td><td class="c">11 / 0 / 2</td><td><span class="warn">有意改动</span>，对照图见 <code>outputs/pm-review/compare/</code></td></tr>
+      <tr><td class="c">s4-train-*</td><td class="c">1.27% / 0.88%</td><td class="c">1.27% / 0.88%</td><td>该页有真实视频画面，像素比对无分辨率，改用 <code>probe-s4-vis.cjs</code> 取值验证</td></tr>
+    </tbody>
+  </table>
+  <p class="ev" style="margin-top:10px">全部 9 屏与 s4 页面在探针下 <b>0 条 JS 报错</b>（s4 无头环境的摄像头 <code>NotAllowedError</code> 不计）。</p>
+
+  <div class="shot">
+    <figure><img class="wide" src="compare/cmp-done.png" alt="结束页 改前 / 改后 / 差异"><figcaption><b>结束页对照（左：改前 · 中：改后 · 右：差异热力图）。</b>改前是写死的 89 分 / 12 分钟 / 146·162 / 随机点阵；改后无真实会话时一律「—」。右图可见差异集中在文字与点的<b>颜色</b>上，背景图、卡片、行距位置未变。</figcaption></figure>
+  </div>
+  <div class="shot">
+    <figure><img class="wide" src="compare/cmp-home.png" alt="首页 改前 / 改后 / 差异"><figcaption><b>首页对照。</b>差异只在「今日 · 霜降 / 10月23日 农历九月初三」这一块（正是 P0-1 修掉的那段写死文案）。</figcaption></figure>
+  </div>
+  <div class="shot">
+    <figure><img class="wide" src="compare/cmp-question.png" alt="问诊页 改前 / 改后 / 差异"><figcaption><b>问诊页对照。</b>差异只在题干一行——改前 7 步都是同一道题，改后是 7 道递进题。</figcaption></figure>
+  </div>
+  <div class="shot">
+    <figure><img class="wide" src="compare/cmp-practice.png" alt="练习屏差异"><figcaption><b>练习屏（P0-3 未动）。</b>差异热力图近乎全黑，仅 36 像素的光栅化抖动；渲染后 DOM 与改前逐字符相同——证明本轮确实没动这一屏。</figcaption></figure>
+  </div>
+
+  <h3 style="margin-top:26px">第三批（待你确认后再动）</h3>
+  <table>
+    <thead><tr><th style="width:64px">条目</th><th style="width:210px">要改什么</th><th>为什么需要先看对照图</th></tr></thead>
+    <tbody>
+      <tr><td class="c"><b>P0-3</b></td><td>主壳「练习」屏重定位为「动作图解」，移除三个百分比的残留</td><td>这会改掉设计稿上那张静态复刻页的版式与文案基调</td></tr>
+      <tr><td class="c"><b>P1-2</b></td><td>经验 / 阶段曲线重标定（现在 4 次打卡满格）；「已练 N 天」与「连续 N 天」文案彻底分开；零记录用户不再直接显示设计稿的 360/600、连续 7 天、阶段 3/8</td><td>会改「我的」页首屏的进度条与文案，属设计稿固定值区域</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 优点 ============ -->
+<section>
+  <div class="sec-h"><span class="n">七</span><h2>值得保留的优点（别在迭代里丢掉）</h2></div>
+  <ul>
+    <li><b>诚实机制</b>：未接入的按钮在渲染后被自动打标（<code>app.js:599–603</code>），点击弹「暂未接入」并指向「我的 › 版本信息」里的能力清单。评审跑完全部 9 屏，<b>109 个可点元素，0 个死按钮</b>。</li>
+    <li><b>假数据有标注</b>：结束页顶部「以下评分与建议为示例，未进行动作识别或测量」、身体数据「示例指标 · 未连接设备」。</li>
+    <li><b>曲库红线守得住</b>：只列真有干净音源的 2 首，其余曲目不出现、不做不可播按钮。</li>
+    <li><b>无障碍做得比同类项目好</b>：aria-label / aria-pressed / aria-current、弹层 <code>role="dialog"</code> + Esc 关闭 + Enter·Space 触发。</li>
+    <li><b>手感细节是真的</b>：点弦试音、式序自动拨对应琴弦、呼吸引导 4-6-4、保持倒计时、分享图只画真实信息（日期 / 式数 / 弦号 / 署名，不画虚拟评分）。</li>
+  </ul>
+  <p class="ev" style="margin-top:14px">评审原则：以上优点意味着这产品的"底子"是诚实的——所以 P0 那三条尤其值得修，因为它们恰恰是在破坏这个产品最值钱的品质。</p>
+</section>
+
+<footer>
+  <p><b>评审与验收产物</b>（均在 <code>outputs/pm-review/</code>）：
+  <code>report.html</code> 本报告 ·
+  <code>capture.cjs</code> 批量截图与探针 ·
+  <code>regress.cjs</code> 逐像素回归（带噪声地板）·
+  <code>dom-snap.cjs</code> / <code>dom-diff.cjs</code> 渲染后 DOM 比对 ·
+  <code>probe-today.cjs</code> / <code>probe-quiz.cjs</code> / <code>probe-done.cjs</code> / <code>probe-s4-vis.cjs</code> 四项断言 ·
+  <code>solar-term.cjs</code> 节气独立算例 ·
+  <code>compare/</code> 改前改后对照图 ·
+  <code>before/</code> <code>after/</code> 截图基线 · <code>diff/</code> 差异热力图。</p>
+  <p style="margin-bottom:0">第一、二批（P0-1 / P0-2 / P1-1 / P1-3）已落地并通过上述全部验收；<b>第三批（P0-3 / P1-2）未动</b>，等你确认对照图后再开工。所有行号引用基于评审当日仓库状态（<code>9539a45</code>）。</p>
+</footer>
+
+</div>
+</body>
+</html>

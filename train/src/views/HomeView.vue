@@ -17,12 +17,13 @@
       <!-- 今日推荐卡 -->
       <div class="rec-card">
         <div class="rec-head">
-          <span class="rec-badge">今日推荐</span>
+          <span class="rec-badge">{{ rec.badge }}</span>
           <button class="rec-detail" @click="showWhy = true">为什么推荐给你</button>
         </div>
         <div class="rec-main">
           <div class="rec-title">{{ rec.style }} · {{ rec.toneName }}调</div>
           <div class="rec-sub">{{ rec.toneFeel }} · {{ rec.minutes }} 分钟</div>
+          <div class="rec-note" v-if="rec.note">{{ rec.note }}</div>
           <div class="rec-tags">
             <span class="rtag" v-for="tag in th.exp" :key="tag">{{ tag }}</span>
           </div>
@@ -37,7 +38,8 @@
       <div class="style-pills">
         <button
           v-for="s in stylePills" :key="s.key"
-          class="spill" :class="{ on: selectedStyle === s.key }"
+          class="spill" :class="{ on: selectedStyle === s.key, off: s.disabled }"
+          :disabled="s.disabled"
           @click="selectStyle(s.key)"
         >
           <span class="sp-name">{{ s.name }}</span>
@@ -70,7 +72,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getTone, TONES } from '../data/tones'
-import { getStyle } from '../data/styles'
+import { getStyle, STYLE_LIST } from '../data/styles'
 import { currentTerm, todayText } from '../data/solar'
 import { unlockAudio, preloadSamples } from '../engine/guqin'
 import { primeVoice } from '../engine/voice'
@@ -82,11 +84,19 @@ const ICON_MEDITATE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor
 const ICON_DEER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 3c0 2 1 3 2 4M17 3c0 2-1 3-2 4M9 7l-1-3M15 7l1-3M12 8c-2 0-3.5 1.5-3.5 3.5S10 15 12 15s3.5-1.5 3.5-3.5S14 8 12 8zM9 15l-1 6M15 15l1 6M12 15v5"/></svg>'
 const ICON_DICE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="15" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/><circle cx="9" cy="15" r="1.2" fill="currentColor"/></svg>'
 
-const stylePills = [
-  { key: 'baduanjin', name: '八段锦', desc: '经典·全身调养', icon: ICON_MEDITATE },
-  { key: 'wuqinxi', name: '五禽戏', desc: '灵动·强筋养气', icon: ICON_DEER },
-  { key: 'auto', name: '帮我选', desc: '智能推荐练习', icon: ICON_DICE },
-]
+// 胶囊来自拳种注册表（styles.js），避免硬编码与注册表漂移；
+// 未上线（status==='pending'）的拳种显式置灰，不假装可选。
+const PILL_DESC = { baduanjin: '经典·全身调养', wuqinxi: '灵动·强筋养气', taiji: '圆活·调息养神' }
+const stylePills = computed(() => [
+  ...STYLE_LIST.map((s) => ({
+    key: s.id,
+    name: s.name,
+    desc: PILL_DESC[s.id] || s.subtitle,
+    disabled: s.status === 'pending',
+    icon: s.id === 'wuqinxi' ? ICON_DEER : ICON_MEDITATE,
+  })),
+  { key: 'auto', name: '帮我选', desc: '智能推荐练习', disabled: false, icon: ICON_DICE },
+])
 
 const TONE_HOME = {
   gong: { what: '动作柔和、节奏平稳，调息养气，适合完成一轮全身练习。', why: '五音文化中，宫音与「脾」相应，意象偏向平稳、承载。配合节气收敛之势，让动作与呼吸更容易慢下来。', exp: ['舒缓减压', '调和气息', '适合日常'] },
@@ -100,8 +110,29 @@ function safeGet(k, fallback) { try { return localStorage.getItem(k) || fallback
 
 const selectedStyle = ref(safeGet('xianyang.style', 'baduanjin'))
 const toneKey = ref(safeGet('xianyang.tone', 'gong'))
+
+// 主壳问诊结果（由 dist/app.js 的 saveQuiz 写入 localStorage['xy-quiz']）：
+//   { answers, organ:0-4, rec:0宫|1徵|2羽, imode:0全套|1招牌, istage:0-2, tags }
+// 「帮我选」真读这份结果；没有就如实说明，不假装个性化推荐。
+function readShellQuiz() {
+  try {
+    const q = JSON.parse(localStorage.getItem('xy-quiz') || 'null')
+    if (q && typeof q === 'object' && typeof q.rec === 'number') return q
+  } catch {}
+  return null
+}
+const shellQuiz = ref(readShellQuiz())
+const REC_TONE = ['gong', 'zhi', 'yu']
+// 音调：手动选拳种时用用户偏好；「帮我选」且有问诊时，用问诊算出的调式
+const activeToneKey = computed(() => {
+  if (selectedStyle.value === 'auto' && shellQuiz.value) {
+    return REC_TONE[shellQuiz.value.rec] || toneKey.value
+  }
+  return toneKey.value
+})
+
 const term = computed(() => currentTerm())
-const tone = computed(() => getTone(toneKey.value))
+const tone = computed(() => getTone(activeToneKey.value))
 const th = computed(() => TONE_HOME[tone.value.key] || TONE_HOME.gong)
 const weekday = computed(() => '周' + '日一二三四五六'[new Date().getDay()])
 const todayStr = computed(() => {
@@ -110,24 +141,35 @@ const todayStr = computed(() => {
 })
 
 const rec = computed(() => {
-  const sid = selectedStyle.value === 'auto' ? 'baduanjin' : selectedStyle.value
+  const isAuto = selectedStyle.value === 'auto'
+  const sid = isAuto ? 'baduanjin' : selectedStyle.value
   const st = getStyle(sid) || getStyle('baduanjin')
   const secs = st.moves.reduce((n, m) => n + (m.sec || 0), 0) + 30
+  const q = isAuto ? shellQuiz.value : null
   return {
     style: st.name,
     moves: st.moves.length,
     minutes: Math.max(1, Math.round(secs / 60)),
     toneName: tone.value.name,
     toneFeel: tone.value.feel,
+    // 「帮我选」有问诊 → 今日推荐（音调/套式来自问诊）；无问诊 → 通用推荐 + 如实说明
+    badge: q || !isAuto ? '今日推荐' : '通用推荐',
+    note: q
+      ? (q.imode === 1 ? '按问诊结果：招牌三式 · 约 5 分钟' : '按问诊结果：整套八式 · 约 12 分钟')
+      : (isAuto ? '还没做问诊 · 先按最稳妥的八段锦' : ''),
   }
 })
 
 function selectStyle(key) {
+  const p = stylePills.value.find((x) => x.key === key)
+  if (p && p.disabled) return // 未上线的拳种不假装可选中
   selectedStyle.value = key
   try { localStorage.setItem('xianyang.style', key) } catch {}
 }
 
 function start() {
+  const p = stylePills.value.find((x) => x.key === selectedStyle.value)
+  if (p && p.disabled) selectedStyle.value = 'baduanjin'
   unlockAudio()
   preloadSamples()
   primeVoice()
@@ -169,6 +211,7 @@ function start() {
 }
 .rec-title { font-size: 22px; font-weight: 600; color: #2B251E; margin-bottom: 6px; }
 .rec-sub { font-size: 14px; color: var(--xuan-dim); margin-bottom: 10px; }
+.rec-note { font-size: 11px; color: var(--brown); margin: -4px 0 10px; opacity: .9; }
 .rec-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .rtag { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--green-light); color: var(--green); }
 
@@ -240,6 +283,7 @@ function start() {
   background: var(--bg-card); color: var(--xuan);
 }
 .spill.on { background: var(--green); color: #fff; border-color: var(--green); }
+.spill.off { opacity: .42; cursor: not-allowed; }
 .sp-name { display: block; font-size: 14px; font-weight: 600; margin-bottom: 2px; }
 .sp-desc { font-size: 10px; opacity: .8; }
 

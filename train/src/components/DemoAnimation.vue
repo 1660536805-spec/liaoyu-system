@@ -25,7 +25,7 @@
                但**不带 3D 房间场景**。时间轴仍由本组件推进（t 每帧更新），
                CoachFigure 只负责「按当前姿态重绘一帧」。 -->
           <CoachFigure
-            v-if="useRoomFigure"
+            v-if="useRoomFigure && figureIdx != null"
             v-show="state === 'ready'"
             :idx="figureIdx"
             :u="t"
@@ -41,10 +41,7 @@
           <div v-else-if="state === 'missing'" class="ph miss">
             <img v-if="photoOk && move?.photo" :src="move.photo" alt="" @error="photoOk = false" />
             <div v-else class="ph-blank">示意</div>
-            <p class="ph-note">
-              该式暂无示范动画，已降级为静态图示<span v-if="!photoOk">（图片也未找到，请参考语音要领）</span>。
-              跟练时以语音要领 + 镜像骨架为准。
-            </p>
+            <p class="ph-note">{{ missNote }}<span v-if="!photoOk && variant !== 'coach'">（图片也未找到，请参考语音要领）</span></p>
           </div>
         </div>
 
@@ -98,6 +95,7 @@
 //   语音开始 → 动画从头播；语音暂停/结束 → 停在结束姿态或回到起始（可设）。
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { getAnim, DEFAULT_POSE, POSE_KEYS, PHASE_TEXT } from '../data/demoAnim'
+import { ROOM_MOVES } from '../data/roomMoves.js'
 import CoachFigure from './CoachFigure.vue'
 
 const props = defineProps({
@@ -126,8 +124,9 @@ const props = defineProps({
   /** 形象来源：'auto' = coach 版式自动用「房间版小人」、drawer 仍用原来的疗养风小人；
       'room' = 强制房间版小人；'plain' = 强制原来的疗养风小人（canvas）。 */
   figure: { type: String, default: 'auto' },
-  /** 房间版式号：应用第 i 式(0-based) 传 i+1 —— 房间版头部多一个「起势」，名称逐条对齐。 */
-  figureIdx: { type: Number, default: 0 },
+  /** 房间版式号：应用第 i 式(0-based) 传 i+1 —— 房间版头部多一个「起势」，名称逐条对齐。
+      **null = 该拳种没有房间版小人**（非八段锦），此时不渲染 CoachFigure。 */
+  figureIdx: { type: Number, default: null },
 })
 
 const emit = defineEmits(['done'])
@@ -182,7 +181,16 @@ function persist() {
   } catch { /* ignore */ }
 }
 
-const dur = computed(() => anim.value?.dur || 1)
+const dur = computed(() => {
+  // 教练房间版小人：用**房间版动作库的作者时长**（ROOM_MOVES[idx].dur）当整段时长，
+  // 让 u 的推进速度与房间版逐帧一致（否则 8 式各自被拉长/压短）。
+  // drawer（非房间版小人）仍用 demoAnim 的时长。
+  if (useRoomFigure.value && figureIdx.value != null) {
+    const rm = ROOM_MOVES[figureIdx.value]
+    if (rm && rm.dur > 0) return rm.dur
+  }
+  return anim.value?.dur || 1
+})
 const pct = computed(() => Math.min(1, t.value))
 
 const seg = computed(() => {
@@ -200,6 +208,10 @@ const coachCaption = computed(() => {
   if (props.keepLooping) return playing.value ? '循环陪练中…' : '已暂停'
   return playing.value ? '示范中…' : '示范完毕 · 请跟我做'
 })
+/** 降级文案：教练小窗只有 96×108，原来那 40 余字会溢出糊成字块 → coach 版式给短句 */
+const missNote = computed(() => (props.variant === 'coach'
+  ? '暂无示范动画 · 看要领跟练'
+  : '该式暂无示范动画，已降级为静态图示。跟练时以语音要领 + 镜像骨架为准。'))
 const phaseMarks = computed(() => [
   { label: '起始', on: seg.value?.phase === 'start' },
   { label: '发力', on: seg.value?.phase === 'work' },
@@ -211,13 +223,12 @@ const endKeyT = computed(() => {
   return k ? k.t : dur.value * 0.5
 })
 
-/** once 模式播到哪停住：最后一个「结束姿态」关键帧（没有则整段末尾） */
-const onceEndT = computed(() => {
-  const ks = anim.value?.keys || []
-  let t = null
-  for (const k of ks) if (k.phase === 'end') t = k.t
-  return t ?? (anim.value?.dur || 1)
-})
+/** once 模式播到哪停住：**整段末尾**（u=1）。
+    【为什么不再取最后一个 phase:'end'】demoAnim 里多数式把最后的 'end' 关键帧放在自然回位之前
+    （如式6 停在 3.0/4.6 ≈ 65%），会让教练小窗在半途「定格截尾」。改用 dur（与 t 的推进同一来源）
+    即播到 u=1，且天然与「房间版时长」同源。
+    注意：第一个 'end' 的 endKeyT 仍供 voiceSync 的「停在结束姿态」用，不收本次影响。 */
+const onceEndT = computed(() => dur.value)
 
 function emitDone() {
   if (doneFired) return
