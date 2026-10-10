@@ -1,0 +1,78 @@
+<Slide style={{ width: 1280, height: 720, background: '#FBF3E3', padding: '20px 72px', flexDirection: 'column' }}>
+    <Box style={{ height: 78, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Box style={{ flexDirection: 'column', gap: 6 }}>
+            <Text style={{ fontSize: 15, letterSpacing: 3, color: '#B0552E', fontFamily: '"PingFang SC", sans-serif' }}>命 题 三 · 契 合 与 交 付 口 径</Text>
+            <Text style={{ fontSize: 36, fontWeight: 'bold', color: '#241C14', fontFamily: '"Songti SC","STSong",serif' }}>可演示的系统原型，与诚实的交付口径</Text>
+        </Box>
+        <Box style={{ width: 44, height: 44, borderRadius: 4, background: 'linear-gradient(135deg,#C2543C 0%,#8F3F1F 100%)', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontSize: 20, color: '#FBEFD8', fontFamily: '"Songti SC",serif', fontWeight: 'bold' }}>弦</Text>
+        </Box>
+    </Box>
+    <Box style={{ height: 1, background: '#E3D6BC', marginTop: 6 }} />
+    <Box style={{ flexDirection: 'column', gap: 14, marginTop: 16, height: 548 }}>
+        <Box style={{ flexDirection: 'column', gap: 10 }}>
+            <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <Text style={{ fontSize: 15, letterSpacing: 2, color: '#B0552E', fontFamily: '"PingFang SC", sans-serif' }}>命 题 列 举 方 向</Text>
+                <Text style={{ fontSize: 14, color: '#8A7A5E', fontFamily: '"PingFang SC", sans-serif' }}>命题允许任选其一或组合；弦养选其中两项组合，成果按「系统原型」组织。</Text>
+            </Box>
+            <Box style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {[
+                    { t: '五音疗愈音频 API/SDK', sel: true },
+                    { t: 'AI 动作识别 API', sel: true },
+                    { t: 'AI 定制音疗处方系统', sel: false },
+                    { t: '子午流注控制协议模块', sel: false },
+                    { t: '时辰化调理方案引擎', sel: false },
+                    { t: '分体质阶梯功法训练 SaaS', sel: false },
+                    { t: '和香配方数据库', sel: false },
+                    { t: '智能香薰控制 API', sel: false },
+                    { t: '节气食养内容库', sel: false },
+                    { t: '个性化食养推荐 API', sel: false },
+                ].map((c, i) => (
+                    <Box key={i} style={{ padding: '7px 14px', borderRadius: 18, background: c.sel ? '#B0552E' : '#F7EEDC', border: c.sel ? '1px solid #B0552E' : '1px solid #DCCBA8' }}>
+                        <Text style={{ fontSize: 14, color: c.sel ? '#FBEFD8' : '#9A8A6E', fontFamily: '"PingFang SC", sans-serif', fontWeight: c.sel ? 'bold' : 'normal' }}>{c.t}</Text>
+                    </Box>
+                ))}
+            </Box>
+        </Box>
+        <Box style={{ flexDirection: 'column', border: '1px solid #E3D6BC', borderRadius: 8, overflow: 'hidden' }}>
+            <Box style={{ flexDirection: 'row', background: '#241C14', height: 42 }}>
+                <Box style={{ width: 300, paddingLeft: 18, justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#F3E9D6', fontFamily: '"PingFang SC", sans-serif' }}>命题方向 / 要求</Text>
+                </Box>
+                <Box style={{ width: 400, paddingLeft: 18, justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#F3E9D6', fontFamily: '"PingFang SC", sans-serif' }}>弦养对应内容</Text>
+                </Box>
+                <Box style={{ flex: 1, paddingLeft: 18, justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#E9B85F', fontFamily: '"PingFang SC", sans-serif' }}>提交口径（如实标注）</Text>
+                </Box>
+            </Box>
+            {[
+                { k: '五音疗愈音频 API/SDK', v: '五音基调、古琴音色、点 / 线 / 面音乐组织', d: '独立音层原型 + 接口封装方案；未交付独立 SDK' },
+                { k: 'AI 动作识别 API', v: '姿态关键点、八段锦判定、动作触发弦音', d: 'H5 内动作识别链路 + 接口契约；未交付独立服务 API' },
+                { k: '文化内核数字化', v: '五脏关联、五音配置、动作内容、授权信息', d: '文档关系、原型数据与后续统一配置模型' },
+                { k: '可插拔接入', v: '输入适配、动作事件、音频输出、场景层分离', d: '说明模块边界与接入步骤，不宣称多硬件已联调' },
+            ].map((r, i) => (
+                <Box key={i} style={{ flexDirection: 'row', height: 62, borderTop: '1px solid #E3D6BC', background: i % 2 === 0 ? '#FFFFFF' : '#FAF4E6' }}>
+                    <Box style={{ width: 300, paddingLeft: 18, paddingRight: 12, justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#8F3F1F', fontFamily: '"PingFang SC", sans-serif' }}>{r.k}</Text>
+                    </Box>
+                    <Box style={{ width: 400, paddingLeft: 18, paddingRight: 12, justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 15, color: '#5C4E3C', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.5 }}>{r.v}</Text>
+                    </Box>
+                    <Box style={{ flex: 1, paddingLeft: 18, paddingRight: 12, justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 15, color: '#5C4E3C', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.5 }}>{r.d}</Text>
+                    </Box>
+                </Box>
+            ))}
+        </Box>
+        <Box style={{ flex: 1, justifyContent: 'center', background: '#1E1710', borderRadius: 8, padding: '14px 22px' }}>
+            <Text style={{ fontSize: 15, color: '#C9A97E', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.62 }}>
+                诚实边界：AI 的实际作用是调用现有姿态模型得到关键点，再结合动作判定完成反馈；没有证据支持「自研基础模型」「AI 音疗处方系统已完成」等说法。是否达到验收要求，以最终提交包、演示证据与赛方审核为准。
+            </Text>
+        </Box>
+    </Box>
+    <Box style={{ height: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <Text style={{ fontSize: 14, color: '#A9977B', fontFamily: '"PingFang SC", sans-serif' }}>弦养 · 以身为琴，以动为弦</Text>
+        <Text style={{ fontSize: 14, color: '#A9977B', fontFamily: '"PingFang SC", sans-serif' }}>10 / 12</Text>
+    </Box>
+</Slide>

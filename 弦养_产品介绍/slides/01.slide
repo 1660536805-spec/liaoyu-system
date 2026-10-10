@@ -1,0 +1,30 @@
+<Slide style={{ width: 1280, height: 720, position: 'relative', background: '#15100B', padding: 0, overflow: 'hidden' }}>
+    <Image src="assets/cover_guqin.png" style={{ position: 'absolute', top: 0, left: 0, width: 1280, height: 720, objectFit: 'cover' }} />
+    <Box style={{ position: 'absolute', top: 0, left: 0, width: 1280, height: 720, background: 'linear-gradient(90deg, rgba(18,12,8,0.94) 0%, rgba(18,12,8,0.74) 44%, rgba(18,12,8,0.16) 100%)' }} />
+    <Box style={{ position: 'absolute', top: 0, left: 0, width: 1280, height: 720, flexDirection: 'column', justifyContent: 'center', paddingLeft: 104, paddingRight: 104 }}>
+        <Animation animType="fadeIn" duration={600}>
+            <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 30 }}>
+                <Box style={{ width: 46, height: 2, background: '#C9A97E' }} />
+                <Text style={{ fontSize: 18, letterSpacing: 6, color: '#C9A97E', fontFamily: '"PingFang SC", sans-serif' }}>弦 养 · 身 心 疗 愈 系 统 原 型</Text>
+            </Box>
+        </Animation>
+        <Animation animType="fadeIn" startType="afterPrevious" duration={700}>
+            <Box style={{ marginBottom: 26 }}>
+                <Text style={{ fontSize: 76, fontWeight: 'bold', color: '#FBF3E3', fontFamily: '"Songti SC","STSong",serif', lineHeight: 1.16, letterSpacing: 3 }}>以身为琴，以动为弦</Text>
+            </Box>
+        </Animation>
+        <Animation animType="fadeIn" startType="afterPrevious" duration={600}>
+            <Box style={{ marginBottom: 40 }}>
+                <Text style={{ fontSize: 27, color: '#E8D9B8', fontFamily: '"PingFang SC", sans-serif', letterSpacing: 2 }}>五音疗愈 × AI 动作识别</Text>
+            </Box>
+        </Animation>
+        <Animation animType="fadeIn" startType="afterPrevious" duration={600}>
+            <Box style={{ flexDirection: 'column', gap: 10, borderLeft: '2px solid rgba(201,169,126,0.5)', paddingLeft: 20 }}>
+                <Text style={{ fontSize: 18, color: '#C3B491', fontFamily: '"PingFang SC", sans-serif' }}>命题三：OPC 时代身心疗愈五大核心赛道</Text>
+                <Text style={{ fontSize: 17, color: '#8E8069', fontFamily: '"PingFang SC", sans-serif' }}>从宫商角徵羽出发 · 以五脏串联古琴声音与八段锦练习</Text>
+                <Text style={{ fontSize: 17, color: '#C9A97E', letterSpacing: 1, fontFamily: '"PingFang SC", sans-serif' }}>可演示的系统原型 · 文化内核数字化 · 可插拔接入硬件与场景</Text>
+            </Box>
+        </Animation>
+    </Box>
+    <Text style={{ position: 'absolute', right: 72, bottom: 26, fontSize: 14, color: 'rgba(251,243,227,0.55)', fontFamily: '"PingFang SC", sans-serif' }}>01 / 12</Text>
+</Slide>

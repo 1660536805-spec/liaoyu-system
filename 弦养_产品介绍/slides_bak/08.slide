@@ -1,0 +1,65 @@
+<Slide style={{ width: 1280, height: 720, background: '#FBF3E3', padding: '20px 72px', flexDirection: 'column' }}>
+    <Box style={{ height: 78, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Box style={{ flexDirection: 'column', gap: 6 }}>
+            <Text style={{ fontSize: 15, letterSpacing: 3, color: '#B0552E', fontFamily: '"PingFang SC", sans-serif' }}>应 用 场 景 与 可 插 拔</Text>
+            <Text style={{ fontSize: 36, fontWeight: 'bold', color: '#241C14', fontFamily: '"Songti SC","STSong",serif' }}>从居家练习，到康养空间</Text>
+        </Box>
+        <Box style={{ width: 44, height: 44, borderRadius: 4, background: 'linear-gradient(135deg,#C2543C 0%,#8F3F1F 100%)', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontSize: 20, color: '#FBEFD8', fontFamily: '"Songti SC",serif', fontWeight: 'bold' }}>弦</Text>
+        </Box>
+    </Box>
+    <Box style={{ height: 1, background: '#E3D6BC', marginTop: 6 }} />
+    <Box style={{ flexDirection: 'row', gap: 30, marginTop: 20, height: 530 }}>
+        <Animation animType="fadeIn" duration={700}>
+            <Box style={{ width: 610, height: 530, position: 'relative', borderRadius: 8, overflow: 'hidden', boxShadow: '0 12px 34px rgba(60,40,20,0.16)' }}>
+                <Image src="assets/scene_room.png" style={{ position: 'absolute', top: 0, left: 0, width: 610, height: 530, objectFit: 'cover' }} />
+                <Box style={{ position: 'absolute', top: 264, left: 0, width: 610, height: 266, background: 'linear-gradient(0deg, rgba(24,17,11,0.94) 0%, rgba(24,17,11,0.58) 46%, rgba(24,17,11,0) 100%)' }} />
+                <Box style={{ position: 'absolute', top: 0, left: 0, width: 610, height: 530, flexDirection: 'column', justifyContent: 'flex-end', paddingLeft: 32, paddingRight: 32, paddingBottom: 30, gap: 10 }}>
+                    <Text style={{ fontSize: 15, letterSpacing: 2, color: '#C9A97E', fontFamily: '"PingFang SC", sans-serif' }}>当 前 展 示 场 景</Text>
+                    <Text style={{ fontSize: 34, fontWeight: 'bold', color: '#FBF3E3', fontFamily: '"Songti SC",serif' }}>居家跟练</Text>
+                    <Text style={{ fontSize: 17, color: '#E4D9C0', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.66 }}>
+                        一床古琴、一方静室：用户在摄像头前完成八段锦，身体动作得到可听见的回应。
+                    </Text>
+                </Box>
+            </Box>
+        </Animation>
+        <Box style={{ flex: 1, flexDirection: 'column', gap: 16 }}>
+            <Animation animType="fadeIn" startType="afterPrevious" duration={600}>
+                <Box style={{ flexDirection: 'column', gap: 12 }}>
+                    <Text style={{ fontSize: 15, letterSpacing: 2, color: '#B0552E', fontFamily: '"PingFang SC", sans-serif' }}>扩 展 场 景</Text>
+                    <Box style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                        {['团体课程', '互动展陈', '康养空间'].map((t, i) => (
+                            <Box key={i} style={{ padding: '9px 18px', borderRadius: 20, background: '#B0552E' }}>
+                                <Text style={{ fontSize: 16, color: '#FBEFD8', fontFamily: '"PingFang SC", sans-serif' }}>{t}</Text>
+                            </Box>
+                        ))}
+                    </Box>
+                    <Box style={{ height: 1, background: '#E3D6BC' }} />
+                    <Text style={{ fontSize: 15, letterSpacing: 2, color: '#6E8F7C', fontFamily: '"PingFang SC", sans-serif' }}>可 插 拔 接 入 对 象</Text>
+                    <Box style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                        {['手机 / 电脑摄像头', '扬声器 / 耳机', '大屏 / 投影', '深度摄像头 / 边缘设备', '灯光 / 振动外设', '智能音箱 / 第三方应用'].map((t, i) => (
+                            <Box key={i} style={{ padding: '8px 15px', borderRadius: 18, background: '#F7EEDC', border: '1px solid #DCCBA8' }}>
+                                <Text style={{ fontSize: 15, color: '#5C4E3C', fontFamily: '"PingFang SC", sans-serif' }}>{t}</Text>
+                            </Box>
+                        ))}
+                    </Box>
+                </Box>
+            </Animation>
+            <Box style={{ flexDirection: 'column', gap: 8, background: '#F7EEDC', borderRadius: 8, padding: '14px 18px', border: '1px solid #DCCBA8' }}>
+                <Text style={{ fontSize: 15, letterSpacing: 2, color: '#B08A3E', fontFamily: '"PingFang SC", sans-serif' }}>最 小 接 入 步 骤</Text>
+                <Text style={{ fontSize: 15, color: '#5C4E3C', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.55 }}>
+                    选输入 → 做适配 → 接判定器 → 接文化配置 → 接声音与界面 → 验证与降级。
+                </Text>
+            </Box>
+            <Box style={{ background: '#F2E7D2', borderRadius: 8, padding: 20, borderLeft: '3px solid #6E8F7C' }}>
+                <Text style={{ fontSize: 16, color: '#4E5B4F', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.68 }}>
+                    保持文化配置与动作事件的含义稳定，通过适配层更换设备或使用场景；写出接口不等于已验证可插拔，需用实际替换测试证明。
+                </Text>
+            </Box>
+        </Box>
+    </Box>
+    <Box style={{ height: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <Text style={{ fontSize: 14, color: '#A9977B', fontFamily: '"PingFang SC", sans-serif' }}>弦养 · 以身为琴，以动为弦</Text>
+        <Text style={{ fontSize: 14, color: '#A9977B', fontFamily: '"PingFang SC", sans-serif' }}>08 / 10</Text>
+    </Box>
+</Slide>

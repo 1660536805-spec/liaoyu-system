@@ -1,0 +1,77 @@
+<Slide style={{ width: 1280, height: 720, background: '#FBF3E3', padding: '20px 72px', flexDirection: 'column' }}>
+    <Box style={{ height: 84, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Box style={{ flexDirection: 'column', gap: 6 }}>
+            <Text style={{ fontSize: 15, letterSpacing: 3, color: '#B0552E', fontFamily: '"PingFang SC", sans-serif' }}>文 化 内 核</Text>
+            <Text style={{ fontSize: 36, fontWeight: 'bold', color: '#241C14', fontFamily: '"Songti SC","STSong",serif' }}>五脏：串联五音与身体练习的内部线索</Text>
+        </Box>
+        <Box style={{ width: 44, height: 44, borderRadius: 4, background: 'linear-gradient(135deg,#C2543C 0%,#8F3F1F 100%)', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontSize: 20, color: '#FBEFD8', fontFamily: '"Songti SC",serif', fontWeight: 'bold' }}>弦</Text>
+        </Box>
+    </Box>
+    <Box style={{ height: 1, background: '#E3D6BC', marginTop: 6 }} />
+    <Box style={{ flexDirection: 'row', gap: 30, marginTop: 22, height: 520 }}>
+        <Table
+            style={{ width: 800, height: 512 }}
+            defaultTextStyle={{ fontSize: 17, textAlign: 'center', color: '#3A2F22', fontFamily: '"PingFang SC", sans-serif' }}
+            defaultCellStyle={{ padding: 8, border: { left: { width: 1, color: '#E3D6BC' }, right: { width: 1, color: '#E3D6BC' }, top: { width: 1, color: '#E3D6BC' }, bottom: { width: 1, color: '#E3D6BC' } } }}
+            cells={[
+                [
+                    { text: '五脏线索', textStyle: { bold: true, color: '#FBEFD8' }, cellStyle: { background: { color: '#B0552E' } } },
+                    { text: '五音', textStyle: { bold: true, color: '#FBEFD8' }, cellStyle: { background: { color: '#B0552E' } } },
+                    { text: '五行', textStyle: { bold: true, color: '#FBEFD8' }, cellStyle: { background: { color: '#B0552E' } } },
+                    { text: '体验编排意象', textStyle: { bold: true, color: '#FBEFD8' }, cellStyle: { background: { color: '#B0552E' } } },
+                    { text: '八段锦关联动作', textStyle: { bold: true, color: '#FBEFD8' }, cellStyle: { background: { color: '#B0552E' } } },
+                ],
+                [
+                    { text: '心', textStyle: { bold: true } },
+                    { text: '徵', textStyle: { bold: true, color: '#B0552E', fontSize: 22 } },
+                    '火', '明亮、提振', '摇头摆尾去心火',
+                ],
+                [
+                    { text: '肝', textStyle: { bold: true }, cellStyle: { background: { color: '#F7EEDC' } } },
+                    { text: '角', textStyle: { bold: true, color: '#4E7A61', fontSize: 22 }, cellStyle: { background: { color: '#F7EEDC' } } },
+                    { text: '木', cellStyle: { background: { color: '#F7EEDC' } } },
+                    { text: '舒展、疏达', cellStyle: { background: { color: '#F7EEDC' } } },
+                    { text: '攒拳怒目增气力', cellStyle: { background: { color: '#F7EEDC' } } },
+                ],
+                [
+                    { text: '脾', textStyle: { bold: true } },
+                    { text: '宫', textStyle: { bold: true, color: '#B08A3E', fontSize: 22 } },
+                    '土', '平和、承载', '调理脾胃须单举',
+                ],
+                [
+                    { text: '肺', textStyle: { bold: true }, cellStyle: { background: { color: '#F7EEDC' } } },
+                    { text: '商', textStyle: { bold: true, color: '#8C8474', fontSize: 22 }, cellStyle: { background: { color: '#F7EEDC' } } },
+                    { text: '金', cellStyle: { background: { color: '#F7EEDC' } } },
+                    { text: '收敛、清肃', cellStyle: { background: { color: '#F7EEDC' } } },
+                    { text: '左右开弓似射雕', cellStyle: { background: { color: '#F7EEDC' } } },
+                ],
+                [
+                    { text: '肾', textStyle: { bold: true } },
+                    { text: '羽', textStyle: { bold: true, color: '#4E6E7E', fontSize: 22 } },
+                    '水', '沉静、润下', '两手攀足固肾腰',
+                ],
+            ]}
+        />
+        <Box style={{ flex: 1, flexDirection: 'column', gap: 16 }}>
+            <Box style={{ flexDirection: 'column', gap: 10, background: '#F2E7D2', borderRadius: 6, padding: 20, borderLeft: '3px solid #6E8F7C' }}>
+                <Text style={{ fontSize: 15, letterSpacing: 2, color: '#6E8F7C', fontFamily: '"PingFang SC", sans-serif' }}>典 籍 依 据</Text>
+                <Text style={{ fontSize: 17, color: '#5C4E3C', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.65 }}>
+                    《黄帝内经 · 素问 · 阴阳应象大论》：东方「在藏为肝……在音为角」，南方「在藏为心……在音为徵」。弦养的五脏串联，建立在这一体系之上。
+                </Text>
+            </Box>
+            <Box style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', gap: 12, paddingLeft: 20, borderLeft: '3px solid #B0552E' }}>
+                <Text style={{ fontSize: 19, fontWeight: 'bold', color: '#241C14', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.6 }}>
+                    文化关联 ≠ 播放指令
+                </Text>
+                <Text style={{ fontSize: 17, color: '#5C4E3C', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.7 }}>
+                    五脏是组织声音、身体与情绪文化语境的内部线索，不是系统检测出的脏器状态；关联动作也不是「某个器官有问题就练某一式」的建议。其余三式仍保留在完整练习中，用它们组织起始、中段与收束。
+                </Text>
+            </Box>
+        </Box>
+    </Box>
+    <Box style={{ height: 32, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <Text style={{ fontSize: 14, color: '#A9977B', fontFamily: '"PingFang SC", sans-serif' }}>弦养 · 以身为琴，以动为弦</Text>
+        <Text style={{ fontSize: 14, color: '#A9977B', fontFamily: '"PingFang SC", sans-serif' }}>03 / 12</Text>
+    </Box>
+</Slide>

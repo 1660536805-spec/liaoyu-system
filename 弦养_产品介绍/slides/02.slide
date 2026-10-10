@@ -1,0 +1,56 @@
+<Slide style={{ width: 1280, height: 720, background: '#FBF3E3', padding: '20px 72px', flexDirection: 'column' }}>
+    <Box style={{ height: 84, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Box style={{ flexDirection: 'column', gap: 6 }}>
+            <Text style={{ fontSize: 15, letterSpacing: 3, color: '#B0552E', fontFamily: '"PingFang SC", sans-serif' }}>产 品 概 述</Text>
+            <Text style={{ fontSize: 36, fontWeight: 'bold', color: '#241C14', fontFamily: '"Songti SC","STSong",serif' }}>起点：从五音进入身心疗愈</Text>
+        </Box>
+        <Box style={{ width: 44, height: 44, borderRadius: 4, background: 'linear-gradient(135deg,#C2543C 0%,#8F3F1F 100%)', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontSize: 20, color: '#FBEFD8', fontFamily: '"Songti SC",serif', fontWeight: 'bold' }}>弦</Text>
+        </Box>
+    </Box>
+    <Box style={{ height: 1, background: '#E3D6BC', marginTop: 6 }} />
+    <Box style={{ height: 500, flexDirection: 'column', marginTop: 22 }}>
+        <Animation animType="flyIn" direction="right" duration={700}>
+            <Box style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height: 268, paddingLeft: 24, paddingRight: 24 }}>
+                {[
+                    { char: '宫', organ: '脾 · 土', color: '#C9A97E' },
+                    { char: '商', organ: '肺 · 金', color: '#A79E8C' },
+                    { char: '角', organ: '肝 · 木', color: '#5F8A72' },
+                    { char: '徵', organ: '心 · 火', color: '#B0552E' },
+                    { char: '羽', organ: '肾 · 水', color: '#4E6E7E' },
+                ].map((t, i) => (
+                    <Box key={i} style={{ width: 196, flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                        <Text style={{ fontSize: 104, fontWeight: 'bold', color: t.color, fontFamily: '"Songti SC","STSong",serif', lineHeight: 1.0 }}>{t.char}</Text>
+                        <Box style={{ width: 40, height: 2, background: t.color, opacity: 0.7 }} />
+                        <Text style={{ fontSize: 17, color: '#7C6B54', fontFamily: '"PingFang SC", sans-serif', letterSpacing: 1 }}>{t.organ}</Text>
+                    </Box>
+                ))}
+            </Box>
+        </Animation>
+        <Box style={{ flexDirection: 'row', gap: 36, flex: 1, marginTop: 6 }}>
+            <Animation animType="fadeIn" startType="afterPrevious" duration={600}>
+                <Box style={{ width: 700, flexDirection: 'column', justifyContent: 'center', gap: 16 }}>
+                    <Text style={{ fontSize: 22, color: '#241C14', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.6 }}>
+                        弦养不是「健身 App + 一段国风配乐」，也不是以五音命名的五个功能。
+                    </Text>
+                    <Text style={{ fontSize: 20, color: '#5C4E3C', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.7 }}>
+                        它面向希望在日常中舒展身体、安静聆听、放松身心的人，组织一段「<span style={{ color: '#B0552E', fontWeight: 'bold' }}>听 · 动 · 回应 · 回顾</span>」的疗愈体验——五音是声音材料，也是贯穿产品的文化脉络。
+                    </Text>
+                </Box>
+            </Animation>
+            <Box style={{ width: 3, background: '#6E8F7C', opacity: 0.35 }} />
+            <Animation animType="fadeIn" startType="afterPrevious" duration={600}>
+                <Box style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', gap: 14, paddingLeft: 4 }}>
+                    <Text style={{ fontSize: 15, letterSpacing: 2, color: '#6E8F7C', fontFamily: '"PingFang SC", sans-serif' }}>边 界 声 明</Text>
+                    <Text style={{ fontSize: 18, color: '#5C4E3C', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.7 }}>
+                        这里的「疗愈」指体验目标，不代表已证明的医学疗效或治疗服务。
+                    </Text>
+                </Box>
+            </Animation>
+        </Box>
+    </Box>
+    <Box style={{ height: 32, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <Text style={{ fontSize: 14, color: '#A9977B', fontFamily: '"PingFang SC", sans-serif' }}>弦养 · 以身为琴，以动为弦</Text>
+        <Text style={{ fontSize: 14, color: '#A9977B', fontFamily: '"PingFang SC", sans-serif' }}>02 / 12</Text>
+    </Box>
+</Slide>

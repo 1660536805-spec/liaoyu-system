@@ -1,0 +1,37 @@
+<Slide style={{ width: 1280, height: 720, background: 'linear-gradient(160deg,#241C14 0%,#15100B 100%)', padding: '20px 72px', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+    <Animation animType="fadeIn" duration={700}>
+        <Box style={{ width: 1136, height: 172, justifyContent: 'center', alignItems: 'center' }}>
+            <svg width='1136' height='172' viewBox='0 0 1136 172'>
+                <g fill='none' stroke='#E9B85F'>
+                    <path d='M468 166 A100 100 0 0 1 668 166' strokeOpacity='0.85' strokeWidth='2.5' />
+                    <path d='M408 166 A160 160 0 0 1 728 166' strokeOpacity='0.5' strokeWidth='2' />
+                    <path d='M348 166 A220 220 0 0 1 788 166' strokeOpacity='0.3' strokeWidth='1.8' />
+                    <path d='M288 166 A280 280 0 0 1 848 166' strokeOpacity='0.16' strokeWidth='1.4' />
+                </g>
+                <circle cx='568' cy='166' r='7' fill='#E9B85F' />
+            </svg>
+        </Box>
+    </Animation>
+    <Animation animType="fadeIn" startType="afterPrevious" duration={700}>
+        <Box style={{ flexDirection: 'column', alignItems: 'center', gap: 20, marginTop: 6 }}>
+            <Text style={{ fontSize: 30, color: '#E4D9C0', fontFamily: '"Songti SC","STSong",serif', letterSpacing: 2, lineHeight: 1.5, textAlign: 'center' }}>五音是起点与脉络 · 五脏是串联逻辑</Text>
+            <Text style={{ fontSize: 30, color: '#E4D9C0', fontFamily: '"Songti SC","STSong",serif', letterSpacing: 2, lineHeight: 1.5, textAlign: 'center' }}>古琴是声音载体 · 八段锦是身体实践</Text>
+            <Text style={{ fontSize: 52, fontWeight: 'bold', fontFamily: '"Songti SC","STSong",serif', letterSpacing: 2, textAlign: 'center', backgroundImage: 'linear-gradient(135deg,#E9B85F 0%,#B0552E 100%)', backgroundClip: 'text', color: 'transparent', marginTop: 8 }}>动作识别，让身体得到可听见的回应</Text>
+        </Box>
+    </Animation>
+    <Animation animType="fadeIn" startType="afterPrevious" duration={600}>
+        <Box style={{ flexDirection: 'column', alignItems: 'center', gap: 16, marginTop: 40 }}>
+            <Box style={{ width: 60, height: 1, background: 'rgba(201,169,126,0.5)' }} />
+            <Text style={{ fontSize: 24, color: '#FBF3E3', fontFamily: '"Songti SC","STSong",serif', letterSpacing: 4 }}>弦养 · 以身为琴，以动为弦</Text>
+            <Text style={{ fontSize: 16, color: '#8E8069', fontFamily: '"PingFang SC", sans-serif', letterSpacing: 1 }}>命题三：OPC 时代身心疗愈五大核心赛道</Text>
+            <Text style={{ fontSize: 15, color: '#C9A97E', fontFamily: '"PingFang SC", sans-serif', letterSpacing: 1 }}>以系统原型证明核心体验 · 以模块边界说明 API / SDK 封装方向</Text>
+            <Animation animType="pulse" delay={400}>
+                <Box style={{ width: 52, height: 52, borderRadius: 5, background: 'linear-gradient(135deg,#C2543C 0%,#8F3F1F 100%)', justifyContent: 'center', alignItems: 'center', marginTop: 6 }}>
+                    <Text style={{ fontSize: 24, color: '#FBEFD8', fontFamily: '"Songti SC",serif', fontWeight: 'bold' }}>弦</Text>
+                </Box>
+            </Animation>
+        </Box>
+    </Animation>
+    <Text style={{ position: 'absolute', top: 664, left: 72, fontSize: 14, color: 'rgba(201,169,126,0.6)', fontFamily: '"PingFang SC", sans-serif' }}>弦养 · 以身为琴，以动为弦</Text>
+    <Text style={{ position: 'absolute', top: 664, left: 1180, fontSize: 14, color: 'rgba(201,169,126,0.6)', fontFamily: '"PingFang SC", sans-serif' }}>12 / 12</Text>
+</Slide>

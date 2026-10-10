@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>弦养 · 场景创新赛道 需求调研工具包</title>
+<style>
+  @page { size: A4 portrait; margin: 20mm 18mm 18mm 18mm; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Songti SC", "STSong", "SimSun", serif;
+    font-size: 11pt; color: #111; line-height: 1.5;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  p { margin: 0 0 5pt 0; text-align: justify; }
+  h1 { font-size: 20pt; text-align: center; letter-spacing: 3px; margin: 0 0 4mm 0; }
+  h2 { font-size: 15pt; margin: 12pt 0 6pt 0; border-bottom: 1.2pt solid #B0552E; padding-bottom: 2pt; }
+  h3 { font-size: 12.5pt; margin: 10pt 0 4pt 0; }
+  h4 { font-size: 11.5pt; margin: 8pt 0 3pt 0; }
+  .sec { page-break-before: always; }
+  .nobreak { page-break-inside: avoid; }
+  table { border-collapse: collapse; width: 100%; margin: 5pt 0 9pt 0; font-size: 10pt; }
+  th, td { border: 1px solid #777; padding: 3px 5px; text-align: left; vertical-align: top; line-height: 1.35; }
+  th { background: #f0e9dc; font-weight: 700; }
+  td.c, th.c { text-align: center; }
+  .cap { font-size: 10pt; font-weight: 700; text-align: center; margin: 2pt 0 4pt 0; }
+  .note { font-size: 9.5pt; color: #444; }
+  .kv { font-weight: 700; }
+  em { font-style: normal; font-weight: 700; color: #8A3B1E; }
+  .box { border: 1px solid #c9b9a0; background: #fbf7ef; padding: 7px 10px; margin: 5pt 0 9pt 0; }
+  .warn { border: 1px solid #d9a08a; background: #fdf0ea; padding: 7px 10px; margin: 5pt 0 9pt 0; }
+  .q { margin: 0 0 3pt 0; }
+  .opt { font-size: 10pt; margin: 0 0 5pt 1.4em; }
+  .likert { font-size: 9.5pt; letter-spacing: 1px; }
+  .fill { border-bottom: 0.8pt solid #555; display: inline-block; min-width: 6em; }
+  .fill-l { border-bottom: 0.8pt solid #555; display: block; height: 13pt; margin: 2pt 0 6pt 0; }
+  .lines-2 .fill-l { margin-bottom: 12pt; }
+  .meta { font-size: 10pt; color: #555; text-align: center; }
+  .cover { height: 235mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; page-break-after: always; }
+  .cover .t1 { font-size: 24pt; font-weight: 700; letter-spacing: 6px; }
+  .cover .t2 { font-size: 14pt; margin-top: 8mm; letter-spacing: 2px; }
+  .cover .t3 { font-size: 11pt; margin-top: 26mm; color: #666; }
+  .tag { display: inline-block; border: 0.8pt solid #B0552E; color: #B0552E; font-size: 9pt; padding: 0 5px; margin-left: 4px; }
+  .two { display: flex; gap: 10px; }
+  .two > div { flex: 1; }
+  ul, ol { margin: 0 0 6pt 0; padding-left: 1.6em; }
+  li { margin: 0 0 2pt 0; }
+  .chk { font-family: "Songti SC", serif; }
+  /* 问卷B 专用：压缩量表行高，使整节（SUS+主观题+B5–B10）收在一页内，避免出现空白页 */
+  .compact table { font-size: 9.6pt; margin: 4pt 0 7pt 0; }
+  .compact th, .compact td { padding: 2px 5px; line-height: 1.25; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="t1">弦 养</div>
+  <div class="t2">2026AIC · 算法创新赛 · AI+场景创新<br>需求调研与效果验证工具包</div>
+  <div class="t3">
+    内部执行文件 · 非提交材料<br>
+    适用样本：3–5 人小规模深度试用<br>
+    版本 v1.0 · 2026年10月10日
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2>〇、30 秒看懂怎么用</h2>
+
+<p>这一册只解决一件事：<em>在 5 天内，用 5 个人，拿到足够撑起「需求分析 15 分 + 应用效果 15 分」的真实证据。</em></p>
+
+<table class="nobreak">
+  <tr><th style="width:16%">日期</th><th style="width:34%">要做的动作</th><th>用本册哪几页</th></tr>
+  <tr><td>10月11日</td><td>打印材料、招募 5 位被试、备好设备</td><td>第 3 页执行流程 · 第 4 页知情同意 · 第 12 页设备清单</td></tr>
+  <tr><td>10月12日</td><td>完成 3 位被试（每人 25 分钟）</td><td>第 5 页问卷A · 第 7 页问卷B · 第 8 页访谈 · 第 10 页测试卡</td></tr>
+  <tr><td>10月13日</td><td>完成剩余 2 位 + 补测</td><td>同上</td></tr>
+  <tr><td>10月14日</td><td>录入台账 → 跑统计脚本 → 出图</td><td><span class="kv">弦养_试点数据台账.xlsx</span> · <span class="kv">弦养_调研统计出图.py</span></td></tr>
+  <tr><td>10月15日</td><td>方案定稿并上传（20:00 截止）</td><td>第 11 页「数据→方案映射表」</td></tr>
+</table>
+
+<div class="warn">
+  <p style="margin:0"><span class="kv">四条红线（违反会直接扣分甚至取消资格）</span></p>
+  <p style="margin:3pt 0 0 0">① <em>绝不编造数据</em>——没有测到的指标就写「未测」，宁可分数低也不能造假；② <em>绝不诱导受访者</em>——不暗示"应该觉得好"，开放题先听后记；③ <em>绝不承诺疗效</em>——弦养是运动与音乐体验产品，访谈中不得说"能治病、能改善颈椎"这类话；④ <em>绝不露出学校信息</em>——本册衍生的所有图表、引语、录像，在对外提交前必须确认已移除学校名称、校徽与指导教师姓名，这是赛规明确写出的公平性要求。</p>
+</div>
+
+<div class="box">
+  <p style="margin:0"><span class="kv">场景定位（三场景兼顾，但只有一条主线）</span></p>
+  <p style="margin:3pt 0 0 0">赛题规则要求"选取某一细分场景"，并列三个会削弱创新性得分。因此本册按<em>一条主线 + 一层延展</em>设计：</p>
+  <p style="margin:3pt 0 0 0"><span class="kv">主场景（P0）</span>：养老场景的「<em>机构日间带练 → 居家自练延续</em>」双场地闭环——同一批老人、同一套系统、两个场地，练完回家能接着练。落地证明只需一个社区活动室。</p>
+  <p style="margin:3pt 0 0 0"><span class="kv">延展场景（P1）</span>：校园 / 职场久坐人群。同一技术底座的复制能力，只用于证明「推广路径」，不占主线篇幅。</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 class="sec">一、调研设计说明</h2>
+
+<h3>1.1 为什么 5 个人也够？——方法论辩护</h3>
+<p>这是评委最可能质疑的一点，必须答得出来。三条依据：</p>
+<ul>
+  <li><span class="kv">可用性问题发现率曲线（Nielsen 1993）</span>：单个用户能发现约 31% 的可用性问题，<em>5 个用户累计可发现约 85%</em>。5 人是「发现可用性问题」的公认拐点，再多边际收益骤降。本项目要的是<b>发现问题</b>，不是做统计推断。</li>
+  <li><span class="kv">单被试内配对设计，抵消个体差异</span>：我们不做「弦养组 vs 对照组」的两组比较（5 人做两组没有统计力），而是让<em>同一个人</em>在同一场次里先后做「静音跟练」和「弦养跟练」，比较<b>配对差值</b>。个体差异被自身抵消，5 对配对数据即可看到稳定的方向性差异。</li>
+  <li><span class="kv">顺序效应已做抵消</span>：一半被试按 A→B 顺序，另一半按 B→A 反序。若两种顺序下的差值方向一致，说明差异来自条件本身而非练习疲劳或新奇感。</li>
+</ul>
+<p class="note">诚实边界：5 人样本只能支持「小规模可用性测试 + 方向性证据」，<b>不能</b>外推为人群统计结论。方案中将如实标注样本量与方法，不做过度声称。</p>
+
+<h3>1.2 样本框（5 人如何覆盖三个场景）</h3>
+<table class="nobreak">
+  <tr><th class="c" style="width:8%">编号</th><th style="width:24%">受访者</th><th style="width:22%">对应场景</th><th>可获得的证据</th></tr>
+  <tr><td class="c">S1</td><td>60 岁以上长者（居家）</td><td>主场景 · 居家自练</td><td>痛点强度、设备与网络现状、隐私顾虑</td></tr>
+  <tr><td class="c">S2</td><td>60 岁以上长者（居家）</td><td>主场景 · 居家自练</td><td>同上（成对，验证痛点是否普遍）</td></tr>
+  <tr><td class="c">S3</td><td>社区/养老机构工作人员<br>或长期照护者</td><td>主场景 · 机构带练</td><td><b>落地可行性</b>：场地、设备、网络、采购与组织方式</td></tr>
+  <tr><td class="c">S4</td><td>20–35 岁久坐青年</td><td>延展场景 · 校园/职场</td><td>可复制性、迁移成本、音色偏好</td></tr>
+  <tr><td class="c">S5</td><td>20–35 岁久坐青年</td><td>延展场景 · 校园/职场</td><td>同上</td></tr>
+</table>
+<p>S1/S2 与 S4/S5 各成一对做 A/B 顺序平衡：S1、S4 用 A→B 顺序，S2、S5 用 B→A 反序；S3 只做访谈（机构视角不做跟练测试，因为其身份是决策人而非最终用户）。</p>
+
+<h3>1.3 调研问题 → 评分项 的对应关系</h3>
+<table class="nobreak">
+  <tr><th style="width:34%">赛题4 评分项</th><th style="width:26%">本册要产出的证据</th><th>落点</th></tr>
+  <tr><td>需求分析（15 分）</td><td>痛点强度量化 + 现有方案不满 + 用户原话</td><td>问卷A Q6–Q9；访谈；方案「二、需求分析」</td></tr>
+  <tr><td>解决方案可行性（20 分）</td><td>设备/网络/场地真实约束；老人能否独立上手</td><td>问卷A Q10–Q13；访谈 S3；任务 T1–T2</td></tr>
+  <tr><td>项目实施（15 分）</td><td>本册本身就是实施计划的证据（时间节点 + 分工）</td><td>方案「四、项目实施」</td></tr>
+  <tr><td>测试与验证（10 分）</td><td>任务完成率、TTFS、配对 A/B 差值</td><td>任务 T1–T5；台账「任务记录」页</td></tr>
+  <tr><td>应用效果（15 分）</td><td>SUS 得分、NPS、A/B 配对差值、真实引语</td><td>问卷B；台账；方案「六、应用效果与成果」</td></tr>
+</table>
+
+<h3>1.4 要测的指标清单（全部可在 5 人内测出）</h3>
+<table class="nobreak">
+  <tr><th class="c" style="width:14%">指标</th><th style="width:30%">定义</th><th style="width:14%">目标值</th><th>为什么选它</th></tr>
+  <tr><td class="c">TTFS</td><td>从授权摄像头到听见<b>第一声琴响</b>所耗秒数</td><td>&lt; 90 秒</td><td>产品的核心体验时刻，老人最容易在这一步流失</td></tr>
+  <tr><td class="c">任务完成率</td><td>T1–T5 独立完成（不提示、不代操作）的比例</td><td>≥ 80%</td><td>直接回答"老人能不能自己用"</td></tr>
+  <tr><td class="c">配对差值 Δ</td><td>同一个人「弦养」条件减「静音」条件的主观想继续意愿</td><td>&gt; 0</td><td><b>本册最有力的一条证据</b>，用自身对照证明听觉反馈的价值</td></tr>
+  <tr><td class="c">SUS</td><td>系统可用性量表（10 题标准量表），换算 0–100</td><td>≥ 68</td><td>行业公认基准线 68，可跨产品比较</td></tr>
+  <tr><td class="c">NPS</td><td>推荐意愿 0–10，净推荐值 = 推荐者% − 贬损者%</td><td>≥ 0</td><td>一句话看清口碑方向</td></tr>
+  <tr><td class="c">痛点强度</td><td>问卷A Q6–Q8 的 1–5 均值</td><td>—</td><td>证明"问题是真问题"</td></tr>
+</table>
+
+<h3>1.5 不能做的事</h3>
+<ul>
+  <li>不要为了凑数拉人：宁可 3 人真实，不要 5 人造假；</li>
+  <li>不要在受访者面前评价产品，不要说"这个特别好用对吧"；</li>
+  <li>不要替受访者操作。他卡住时先等 15 秒，再问"你现在在想什么"，最后才给最小提示，并在记录表标注<b>需要协助</b>；</li>
+  <li>不要把技术侧自测数据混进用户数据（如 8797 帧标定属于算法验证，不是用户体验）；</li>
+  <li>不要录制受访者面部后对外传播。录像只用于内部复盘。</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 class="sec">二、执行流程（每位被试 25 分钟）</h2>
+
+<table class="nobreak">
+  <tr><th class="c" style="width:12%">用时</th><th style="width:26%">环节</th><th>做什么</th></tr>
+  <tr><td class="c">0–3 min</td><td>签到与知情同意</td><td>读第 4 页同意书，签字；说明"测的是产品不是你，卡住很正常"</td></tr>
+  <tr><td class="c">3–9 min</td><td>背景访谈</td><td>第 8 页对应类别的访谈提纲（边聊边填问卷A Q1–Q5）</td></tr>
+  <tr><td class="c">9–13 min</td><td>条件 A 静音跟练</td><td><span class="kv">关闭所有声音</span>，只跟画面做 3 式；记录完成时长与主动重复次数</td></tr>
+  <tr><td class="c">13–19 min</td><td>条件 B 弦养跟练</td><td>打开琴声反馈，做同 3 式；记录 T1–T5 与 TTFS</td></tr>
+  <tr><td class="c">19–25 min</td><td>问卷 B 与收尾</td><td>填 SUS + 主观题；追问 A/B 两个条件的主观差异</td></tr>
+</table>
+
+<div class="box">
+  <p style="margin:0"><span class="kv">主持人口播脚本（照读即可）</span></p>
+  <p style="margin:4pt 0 0 0">"今天不是考试，测的是我们这个产品好不好用，不是你。你只要像平时自己在家那样操作就行，想到什么就随口说出来，卡住了也不用不好意思——你卡住的地方恰恰是我们最想知道的。"</p>
+  <p style="margin:4pt 0 0 0">条件切换时："接下来我把声音关掉，你按刚才一样再做三个动作就行。"</p>
+  <p style="margin:4pt 0 0 0">结束时："最后两个问题——如果只能用一个词形容刚才有琴声的那一次，你会用哪个词？"</p>
+</div>
+
+<h3>设备与场地检查清单（每次开测前逐项打勾）</h3>
+<table class="nobreak">
+  <tr><th class="c" style="width:8%">✓</th><th style="width:34%">项目</th><th>标准</th></tr>
+  <tr><td class="c">□</td><td>拍摄设备</td><td>手机或平板，浏览器已更新；提前打开一次确认摄像头权限可用</td></tr>
+  <tr><td class="c">□</td><td>摆放距离与高度</td><td>人后退约 2.2 m，设备高度约齐腰~胸，能拍到<b>全身</b>（含脚）</td></tr>
+  <tr><td class="c">□</td><td>环境光</td><td>被测者面向光源，避免逆光；背景不要太乱</td></tr>
+  <tr><td class="c">□</td><td>音量</td><td>琴声响度调到被测者能清楚听见但不刺耳，先试响一次</td></tr>
+  <tr><td class="c">□</td><td>断网演示开关</td><td>知道怎么开飞行模式，用于现场验证"断网可跑"</td></tr>
+  <tr><td class="c">□</td><td>计时工具</td><td>手机秒表，用于 TTFS 与任务耗时</td></tr>
+  <tr><td class="c">□</td><td>记录材料</td><td>问卷A、问卷B、访谈提纲、任务记录表各一份 + 笔</td></tr>
+  <tr><td class="c">□</td><td>安全</td><td>地面不滑、周边无尖角家具；提醒长者动作幅度以自身舒适为准，不适立即停止</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 class="sec">三、知情同意与隐私说明</h2>
+
+<p>请受访者阅读后签名。本页可单独打印两份，双方各留一份。</p>
+
+<div class="box">
+  <p><span class="kv">研究目的</span>：本测试用于评估一套"跟练时用琴声反馈动作是否做到位"的居家运动产品的可用性与体验。测试结果仅用于参加全球校园人工智能算法精英大赛的参赛材料与产品改进。</p>
+  <p><span class="kv">您需要做什么</span>：按主持人的引导，用我们的设备完成几个简单的八段锦动作，并回答一些关于体验的问题。全程约 25 分钟。</p>
+  <p><span class="kv">摄像头与数据</span>：设备<b>只在本机本地</b>运行姿态识别，<em>关键点数据与视频不会被上传到任何服务器</em>。练习记录仅保存在该设备本地，可随时删除。</p>
+  <p><span class="kv">录像</span>：是否同意我们录像（仅用于内部复盘，不对外传播）？　　同意 □　　不同意 □</p>
+  <p><span class="kv">风险与不适</span>：动作幅度以您自身舒适为准。如有任何不适请立即停止并告知主持人。</p>
+  <p><span class="kv">权利</span>：您可以在任何时候无理由退出，无需说明原因，也不会有任何影响。</p>
+  <p><span class="kv">关于本产品的重要说明</span>：本产品是<b>运动与音乐体验产品，不提供诊断、治疗或任何医疗建议</b>。测试过程中提到的内容不构成健康建议，如有健康问题请咨询专业医师。</p>
+  <p style="margin-top:8pt">受访者签名：<span class="fill" style="min-width:12em"></span>　　编号：<span class="fill" style="min-width:5em"></span>　　日期：<span class="fill" style="min-width:8em"></span></p>
+  <p>主持人签名：<span class="fill" style="min-width:12em"></span></p>
+</div>
+
+<!-- ============================================================ -->
+<h2 class="sec">四、问卷 A · 需求侧（使用前填写）</h2>
+<p class="note">由受访者自填，或主持人逐题读出来并代填。Q1–Q5 结合访谈完成，Q6–Q15 请受访者逐条作答。1 = 非常不同意，5 = 非常同意。</p>
+
+<p class="q"><span class="kv">Q1.</span> 年龄段：□ 18–25　□ 26–35　□ 36–59　□ 60–69　□ 70 及以上</p>
+<p class="q"><span class="kv">Q2.</span> 您的身份：□ 自己练的人　□ 家里有长辈在练　□ 社区/养老机构工作人员　□ 其他 <span class="fill" style="min-width:8em"></span></p>
+<p class="q"><span class="kv">Q3.</span> 您（或您关照的人）最可能在哪里练：□ 家里　□ 社区活动室/养老机构　□ 单位/学校　□ 户外</p>
+<p class="q"><span class="kv">Q4.</span> 过去三个月，练过八段锦、太极或类似功法的次数：□ 没练过　□ 1–5 次　□ 6–15 次　□ 16 次以上</p>
+<p class="q"><span class="kv">Q5.</span> 跟练时最让您困扰的是什么？（可多选，并在最困扰的一项前打 ★）</p>
+<p class="opt">□ 不知道自己做得对不对　□ 记不住练了多久、没什么成就感　□ 一个人练太枯燥容易放弃　□ 动作太快跟不上　□ 看小屏幕眼睛累　□ 找不到合适的教学视频　□ 其他 <span class="fill" style="min-width:10em"></span></p>
+
+<table class="nobreak">
+  <tr><th style="width:6%">#</th><th>请对下面每句话表态</th><th class="c" style="width:26%">1　2　3　4　5</th></tr>
+  <tr><td class="c">Q6</td><td>我常常不确定自己刚才那个动作到底做对了没有。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">Q7</td><td>练完以后，我说不清今天到底练成了什么，也没什么成就感。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">Q8</td><td>没有人带着、没有人纠正的时候，我很容易就放弃了。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">Q9</td><td>如果一个动作做到位时会立刻响一声琴，我会更有兴趣继续练下去。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">Q10</td><td>比起教练的语音口令，我更希望用声音（琴声）直接告诉我"对了"。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">Q11</td><td>我担心摄像头会拍到我的样子，也担心视频被传到网上去。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">Q12</td><td>我愿意在不注册、不填手机号、不下载 App 的情况下直接开始用。</td><td class="c likert">□　□　□　□　□</td></tr>
+</table>
+
+<p class="q"><span class="kv">Q13.</span> 您最希望在哪个设备上使用？（可多选）　□ 手机　□ 平板　□ 电视/大屏　□ 智能音箱　□ 都可以</p>
+<p class="q"><span class="kv">Q14.</span> 您家里/活动室的网络情况是：□ 一直稳定　□ 有时会断　□ 基本没有网络　□ 不清楚</p>
+<p class="q"><span class="kv">Q15.</span> 假如这套系统要收费，您更能接受哪种方式？　□ 完全免费（看广告）　□ 一次性买断　□ 按月订阅　□ 由社区/机构统一购买　□ 不愿意付费</p>
+
+<p class="q"><span class="kv">Q16.（开放）</span> 您理想中的跟练体验是什么样的？如果有一位师傅在旁边，您最希望他做什么？</p>
+<div class="lines-2"><span class="fill-l"></span><span class="fill-l"></span><span class="fill-l"></span></div>
+
+<p class="q"><span class="kv">Q17.（开放）</span> 如果练完这套功，能听到一段完整的古琴曲——您觉得这个想法怎么样？为什么？</p>
+<div class="lines-2"><span class="fill-l"></span><span class="fill-l"></span></div>
+
+<p class="note">主持人补记（不读给受访者）：完成时间 <span class="fill" style="min-width:5em"></span>　受访者配合度 □ 高 □ 中 □ 低　备注：</p>
+<div class="lines-2"><span class="fill-l"></span></div>
+
+<!-- ============================================================ -->
+<h2 class="sec">五、问卷 B · 体验侧（使用后填写）</h2>
+
+<p class="note">第一段是标准 SUS 量表（Brooke, 1996 中文版），请勿改动题目与顺序，否则分数不可比。</p>
+
+<div class="compact">
+<table class="nobreak">
+  <tr><th style="width:6%">#</th><th>SUS 系统可用性量表</th><th class="c" style="width:26%">1　2　3　4　5</th></tr>
+  <tr><td class="c">1</td><td>我觉得我愿意经常使用这个系统。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">2</td><td>我发现这个系统没必要这么复杂。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">3</td><td>我觉得这个系统很容易使用。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">4</td><td>我觉得需要有技术支持人员帮助我，才能使用这个系统。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">5</td><td>我发现这个系统的各项功能整合得很好。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">6</td><td>我觉得这个系统存在太多不一致的地方。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">7</td><td>我想大多数人很快就能学会使用这个系统。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">8</td><td>我觉得这个系统用起来很别扭。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">9</td><td>我对使用这个系统很有信心。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">10</td><td>在开始使用这个系统之前，我需要学习很多东西。</td><td class="c likert">□　□　□　□　□</td></tr>
+</table>
+<p class="note">计分（台账自动算）：奇数题得分 = 填值 − 1；偶数题得分 = 5 − 填值；十题求和 × 2.5 = SUS 分（0–100）。行业基准线 68。</p>
+
+<h3>主观体验题</h3>
+<table class="nobreak">
+  <tr><th style="width:6%">#</th><th>请对下面每句话表态</th><th class="c" style="width:26%">1　2　3　4　5</th></tr>
+  <tr><td class="c">B1</td><td><b>有琴声时</b>，我更想继续把整套动作做完。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">B2</td><td><b>没有声音时</b>，我更想继续把整套动作做完。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">B3</td><td>琴声响的那一下，我能立刻明白"我做对了"。</td><td class="c likert">□　□　□　□　□</td></tr>
+  <tr><td class="c">B4</td><td>练完之后，我有一种"完成了一件事"的感觉。</td><td class="c likert">□　□　□　□　□</td></tr>
+</table>
+<p class="note">B1 − B2 即该被试的<b>配对差值 Δ</b>（本册最关键的一个数）；Δ 越大，说明听觉反馈带来的增益越明显。</p>
+
+<p class="q"><span class="kv">B5.</span> 您向朋友或家人推荐这套系统的可能性有多大？（0 = 完全不会，10 = 一定会）</p>
+<p class="opt">0　1　2　3　4　5　6　7　8　9　10　← 圈出一个数字</p>
+
+<p class="q"><span class="kv">B6.</span> 刚才哪一步最让您卡住或困惑？</p>
+<div class="lines-2"><span class="fill-l"></span><span class="fill-l"></span></div>
+
+<p class="q"><span class="kv">B7.</span> 如果只能用一个词形容"有琴声的那一次"，您会用哪个词？</p>
+<p class="opt">词：<span class="fill" style="min-width:8em"></span>　为什么：<span class="fill" style="min-width:20em"></span></p>
+
+<p class="q"><span class="kv">B8.</span> 有哪一刻让您觉得"这个不对/很奇怪"？</p>
+<div class="lines-2"><span class="fill-l"></span></div>
+
+<p class="q"><span class="kv">B9.</span> 如果您家里/活动室明天就要用，您觉得还差什么？</p>
+<div class="lines-2"><span class="fill-l"></span></div>
+
+<p class="q"><span class="kv">B10.</span> 还有什么想补充的？</p>
+<div class="lines-2"><span class="fill-l"></span><span class="fill-l"></span></div>
+</div><!-- /compact · 问卷B -->
+
+<!-- ============================================================ -->
+<h2 class="sec">六、访谈提纲</h2><p class="note">半结构化：按顺序问，但允许追问。每类 8 题，控制在 6 分钟内。括号内是追问方向，不必逐字念。</p>
+
+<h3>6.1 老年用户（S1 / S2）— 主场景 · 居家自练</h3>
+<ol>
+  <li>您现在平时会做哪些活动身体的事？（每天/每周几次？在哪儿做？一个人还是有伴？）</li>
+  <li>有没有跟着手机或电视上的视频练过？练了多久就停了？为什么停？（<span class="note">追问具体的一天，不要接受"忙"这种笼统答案</span>）</li>
+  <li>练的时候，您怎么知道自己做对了没有？（有谁纠正过您吗？）</li>
+  <li>如果做了一个动作却不知道对不对，您心里是什么感觉？（<span class="note">追问情绪词：着急？无所谓？</span>）</li>
+  <li>您觉得"练了多久"和"练对了几个动作"，哪个对您更重要？为什么？</li>
+  <li>假如手机能在您做对的那一下响一声——您觉得会怎么样？会不会吵？（<span class="note">不要引导，让受访者自己说</span>）</li>
+  <li>家里网络怎么样？会不会担心要装软件、要注册？（<span class="note">追问：谁帮您装？你自己会吗？</span>）</li>
+  <li>如果要用摄像头对着您，您心里会有什么想法？</li>
+</ol>
+<p class="q"><span class="kv">收尾必问（金句来源）</span>：这件事您最希望它替您解决掉的是什么？用一句话说说。</p>
+
+<h3>6.2 社区/养老机构工作人员（S3）— 主场景 · 机构带练</h3>
+<ol>
+  <li>咱们这里平时怎么组织长辈们活动？（频次、时长、谁带、多少人一次？）</li>
+  <li>带大家一起练八段锦或类似活动时，最难的是什么？（<span class="note">追问：人手不够？没人会带？长辈参与度低？</span>）</li>
+  <li>活动室的设备和网络情况怎么样？（有没有电视/投影？WiFi 稳不稳？）</li>
+  <li>如果有一套系统，打开大屏就能带着一屋子人练，还有人能听出来自己练对了——您觉得能用上吗？</li>
+  <li>您最担心的是什么？（<span class="note">追问：学不会？设备坏？没人维护？老人抗拒摄像头？</span>）</li>
+  <li>如果要给长辈们推荐一个每天花十分钟做的事，您会推荐什么？为什么？</li>
+  <li>这类系统如果是买/租的，您觉得什么样的形式比较好接受？（<span class="note">追问：一次性买断？按年？按人头？</span>）</li>
+  <li>如果要在这里先试一个月，您需要我们先准备什么、承诺什么？</li>
+</ol>
+<p class="q"><span class="kv">收尾必问</span>：这件事如果要真正落地在这里，最关键的那一个条件是什么？</p>
+
+<h3>6.3 校园 / 职场久坐青年（S4 / S5）— 延展场景</h3>
+<ol>
+  <li>你一天大概坐着多久？身体上最难受的是哪儿？</li>
+  <li>你会做拉伸或者跟练吗？做了多久会放弃？卡在哪一步？</li>
+  <li>你用过健身或多邻国这类"打卡"类产品吗？是什么让你坚持下来、又是什么让你卸载？</li>
+  <li>如果一次只要三分钟、打开网页就能做、不用注册——你会试吗？</li>
+  <li>做完有声音反馈、还能攒成一首曲子——这对你有吸引力吗？（<span class="note">追问：为什么有/没有</span>）</li>
+  <li>你在意被摄像头拍到吗？如果数据完全不上传、只在你手机里，会不会好一点？</li>
+  <li>你觉得这个东西更适合放在哪儿用？（教室？宿舍？工位？客厅？）</li>
+  <li>如果让你推荐给同学/同事，你会怎么说它？</li>
+</ol>
+<p class="q"><span class="kv">收尾必问</span>：什么样的情况下，你明天还会再打开它一次？</p>
+
+<!-- ============================================================ -->
+<h2 class="sec">七、可用性测试脚本 · 任务卡 · 记录表</h2>
+
+<h3>7.1 五个任务（照读任务卡，不要解释怎么点）</h3>
+<table class="nobreak">
+  <tr><th class="c" style="width:8%">任务</th><th style="width:44%">任务卡原文（读给受访者）</th><th>记录什么</th></tr>
+  <tr><td class="c">T1</td><td>"请打开这个网址，让摄像头开始工作。"</td><td>是否独立完成授权；卡在哪；耗时</td></tr>
+  <tr><td class="c">T2</td><td>"请选好八段锦，开始第一式。"</td><td>是否找到入口；有没有误点</td></tr>
+  <tr><td class="c">T3</td><td>"请做'双手托天'，直到你听见第一声琴响。"</td><td><b>TTFS 秒数</b>（核心指标）；试了几次</td></tr>
+  <tr><td class="c">T4</td><td>"接着把第 2 式和第 3 式也做完。"</td><td>完成时长；有没有原地打转卡住</td></tr>
+  <tr><td class="c">T5</td><td>"看看你刚才练得怎么样。"</td><td>是否找到练习记录页</td></tr>
+</table>
+
+<h3>7.2 单被试 A/B 配对记录（每人一张）</h3>
+<table class="nobreak">
+  <tr><th style="width:34%">记录项</th><th class="c" style="width:22%">条件 A<br><span class="note">静音跟练</span></th><th class="c" style="width:22%">条件 B<br><span class="note">弦养（有琴声）</span></th><th>备注</th></tr>
+  <tr><td>顺序（A→B / B→A）</td><td class="c">□</td><td class="c">□</td><td>一半被试须反序</td></tr>
+  <tr><td>完成 3 式所耗时长（秒）</td><td></td><td></td><td></td></tr>
+  <tr><td>中途主动重做的次数</td><td></td><td></td><td></td></tr>
+  <tr><td>停下来看屏幕的次数</td><td></td><td></td><td></td></tr>
+  <tr><td>"我还想再做一遍"意愿（1–5）</td><td></td><td></td><td><b>此列相减即配对差值 Δ</b></td></tr>
+  <tr><td>主持人观察到的表情/姿态描述</td><td></td><td></td><td>写具体动作，不写结论</td></tr>
+</table>
+
+<h3>7.3 出声思考原话记录（听到就抄下来，不要转述）</h3>
+<table class="nobreak">
+  <tr><th class="c" style="width:16%">时间点</th><th style="width:16%">触发场景</th><th>受访者原话（逐字）</th></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+</table>
+
+<h3>7.4 观察到的可用性问题（当场归类，避免事后回忆偏差）</h3>
+<table class="nobreak">
+  <tr><th class="c" style="width:8%">序</th><th style="width:24%">问题位置</th><th style="width:28%">现象（可观察的事实）</th><th style="width:14%">严重度</th><th>可能原因</th></tr>
+  <tr><td class="c">1</td><td></td><td></td><td class="c">高/中/低</td><td></td></tr>
+  <tr><td class="c">2</td><td></td><td></td><td class="c">高/中/低</td><td></td></tr>
+  <tr><td class="c">3</td><td></td><td></td><td class="c">高/中/低</td><td></td></tr>
+  <tr><td class="c">4</td><td></td><td></td><td class="c">高/中/低</td><td></td></tr>
+</table>
+
+<h3>7.5 不需要外部被试、你自己就能测的三项（补强"测试与验证"章）</h3>
+<table class="nobreak">
+  <tr><th style="width:28%">指标</th><th style="width:34%">怎么测</th><th>取什么</th></tr>
+  <tr><td>TTFS 稳定性</td><td>自己完整走 5 次"打开→第一声琴响"</td><td>中位数与最慢一次</td></tr>
+  <tr><td>抗误触发</td><td>站在镜头前原地晃动 10 秒，不做任何标准动作</td><td>误触发次数（期望 0）</td></tr>
+  <tr><td>断网可用</td><td>开飞行模式后走一遍完整流程</td><td>是否全程可用；失败则记录卡在哪一步</td></tr>
+</table>
+<p class="note">这三项属于<b>技术侧验证</b>，写进方案第五章时须与用户体验数据分开呈现，不要混为一谈。</p>
+
+<!-- ============================================================ -->
+<h2 class="sec">八、数据台账字段与「数据→方案」映射</h2>
+
+<h3>8.1 台账结构（对应 弦养_试点数据台账.xlsx 的四个工作表）</h3>
+<table class="nobreak">
+  <tr><th style="width:22%">工作表</th><th style="width:34%">一行代表什么</th><th>关键字段</th></tr>
+  <tr><td><span class="kv">① 受访者</span></td><td>一位受访者</td><td>编号、场景、年龄段、身份、设备、网络、A/B 顺序</td></tr>
+  <tr><td><span class="kv">② 需求问卷</span></td><td>一位受访者的问卷 A 作答</td><td>Q4、Q5多选、Q6–Q12（1–5）、Q13–Q15</td></tr>
+  <tr><td><span class="kv">③ 任务与AB</span></td><td>一位受访者的任务记录</td><td>T1–T5 结果、TTFS、A/B 时长、A/B 意愿、<b>Δ 列自动计算</b></td></tr>
+  <tr><td><span class="kv">④ 体验问卷</span></td><td>一位受访者的问卷 B 作答</td><td>SUS 十题（<b>SUS 分自动计算</b>）、B1–B4、NPS（<b>自动判定推荐者/贬损者</b>）、开放题原话</td></tr>
+</table>
+<p class="note">你只需要填<b>原始作答</b>；灰色带公式的列会自动出分，不要手改。</p>
+
+<h3>8.2 每个数字最终填到方案哪里</h3>
+<table class="nobreak">
+  <tr><th style="width:30%">方案章节</th><th style="width:34%">用哪个指标</th><th>呈现形式</th></tr>
+  <tr><td>二、需求分析 → 问题剖析</td><td>Q6–Q8 均值、Q5 首选项分布</td><td>痛点强度条形图 + 一句结论</td></tr>
+  <tr><td>二、需求分析 → 用户需求调研</td><td>样本框、访谈方法、5 人发现率论证</td><td>方法说明表（本册 1.1 / 1.2）</td></tr>
+  <tr><td>二、需求分析 → 需求结论</td><td>Q9 / Q10 均值、Q16 原话</td><td>需求强度 + 用户引语</td></tr>
+  <tr><td>三、解决方案设计</td><td>Q12 / Q13 / Q14、S3 访谈</td><td>说明"零安装、本地优先、大屏适配"是<b>由需求倒推的设计</b></td></tr>
+  <tr><td>四、项目实施</td><td>本册时间表与执行记录</td><td>实施计划表 + 分工</td></tr>
+  <tr><td>五、测试与验证</td><td>任务完成率、TTFS、7.5 三项自测</td><td>测试用例结果表</td></tr>
+  <tr><td>六、应用效果与成果</td><td>SUS、NPS、配对差值 Δ、B7 关键词</td><td>效果图 + 真实引语（<b>本册最高价值产出</b>）</td></tr>
+  <tr><td>七、总结与展望</td><td>可用性问题清单与改进措施</td><td>局限说明 + 下一轮迭代方向</td></tr>
+</table>
+
+<h3>8.3 跑完数据后怎么出图</h3>
+<p>打开终端，<span class="kv">cd 到台账所在的文件夹</span>，执行（脚本与本册、台账放在同一目录）：</p>
+<div class="box">
+  <p class="mono" style="margin:0;font-family:Menlo,monospace;font-size:9.5pt">
+    python 弦养_调研统计出图.py &nbsp;"弦养_试点数据台账.xlsx" &nbsp;charts
+  </p>
+</div>
+<p class="note">仓库内的工作副本路径为 <span class="mono">outputs/aic-scene/stats.py</span>，与本册交付的 <span class="mono">弦养_调研统计出图.py</span> 是同一份文件。</p>
+<p>脚本会输出到 <span class="mono">charts/</span> 目录：① <span class="mono">指标.json</span>（全部关键指标）；② <span class="mono">结论.md</span>（可直接粘进方案的 Markdown 结论文字，数字全部来自台账，缺数据会明确提示"未测"，不会自动补数）；③ 五张图表 PNG（痛点强度、SUS 分布、配对差值、任务完成率、NPS 构成）。</p>
+<p class="note">脚本只依赖 openpyxl 与 Pillow，不依赖 matplotlib / pandas，也不需要联网；未填数据时不会崩，会直接把该指标标为「未测」。</p>
+
+<h3>8.4 如果最终只招到 3 个人</h3>
+<p>照跑，不要凑数。方案中如实写"小规模可用性测试，N=3"，并把 7.5 的三项技术侧自测补上。评委会因为"方法诚实、结论与样本量匹配"给出中档分，这比虚报 30 人最后被追问要好得多。</p>
+
+</body>
+</html>

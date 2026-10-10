@@ -19,6 +19,9 @@ outputs/复刻截图/
 outputs/复刻截图v2/
 outputs/ui-compare/out/
 outputs/ui-compare/evidence/
+# 例外：AIC 报告渲染管线的标志素材——render.cjs / gen_docx.py 运行时读取该 PNG 生成
+# base64 页眉标志，是可重跑的「源码依赖」而非可丢的截图，故放行（其余 outputs/*.png 仍忽略）。
+!outputs/aic-report/assets/*.png
 
 # ---- dist 内「运行时不读」的副本与废弃原型 ----
 # s4 构建(vite --outDir=../dist/s4)会把 train/public/* 复制到 dist/s4/，
@@ -45,3 +48,13 @@ output/
 outputs/video/
 outputs/truth-pack/
 outputs/activate-all/out/
+
+# ---- 弦养_产品介绍/：只入库「幻灯片源 + 成品 + 素材」，渲染产物与缓存不入库 ----
+# preview/    = 12 张页面渲染预览（6.6M，凭 slides/*.slide 可重新渲染）
+# .cache/     = slidep 工具缓存（8.1M）
+# .slidep/    = slidep 命令记录与日志（62K，工具状态，非内容）
+# *.bak.pptx  = 成品备份（8.1M，与正式成品仅差十几 KB）
+弦养_产品介绍/preview/
+弦养_产品介绍/.cache/
+弦养_产品介绍/.slidep/
+弦养_产品介绍/*.bak.pptx

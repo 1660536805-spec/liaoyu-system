@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>弦养 · 2026AIC 算法创新赛 作品方案</title>
+<style>
+  /* ===== 页面设置：A4 纵向；页边距 上下2.5cm 左右3cm ===== */
+  @page {
+    size: A4 portrait;
+    margin: 25mm 30mm 25mm 30mm;
+  }
+  html, body { margin: 0; padding: 0; }
+  body {
+    /* 字体：宋体（macOS 映射 Songti SC） */
+    font-family: "Songti SC", "STSong", "SimSun", "Source Han Serif SC", "Noto Serif CJK SC", serif;
+    font-size: 12pt;          /* 正文 小四 */
+    color: #111;
+    line-height: 1.5;          /* 单倍行距的可读实现 */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  p { margin: 0 0 6pt 0; text-align: justify; }
+  ul, ol { margin: 0 0 6pt 0; padding-left: 2em; }
+  li { margin: 0 0 3pt 0; text-align: justify; }
+  em { font-style: normal; color: #8a3b1e; font-weight: 700; }
+  code, .mono { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 10.5pt; }
+
+  /* ===== 封面 ===== */
+  .cover { height: 235mm; display: flex; flex-direction: column; align-items: center; page-break-after: always; text-align: center; }
+  .cover .top-title { margin-top: 20mm; font-size: 15pt; letter-spacing: 2px; }
+  .cover .main-title { margin-top: 8mm; font-size: 26pt; font-weight: 700; line-height: 1.5; letter-spacing: 3px; }
+  .cover .race { margin-top: 4mm; font-size: 17pt; font-weight: 700; }
+  .cover .kind { margin-top: 3mm; font-size: 15pt; color: #8a3b1e; font-weight: 700; letter-spacing: 1px; }
+  .cover .report-type { margin-top: 20mm; font-size: 22pt; font-weight: 700; letter-spacing: 10px; }
+  .cover .meta { margin-top: 26mm; text-align: left; font-size: 14pt; line-height: 2.4; }
+  .cover .meta .k { display: inline-block; width: 6.2em; }
+  .cover .meta .v { border-bottom: 1px solid #333; display: inline-block; min-width: 12em; padding: 0 6px; }
+  .cover .date { margin-top: auto; margin-bottom: 4mm; font-size: 14pt; }
+
+  /* ===== 目录 ===== */
+  .toc { page-break-after: always; }
+  .h-center { text-align: center; }
+  h1.toc-title { font-size: 22pt; font-weight: 700; text-align: center; letter-spacing: 8px; margin: 0 0 8mm 0; } /* 二号 */
+  .toc-line { display: flex; align-items: baseline; font-size: 11pt; line-height: 1.28; margin: 0 0 1.5pt 0; }
+  .toc-line .t { white-space: nowrap; }
+  .toc-line .dots { flex: 1; border-bottom: 1px dotted #999; margin: 0 6px 3px 6px; }
+  .toc-line .pg { white-space: nowrap; min-width: 2em; text-align: right; }
+  .toc-l1 { font-weight: 700; margin-top: 3pt; }
+  .toc-l2 { padding-left: 2em; }
+  .toc-l3 { padding-left: 4em; }
+  .sub { font-weight: 700; margin: 7pt 0 2pt 0; }
+
+  /* ===== 正文标题层级 ===== */
+  h2 { font-size: 16pt; font-weight: 700; margin: 14pt 0 8pt 0; }      /* 一级 三号 */
+  h3 { font-size: 14pt; font-weight: 700; margin: 11pt 0 6pt 0; }      /* 二级 四号 */
+  h4 { font-size: 12pt; font-weight: 700; margin: 9pt 0 4pt 0; }       /* 三级 小四 */
+  .sec { page-break-before: always; }
+  h2.first { page-break-before: auto; }
+
+  /* ===== 表格 ===== */
+  table { border-collapse: collapse; width: 100%; margin: 6pt 0 10pt 0; font-size: 10.5pt; }
+  th, td { border: 1px solid #666; padding: 4px 6px; text-align: left; vertical-align: top; line-height: 1.35; }
+  th { background: #f0e9dc; font-weight: 700; }
+  td.c, th.c { text-align: center; }
+  .cap { font-size: 10.5pt; font-weight: 700; text-align: center; margin: 2pt 0 6pt 0; }
+  .tbl { page-break-inside: avoid; }
+
+  /* ===== 代码/流程框 ===== */
+  pre.flow {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10pt; line-height: 1.5; background: #f7f3ea;
+    border: 1px solid #d9cfb8; border-left: 3px solid #B0552E;
+    padding: 8px 10px; margin: 6pt 0 10pt 0; white-space: pre-wrap; page-break-inside: avoid;
+  }
+  .box {
+    border: 1px solid #c9b9a0; background: #fbf7ef; padding: 8px 12px; margin: 6pt 0 10pt 0;
+    page-break-inside: avoid;
+  }
+  .note { font-size: 10.5pt; color: #444; }
+  .hl { background: #f6e7d8; padding: 0 2px; }
+  .kv { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- ==================== 封面 ==================== -->
+<div class="cover">
+  <div class="top-title">2026年第八届</div>
+  <div class="main-title">全球校园人工智能<br>算法精英大赛</div>
+  <div class="race">算法创新赛</div>
+  <div class="kind">（AI+软件赛道）</div>
+  <div class="report-type">技术报告</div>
+  <div class="meta">
+    <div><span class="k">团队名称：</span><span class="v">锻五音</span></div>
+    <div><span class="k">参赛编号：</span><span class="v">AIC-2026-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+    <div><span class="k">作品名称：</span><span class="v">弦养</span></div>
+  </div>
+  <div class="date">2026年10月10日</div>
+</div>
+
+<!-- ==================== 目录 ==================== -->
+<div class="toc">
+  <h1 class="toc-title">目&nbsp;&nbsp;录</h1>
+  <div class="toc-line toc-l1"><span class="t">作品简介</span><span class="dots"></span><span class="pg" data-toc="作品简介">3</span></div>
+  <div class="toc-line toc-l1"><span class="t">一、项目概述</span><span class="dots"></span><span class="pg" data-toc="一、项目概述">3</span></div>
+  <div class="toc-line toc-l2"><span class="t">（一）项目背景与意义</span><span class="dots"></span><span class="pg" data-toc="（一）项目背景与意义">3</span></div>
+  <div class="toc-line toc-l3"><span class="t">1. 痛点：跟练产品的「反馈断点」</span><span class="dots"></span><span class="pg" data-toc="1. 痛点：跟练产品的「反馈断点」">3</span></div>
+  <div class="toc-line toc-l3"><span class="t">2. 机会：让姿态识别的结果「听得见」</span><span class="dots"></span><span class="pg" data-toc="2. 机会：让姿态识别的结果「听得见」">3</span></div>
+  <div class="toc-line toc-l3"><span class="t">3. 技术意义</span><span class="dots"></span><span class="pg" data-toc="3. 技术意义">4</span></div>
+  <div class="toc-line toc-l2"><span class="t">（二）赛题方向定位</span><span class="dots"></span><span class="pg" data-toc="（二）赛题方向定位">4</span></div>
+  <div class="toc-line toc-l1"><span class="t">二、技术方案与核心算法</span><span class="dots"></span><span class="pg" data-toc="二、技术方案与核心算法">4</span></div>
+  <div class="toc-line toc-l2"><span class="t">（一）系统总体方案与架构</span><span class="dots"></span><span class="pg" data-toc="（一）系统总体方案与架构">4</span></div>
+  <div class="toc-line toc-l3"><span class="t">1. 端到端数据流</span><span class="dots"></span><span class="pg" data-toc="1. 端到端数据流">4</span></div>
+  <div class="toc-line toc-l3"><span class="t">2. 技术选型</span><span class="dots"></span><span class="pg" data-toc="2. 技术选型">5</span></div>
+  <div class="toc-line toc-l3"><span class="t">3. 四层解耦架构与 onHit 可插拔契约</span><span class="dots"></span><span class="pg" data-toc="3. 四层解耦架构与 onHit 可插拔契约">5</span></div>
+  <div class="toc-line toc-l2"><span class="t">（二）核心算法设计</span><span class="dots"></span><span class="pg" data-toc="（二）核心算法设计">6</span></div>
+  <div class="toc-line toc-l3"><span class="t">1. 人体姿态估计与关键点净化算法</span><span class="dots"></span><span class="pg" data-toc="1. 人体姿态估计与关键点净化算法">6</span></div>
+  <div class="toc-line toc-l3"><span class="t">2. 尺度归一化与几何特征构造</span><span class="dots"></span><span class="pg" data-toc="2. 尺度归一化与几何特征构造">7</span></div>
+  <div class="toc-line toc-l3"><span class="t">3. 八式动作判定算法</span><span class="dots"></span><span class="pg" data-toc="3. 八式动作判定算法">8</span></div>
+  <div class="toc-line toc-l3"><span class="t">4. 时序特征与互斥仲裁机制</span><span class="dots"></span><span class="pg" data-toc="4. 时序特征与互斥仲裁机制">9</span></div>
+  <div class="toc-line toc-l3"><span class="t">5. 稳健性设计：抗误触发与降级</span><span class="dots"></span><span class="pg" data-toc="5. 稳健性设计：抗误触发与降级">10</span></div>
+  <div class="toc-line toc-l3"><span class="t">6. 陪练教练状态机</span><span class="dots"></span><span class="pg" data-toc="6. 陪练教练状态机">10</span></div>
+  <div class="toc-line toc-l3"><span class="t">7. 多模态音频调度算法</span><span class="dots"></span><span class="pg" data-toc="7. 多模态音频调度算法">11</span></div>
+  <div class="toc-line toc-l2"><span class="t">（三）关键技术创新点</span><span class="dots"></span><span class="pg" data-toc="（三）关键技术创新点">12</span></div>
+  <div class="toc-line toc-l2"><span class="t">（四）实验与验证</span><span class="dots"></span><span class="pg" data-toc="（四）实验与验证">13</span></div>
+  <div class="toc-line toc-l3"><span class="t">1. 判定器单元测试</span><span class="dots"></span><span class="pg" data-toc="1. 判定器单元测试">13</span></div>
+  <div class="toc-line toc-l3"><span class="t">2. 真机数据驱动的阈值标定</span><span class="dots"></span><span class="pg" data-toc="2. 真机数据驱动的阈值标定">13</span></div>
+  <div class="toc-line toc-l3"><span class="t">3. 端到端与验收门槛</span><span class="dots"></span><span class="pg" data-toc="3. 端到端与验收门槛">14</span></div>
+  <div class="toc-line toc-l3"><span class="t">4. 算法复杂度分析</span><span class="dots"></span><span class="pg" data-toc="4. 算法复杂度分析">14</span></div>
+  <div class="toc-line toc-l2"><span class="t">（五）商业计划与应用前景</span><span class="dots"></span><span class="pg" data-toc="（五）商业计划与应用前景">15</span></div>
+  <div class="toc-line toc-l3"><span class="t">1. 目标用户与使用场景</span><span class="dots"></span><span class="pg" data-toc="1. 目标用户与使用场景">15</span></div>
+  <div class="toc-line toc-l3"><span class="t">2. 产品定位与差异化</span><span class="dots"></span><span class="pg" data-toc="2. 产品定位与差异化">15</span></div>
+  <div class="toc-line toc-l3"><span class="t">3. 落地路径与商业模式</span><span class="dots"></span><span class="pg" data-toc="3. 落地路径与商业模式">15</span></div>
+  <div class="toc-line toc-l3"><span class="t">4. 可插拔生态与硬件扩展</span><span class="dots"></span><span class="pg" data-toc="4. 可插拔生态与硬件扩展">16</span></div>
+  <div class="toc-line toc-l3"><span class="t">5. 风险边界与合规</span><span class="dots"></span><span class="pg" data-toc="5. 风险边界与合规">16</span></div>
+  <div class="toc-line toc-l1"><span class="t">三、附录</span><span class="dots"></span><span class="pg" data-toc="三、附录">17</span></div>
+  <div class="toc-line toc-l2"><span class="t">（一）八式判定特征与权重表</span><span class="dots"></span><span class="pg" data-toc="（一）八式判定特征与权重表">17</span></div>
+  <div class="toc-line toc-l2"><span class="t">（二）关键参数一览</span><span class="dots"></span><span class="pg" data-toc="（二）关键参数一览">17</span></div>
+  <div class="toc-line toc-l2"><span class="t">（三）术语表</span><span class="dots"></span><span class="pg" data-toc="（三）术语表">18</span></div>
+  <div class="toc-line toc-l2"><span class="t">（四）第三方素材与授权</span><span class="dots"></span><span class="pg" data-toc="（四）第三方素材与授权">18</span></div>
+</div>
+
+<!-- ==================== 作品简介 ==================== -->
+<h2 class="first">作品简介</h2>
+<p>居家运动与传统功法跟练，只告诉用户练了多久，却答不出做对了什么：动作缺即时反馈，练习单调难坚持。弦养以手机摄像头为输入，构建端侧多模态算法系统：基于 MediaPipe Pose 提取 33 点骨架，自研「关键点净化—尺度归一化—几何打分—时序互斥仲裁」四段式<em>八段锦动作判定算法</em>，经事件契约 <code>onHit(1..7|choir)</code> 把判定映射为古琴七弦与七弦齐鸣，辅以五音三阶段音乐调度与本地优先推理。动作达标即拨响琴弦，单帧判定 O(1)，保持帧与锁存使原地晃动 10 秒零误触发，断网可跑，练完一套即成一曲。零安装零登录，可用于居家康养、社区养老、文旅等场景，并可通过同一契约接入音箱、香薰等硬件。</p>
+
+<!-- ==================== 一、项目概述 ==================== -->
+<h2>一、项目概述</h2>
+
+<h3>（一）项目背景与意义</h3>
+<h4>1. 痛点：跟练产品的「反馈断点」</h4>
+<p>现有的居家健身与八段锦、太极等传统功法跟练产品，绝大多数只能记录<em>时长与热量</em>，很少回答用户最关心的那个问题——「我这一下，做对了吗？」具体表现为三点：</p>
+<ul>
+  <li><span class="kv">反馈缺失：</span>动作是否达标缺乏即时、可感知的回应，用户只能「凭感觉」；</li>
+  <li><span class="kv">完成感弱：</span>练习过程单调重复，缺少一个「我今天完成了什么」的收束；</li>
+  <li><span class="kv">闭环断裂：</span>不少摄像头应用停留在「看见人」（骨架可视化），识别结果没有转化成用户能感知的反馈。</li>
+</ul>
+<p>其结果是：用户知道要坚持，却不知道每一次坚持换来了什么，动力自然衰减。公式化地说，问题出在链路的一个断点上：</p>
+<pre class="flow">做动作  →  反馈弱  →  不知道是否做对  →  动力弱  →  难以坚持
+                ▲
+            本作品要补上的「反馈断点」</pre>
+
+<h4>2. 机会：让姿态识别的结果「听得见」</h4>
+<p>八段锦有八式、古琴有七弦，二者天然同构：<em>前七式一式一弦，第八式收势七弦齐鸣</em>。这让「一次正确的动作 = 一声古琴」成为可能——把抽象的识别分数，直接转译成即时、可记忆的听觉反馈，形成闭环：</p>
+<pre class="flow">动作命中  →  弦位亮起  →  古琴出声  →  用户记住「我做到了」</pre>
+<p>由此，练习不再需要用户去「读懂」技术：做完一套八段锦，就等于弹完一曲古琴。东方美学与身心疗愈的调性，也恰好契合「OPC 时代身心疗愈」的命题方向。</p>
+
+<h4>3. 技术意义</h4>
+<ul>
+  <li><span class="kv">面向真实输入的鲁棒判定：</span>手机摄像头画面存在抖动、遮挡、出画、镜像等低质量问题，需要专门的关键点净化、阈值标定与防误触算法；</li>
+  <li><span class="kv">端侧本地优先：</span>姿态模型、推理 WASM、音频与练习记录全部本地运行，<em>断网可跑、零后端、零依赖</em>，天然适合弱网、离线与私有化场景；</li>
+  <li><span class="kv">可插拔的接口契约：</span>用统一事件契约把「识别」与「播放」解耦，使系统能低成本接入更多输入/输出设备。</li>
+</ul>
+
+<h3>（二）赛题方向定位</h3>
+<p>本作品参加<strong>AI 算法创新赛 · AI+软件赛道</strong>，交付形态为<strong>一个可现场演示的端到端系统原型</strong>（手机浏览器 H5，打开网址即可运行），而非 PPT 方案或接口草案。</p>
+<p>在命题层面，弦养对应企业命题三「OPC 时代身心疗愈」，选择的方向是<strong>「五音疗愈音频能力 × AI 动作识别能力」的组合</strong>；在算法与工程层面，作品的重点落在四件事上：</p>
+<table class="tbl">
+  <tr><th style="width:26%">算法/技术侧重</th><th>本作品的具体落点</th></tr>
+  <tr><td>动作识别判定</td><td>自研八式动作判定算法（几何特征 + 加权打分 + 硬门槛），见第三章第（三）节</td></tr>
+  <tr><td>时序与仲裁</td><td>保持帧、每式锁存、领先幅度仲裁、时序特征与互斥机制，见第三章第（四）节</td></tr>
+  <tr><td>事件契约与解耦</td><td><code>onHit(stringIndex)</code> 契约，识别层与音频/UI 层彻底解耦</td></tr>
+  <tr><td>音乐调度算法</td><td>五音定弦、点/线/面三阶段、12 分钟弧线调度，见第三章第（七）节</td></tr>
+</table>
+<p class="note">说明：贯串全篇的一处诚实边界——本作品使用现成的姿态估计模型（MediaPipe Pose Landmarker Lite）作为感知底座；<strong>自研部分</strong>是八式时间/姿态判定、防抖动与防重复反馈、识别到声音的事件接口、音乐阶段调度与产品交互整合。我们<strong>不声称训练了独创的基础模型</strong>。</p>
+
+<!-- ==================== 二、系统总体方案 ==================== -->
+<h2>二、技术方案与核心算法</h2>
+<h3>（一）系统总体方案与架构</h3>
+
+<h4>1. 端到端数据流</h4>
+<p>系统的主链路是「一帧画面 → 一次判定 → 一声琴音」，全程在浏览器端完成：</p>
+<pre class="flow">手机摄像头画面 (MediaStream)
+   ↓
+MediaPipe Pose Landmarker Lite  ← 本地 WASM + 本地模型（不依赖 CDN）
+   ↓
+33 点人体关键点 (归一化坐标) + 33 点 3D 世界坐标 (米制，原点在髋中心)
+   ↓
+关键点净化器 createLandmarkCleaner   ← 越界剔除 / 低置信剔除 / 坐标冻结
+   ↓
+尺度归一化 & 几何特征构造            ← 以「肩宽 T」为尺度的相对量
+   ↓
+八式判定器 MoveJudge                 ← 打分 → 时序特征 → 互斥仲裁 → 保持帧 → 每式锁存
+   ↓
+onHit(stringIndex)   1..7 = 第 1~7 弦 ；'choir' = 第七弦齐鸣
+   ↓
+古琴音合成 + UI 状态更新 + 本地练习记录（localStorage）</pre>
+<p>主链路之外还有两个旁路模块：<strong>陪练教练状态机</strong>负责调度「示范 / 跟练 / 完成」的节奏；<strong>取景伺服</strong>逐帧计算「上半身可见度 / 下半身可见度 / 取景完整度」三个真实指标，用于引导用户后退取景，并驱动半身模式的降级逻辑。</p>
+
+<h4>2. 技术选型</h4>
+<table class="tbl">
+  <tr><th style="width:24%">层</th><th>选型</th></tr>
+  <tr><td>前端工程</td><td>Vite 6 + Vue 3.5 + vue-router 4</td></tr>
+  <tr><td>姿态识别</td><td>@mediapipe/tasks-vision · Pose Landmarker Lite（33 点关键点 + 3D 世界坐标）</td></tr>
+  <tr><td>模型 / WASM</td><td>本地 <code>pose_landmarker_lite.task</code>（约 5.5MB）与本地推理 WASM，<strong>不依赖运行时 CDN</strong></td></tr>
+  <tr><td>动作判定</td><td>关节角度 + 关键点相对关系 + 保持帧（约 300–500ms）+ 每式锁存（纯函数，不依赖 Vue/DOM）</td></tr>
+  <tr><td>音频</td><td>Web Audio + 真实古琴散音采样</td></tr>
+  <tr><td>存储</td><td>localStorage 本地打卡记录，读写均做容错</td></tr>
+  <tr><td>服务</td><td>Node 内置 <code>http</code> 零依赖静态服务</td></tr>
+</table>
+
+<h4>3. 四层解耦架构与 onHit 可插拔契约</h4>
+<p>为了让「文化」不被写死进代码、「设备」可以随时替换，系统在工程上分成互相隔离的四层，只通过稳定契约通信：</p>
+<table class="tbl">
+  <tr><th style="width:16%">层</th><th style="width:30%">职责</th><th>数字化落点</th></tr>
+  <tr><td>音层</td><td>整段一个五音基调，负责氛围</td><td>音频基调参数（五调式）</td></tr>
+  <tr><td>弦层</td><td>一至七弦，动作命中的即时声音</td><td><code>onHit(1..7)</code></td></tr>
+  <tr><td>势层</td><td>八式自身的升、降、开、合</td><td>八式动作判定器</td></tr>
+  <tr><td>解释层</td><td>文案 / 点单 / 路演中的五音五脏意象</td><td>内容数据</td></tr>
+</table>
+<div class="box">
+  <p style="margin:0"><span class="kv">对外最小切面 —— 音频契约</span></p>
+  <p class="mono" style="margin:4pt 0 4pt 0">onHit(stringIndex)　// stringIndex ∈ { 1,2,3,4,5,6,7 } ∪ { 'choir' }</p>
+  <p style="margin:0" class="note">识别侧只负责产出 <code>onHit</code> 事件；音频侧只消费 <code>onHit</code>，<strong>不关心动作信号从哪来</strong>（真实识别 / 预录兜底 / 手动触发可互换）。任何新的输入源（体感手柄、可穿戴 IMU）或输出源（音箱、香薰机、灯带）只需实现同一契约即可接入，核心链路一行不改——这就是「可插拔」的工程含义。</p>
+</div>
+<p>因此，八段锦任意一式都能在任意五音基调下练习，<strong>文化层与工程层互不绑架</strong>。</p>
+
+<!-- ==================== 三、核心算法设计 ==================== -->
+<h3>（二）核心算法设计</h3>
+<p>本章是报告的重点，按数据流的处理顺序，逐层说明系统中的核心算法：从关键点净化，到几何特征构造，再到八式判定、时序仲裁、稳健性设计、教练状态机，最后是音频调度。</p>
+
+<h4>1. 人体姿态估计与关键点净化算法</h4>
+<p class="sub">① 姿态估计的工程配置</p>
+<p>姿态估计采用 VIDEO 模式、单人体（numPoses=1）。三个内部置信度阈值（检测 / 存在 / 跟踪）均设为 <strong>0.4</strong>，低于模型默认值——原因是真机实测中，远处或暗光时关键点可见度普遍偏低（右手腕一度只有 0.47），沿用默认阈值会把真实动作整式拦掉。引擎在 GPU delegate 初始化失败时会自动退回 CPU，并对部分驱动挂起做超时兜底；模型只加载一次，切换摄像头不重载。</p>
+
+<p class="sub">② 关键点净化算法（三道处理）</p>
+<p>实测 8797 帧数据证明：关键点抖动与可见度强相关（右腕在可见度 &gt; 0.85 时抖动 0.069，可见度 &lt; 0.3 时抖动 0.202，<em>相差约 3 倍</em>）；且 MediaPipe 对「画面外 / 遮挡」的点并非返回空值，而是给出一个<strong>数学连续、物理无意义的猜测坐标</strong>（例如脚踝 y 跑到 1.55，即画面外 55%）。这类坐标会严重污染「手到脚距离」等几何量，因此必须净化。净化器 <code>createLandmarkCleaner</code> 对 12 个躯干/四肢关键点做三道处理：</p>
+<table class="tbl">
+  <tr><th style="width:6%">序</th><th style="width:22%">处理</th><th>规则与动机</th></tr>
+  <tr><td class="c">①</td><td>越界剔除</td><td>x / y 超出 [−0.005, 1.005]（略放宽，MediaPipe 边缘点会轻微越界）即判无效</td></tr>
+  <tr><td class="c">②</td><td>低置信剔除</td><td>visibility &lt; <strong>0.30</strong> 即判无效（实测该阈值以下抖动为可信帧的 3 倍）</td></tr>
+  <tr><td class="c">③</td><td>坐标冻结</td><td>无效点的坐标<strong>沿用上一帧有效值</strong>，避免几何量突变；整帧无任何有效点时返回 <code>null</code>，让上层跳过本帧判定</td></tr>
+</table>
+<div class="box">
+  <p style="margin:0" class="kv">设计取舍：为什么「净化而不滤波」？</p>
+  <p style="margin:4pt 0 0 0">我们<strong>刻意不做时序平滑</strong>。消融实验表明：中值 5 + EMA 0.5 可使抖动下降 42%，但真实动作的速度分量仅保留 52%，判定会明显迟钝、动作跟不上。于是选择「剔除坏点 + 冻结坐标」的净化策略，把「是否可信」交给下游的可见度门槛去判断——<strong>宁可不判，不误判</strong>。</p>
+</div>
+
+<p class="sub">③ 头部朝向的解算</p>
+<p>第 4 式「五劳七伤往后瞧」需要判断头部转向。仅用「鼻 + 双眼」三点存在两个问题：正侧面转 90° 时鼻子投影不再明显；且无法区分「头在转」与「整个人在转」。因此系统取用 MediaPipe Pose 的全部头部关键点（鼻、双眼内/外眼角、双耳、双嘴角共 11 点）并结合 <strong>3D 世界坐标</strong>：</p>
+<ul>
+  <li>耳间距的投影变化 → 侧面程度（头转 90° 时两耳前后重叠，投影最小）；</li>
+  <li>鼻相对双耳中点的偏移 → 头部朝向；</li>
+  <li>眼/口连线与双耳连线的夹角 → 头部 yaw（左右转角）。</li>
+</ul>
+<p>当 3D 数据不可用时，相关式子直接判 0，避免用不可靠的 2D 投影硬判。</p>
+
+<h4>2. 尺度归一化与几何特征构造</h4>
+<p>用户离摄像头有远有近，绝对像素坐标无法直接比较。系统统一以<strong>肩宽</strong>作为尺度基准：</p>
+<p class="mono">T = max(ε, ‖ L_shoulder − R_shoulder ‖)　（ε = 1e-3，防止除零）</p>
+<p>所有几何特征都表示为「多少倍肩宽」，从而使判定<strong>与离摄像头远近无关</strong>。三个归一化打分核定义了「特征如何折算成 0~1 的分数」：</p>
+<table class="tbl">
+  <tr><th style="width:34%">打分核</th><th>定义</th><th>语义</th></tr>
+  <tr><td class="mono">ok(x, lo, hi)</td><td>1 − clamp₀¹((x−lo)/(hi−lo))</td><td>x 越小越好（lo 得 1，hi 得 0）</td></tr>
+  <tr><td class="mono">okUp(x, lo, hi)</td><td>clamp₀¹((x−lo)/(hi−lo))</td><td>x 越大越好（lo 得 0，hi 得 1）</td></tr>
+  <tr><td class="mono">okDown(x, good, bad)</td><td>1 − clamp₀¹((x−good)/(bad−good))</td><td>x 越小越好（good 得 1，bad 得 0），独立实现以免区间倒序踩坑</td></tr>
+</table>
+<p>在此之上构造的核心几何量包括：手腕相对肩线的上升量 <code>raiseL / raiseR</code>、躯干前倾角 <code>leanDeg = atan2(|Δx|, |Δy|)</code>、三点夹角 <code>angle(a,b,c)</code>、手到同侧脚踝距离 <code>handToAnkle</code>、双脚间距 <code>feetSpread</code>，以及肩中点 / 髋中点 <code>shoMid / hipMid</code>。</p>
+
+<h4>3. 八式动作判定算法</h4>
+<p>八式各对应一个纯函数打分器 <code>fᵢ(p) : Landmarks → [0,1]</code>，输出为若干归一化特征的加权和。判定遵循「<strong>硬门槛先行、加权打分为主</strong>」的原则：不满足硬门槛（如「手举过头顶」「躯干站直」）直接判 0，不进入加权，从而在源头上掐掉误判。下面以三个代表式说明其判定逻辑（完整特征与权重见附录表）。</p>
+
+<p class="sub">① 第 1 式「双手托天理三焦」——静态姿态型</p>
+<p>核心是「双臂高举过顶」。区间按真人比例标定（单位 = 肩宽 T）：手举过头顶时手腕约在肩线上方 1.8~2.2T，双腕分开约 1.5~2.0T，肘接近伸直。四个特征加权：</p>
+<pre class="flow">lower_raise = min(raiseL, raiseR)          较低那只手腕也要高过头   okUp(·,1.0,1.9)  权重 0.28
+avg_raise   = (raiseL + raiseR)/2          平均举高                 okUp(·,1.2,2.2)  权重 0.26
+elbow_str   = (∠左肘 + ∠右肘)/360°         双肘接近伸直             okUp(·,0.78,0.94) 权重 0.24
+apart       = ‖双腕距离‖/T                 双腕分开程度             okUp(·,1.3,2.4)  权重 0.22
+score₁ = 0.28·lower_raise + 0.26·avg_raise + 0.24·elbow_str + 0.22·apart</pre>
+
+<p class="sub">② 第 5 式「摇头摆尾去心火」与第 6 式「两手攀足固肾腰」——时序型 + 互斥设计</p>
+<p>这两式都是俯身动作，单帧几乎无法区分，因此引入<strong>滑动窗口时序特征</strong>与<strong>互斥硬门槛</strong>：</p>
+<ul>
+  <li>第 5 式主信号是<em>双手横摆幅度</em> <code>__handSwing</code>（摇头摆尾时手随身体左右摆动，腕中点持续横移），要求 <code>__handSwing ≥ 0.18 T</code>，否则判 0；</li>
+  <li>第 6 式（攀足）是双手<em>定点</em>下探、几乎不横摆，要求 <code>__handSwing ≤ 0.26 T</code>，否则判 0；</li>
+  <li>二者共同要求时序窗口已就绪（<code>__ready</code>），否则判 0——防止「静止的攀足」被误判成「摆动的摇头摆尾」。</li>
+</ul>
+<p>此外，第 5 式还实测发现：摇头摆尾时两肩基本同向平移，肩线倾斜量仅约 0.04 肩宽、恒不达标，故改用「躯干整体左右横移 <code>__sway</code>」而非「肩线一高一低」作为辅助信号。</p>
+
+<p class="sub">③ 第 7 式「攒拳怒目增气力」——镜像自适应</p>
+<p>原先的实现硬编码「左手在画面左侧」，即假设 <code>fwdL &lt; 0</code>。但实测 8797 帧中发现 <strong>95.6% 的帧呈现「左肩 x &gt; 右肩」</strong>（画面被水平镜像）。硬编码会导致第 7 式在镜像下判定失效。现改为<strong>从双肩实际位置推断「出拳方向」</strong>：</p>
+<pre class="flow">leftOnScreen = (L_shoulder.x < R_shoulder.x)    // 左肩是否在画面左侧
+outward      = leftOnScreen ? −1 : +1           // 出拳方向
+scoreL = fwdL · outward ;  scoreR = fwdR · outward
+出拳手 = 「更向外伸」的那只（score &gt; 0.2），与镜像 / 朝向无关</pre>
+<p>同时用 <code>atWaist</code>（另一手须收在腰侧，<em>兼作硬门槛</em>）把「左右开弓」挡在外面，避免第 2 式被第 7 式压过。</p>
+
+<h4>4. 时序特征与互斥仲裁机制</h4>
+<p class="sub">① 滑动窗口时序特征</p>
+<p>系统维护一个长度为 <strong>45 帧</strong>（约 1.5s @30fps）的滑动窗口，窗口内不足 <strong>12 帧</strong>时视为「时序信号未就绪」，相关式子一律判 0。窗口上计算四个时序特征：</p>
+<table class="tbl">
+  <tr><th style="width:22%">特征</th><th>含义</th><th>用途</th></tr>
+  <tr><td class="mono">__bob</td><td>躯干中点的垂直起伏幅度 / T</td><td>第 8 式「踮脚」的主信号</td></tr>
+  <tr><td class="mono">__sway</td><td>躯干中点的横向摆幅 / T</td><td>第 5 式辅助</td></tr>
+  <tr><td class="mono">__handSwing</td><td>双腕中点的横摆幅度 / T</td><td>第 5 式主信号、第 6 式互斥门槛</td></tr>
+  <tr><td class="mono">__handGap</td><td>双腕间距的变化量</td><td>第 5 式辅助</td></tr>
+</table>
+<p>起伏源自适应：髋部关键点可见时用髋中点，不可见时自动退回肩中点（肩的可见度常年约 0.99，最稳）。</p>
+
+<p class="sub">② 保持帧 + 每式锁存 + 互斥仲裁</p>
+<p>判定状态机 <code>MoveJudge</code> 在每帧执行以下步骤：</p>
+<pre class="flow">① 打分：对 8 个规则函数求值，得 sc[0..7]
+② 选最优：best = argmax(sc)
+③ 仲裁：要求 sc[best] ≥ THRESHOLD(0.55)  且  lead = sc[best] − second ≥ MARGIN(0.10)
+④ 保持：命中则 counts[best]++ ，否则清零
+⑤ 锁存：当 counts[best] ≥ holdFrames(12，约 0.4s) 且该式未锁存 → 触发一次，并置 latched[best]=true（同式不再重复响）</pre>
+<p>其中<strong>「保持帧」</strong>过滤掉骨架的瞬时抖动，<strong>「每式锁存」</strong>保证同一式不会连续狂响。此外系统提供<strong>顺序模式</strong>（八段锦是顺序练的，即产品主用模式）：只判定当前指定式、不做仲裁，可彻底消除式间串扰；<strong>自由模式</strong>才启用「领先幅度 MARGIN」仲裁。当某式要求头部转到指定角度时，头未到位则整式判 0。</p>
+
+<h4>5. 稳健性设计：抗误触发与降级</h4>
+<p>真实场景中摄像头可能只拍到上半身（近距离取景），此时下肢关键点不可靠。为此系统设计了三层稳健性机制：</p>
+<table class="tbl">
+  <tr><th style="width:26%">机制</th><th>规则</th></tr>
+  <tr><td>可见度门槛</td><td>任一依赖点的 visibility 低于门槛即该式记 0 分（<strong>VIS_MIN = 0.35</strong>；实测 0.5 会误拦真实动作，0.35 仍足以挡住真正出画的点）</td></tr>
+  <tr><td>半身模式髋降级</td><td>近距离取景时髋贴边、可见度落到 0.15~0.35 之间。髋在躯干上、人体先验强，坐标仍可信，故<strong>只把髋门槛降到 0.15</strong>（HIP_VIS_HALF）；而膝/踝是肢体末端，出画后返回的是 y&gt;1 的猜测坐标，<strong>门槛一律不放宽</strong>（LEG_VIS = 0.35）</td></tr>
+  <tr><td>下肢降级路径</td><td>当膝盖/脚踝不可用时，第 5 / 6 / 8 式自动切换到「纯上半身信号」分支（如第 8 式改用「双手垂于体侧 + 躯干规律起伏」当踮脚信号），保证仍可判定</td></tr>
+</table>
+<p class="note">这一设计直接支撑了验收项 <strong>D7（抗误触）</strong>与半身取景场景下的可用性。</p>
+
+<h4>6. 陪练教练状态机</h4>
+<p>仅有判定器时，用户并不知道下一步该做什么，标准骨架在原地无限循环；而且一旦判定不命中，就会永远停在同一式。为此设计了陪练教练状态机 <code>coach.js</code>——一个<strong>纯函数</strong>（只暴露 <code>tick(dtMs)</code>，不读系统时钟、不开定时器），因此可以在 Node 里跑单元测试，也能在页面不可见时暂停计时。</p>
+<pre class="flow">begin(idx)
+   │
+   ▼
+ demo ── 教练示范（动一遍后停在结束姿态）
+   │ demoDone() / demoMaxMs 保底
+   ▼
+ follow ── 用户跟练：判定器武装，等做到位
+   │   ├─ hit(idx) ────────────→ done（完成）
+   │   └─ 判定闸门下每 attemptMs → nudge（重播示范 + 轮次+1，仍留在 follow）
+   ▼
+ grace ── 宽限期：仍可命中；extend() 可延长
+   │   └─ hit / extend → follow ；graceMs 到 → advance(timeout)
+   ▼
+ done ── 极短庆祝（doneMs 后）→ advance(done) → 进入下一式</pre>
+<p>状态机支持两档「闸门」，决定「什么时候进入下一式」：</p>
+<table class="tbl">
+  <tr><th style="width:20%">闸门</th><th>行为</th><th style="width:26%">用途</th></tr>
+  <tr><td><strong>judge</strong>（默认）</td><td><strong>判定闸门</strong>：只有判定命中才进下一式；没通关就永远停在这一式，每 <code>attemptMs</code> 重播一遍示范（轮次 +1）。它不是「停死」——画面一直在动、轮次可见、调用方保留「跳过本式」手动出口</td><td>「一个动作没通关就一直练这个动作」</td></tr>
+  <tr><td>time</td><td><strong>计时闸门</strong>：到点自动放行，即使一直没做到位也会在硬上界内进入下一式</td><td>先过一遍流程；也用于做 A/B 反证测试</td></tr>
+</table>
+<p>两档节奏预设（race = 完整 / 精简）：</p>
+<table class="tbl">
+  <tr><th style="width:34%">参数</th><th class="c">full</th><th class="c">short</th><th>含义</th></tr>
+  <tr><td class="mono">attemptMs</td><td class="c">15000</td><td class="c">10000</td><td>判定闸门下重播示范的间隔</td></tr>
+  <tr><td class="mono">demoMaxMs</td><td class="c">9000</td><td class="c">5000</td><td>示范阶段保底时长（防卡在 demo）</td></tr>
+  <tr><td class="mono">doneMs</td><td class="c">900</td><td class="c">700</td><td>「很好！」停留时长</td></tr>
+  <tr><td class="mono">graceMs</td><td class="c">8000</td><td class="c">6000</td><td>宽限期时长（仅 time 档）</td></tr>
+  <tr><td class="mono">hardWaitMs</td><td class="c">25000</td><td class="c">15000</td><td>跟练进入宽限的时限（仅 time 档）</td></tr>
+</table>
+
+<h4>7. 多模态音频调度算法</h4>
+<p class="sub">① 五音定弦：可播放的频率表</p>
+<p>「五音」被数字化为一张可播放的定弦频率表。前七式的命中分别触发一至七弦，第八式触发七弦齐鸣：</p>
+<table class="tbl">
+  <tr><th class="c">弦</th><th class="c">音名</th><th class="c">频率 (Hz)</th><th class="c">弦</th><th class="c">音名</th><th class="c">频率 (Hz)</th></tr>
+  <tr><td class="c">一弦</td><td class="c">宫</td><td class="c">174.61</td><td class="c">五弦</td><td class="c">羽</td><td class="c">294.66</td></tr>
+  <tr><td class="c">二弦</td><td class="c">商</td><td class="c">196.44</td><td class="c">六弦</td><td class="c">宫（高）</td><td class="c">349.23</td></tr>
+  <tr><td class="c">三弦</td><td class="c">角</td><td class="c">220.89</td><td class="c">七弦</td><td class="c">商（高）</td><td class="c">392.88</td></tr>
+  <tr><td class="c">四弦</td><td class="c">徵</td><td class="c">261.92</td><td class="c">第八式</td><td class="c">七弦齐鸣</td><td class="c">'choir'</td></tr>
+</table>
+
+<p class="sub">② 点 / 线 / 面三阶段音乐调度</p>
+<table class="tbl">
+  <tr><th class="c" style="width:14%">阶段</th><th class="c" style="width:12%">形态</th><th>用户感知</th></tr>
+  <tr><td class="c">一 · 学架子</td><td class="c">点</td><td>一个动作一声，用户慢它就等</td></tr>
+  <tr><td class="c">二 · 找气感</td><td class="c">线</td><td>五声短句连成一条线</td></tr>
+  <tr><td class="c">三 · 入静</td><td class="c">面</td><td>约 12 分钟连续音乐弧线</td></tr>
+</table>
+
+<p class="sub">③ 12 分钟弧线调度算法</p>
+<p>「面」阶段由弧线引擎 <code>arc.js</code> 实现，是系统中最「音乐」的一段算法：</p>
+<ul>
+  <li><span class="kv">同构结构：</span>总长 <strong>720 秒</strong>，划分为 9 段（起势 → 收功）；五个调式共用<em>同一条九段结构</em>，只换「动机落音」和「低音主音」；</li>
+  <li><span class="kv">同宫系统：</span>音高集合恒为 F G A C D（简谱 1 2 3 5 6）五个音，调式只决定「谁当家」；每种调式自带 7 条动机（A/B/E/D/C/C2/P/Z）；</li>
+  <li><span class="kv">前瞻调度：</span>以 <strong>TICK_MS = 130ms</strong> 为排程检查间隔，<strong>LOOK = 2.0s</strong> 为前瞻窗口，提前把进入点落在窗口内的音符排入播放队列；</li>
+  <li><span class="kv">强度曲线：</span>段内强度随进度线性变化 <code>i(sec, u) = i₀ + (i₁−i₀)·u</code>，配合每段的密度、音区、明暗、力度等参数形成一张「情绪波形」；</li>
+  <li><span class="kv">七弦齐鸣：</span>弧线中固定存在两个齐鸣时刻 <code>CHOIRS = [630, 712]</code> 秒，与调式无关（属弦层事件）。</li>
+</ul>
+<p class="note">这一层把「文化编排」变成了可计算、可调度的数据结构，同时严格通过 <code>onHit</code> 与识别层解耦。</p>
+
+<!-- ==================== 四、关键技术创新点 ==================== -->
+<h3>（三）关键技术创新点</h3>
+<table class="tbl">
+  <tr><th style="width:6%">序</th><th style="width:26%">创新点</th><th>说明</th></tr>
+  <tr><td class="c">1</td><td>听觉化反馈范式</td><td>把动作判定结果经 <code>onHit</code> 契约转译为「有声 / 无声」，将「对与错」从视觉层搬到了听觉层。反馈不再是背景音乐，而是反馈本身</td></tr>
+  <tr><td class="c">2</td><td>真机数据驱动的鲁棒判定</td><td>不靠拍脑袋调参，而是基于 8797 帧真实录制数据标定阈值：抖动-可见度相关性 → 净化阈值 0.30；出画点坐标 → 下肢门槛不放宽；镜像比例 95.6% → 出拳方向自适应</td></tr>
+  <tr><td class="c">3</td><td>时序 + 互斥 + 锁存的防误触框架</td><td>保持帧 + 每式锁存 + 领先幅度仲裁 + 时序硬门槛，四者叠加实现「原地晃动 10 秒零误触发」</td></tr>
+  <tr><td class="c">4</td><td>文化内核数字化</td><td>把「五音—七弦—八式」拆成可计算、可播放、可校验的数据结构与契约（音/弦/势/解释四层解耦），文化调性可被工程一致地复用</td></tr>
+  <tr><td class="c">5</td><td>端侧本地优先 + 三级兜底</td><td>模型、WASM、音频、记录全本地，断网可跑；识别失败时 ≤3s 切换到预录兜底，保证现场演示不翻车</td></tr>
+</table>
+
+<!-- ==================== 五、实验与验证 ==================== -->
+<h3>（四）实验与验证</h3>
+
+<h4>1. 判定器单元测试</h4>
+<p>判定器与 Vue / DOM / MediaPipe 完全解耦，是纯函数，因此可用 Node 直接做单元测试（<code>judge.test.mjs</code>）：</p>
+<table class="tbl">
+  <tr><th style="width:26%">测试组</th><th>内容</th></tr>
+  <tr><td>正例（八式全通）</td><td>构造八式的标准姿态序列，验证每一式都能在保持帧内命中</td></tr>
+  <tr><td>盲测 / 互斥</td><td>验证式间不会互相误触发（式2↔式7、式5↔式6）</td></tr>
+  <tr><td>消融</td><td>逐项关闭特征，观察得分变化，确认各特征均有效</td></tr>
+  <tr><td>复杂度定级</td><td>确认单帧判定为常数级</td></tr>
+  <tr><td>半身模式髋降级</td><td>全身模式 + 髋 vis=0.20 → 判 0（保持旧行为）；半身模式 + 髋 vis=0.20 → 可判；髋 vis=0.05（真出画）→ 仍判 0；膝/踝门槛不因半身模式放宽</td></tr>
+</table>
+
+<h4>2. 真机数据驱动的阈值标定</h4>
+<p>在 2.2m 退后取景的真实场景下录制 8797 帧，得到以下关键标定依据：</p>
+<table class="tbl">
+  <tr><th style="width:30%">观测</th><th>数据</th><th style="width:30%">对算法的指导</th></tr>
+  <tr><td>抖动-可见度相关性</td><td>右腕 vis&gt;0.85 抖动 0.069；vis&lt;0.3 抖动 0.202（约 3×）</td><td>净化阈值取 0.30</td></tr>
+  <tr><td>出画点坐标</td><td>脚踝可见度约 0.02，但返回 y≈1.55 的猜测坐标</td><td>下肢门槛不放宽；改用上半身信号</td></tr>
+  <tr><td>画面镜像比例</td><td>95.6% 的帧「左肩 x &gt; 右肩」</td><td>第 7 式出拳方向自适应，丢弃硬编码</td></tr>
+  <tr><td>滤波消融</td><td>中值5+EMA0.5：抖动 ↓42%，真实动作速度仅保留 52%</td><td>放弃时序平滑，改「净化不滤波」</td></tr>
+  <tr><td>右腕低置信值</td><td>深色物体 / 运动模糊时仅 0.47</td><td>可见度门槛由 0.5 降到 0.35</td></tr>
+</table>
+
+<h4>3. 端到端与验收门槛</h4>
+<table class="tbl">
+  <tr><th style="width:34%">脚本 / 门槛</th><th>覆盖内容</th></tr>
+  <tr><td><code>judge.test.mjs</code></td><td>八式判定器：正例 / 盲测 / 消融 / 复杂度定级 / 半身模式</td></tr>
+  <tr><td><code>coach.test.mjs</code>（26 项）</td><td>教练状态机的两档闸门、超时、重播、宽限</td></tr>
+  <tr><td><code>roomFigure.test.mjs</code>（10 项）</td><td>小窗教练形象姿态解算保真（2730 个数值 0 处不一致）</td></tr>
+  <tr><td><code>e2e-coach-judge.cjs</code>（21 项）</td><td>端到端：跟练推进不跳式；并以 <code>?coachGate=time</code> 作反证档</td></tr>
+</table>
+<p>产品级验收门槛（部分）：</p>
+<table class="tbl">
+  <tr><th class="c" style="width:10%">编号</th><th style="width:26%">验收项</th><th>通过条件</th></tr>
+  <tr><td class="c">D1</td><td>双手托天</td><td>现场做一次，听到对应琴响</td></tr>
+  <tr><td class="c">D2</td><td>八式映射</td><td>1–7 式对应弦正确，第 8 式七弦齐鸣</td></tr>
+  <tr><td class="c">D3</td><td>全链路</td><td>选课 → 跟练 → 识别 → 拨弦 → 打卡贯通</td></tr>
+  <tr><td class="c">D5</td><td>断网</td><td>断网后核心流程仍成立</td></tr>
+  <tr><td class="c">D7</td><td>抗误触</td><td>原地晃动 10 秒不乱响</td></tr>
+  <tr><td class="c">D8</td><td>兜底时长</td><td>故障发生至可播放 ≤ 3 秒</td></tr>
+</table>
+
+<h4>4. 算法复杂度分析</h4>
+<p>判定链路全部为轻量级几何运算，满足手机端实时性要求：</p>
+<table class="tbl">
+  <tr><th style="width:26%">环节</th><th style="width:20%">时间复杂度</th><th>说明</th></tr>
+  <tr><td>关键点净化</td><td class="mono">O(K)，K=12</td><td>固定 12 个点，常数级</td></tr>
+  <tr><td>八式打分</td><td class="mono">O(N)，N=8</td><td>每式固定数量特征，与人数/画面无关</td></tr>
+  <tr><td>时序特征更新</td><td class="mono">O(W)，W=45</td><td>滑动窗口仅入队/出队；极值用窗口内常数扫描</td></tr>
+  <tr><td>仲裁与锁存</td><td class="mono">O(N)</td><td>一次求最值与次最值</td></tr>
+  <tr><td><strong>单帧合计</strong></td><td class="mono"><strong>O(1)</strong></td><td>与画面分辨率、人体数量、练习时长均无关</td></tr>
+</table>
+<p>内存方面，判定器仅维护 4 个长度为 45 的窗口数组与若干计数器，占用为常数级；模型推理开销由 MediaPipe 承担（本地 WASM，约 5.5MB 模型）。</p>
+
+<!-- ==================== 六、商业计划与应用前景 ==================== -->
+<h3>（五）商业计划与应用前景</h3>
+
+<h4>1. 目标用户与使用场景</h4>
+<table class="tbl">
+  <tr><th style="width:20%">用户</th><th style="width:26%">场景</th><th>核心诉求</th></tr>
+  <tr><td>路演观众</td><td>现场首次体验</td><td>3 秒看懂、快速授权、做一个动作就能听到琴响</td></tr>
+  <tr><td>普通用户</td><td>手机日常练习</td><td>不登录、不安装、打开即可练，能看到练习记录</td></tr>
+  <tr><td>定制用户</td><td>长期练习</td><td>补充身体数据后获得更贴合的推荐、反馈与内容</td></tr>
+  <tr><td>机构客户</td><td>康养 / 养老 / 文旅</td><td>弱网 / 离线可用的功法带练工具，可私有化部署</td></tr>
+</table>
+
+<h4>2. 产品定位与差异化</h4>
+<table class="tbl">
+  <tr><th style="width:22%">对比维度</th><th style="width:39%">普通跟练 App</th><th>弦养</th></tr>
+  <tr><td>反馈形式</td><td>次数、时长、热量；偶尔骨架可视化</td><td><strong>动作达标即拨响对应古琴弦</strong>，听觉即时反馈</td></tr>
+  <tr><td>完成感</td><td>进度条走完</td><td>练完一套 = 弹完一曲，第 8 式<strong>七弦齐鸣</strong></td></tr>
+  <tr><td>部署形态</td><td>需安装 / 登录 / 联网</td><td>手机浏览器 <strong>零安装、零登录、零后端</strong>，断网可跑</td></tr>
+  <tr><td>可扩展性</td><td>功能耦合，难以接硬件</td><td>统一 <code>onHit</code> 契约，输入/输出设备可插拔</td></tr>
+</table>
+
+<h4>3. 落地路径与商业模式</h4>
+<pre class="flow">第一阶段（已可演示）：八段锦核心闭环 —— 做动作 → 听得见
+        ↓
+第二阶段：音疗页 + 点/线/面音乐 + 身体数据定制
+        ↓
+第三阶段：更多拳种 / 个性化推荐 / 长期练习反馈</pre>
+<ul>
+  <li><span class="kv">首批用户假设：</span>愿意尝试八段锦的久坐人群，而非一开始就覆盖所有健康人群；</li>
+  <li><span class="kv">验证渠道：</span>校园 / 社团小规模体验；康养与养老机构、文旅与酒店等 B 端场景（渠道合作发生前不宣称既有合作）；</li>
+  <li><span class="kv">可测指标：</span>首次琴声成功率、三式完成率、7 日内主动复练比例；</li>
+  <li><span class="kv">商业假设：</span>基础跟练免费，未来验证音乐内容 / 课程 / 团体活动服务的付费意愿（无收入证据不写盈利承诺）；</li>
+  <li><span class="kv">取舍理由：</span>先砍登录、云后台、第二拳种与逐帧纠错，把有限资源投入「动作反馈闭环」。</li>
+</ul>
+
+<h4>4. 可插拔生态与硬件扩展</h4>
+<p>在事件总线之后挂一层适配器，即可向外延伸（<strong>以下接口位已预留、尚未实现</strong>）：</p>
+<ul>
+  <li><span class="kv">输出侧：</span>智能音箱 / 古琴音箱（音频）、智能香薰控制 API（香方 → 扩香节奏）、氛围灯、中控屏；</li>
+  <li><span class="kv">输入侧：</span>体感手柄、可穿戴 IMU 等，只需实现 <code>onHit</code> 契约；</li>
+  <li><span class="kv">通路：</span>通过 WebSocket / HTTP 适配层，把 <code>onHit</code>、阶段切换、整套完成等事件广播给上述设备。</li>
+</ul>
+<p class="note">因本地优先、零后端，弦养尤其适合弱网、离线与私有化部署的场景。我们给出的是一套可插拔的架构与契约，而不是「已经对接了香薰机」的既成事实。</p>
+
+<h4>5. 风险边界与合规</h4>
+<div class="box">
+  <p style="margin:0"><span class="kv">非医疗声明</span></p>
+  <p style="margin:4pt 0 0 0">弦养是运动与音乐体验产品，<strong>不提供诊断、治疗或医疗建议</strong>。五行五脏内容仅用于文化意象、氛围与编排叙事，不作为医疗判断；界面不展示「你肝不好」等诊断式表达。身体数据与姿态关键点<strong>只在当前设备本地处理，默认不上传、不保存视频</strong>，且可随时删除。</p>
+</div>
+<ul>
+  <li><span class="kv">诚实边界：</span>严格区分「已实现且可现场验证」与「仅预留扩展点」；不把规划讲成已完成（例如不宣称「AI 音疗处方系统已完成」、不宣称「已对接香薰硬件」）；</li>
+  <li><span class="kv">素材授权：</span>对外发布保留第三方音源署名（见附录），未明确授权的录音一律不对外使用。</li>
+</ul>
+
+<!-- ==================== 七、附录 ==================== -->
+<h2>三、附录</h2>
+
+<h3>（一）八式判定特征与权重表</h3>
+<p class="cap">表 A-1　八段锦八式判定特征、硬门槛与权重</p>
+<table class="tbl">
+  <tr><th class="c" style="width:5%">式</th><th style="width:20%">招式</th><th>特征（权重）</th><th style="width:26%">硬门槛 / 互斥</th></tr>
+  <tr><td class="c">1</td><td>双手托天理三焦</td><td>较低腕举高 0.28 · 平均举高 0.26 · 双肘伸展 0.24 · 双腕分开 0.22</td><td>—</td></tr>
+  <tr><td class="c">2</td><td>左右开弓似射雕</td><td>双腕横向距离 0.30 · 手与肩同高 0.22 · 至少一手伸直 0.26 · 至少一手屈肘 0.22</td><td>—</td></tr>
+  <tr><td class="c">3</td><td>调理脾胃须单举</td><td>双手高低差 0.34 · 举手高度 0.36 · 按手下探深度 0.30</td><td>举手须高过头顶且按手低于肩线，否则判 0</td></tr>
+  <tr><td class="c">4</td><td>五劳七伤往后瞧</td><td>头部偏移量 0.46 · 躯干竖直 0.34 · 双肩水平 0.20</td><td>躯干前倾 &gt; 28° 判 0；头部偏移 &lt; 0.22T 判 0</td></tr>
+  <tr><td class="c">5</td><td>摇头摆尾去心火</td><td>俯身 0.30 · 双手横摆 0.38 · 躯干横摆 0.18 · 手离脚踝 0.14<br>（无腿时：0.32 / 0.42 / 0.26）</td><td>手未下探 &gt;1.9T 判 0；横摆 &lt;0.18T 判 0；窗口未就绪判 0</td></tr>
+  <tr><td class="c">6</td><td>两手攀足固肾腰</td><td>手离脚踝 0.30 · 下探深度 0.26 · 双手同步 0.20 · 俯身 0.16 · 静止 0.08<br>（无腿时：0.34 / 0.30 / 0.24 / 0.12）</td><td>下探 &lt;2.1T 判 0；横摆 &gt;0.26T 判 0；窗口未就绪判 0</td></tr>
+  <tr><td class="c">7</td><td>攒拳怒目增气力</td><td>前伸距离 0.28 · 拳与肩同高 0.22 · 拳肘伸直 0.22 · 另一手收腰 0.18 · 双手高低差 0.10</td><td>无手明确前伸判 0；另一手未收腰侧（atWaist&lt;0.45）判 0</td></tr>
+  <tr><td class="c">8</td><td>背后七颠百病消</td><td>双脚并拢 0.30 · 躯干竖直 0.24 · 躯干起伏 0.46<br>（无腿时：双臂下垂 0.26 / 竖直 0.28 / 起伏 0.46）</td><td>躯干无起伏判 0；窗口未就绪判 0</td></tr>
+</table>
+
+<h3>（二）关键参数一览</h3>
+<table class="tbl">
+  <tr><th style="width:32%">参数</th><th class="c" style="width:16%">取值</th><th>含义</th></tr>
+  <tr><td class="mono">THRESHOLD</td><td class="c">0.55</td><td>触发阈值</td></tr>
+  <tr><td class="mono">MARGIN</td><td class="c">0.10</td><td>互斥仲裁所需领先幅度</td></tr>
+  <tr><td class="mono">holdFrames</td><td class="c">12</td><td>保持帧数（约 0.4s @30fps）</td></tr>
+  <tr><td class="mono">VIS_MIN</td><td class="c">0.35</td><td>关键点可见度门槛</td></tr>
+  <tr><td class="mono">HIP_VIS_HALF</td><td class="c">0.15</td><td>半身模式下髋可见度门槛</td></tr>
+  <tr><td class="mono">LEG_VIS</td><td class="c">0.35</td><td>下肢关键点门槛（不放宽）</td></tr>
+  <tr><td class="mono">LOW_VIS</td><td class="c">0.30</td><td>净化器低置信剔除阈值</td></tr>
+  <tr><td class="mono">BOB_WINDOW / MIN_WINDOW</td><td class="c">45 / 12</td><td>时序窗口长度 / 就绪帧数</td></tr>
+</table>
+
+<h3>（三）术语表</h3>
+<table class="tbl">
+  <tr><th style="width:26%">术语</th><th>说明</th></tr>
+  <tr><td>关键点 (Landmark)</td><td>MediaPipe Pose 输出的 33 个人体关节点，含可见度 visibility</td></tr>
+  <tr><td>肩宽尺度 T</td><td>左右肩关键点的距离，作为所有几何特征的归一化基准</td></tr>
+  <tr><td>硬门槛 (gate)</td><td>不满足即该式直接判 0 的前置条件</td></tr>
+  <tr><td>保持帧 (hold)</td><td>动作需连续保持的帧数，用于过滤瞬时抖动</td></tr>
+  <tr><td>锁存 (latch)</td><td>同一式命中一次后不再重复触发</td></tr>
+  <tr><td>onHit</td><td>音频契约：1..7 表示弦号，'choir' 表示七弦齐鸣</td></tr>
+</table>
+
+<h3>（四）第三方素材与授权</h3>
+<pre class="flow">音色素材：RafaelCaro，来源：Freesound，许可：CC BY 4.0（七弦散音，已作切分处理）
+赏听录音：《醉渔唱晚》卫仲乐 1934，CC0 1.0（可商用、免署名）
+赏听录音：《梅花三弄》前半与尾声，RafaelCaro，CC BY 4.0（必须署名）</pre>
+
+</body>
+</html>

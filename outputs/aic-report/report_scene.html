@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>弦养 · 2026AIC 算法创新赛 场景创新赛道 场景解决方案报告</title>
+<style>
+  /* ===== 页面设置：A4 纵向；页边距 上下2.5cm 左右3cm ===== */
+  @page {
+    size: A4 portrait;
+    margin: 25mm 30mm 25mm 30mm;
+  }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Songti SC", "STSong", "SimSun", "Source Han Serif SC", "Noto Serif CJK SC", serif;
+    font-size: 12pt;          /* 正文 小四 */
+    color: #111;
+    line-height: 1.5;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  p { margin: 0 0 6pt 0; text-align: justify; }
+  ul, ol { margin: 0 0 6pt 0; padding-left: 2em; }
+  li { margin: 0 0 3pt 0; text-align: justify; }
+  em { font-style: normal; color: #8a3b1e; font-weight: 700; }
+  code, .mono { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 10.5pt; }
+
+  /* ===== 封面 ===== */
+  .cover { height: 235mm; display: flex; flex-direction: column; align-items: center; page-break-after: always; text-align: center; }
+  .cover .top-title { margin-top: 20mm; font-size: 15pt; letter-spacing: 2px; }
+  .cover .main-title { margin-top: 8mm; font-size: 26pt; font-weight: 700; line-height: 1.5; letter-spacing: 3px; }
+  .cover .race { margin-top: 4mm; font-size: 17pt; font-weight: 700; }
+  .cover .kind { margin-top: 3mm; font-size: 15pt; color: #8a3b1e; font-weight: 700; letter-spacing: 1px; }
+  .cover .report-type { margin-top: 20mm; font-size: 22pt; font-weight: 700; letter-spacing: 6px; }
+  .cover .meta { margin-top: 24mm; text-align: left; font-size: 14pt; line-height: 2.4; }
+  .cover .meta .k { display: inline-block; width: 6.2em; }
+  .cover .meta .v { border-bottom: 1px solid #333; display: inline-block; min-width: 12em; padding: 0 6px; }
+  .cover .date { margin-top: auto; margin-bottom: 4mm; font-size: 14pt; }
+
+  /* ===== 目录 ===== */
+  .toc { page-break-after: always; }
+  .h-center { text-align: center; }
+  h1.toc-title { font-size: 22pt; font-weight: 700; text-align: center; letter-spacing: 8px; margin: 0 0 8mm 0; }
+  .toc-line { display: flex; align-items: baseline; font-size: 11pt; line-height: 1.28; margin: 0 0 1.5pt 0; }
+  .toc-line .t { white-space: nowrap; }
+  .toc-line .dots { flex: 1; border-bottom: 1px dotted #999; margin: 0 6px 3px 6px; }
+  .toc-line .pg { white-space: nowrap; min-width: 2em; text-align: right; }
+  .toc-l1 { font-weight: 700; margin-top: 4pt; }
+  .toc-l2 { padding-left: 2em; }
+  .toc-l3 { padding-left: 4em; }
+  .sub { font-weight: 700; margin: 7pt 0 2pt 0; }
+
+  /* ===== 正文标题层级 ===== */
+  h2 { font-size: 16pt; font-weight: 700; margin: 14pt 0 8pt 0; }
+  h3 { font-size: 14pt; font-weight: 700; margin: 11pt 0 6pt 0; }
+  h4 { font-size: 12pt; font-weight: 700; margin: 9pt 0 4pt 0; }
+  .sec { page-break-before: always; }
+  h2.first { page-break-before: auto; }
+
+  /* ===== 表格 ===== */
+  table { border-collapse: collapse; width: 100%; margin: 6pt 0 10pt 0; font-size: 10.5pt; }
+  th, td { border: 1px solid #666; padding: 4px 6px; text-align: left; vertical-align: top; line-height: 1.35; }
+  th { background: #f0e9dc; font-weight: 700; }
+  td.c, th.c { text-align: center; }
+  .cap { font-size: 10.5pt; font-weight: 700; text-align: center; margin: 2pt 0 6pt 0; }
+  .tbl { page-break-inside: avoid; }
+
+  /* ===== 代码/流程框 ===== */
+  pre.flow {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10pt; line-height: 1.5; background: #f7f3ea;
+    border: 1px solid #d9cfb8; border-left: 3px solid #B0552E;
+    padding: 8px 10px; margin: 6pt 0 10pt 0; white-space: pre-wrap; page-break-inside: avoid;
+  }
+  .box {
+    border: 1px solid #c9b9a0; background: #fbf7ef; padding: 8px 12px; margin: 6pt 0 10pt 0;
+    page-break-inside: avoid;
+  }
+  /* 待回填占位框：虚线 + 赭石色，与已实现内容在视觉上明确区分 */
+  .fill { border: 1px dashed #B0552E; background: #FBF7EF; }
+  .fill .tag { color: #B0552E; font-weight: 700; }
+  td.tbd { color: #9a8b74; font-style: italic; }
+  .note { font-size: 10.5pt; color: #444; }
+  .hl { background: #f6e7d8; padding: 0 2px; }
+  .kv { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- ==================== 封面 ==================== -->
+<div class="cover" data-track="（AI+场景创新）" data-type="场 景 解 决 方 案 报 告" data-date="2026年10月10日">
+  <div class="top-title">2026年第八届</div>
+  <div class="main-title">全球校园人工智能<br>算法精英大赛</div>
+  <div class="race">算法创新赛</div>
+  <div class="kind">（AI+场景创新）</div>
+  <div class="report-type">场景解决方案报告</div>
+  <div class="meta">
+    <div><span class="k">团队名称：</span><span class="v">锻五音</span></div>
+    <div><span class="k">参赛编号：</span><span class="v">AIC-2026-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+    <div><span class="k">作品名称：</span><span class="v">弦养</span></div>
+  </div>
+  <div class="date">2026年10月10日</div>
+</div>
+
+<!-- ==================== 目录 ==================== -->
+<div class="toc">
+  <h1 class="toc-title">目&nbsp;&nbsp;录</h1>
+  <div class="toc-line toc-l1"><span class="t">作品简介</span><span class="dots"></span><span class="pg" data-toc="作品简介">3</span></div>
+  <div class="toc-line toc-l1"><span class="t">一、项目概述</span><span class="dots"></span><span class="pg" data-toc="一、项目概述">4</span></div>
+  <div class="toc-line toc-l2"><span class="t">（一）背景与意义</span><span class="dots"></span><span class="pg" data-toc="（一）背景与意义">4</span></div>
+  <div class="toc-line toc-l2"><span class="t">（二）目标定位</span><span class="dots"></span><span class="pg" data-toc="（二）目标定位">5</span></div>
+  <div class="toc-line toc-l1"><span class="t">二、需求分析</span><span class="dots"></span><span class="pg" data-toc="二、需求分析">7</span></div>
+  <div class="toc-line toc-l2"><span class="t">（一）问题剖析</span><span class="dots"></span><span class="pg" data-toc="（一）问题剖析">7</span></div>
+  <div class="toc-line toc-l2"><span class="t">（二）用户需求调研</span><span class="dots"></span><span class="pg" data-toc="（二）用户需求调研">8</span></div>
+  <div class="toc-line toc-l1"><span class="t">三、解决方案设计</span><span class="dots"></span><span class="pg" data-toc="三、解决方案设计">12</span></div>
+  <div class="toc-line toc-l2"><span class="t">（一）技术路线规划</span><span class="dots"></span><span class="pg" data-toc="（一）技术路线规划">12</span></div>
+  <div class="toc-line toc-l2"><span class="t">（二）系统架构设计</span><span class="dots"></span><span class="pg" data-toc="（二）系统架构设计">13</span></div>
+  <div class="toc-line toc-l2"><span class="t">（三）功能模块设计</span><span class="dots"></span><span class="pg" data-toc="（三）功能模块设计">15</span></div>
+  <div class="toc-line toc-l1"><span class="t">四、项目实施</span><span class="dots"></span><span class="pg" data-toc="四、项目实施">20</span></div>
+  <div class="toc-line toc-l2"><span class="t">（一）实施计划</span><span class="dots"></span><span class="pg" data-toc="（一）实施计划">20</span></div>
+  <div class="toc-line toc-l2"><span class="t">（二）技术实现</span><span class="dots"></span><span class="pg" data-toc="（二）技术实现">21</span></div>
+  <div class="toc-line toc-l2"><span class="t">（三）团队协作</span><span class="dots"></span><span class="pg" data-toc="（三）团队协作">23</span></div>
+  <div class="toc-line toc-l1"><span class="t">五、测试与验证</span><span class="dots"></span><span class="pg" data-toc="五、测试与验证">24</span></div>
+  <div class="toc-line toc-l2"><span class="t">（一）测试方案</span><span class="dots"></span><span class="pg" data-toc="（一）测试方案">24</span></div>
+  <div class="toc-line toc-l2"><span class="t">（二）验证结果</span><span class="dots"></span><span class="pg" data-toc="（二）验证结果">25</span></div>
+  <div class="toc-line toc-l1"><span class="t">六、应用效果与成果</span><span class="dots"></span><span class="pg" data-toc="六、应用效果与成果">28</span></div>
+  <div class="toc-line toc-l2"><span class="t">（一）实际应用情况</span><span class="dots"></span><span class="pg" data-toc="（一）实际应用情况">28</span></div>
+  <div class="toc-line toc-l2"><span class="t">（二）成果展示</span><span class="dots"></span><span class="pg" data-toc="（二）成果展示">28</span></div>
+  <div class="toc-line toc-l1"><span class="t">七、总结与展望</span><span class="dots"></span><span class="pg" data-toc="七、总结与展望">31</span></div>
+  <div class="toc-line toc-l2"><span class="t">（一）成果总结</span><span class="dots"></span><span class="pg" data-toc="（一）成果总结">31</span></div>
+  <div class="toc-line toc-l2"><span class="t">（二）未来展望</span><span class="dots"></span><span class="pg" data-toc="（二）未来展望">31</span></div>
+  <div class="toc-line toc-l1"><span class="t">八、附录</span><span class="dots"></span><span class="pg" data-toc="八、附录">33</span></div>
+  <div class="toc-line toc-l2"><span class="t">（一）代码与模型</span><span class="dots"></span><span class="pg" data-toc="（一）代码与模型">33</span></div>
+  <div class="toc-line toc-l2"><span class="t">（二）参考文献</span><span class="dots"></span><span class="pg" data-toc="（二）参考文献">35</span></div>
+  <div class="toc-line toc-l2"><span class="t">（三）其他材料</span><span class="dots"></span><span class="pg" data-toc="（三）其他材料">36</span></div>
+</div>
+
+<!-- ==================== 作品简介 ==================== -->
+<h2 class="first">作品简介</h2>
+<p>居家练八段锦的人最想知道「这一下做对了吗」，可现有产品只记时长热量；更关键的是，机构带练一结束，回家就没人管，练习随之中断——<em>反馈缺失</em>与<em>场景断层</em>，让最需自我照护的居家长者与久坐青年难以坚持。弦养以手机摄像头为唯一输入，端侧完成 33 点骨架提取与自研「净化—归一化—几何打分—时序互斥仲裁」四段式八式判定，经 <code>onHit</code> 契约把判定映射为古琴七弦与七弦齐鸣：动作达标即拨响琴弦，练完一套等于弹完一曲。零安装零登录零后端，断网可跑，适配弱网与私有化部署。面向「机构带练→居家延续」与校园职场久坐两片场景，以 5 人小样本配对调研验证需求与可用性，并可经同一契约接入音箱等硬件，形成可复制的「AI+民生康养」范式。</p>
+<div class="box">
+  <p style="margin:0"><span class="kv">关于本报告的数据状态（请评委先读）</span></p>
+  <p style="margin:4pt 0 0 0" class="note">本报告把内容严格分为两类，并在正文中以视觉方式区分：<strong>① 已实现、可现场复现</strong>的内容（算法、系统、测试结果）如实陈述；<strong>② 需要通过小样本试点取得</strong>的内容（用户调研统计、应用成效数据），一律以<span class="tag">【待回填】</span>虚线框或「待回填」单元格标注，并同时给出该空缺数据的<strong>采集方法、样本框与统计口径</strong>。我们<strong>不估算、不推测、不预填任何尚未测得的数值</strong>。</p>
+</div>
+
+<!-- ==================== 一、项目概述 ==================== -->
+<h2 class="sec">一、项目概述</h2>
+
+<h3>（一）背景与意义</h3>
+
+<h4>1. 场景背景：传统功法跟练的「反馈断点」</h4>
+<p>八段锦、太极等传统功法是<strong>低门槛、无器械、可居家</strong>的身心锻炼方式，长期由国家体育总局健身气功管理中心等机构推广，也在社区与养老机构的日常活动中被广泛采用。但落到「一个人在家练」这个真实场景里，现有产品几乎都只做了一件事——<em>记录练了多久</em>，却答不出用户最关心的那句：「我这一下，做对了吗？」</p>
+<p>更值得注意的是一个被产品长期忽略的<strong>场景断层</strong>：社区活动室、养老机构里有一线人员带练，有人看着、有人纠正、有同伴的氛围，练习得以持续；一旦回到家里，这套支撑结构整体消失，用户面对一块屏幕，既没有人纠正，也没有任何反馈，练习很快中断。也就是说，真正的问题不只是「缺少一个功能」，而是<strong>「机构带练」这一已被验证有效的真实场景，无法延续到居家</strong>。</p>
+<pre class="flow">机构带练（有人管、有反馈、能坚持）
+        │
+        │  ← 场景断层：支撑结构整体消失
+        ▼
+居家自练（无人管、零反馈、难坚持）
+        │
+        ▼
+中断  →  健康状况无改善  →  机构侧的干预效果也被抵消</pre>
+
+<h4>2. 问题现状与影响</h4>
+<p>这一断层的影响面并不小。国家统计局《中华人民共和国 2025 年国民经济和社会发展统计公报》显示，2025 年末我国 60 周岁及以上人口为 32338 万人，占全国人口的 <strong>23.0%</strong>；其中 65 周岁及以上人口 22365 万人，占 15.9%。这意味着「居家自我照护」已是数以亿计人群的日常刚需，而其中相当大比例的人<strong>不习惯也不愿意安装 App、注册账号、绑定手机号</strong>。</p>
+<p>问题在三个层面同时造成影响：</p>
+<table class="tbl">
+  <tr><th style="width:16%">层面</th><th>具体影响</th></tr>
+  <tr><td>对个人</td><td>练了但不知道对不对，长期用错误姿态练习，收益低、且存在不适风险；缺少正反馈导致放弃，身心状况无改善</td></tr>
+  <tr><td>对机构</td><td>机构的集中带练投入（人力、场地、课程）因居家阶段的流失而<strong>效果折损</strong>；同时缺少低成本、可复制的居家延续与随访工具</td></tr>
+  <tr><td>对社会</td><td>「积极应对人口老龄化国家战略」与「健康老龄化」倡导的<strong>居家为主</strong>的健身路径，缺少可规模化、低门槛的技术抓手</td></tr>
+</table>
+<p>与此同时，另一片看似无关的场景出现了同样的断层：校园与职场中的<strong>久坐青年</strong>，明知需要起身活动，却被「不知道做得对不对」「看不到进步」劝退，把八段锦这类轻量功法当作「老年人才练的东西」而放弃尝试。</p>
+
+<h4>3. 意义与价值：AI+场景创新的切入点</h4>
+<p>本作品的判断是：与其再造一个「健身 App」，不如<strong>给已经存在、已被验证的真实场景补上那个断点</strong>。而补断点的最有效手段，恰好是人工智能的能力——用手机摄像头这一个人人已有的传感器，把「动作做得对不对」这件事<strong>自动判出来</strong>，并且用<em>听得见</em>的方式即时告诉用户。</p>
+<ul>
+  <li><span class="kv">对个人：</span>把抽象的识别分数变成一声古琴——动作达标即拨响琴弦，用户不需要「读懂」任何技术，就能获得即时的、可记忆的正反馈；</li>
+  <li><span class="kv">对机构：</span>提供一套<strong>零安装、零登录、断网可跑、可私有化</strong>的带练与居家延续工具，把机构的干预效果延伸到居家；</li>
+  <li><span class="kv">对社会：</span>以极低的部署成本（无需专用硬件、无需后端服务器）覆盖弱网与离线的基层场景，形成可复制的「AI+民生康养」范式。</li>
+</ul>
+
+<h3>（二）目标定位</h3>
+
+<h4>1. 项目目标</h4>
+<p>弦养的目标是建成一套<strong>面向居家与传统功法场景的端侧动作反馈系统</strong>，并在真实场景中完成小样本试点验证。具体分为三层：</p>
+<table class="tbl">
+  <tr><th style="width:18%">层次</th><th>目标</th></tr>
+  <tr><td>技术目标</td><td>在手机浏览器上，用普通摄像头完成八段锦八式的实时动作判定，单帧判定 O(1)，断网可跑，原地晃动 10 秒零误触发</td></tr>
+  <tr><td>体验目标</td><td>把判定结果转译为即时听觉反馈，实现「做动作 → 听得见」，并把「做对了什么」以练习记录的形式留存在设备本地</td></tr>
+  <tr><td>场景目标</td><td>在「机构带练→居家延续」与「校园职场久坐」两片场景中，用 5 人小样本配对调研验证需求的真实性与方案的可用性，并给出可复制的落地路径</td></tr>
+</table>
+
+<h4>2. 量化目标</h4>
+<p>为避免「效果好」这类无法验证的表述，项目在立项阶段即锁定了一组<strong>可测量</strong>的目标值。技术侧目标已在本轮实现并验证（见第五章），场景侧目标将在小样本试点后回填实测值。</p>
+<table class="tbl">
+  <tr><th class="c" style="width:12%">维度</th><th style="width:30%">指标</th><th class="c" style="width:16%">目标值</th><th class="c" style="width:20%">当前状态</th></tr>
+  <tr><td class="c">可靠性</td><td>原地晃动 10 秒内的误触发次数</td><td class="c">0 次</td><td class="c">已验证通过</td></tr>
+  <tr><td class="c">可靠性</td><td>故障发生至可播放的兜底时长</td><td class="c">≤ 3 秒</td><td class="c">已验证通过</td></tr>
+  <tr><td class="c">性能</td><td>单帧判定复杂度</td><td class="c">O(1)</td><td class="c">已验证通过</td></tr>
+  <tr><td class="c">场景</td><td>首次授权至第一声琴响（TTFS）</td><td class="c">&lt; 90 秒</td><td class="tbd">待回填（试点）</td></tr>
+  <tr><td class="c">场景</td><td>五任务完成率</td><td class="c">≥ 80%</td><td class="tbd">待回填（试点）</td></tr>
+  <tr><td class="c">场景</td><td>配对意愿差值 Δ（弦养 − 静音）</td><td class="c">&gt; 0</td><td class="tbd">待回填（试点）</td></tr>
+  <tr><td class="c">场景</td><td>系统可用性量表 SUS</td><td class="c">≥ 68</td><td class="tbd">待回填（试点）</td></tr>
+</table>
+
+<h4>3. 创新场景定义（场景新颖性）</h4>
+<p>按赛题要求，此处明确本作品的场景边界与新颖性所在，并说明它<strong>不是</strong>什么。</p>
+<div class="box">
+  <p style="margin:0"><span class="kv">场景定义</span></p>
+  <p style="margin:4pt 0 0 0">弦养面向的场景是：<strong>「社区/养老机构集体带练 → 居家单独延续」的双场地闭环</strong>，以及由同一条技术链路自然延展出的<strong>校园与职场久坐青年的碎片化活动场景</strong>。</p>
+</div>
+<table class="tbl">
+  <tr><th style="width:22%">维度</th><th>说明</th></tr>
+  <tr><td>场景新颖性</td><td>不是「再造一个健身 App」，而是<strong>把机构带练中已被验证有效的「有人看着、有人纠正」这一结构，用端侧听觉反馈搬到居家场景</strong>。创新的落点在<em>场景组合与延续方式</em>，而非单纯的功能叠加</td></tr>
+  <tr><td>技术-场景适配</td><td>该场景的三个硬约束——<strong>不装 App、不注册登录、网络不稳</strong>——恰好与「端侧本地优先、零后端」的技术路线一一对应；反过来，若采用「上传云端 + 大模型逐帧纠错」路线，反而会同时踩中隐私顾虑、网络依赖与成本三条红线</td></tr>
+  <tr><td>与已有应用的差异</td><td>短视频跟练只「播」不「判」；健身 App 要求注册联网、指标是时长与热量；智能健身镜依赖专用硬件、单价高，不适合「一室多人」的机构场景；康复设备医疗属性强、合规与使用门槛高。弦养落在上述四者之间的空白处（详见第二章对比表）</td></tr>
+  <tr><td>场景的可复制性</td><td>不依赖特定硬件与网络条件，同一套网页可在手机、平板、电视大屏上打开，便于从一间活动室复制到一个社区、一个机构</td></tr>
+</table>
+
+<!-- ==================== 二、需求分析 ==================== -->
+<h2 class="sec">二、需求分析</h2>
+
+<h3>（一）问题剖析</h3>
+
+<h4>1. 场景剖析：三类目标场景</h4>
+<p>项目把「居家传统功法」这一宽泛命题收敛为三片可调研、可交付的具体场景，并区分优先级：</p>
+<table class="tbl">
+  <tr><th class="c" style="width:8%">优先级</th><th style="width:22%">场景</th><th style="width:22%">典型用户</th><th>核心诉求</th></tr>
+  <tr><td class="c"><strong>P0</strong></td><td>机构带练 → 居家延续（双场地闭环）</td><td>社区活动室、养老机构中参加集体带练的长者；一线带练人员</td><td>回家后仍能「有人管、有反馈」地练；机构希望带练效果不在居家阶段流失，并需要低成本、可复制的工具</td></tr>
+  <tr><td class="c">P0</td><td>居家独自练习</td><td>60 岁以上、独居或白天独处的长者</td><td>不会装 App、不愿注册、家里网络差；希望对错能被即时告知，不被摄像头「盯着」也有安全感</td></tr>
+  <tr><td class="c">P1</td><td>校园 / 职场久坐人群</td><td>18–35 岁学生与办公族</td><td>碎片时间起身活动；需要低门槛、不需要学习成本、有即时正反馈的轻量方案</td></tr>
+</table>
+<p class="note">说明：P1 场景并非「顺带一提」。它的价值在于<strong>用同一套技术链路验证方案的通用性</strong>——同一份端侧判定引擎，既服务长者也服务青年，这说明创新点是「场景可复制的方法」，而不是「一次性的场景定制」。</p>
+
+<h4>2. 关键难点：场景维度与技术维度</h4>
+<p>按赛题要求，从<strong>场景应用</strong>与<strong>人工智能技术</strong>两个维度拆解问题的关键难点：</p>
+<table class="tbl">
+  <tr><th style="width:14%">维度</th><th style="width:26%">难点</th><th>为什么难 / 对方案的约束</th></tr>
+  <tr><td rowspan="4" style="text-align:center"><strong>场景<br>维度</strong></td><td>老人操作门槛极低</td><td>不能要求安装、注册、登录、绑定；授权到第一声反馈必须在一分钟内完成，否则用户直接放弃</td></tr>
+  <tr><td>网络与部署条件差</td><td>机构与家庭常见弱网、甚至断网；方案不能依赖云端推理与在线服务</td></tr>
+  <tr><td>一室多人的机构场景</td><td>活动室内多人在同一空间活动，画面中人可能不止一个、可能互相遮挡；不能假设「单人独占镜头」</td></tr>
+  <tr><td>隐私顾虑与不能打扰</td><td>用户普遍不愿被摄像头「一直看着」，也不希望视频被留存；方案必须在本地完成处理，且不做诊断式表达</td></tr>
+  <tr><td rowspan="4" style="text-align:center"><strong>技术<br>维度</strong></td><td>输入质量低</td><td>手机摄像头画面存在抖动、遮挡、出画、镜像；且 MediaPipe 对「画面外/遮挡」的点会返回连续但无意义的猜测坐标（如脚踝 y≈1.55），会污染几何量</td></tr>
+  <tr><td>动作区分度低</td><td>第 5 式「摇头摆尾」与第 6 式「两手攀足」都是俯身动作，单帧几乎无法区分，必须依赖时序特征与互斥门槛</td></tr>
+  <tr><td>实时性约束</td><td>必须在手机端以 30fps 稳定运行，判定开销须与画面分辨率、人数、练习时长无关</td></tr>
+  <tr><td>抗误触发</td><td>用户站在原地晃动、调整站位时不能乱响，否则反馈会失去可信度——而反馈一旦不可信，整个方案的价值即归零</td></tr>
+</table>
+
+<h4>3. 现有解决方案的不足</h4>
+<table class="tbl">
+  <tr><th style="width:20%">现有方案</th><th style="width:26%">做到了什么</th><th>无法覆盖本场景的地方</th></tr>
+  <tr><td>短视频平台跟练</td><td>内容丰富、免费、随手可看</td><td>只「播」不「判」，没有动作反馈；节奏由视频固定，跟不上就放弃；练习本身没有任何留存</td></tr>
+  <tr><td>综合健身 App</td><td>课程体系完整、有打卡与数据</td><td>需要安装、注册、联网；指标是<strong>时长与热量</strong>而非「做对了什么」；长者学习成本高</td></tr>
+  <tr><td>智能健身镜 / 大屏</td><td>有姿态识别与动作提示</td><td>依赖专用硬件、单价高；面向单人使用，不适合「一室多人」的机构带练；不便居家延续</td></tr>
+  <tr><td>康复训练 / 医疗设备</td><td>专业性强、有评估闭环</td><td>医疗属性强，使用与合规门槛高；不适合作为普惠、日常、非诊疗的身心锻炼工具</td></tr>
+  <tr><td>纯骨架可视化 Demo</td><td>能看到关键点绘制</td><td>识别结果没有转化成用户能感知的反馈，仍然停在「看见人」这一步，闭环未合上</td></tr>
+</table>
+<p>把上述不足归拢，本场景需要的是一个<strong>同时满足五个条件</strong>的解法：<span class="hl">有即时反馈、零安装零登录、断网可跑、无需专用硬件、且能承接机构带练</span>。这五个条件共同构成了方案的设计边界。</p>
+
+<h3>（二）用户需求调研</h3>
+
+<h4>1. 调研设计与方法</h4>
+<p>受赛程与资源限制，本项目在试点阶段只能组织 <strong>3–5 人</strong>的小范围试用。为了让小样本结论仍然站得住，调研在设计上做了三点控制，并<strong>把「可以做」与「不可以做」同时写明</strong>，避免出现可信度问题：</p>
+<table class="tbl">
+  <tr><th style="width:24%">设计要点</th><th>做法与理由</th></tr>
+  <tr><td>样本量与合理性辩护</td><td>采用 Nielsen 关于可用性问题发现率的结论（<strong>5 名用户可发现约 85% 的可用性问题</strong>）作为样本量依据。这一结论的适用范围是<em>可用性问题的发现</em>，因此本轮结论<strong>只用于发现可用性问题与方向性判断，不用于宣称统计显著性</strong></td></tr>
+  <tr><td>单被试内配对（消除个体差异）</td><td>同一名受访者先后体验两种条件：<strong>A = 静音跟练</strong>（同样的画面与流程，但不发出琴声）、<strong>B = 弦养跟练</strong>（有琴声反馈）。以被试自身为对照计算配对差值 Δ，避免被「个人喜好差异」淹没信号</td></tr>
+  <tr><td>顺序平衡（消除顺序效应）</td><td>一半受访者按 A→B 顺序、一半按 B→A 顺序，以抵消学习效应与疲劳效应</td></tr>
+</table>
+<p>调研工具为一份可打印的执行册，内含：调研设计说明、样本框、主持人口播脚本、知情同意与隐私说明、<strong>需求侧问卷 A（17 题）</strong>、<strong>体验侧问卷 B（SUS 10 题 + 主观题 + NPS）</strong>、分人群访谈提纲（长者 / 机构人员 / 久坐青年）、可用性测试任务卡（T1–T5）与 A/B 配对记录表。</p>
+<div class="box">
+  <p style="margin:0"><span class="kv">四条调研红线（自我约束，随工具包一并提交）</span></p>
+  <p style="margin:4pt 0 0 0" class="note">① <strong>不编造数据</strong>——未实测的指标一律标注「待回填」；② <strong>不诱导受访者</strong>——主持人口播脚本禁止出现「你是不是觉得这样更好」类引导；③ <strong>不承诺疗效</strong>——本品为运动与音乐体验产品，不提供诊断、治疗或医疗建议；④ <strong>不露出学校信息</strong>——为符合评审公平性要求，调研过程与材料中不出现团队所在学校、院系等标识。</p>
+</div>
+
+<h4>2. 样本框与调研安排</h4>
+<p>5 名受访者按场景覆盖，并明确 <strong>S3 只做访谈、不做 A/B 任务与体验问卷</strong>，因为机构人员的身份与长者不同，其作答口径无法与体验侧量表混用：</p>
+<table class="tbl">
+  <tr><th class="c" style="width:8%">编号</th><th style="width:20%">对应场景</th><th class="c" style="width:12%">年龄段</th><th style="width:20%">身份</th><th class="c" style="width:12%">A/B 顺序</th><th>调研内容</th></tr>
+  <tr><td class="c">S1</td><td>P0 居家自练</td><td class="c">60–69</td><td>自己练</td><td class="c">A→B</td><td>问卷 A + 任务 T1–T5 + 问卷 B</td></tr>
+  <tr><td class="c">S2</td><td>P0 居家自练</td><td class="c">70 及以上</td><td>自己练</td><td class="c">B→A</td><td>问卷 A + 任务 T1–T5 + 问卷 B</td></tr>
+  <tr><td class="c">S3</td><td>P0 机构带练</td><td class="c">36–59</td><td>社区 / 机构工作人员</td><td class="c">仅访谈</td><td>访谈提纲（机构人员版）+ 问卷 A</td></tr>
+  <tr><td class="c">S4</td><td>P1 校园职场</td><td class="c">18–25</td><td>自己练</td><td class="c">A→B</td><td>问卷 A + 任务 T1–T5 + 问卷 B</td></tr>
+  <tr><td class="c">S5</td><td>P1 校园职场</td><td class="c">26–35</td><td>自己练</td><td class="c">B→A</td><td>问卷 A + 任务 T1–T5 + 问卷 B</td></tr>
+</table>
+<p>单人调研时长约 <strong>25 分钟</strong>，含：开场与知情同意（2 min）→ 问卷 A 需求侧（5 min）→ 条件 A 静音跟练（5 min）→ 条件 B 弦养跟练（5 min）→ 问卷 B 体验侧（5 min）→ 简短访谈（3 min）。</p>
+
+<h4>3. 调研结果</h4>
+<div class="box fill">
+  <p style="margin:0"><span class="tag">【待回填 · 用户需求调研结果】</span></p>
+  <p style="margin:4pt 0 0 0" class="note">本节数据需在小样本试点（S1–S5）完成后回填。回填方式：把台账 <code>弦养_试点数据台账.xlsx</code> 中录满原始作答后，运行统计脚本 <code>弦养_调研统计出图.py</code>，用其输出的<strong>「结论.md」与「指标.json」</strong>替换下表数值，并把生成的图表插入本节。<strong>未取得数据前保留「待回填」，不得估算或推测。</strong></p>
+</div>
+<table class="tbl">
+  <tr><th class="c" style="width:10%">编号</th><th style="width:30%">指标（问卷来源）</th><th class="c" style="width:16%">实测值</th><th>说明 / 统计口径</th></tr>
+  <tr><td class="c">R1</td><td>痛点强度均值（问卷 A · Q6–Q8）</td><td class="tbd">待回填</td><td>3 题 1–5 分取均值；反映「不知对错 / 无成就感 / 易放弃」的整体严重度</td></tr>
+  <tr><td class="c">R2</td><td>困扰项首选项分布（问卷 A · Q5）</td><td class="tbd">待回填</td><td>7 选项单选，报告占比最高的 1–2 项</td></tr>
+  <tr><td class="c">R3</td><td>琴声提升兴趣的比例（问卷 A · Q9–Q10）</td><td class="tbd">待回填</td><td>1–5 分量表中选 4 或 5 的人数占比</td></tr>
+  <tr><td class="c">R4</td><td>隐私顾虑比例（问卷 A · Q11）</td><td class="tbd">待回填</td><td>担心摄像头的比例，用于验证「本地处理、不上传」的必要性</td></tr>
+  <tr><td class="c">R5</td><td>免注册意愿（问卷 A · Q12）</td><td class="tbd">待回填</td><td>「不愿注册登录」的比例，用于验证零登录设计</td></tr>
+  <tr><td class="c">R6</td><td>机构侧痛点（S3 访谈）</td><td class="tbd">待回填</td><td>质性结论，抄录受访者原话作为引语</td></tr>
+</table>
+
+<h4>4. 需求归纳：功能、性能、操作三方面期望</h4>
+<p>把场景剖析与调研设计（试点后以实测结果校验）归拢，用户对方案的期望可归纳为三个层面。下表同时给出<strong>每条需求在方案中的落点</strong>，以体现「需求—设计」的对应关系，避免需求分析沦为摆设：</p>
+<table class="tbl">
+  <tr><th class="c" style="width:12%">层面</th><th style="width:34%">用户期望</th><th>在方案中的落点</th></tr>
+  <tr><td class="c">功能</td><td>练完立刻知道「这一下做对了没有」</td><td>八式判定器 + <code>onHit</code> 契约 → 达标即拨弦（第三章第（三）节）</td></tr>
+  <tr><td class="c">功能</td><td>一套练完有「完成感」，不是一个进度条</td><td>第 8 式触发<strong>七弦齐鸣</strong>，练完一套 = 弹完一曲</td></tr>
+  <tr><td class="c">功能</td><td>不知道下一步做什么时，有东西带着练</td><td>陪练教练状态机：示范 → 跟练 → 完成，未通关则重播示范</td></tr>
+  <tr><td class="c">功能</td><td>能看到自己练过什么（机构侧还需要了解居家延续情况）</td><td>本地练习记录（localStorage），零后端、不上传</td></tr>
+  <tr><td class="c">性能</td><td>不要卡、不要迟钝，手机就能跑</td><td>单帧判定 O(1)，全程端侧 WASM 推理；不依赖云端</td></tr>
+  <tr><td class="c">性能</td><td>网络不好也要能用</td><td>模型、WASM、音频全部本地化，断网可跑</td></tr>
+  <tr><td class="c">性能</td><td>站着不动时不要乱响</td><td>保持帧 + 每式锁存 + 领先幅度仲裁 + 时序硬门槛（原地晃动 10 秒零误触发）</td></tr>
+  <tr><td class="c">操作</td><td>不想安装、不想注册、不想学</td><td>手机浏览器打开网址即用，<strong>零安装、零登录</strong></td></tr>
+  <tr><td class="c">操作</td><td>怕被摄像头「看着」，怕视频外泄</td><td>关键点与画面仅在本机处理，<strong>不上传、不保存视频</strong>，可随时删除</td></tr>
+  <tr><td class="c">操作</td><td>离摄像头远一点也认得出</td><td>取景伺服引导后退取景；半身模式下髋门槛降级，保证仍可判定</td></tr>
+</table>
+
+<!-- ==================== 三、解决方案设计 ==================== -->
+<h2 class="sec">三、解决方案设计</h2>
+
+<h3>（一）技术路线规划</h3>
+
+<h4>1. 总体思路：让姿态识别的结果「听得见」</h4>
+<p>方案的总体思路可以用一句话概括：<strong>把「动作做得对不对」这项判断的结果，从视觉层搬到听觉层</strong>。八段锦有八式、古琴有七弦，二者天然同构——<em>前七式一式一弦，第八式收势七弦齐鸣</em>。于是「一次正确的动作 = 一声古琴」成立，抽象的识别分数被直接转译成即时、可记忆的听觉反馈：</p>
+<pre class="flow">动作命中  →  弦位亮起  →  古琴出声  →  用户记住「我做到了」
+                                    ↑
+                          判定：这一下做对了吗？</pre>
+<p>这条路径之所以成立，关键在于它同时解决了「反馈及时」与「操作门槛」两个约束：听觉反馈不需要用户看屏幕、不需要理解任何指标；而判定完全在端侧完成，因此不受网络与服务器制约。</p>
+
+<h4>2. 技术选型与「技术-场景」适配逻辑</h4>
+<p>赛题强调「技术或产品选型需与场景需求高度适配，避免技术与场景脱节」。本项目的每一项选型都直接对应第二章识别出的一条场景约束：</p>
+<table class="tbl">
+  <tr><th style="width:20%">选型</th><th style="width:30%">为什么选它</th><th>它解决了哪条场景约束</th></tr>
+  <tr><td>手机浏览器 H5（Vite 6 + Vue 3.5）</td><td>唯一的通用终端就是手机；网页形态免安装、免审核、免分发</td><td>老人操作门槛极低 / 一室多人可随时用任一设备打开</td></tr>
+  <tr><td>MediaPipe Tasks Vision · Pose Landmarker Lite</td><td>成熟的端侧姿态估计，可在浏览器 WASM 上实时运行</td><td>不依赖专用硬件；无需上传画面到云端</td></tr>
+  <tr><td>模型与 WASM <strong>本地化</strong>（不依赖运行时 CDN）</td><td>基层与家庭常见弱网、断网，不能假设随时能下载模型</td><td>网络与部署条件差</td></tr>
+  <tr><td><strong>几何规则判定</strong>而非端到端黑箱分类模型</td><td>八式动作有明确的人体几何先验，规则化判定<strong>可解释、可标定、可单元测试</strong>，且在低质量输入下的失效模式可被显式拦截</td><td>输入质量低 / 抗误触发 / 实时性</td></tr>
+  <tr><td>Web Audio + 古琴散音采样</td><td>无需音频文件流式加载，本地合成、延迟低</td><td>断网可用；反馈必须即时</td></tr>
+  <tr><td>localStorage 本地记录</td><td>记录不离开设备</td><td>隐私顾虑 / 零后端</td></tr>
+</table>
+<div class="box">
+  <p style="margin:0"><span class="kv">一处诚实的技术边界</span></p>
+  <p style="margin:4pt 0 0 0" class="note">本作品使用现成的姿态估计模型（MediaPipe Pose Landmarker Lite）作为<strong>感知底座</strong>；<strong>自研部分</strong>是：八式时间与姿态判定、防抖动与防重复反馈、识别到声音的事件接口、音乐阶段调度，以及产品与场景的整合。<strong>我们不声称训练了独创的基础视觉模型</strong>，也不声称本项目使用了大模型做动作理解——因为在该场景下，端侧几何判定的可解释性与实时性优于端到端黑箱方案。</p>
+</div>
+
+<h4>3. 与场景融合的路径</h4>
+<p>方案不是把技术「搬到」场景里，而是让技术链路与场景流程<strong>逐段对齐</strong>：</p>
+<pre class="flow">场景流程（机构带练 → 居家延续）
+  机构活动室：带练人员打开网页 → 投影/平板放画面 → 长者跟练
+       ↓  同一份链接、同一套判定
+  居家：长者用手机/平板打开同一网页 → 独自练
+       ↓  动作达标 → 拨弦（居家也有人「回应」）
+  记录：练习情况留在设备本地
+       ↓  下次带练时可回看（机构侧了解延续情况）</pre>
+<p>这条路径的关键设计是<strong>「同一份产物贯穿两个场地」</strong>——机构端不需要部署服务器，居家端不需要装任何东西。这正是「场景可复制」的技术前提。</p>
+
+<h3>（二）系统架构设计</h3>
+
+<h4>1. 分层架构（数据层 / 算法层 / 应用层 + 契约层）</h4>
+<p>按赛题要求以数据层、算法层、应用层的分层视图描述系统，并在其中穿插一层<strong>稳定的接口契约层</strong>——它是本架构最重要的设计决定：把「识别」与「播放」彻底解耦，使任何一层都可以独立替换。</p>
+<pre class="flow">┌ 应用层  Application
+│   跟练页 / 首页 / 练习记录 / 场景化封装（机构带练模式、居家延续模式）
+├ 契约层  Contract（全系统唯一的稳定切面）
+│   onHit(stringIndex)   1..7 = 第 1~7 弦 ；'choir' = 七弦齐鸣
+├ 算法层  Algorithm
+│   关键点净化 → 尺度归一化 → 几何特征 → 八式判定 → 时序仲裁
+│   ├ 陪练教练状态机 coach.js（纯函数 tick(dtMs)）
+│   └ 音频弧线调度 arc.js（点 / 线 / 面三阶段）
+└ 数据层  Data
+    摄像头帧 → MediaPipe 33 点关键点（含可见度）→ 净化后关键点
+    本地练习记录（localStorage，不出设备）</pre>
+<p>此外，工程上把系统的「文化内容」拆成互相隔离的四层，只通过稳定契约通信，确保<strong>文化调性不被写死进代码</strong>：</p>
+<table class="tbl">
+  <tr><th style="width:14%">层</th><th style="width:34%">职责</th><th>数字化落点</th></tr>
+  <tr><td>音层</td><td>整段一个五音基调，负责氛围</td><td>音频基调参数（五调式）</td></tr>
+  <tr><td>弦层</td><td>一至七弦，动作命中的即时声音</td><td><code>onHit(1..7)</code></td></tr>
+  <tr><td>势层</td><td>八式自身的升、降、开、合</td><td>八式动作判定器</td></tr>
+  <tr><td>解释层</td><td>文案、内容与场景叙事中的五音意象</td><td>内容数据</td></tr>
+</table>
+
+<h4>2. 端到端数据流</h4>
+<p>主链路是「一帧画面 → 一次判定 → 一声琴音」，全程在浏览器端完成：</p>
+<pre class="flow">手机摄像头画面 (MediaStream)
+   ↓
+MediaPipe Pose Landmarker Lite  ← 本地 WASM + 本地模型（不依赖 CDN）
+   ↓
+33 点人体关键点 (归一化坐标) + 33 点 3D 世界坐标 (米制，原点在髋中心)
+   ↓
+关键点净化器 createLandmarkCleaner   ← 越界剔除 / 低置信剔除 / 坐标冻结
+   ↓
+尺度归一化 & 几何特征构造            ← 以「肩宽 T」为尺度的相对量
+   ↓
+八式判定器 MoveJudge    ← 打分 → 仲裁 → 保持帧 → 锁存
+   ↓
+onHit(stringIndex)   1..7 = 第 1~7 弦 ；'choir' = 七弦齐鸣
+   ↓
+古琴音合成 + UI 状态更新 + 本地练习记录（localStorage）</pre>
+<p>主链路之外有两个旁路模块：<strong>陪练教练状态机</strong>负责调度「示范 / 跟练 / 完成」的节奏；<strong>取景伺服</strong>逐帧计算「上半身可见度 / 下半身可见度 / 取景完整度」三个真实指标，用于引导用户后退取景，并驱动半身模式的降级逻辑——这一设计直接服务于「机构活动室中人与镜头距离不确定」的真实情况。</p>
+
+<h4>3. 可扩展性与稳定性设计</h4>
+<table class="tbl">
+  <tr><th style="width:22%">设计目标</th><th>实现方式</th></tr>
+  <tr><td>可扩展（输出侧）</td><td>在事件总线后挂适配器，把 <code>onHit</code>、阶段切换、整套完成等事件经 WebSocket / HTTP 广播给外部设备（音箱、氛围灯、香薰、中控屏）——<strong>接口位已预留，尚未实现</strong></td></tr>
+  <tr><td>可扩展（输入侧）</td><td>任何新的动作来源（体感手柄、可穿戴 IMU、预录兜底）只需产出同一 <code>onHit</code> 契约即可接入，核心链路一行不改</td></tr>
+  <tr><td>可扩展（内容侧）</td><td>音/弦/势/解释四层解耦，新增拳种或调式不需要改动识别与音频代码</td></tr>
+  <tr><td>稳定性（降级）</td><td>GPU delegate 初始化失败自动退回 CPU；模型只加载一次；识别失败时可在 3 秒内切换到预录兜底，保证现场与机构场景不「翻车」</td></tr>
+  <tr><td>稳定性（半身取景）</td><td>近距离取景时髋门槛降级到 0.15，膝/踝门槛不放宽；第 5 / 6 / 8 式自动切换到纯上半身信号分支</td></tr>
+</table>
+
+<h3>（三）功能模块设计</h3>
+<p>系统由六个功能模块构成。下面逐一说明其功能、实现方式以及与其他模块的协同关系。</p>
+
+<h4>1. 感知与关键点净化模块</h4>
+<p>姿态估计采用 VIDEO 模式、单人体（numPoses=1），三个内部置信度阈值（检测 / 存在 / 跟踪）均设为 <strong>0.4</strong>——低于模型默认值，原因是真机实测中远处或暗光时关键点可见度普遍偏低（右手腕一度只有 0.47），沿用默认阈值会把真实动作整式拦掉。</p>
+<p>实测 8797 帧数据证明：关键点抖动与可见度强相关（右腕在可见度 &gt; 0.85 时抖动 0.069，可见度 &lt; 0.3 时抖动 0.202，<em>相差约 3 倍</em>）；且 MediaPipe 对「画面外 / 遮挡」的点并非返回空值，而是给出一个<strong>数学连续、物理无意义的猜测坐标</strong>（例如脚踝 y 跑到 1.55，即画面外 55%）。净化器 <code>createLandmarkCleaner</code> 因此对 12 个躯干/四肢关键点做三道处理：</p>
+<table class="tbl">
+  <tr><th class="c" style="width:6%">序</th><th style="width:22%">处理</th><th>规则与动机</th></tr>
+  <tr><td class="c">①</td><td>越界剔除</td><td>x / y 超出 [-0.005, 1.005]（略放宽，MediaPipe 边缘点会轻微越界）即判无效</td></tr>
+  <tr><td class="c">②</td><td>低置信剔除</td><td>visibility &lt; <strong>0.30</strong> 即判无效（实测该阈值以下抖动为可信帧的 3 倍）</td></tr>
+  <tr><td class="c">③</td><td>坐标冻结</td><td>无效点的坐标<strong>沿用上一帧有效值</strong>，避免几何量突变；整帧无有效点时返回 <code>null</code>，让上层跳过本帧判定</td></tr>
+</table>
+<div class="box">
+  <p style="margin:0" class="kv">设计取舍：为什么「净化而不滤波」？</p>
+  <p style="margin:4pt 0 0 0">我们<strong>刻意不做时序平滑</strong>。消融实验表明：中值 5 + EMA 0.5 可使抖动下降 42%，但真实动作的速度分量仅保留 52%，判定会明显迟钝、动作跟不上。于是选择「剔除坏点 + 冻结坐标」的净化策略，把「是否可信」交给下游的可见度门槛去判断——<strong>宁可不判，不误判</strong>。</p>
+</div>
+
+<h4>2. 八式判定与仲裁模块</h4>
+<p>八式各对应一个纯函数打分器 <code>fᵢ(p) : Landmarks → [0,1]</code>，输出为若干归一化特征的加权和。所有几何特征统一以<strong>肩宽 T</strong> 为尺度基准，从而使判定<strong>与离摄像头远近无关</strong>——这直接对应「机构活动室里每个人站位不同」的场景现实。</p>
+<p class="mono">T = max(ε, ‖ L_shoulder - R_shoulder ‖)　（ε = 1e-3，防止除零）</p>
+<p>判定遵循「<strong>硬门槛先行、加权打分为主</strong>」的原则：不满足硬门槛（如「手举过头顶」「躯干站直」）直接判 0，不进入加权，从而在源头上掐掉误判。判定状态机 <code>MoveJudge</code> 在每帧执行：</p>
+<pre class="flow">① 打分：对 8 个规则函数求值，得 sc[0..7]
+② 选最优：best = argmax(sc)
+③ 仲裁：sc[best] >= THRESHOLD(0.55)  且
+        lead = sc[best] - second >= MARGIN(0.10)
+④ 保持：命中则 counts[best]++ ，否则清零
+⑤ 锁存：counts[best] >= holdFrames(12) 且未锁存 → 触发一次并置 latched
+         （同式不再重复响；保持帧约 0.4s @30fps）</pre>
+<p>其中<strong>「保持帧」</strong>过滤骨架的瞬时抖动，<strong>「每式锁存」</strong>保证同一式不会连续狂响。系统提供两档模式：<strong>顺序模式</strong>（产品主用模式，只判定当前指定式、不做仲裁，彻底消除式间串扰）与<strong>自由模式</strong>（启用「领先幅度 MARGIN」仲裁）。</p>
+<p>两处设计直接来自真机数据，值得单列：</p>
+<ul>
+  <li><span class="kv">第 5 / 6 式的互斥设计：</span>两式都是俯身动作、单帧几乎无法区分。第 5 式主信号是<em>双手横摆幅度</em>（要求 ≥ 0.18T），第 6 式是双手<em>定点</em>下探（要求 ≤ 0.26T），二者互为硬门槛，并要求时序窗口已就绪——防止「静止的攀足」被误判成「摆动的摇头摆尾」；</li>
+  <li><span class="kv">第 7 式的镜像自适应：</span>实测 8797 帧中 <strong>95.6% 的帧</strong>呈现「左肩 x &gt; 右肩」（画面被水平镜像）。原先硬编码「左手在画面左侧」会导致第 7 式在镜像下失效，现改为<strong>从双肩实际位置推断出拳方向</strong>，与镜像/朝向无关。</li>
+</ul>
+
+<h4>3. 陪练教练调度模块</h4>
+<p>仅有判定器时，用户并不知道下一步该做什么，标准骨架在原地无限循环；而且一旦判定不命中，就会永远停在同一式。为此设计了陪练教练状态机 <code>coach.js</code>——一个<strong>纯函数</strong>（只暴露 <code>tick(dtMs)</code>，不读系统时钟、不开定时器），因此可在 Node 中做单元测试，也能在页面不可见时暂停计时。</p>
+<pre class="flow">begin(idx)
+   │
+   ▼
+ demo ── 教练示范（动一遍后停在结束姿态）
+   │ demoDone() / demoMaxMs 保底
+   ▼
+ follow ── 用户跟练：判定器武装，等做到位
+   │   ├─ hit(idx) ────────────→ done（完成）
+   │   └─ 判定闸门下每 attemptMs → nudge
+   │        （重播示范 + 轮次+1，仍留在 follow）
+   ▼
+ grace ── 宽限期：仍可命中；extend() 可延长
+   │   └─ hit / extend → follow ；graceMs 到 → advance(timeout)
+   ▼
+ done ── 极短庆祝（doneMs 后）→ advance(done) → 进入下一式</pre>
+<table class="tbl">
+  <tr><th style="width:20%">闸门</th><th>行为</th><th style="width:24%">对场景的意义</th></tr>
+  <tr><td><strong>judge</strong>（默认）</td><td><strong>判定闸门</strong>：只有判定命中才进下一式；没通关就停在这一式，每 <code>attemptMs</code> 重播一遍示范（轮次 +1）。它不是「停死」——画面一直在动、轮次可见，且保留「跳过本式」手动出口</td><td>「一个动作没做到位，就再练一次这个动作」——正是带练人员在场的价值所在</td></tr>
+  <tr><td>time</td><td><strong>计时闸门</strong>：到点自动放行，即使一直没做到位也会在硬上界内进入下一式</td><td>让新手先完整过一遍流程，降低挫败感</td></tr>
+</table>
+
+<h4>4. 多模态音频调度模块</h4>
+<p>「五音」被数字化为一张可播放的定弦频率表，前七式的命中分别触发一至七弦，第八式触发七弦齐鸣：</p>
+<table class="tbl">
+  <tr><th class="c">弦</th><th class="c">音名</th><th class="c">频率 (Hz)</th><th class="c">弦</th><th class="c">音名</th><th class="c">频率 (Hz)</th></tr>
+  <tr><td class="c">一弦</td><td class="c">宫</td><td class="c">174.61</td><td class="c">五弦</td><td class="c">羽</td><td class="c">294.66</td></tr>
+  <tr><td class="c">二弦</td><td class="c">商</td><td class="c">196.44</td><td class="c">六弦</td><td class="c">宫（高）</td><td class="c">349.23</td></tr>
+  <tr><td class="c">三弦</td><td class="c">角</td><td class="c">220.89</td><td class="c">七弦</td><td class="c">商（高）</td><td class="c">392.88</td></tr>
+  <tr><td class="c">四弦</td><td class="c">徵</td><td class="c">261.92</td><td class="c">第八式</td><td class="c">七弦齐鸣</td><td class="c">'choir'</td></tr>
+</table>
+<p>在此之上是按用户熟练度递进的三阶段音乐调度；第三阶段由弧线引擎 <code>arc.js</code> 实现，是系统中最「音乐」的一段算法：</p>
+<table class="tbl">
+  <tr><th class="c" style="width:14%">阶段</th><th class="c" style="width:10%">形态</th><th>用户感知</th></tr>
+  <tr><td class="c">一 · 学架子</td><td class="c">点</td><td>一个动作一声，用户慢它就等</td></tr>
+  <tr><td class="c">二 · 找气感</td><td class="c">线</td><td>五声短句连成一条线</td></tr>
+  <tr><td class="c">三 · 入静</td><td class="c">面</td><td>约 12 分钟连续音乐弧线</td></tr>
+</table>
+<ul>
+  <li><span class="kv">同构结构：</span>总长 <strong>720 秒</strong>，划分为 9 段（起势 → 收功）；五个调式共用<em>同一条九段结构</em>，只换「动机落音」和「低音主音」；</li>
+  <li><span class="kv">同宫系统：</span>音高集合恒为 F G A C D（简谱 1 2 3 5 6）五个音，调式只决定「谁当家」；</li>
+  <li><span class="kv">前瞻调度：</span>以 <strong>TICK_MS = 130ms</strong> 为排程检查间隔、<strong>LOOK = 2.0s</strong> 为前瞻窗口，提前把进入点落在窗口内的音符排入播放队列；</li>
+  <li><span class="kv">强度曲线：</span>段内强度随进度线性变化 <code>i(sec, u) = i₀ + (i₁ - i₀)·u</code>，配合每段的密度、音区、明暗、力度参数形成一张「情绪波形」；</li>
+  <li><span class="kv">七弦齐鸣：</span>弧线中固定存在两个齐鸣时刻 <code>CHOIRS = [630, 712]</code> 秒，与调式无关。</li>
+</ul>
+<p class="note">这一层把「文化编排」变成了可计算、可调度的数据结构，同时严格通过 <code>onHit</code> 与识别层解耦：八段锦任意一式都能在任意五音基调下练习，<strong>文化层与工程层互不绑架</strong>。</p>
+
+<h4>5. 练习记录与场景化封装模块</h4>
+<p>该模块承担「让场景闭环」的职责，也是本作品与普通健身 App 在功能定位上的分界：</p>
+<table class="tbl">
+  <tr><th style="width:22%">功能</th><th>说明</th></tr>
+  <tr><td>本地练习记录</td><td>记录完成式数、练习时长与日期，写入 localStorage。数据<strong>只在本机</strong>，无账号、无云端、无上传；无真实会话时界面显示「—」而非假数据</td></tr>
+  <tr><td>机构带练模式</td><td>投影/大屏友好的大字号与高对比展示，供活动室集体使用</td></tr>
+  <tr><td>居家延续模式</td><td>手机/平板单人手势友好的流程，授权到第一声反馈尽量短</td></tr>
+  <tr><td>记录回看</td><td>用户与带练人员可回看一段时间内的练习情况（本机可见）</td></tr>
+</table>
+<div class="box">
+  <p style="margin:0"><span class="kv">一处诚实说明</span></p>
+  <p style="margin:4pt 0 0 0" class="note">受资源所限，本轮交付的是<strong>「机构带练模式」与「居家延续模式」共用同一套核心链路的形态</strong>，两者的差异主要体现在界面与流程组织上，而非两套独立产品。机构侧的多账号汇总、随访看板等能力属于后续规划，<strong>尚未实现</strong>。</p>
+</div>
+
+<h4>6. 模块协同与事件契约</h4>
+<p>六个模块之间只通过少数稳定接口通信，其中最核心的是<strong>音频契约</strong>：</p>
+<div class="box">
+  <p style="margin:0"><span class="kv">对外最小切面 —— 音频契约</span></p>
+  <p class="mono" style="margin:4pt 0 4pt 0">onHit(stringIndex)<br>// stringIndex ∈ { 1..7 } ∪ { 'choir' }</p>
+  <p style="margin:0" class="note">识别侧只负责产出 <code>onHit</code> 事件；音频侧只消费 <code>onHit</code>，<strong>不关心动作信号从哪来</strong>（真实识别 / 预录兜底 / 手动触发可互换）。任何新的输入源或输出源只需实现同一契约即可接入，核心链路一行不改——这就是「可插拔」的工程含义，也是场景可复制、可延展的技术基础。</p>
+</div>
+<pre class="flow">摄像头帧 ─→ [感知与净化] ─→ 净化关键点
+                  ↓
+        [判定与仲裁] ──onHit──→ [音频调度] ─→ 声音
+                  ↓                  ↓
+        [陪练教练] ←──hit/advance──→ [记录与场景化]
+                  ↓
+          localStorage（本机）</pre>
+
+<h4>7. 数据合规与隐私边界</h4>
+<p>按赛题对隐私与伦理的要求，本作品的合规设计写死在架构里，而不是停留在声明上：</p>
+<table class="tbl">
+  <tr><th style="width:24%">合规要点</th><th>技术与产品实现</th></tr>
+  <tr><td>画面不出设备</td><td>姿态估计在浏览器端（本地 WASM）完成，<strong>不保存视频、不上传任何画面帧</strong></td></tr>
+  <tr><td>关键点不出设备</td><td>关键点用于当帧判定后即丢弃，仅保留聚合后的练习计数</td></tr>
+  <tr><td>无账号体系</td><td>零注册、零登录，因此<strong>不收集手机号、身份信息与设备标识</strong></td></tr>
+  <tr><td>可随时删除</td><td>练习记录在 localStorage，用户可自行清除</td></tr>
+  <tr><td>非医疗声明</td><td>界面不出现「你肝不好」等诊断式表达；五音五脏内容仅用于文化意象与编排叙事</td></tr>
+  <tr><td>调研侧合规</td><td>试点前签署知情同意与隐私说明；调研材料不出现团队所在学校信息；受访者可随时退出并删除其数据</td></tr>
+</table>
+
+<!-- ==================== 四、项目实施 ==================== -->
+<h2 class="sec">四、项目实施</h2>
+
+<h3>（一）实施计划</h3>
+
+<h4>1. 阶段划分与时间安排</h4>
+<p>项目实施按六个阶段推进。以下表格中「状态」一栏如实标注各阶段的真实进度，未完成的阶段不提前标记为已完成：</p>
+<table class="tbl">
+  <tr><th class="c" style="width:8%">阶段</th><th style="width:24%">关键任务</th><th style="width:22%">交付物</th><th class="c" style="width:14%">责任角色</th><th class="c">状态</th></tr>
+  <tr><td class="c">S0</td><td>场景调研与工具包设计（调研设计、问卷、访谈提纲、任务卡、数据台账、统计脚本）</td><td>需求调研工具包（PDF）、试点数据台账（xlsx）、统计出图脚本</td><td class="c">调研与产品</td><td class="c">已完成</td></tr>
+  <tr><td class="c">S1</td><td>端侧判定引擎：姿态接入、关键点净化、尺度归一化、八式判定、时序仲裁</td><td>判定引擎（纯函数）+ 单元测试</td><td class="c">算法</td><td class="c">已完成</td></tr>
+  <tr><td class="c">S2</td><td>帧标定：录制真实场景帧数据，标定阈值与门槛</td><td>8797 帧标定报告、参数一览</td><td class="c">算法</td><td class="c">已完成</td></tr>
+  <tr><td class="c">S3</td><td>陪练教练状态机与多模态音频调度；跟练页整合</td><td>教练状态机（纯函数）、音频弧线引擎、可演示原型</td><td class="c">算法 / 前端</td><td class="c">已完成</td></tr>
+  <tr><td class="c">S4</td><td><strong>小样本试点</strong>：S1–S5 配对调研（条件 A 静音 / 条件 B 弦养）</td><td>原始问卷与台账、统计结论与图表</td><td class="c">调研与产品</td><td class="tbd">待执行</td></tr>
+  <tr><td class="c">S5</td><td>方案回填与场景延展：按试点结论修订二、六章；评估机构版能力与硬件适配可行性</td><td>修订后的方案报告、延展路线</td><td class="c">全队</td><td class="tbd">待执行</td></tr>
+</table>
+<p class="note">时间安排说明：S0–S3 为已完成阶段，S4 试点在试点对象档期确定后启动，单人约 25 分钟，5 人合计安排在 2 个工作日内完成；S5 在数据产出后同步进行。本报告不虚构历史时间节点，仅标注阶段序号与真实状态。</p>
+
+<h4>2. 数据采集与算法标定安排</h4>
+<table class="tbl">
+  <tr><th style="width:24%">环节</th><th>具体安排</th></tr>
+  <tr><td>数据采集</td><td>在 2.2m 退后取景的真实场景下录制视频并逐帧提取关键点，共取得 <strong>8797 帧</strong>有效数据，用于抖动-可见度相关性、出画点坐标分布、镜像比例与消融实验的统计</td></tr>
+  <tr><td>预处理</td><td>关键点越界剔除、低置信剔除、坐标冻结；构建以肩宽为尺度的归一化特征序列</td></tr>
+  <tr><td>标定</td><td>依据统计结果确定净化阈值（0.30）、可见度门槛（0.35 / 半身髋 0.15 / 下肢 0.35）与帧窗口参数（45 / 12）</td></tr>
+  <tr><td>模型训练说明</td><td>本项目<strong>不训练基础视觉模型</strong>；八式判定为几何规则模型，其「参数学习」环节表现为基于真机数据的阈值标定与消融验证</td></tr>
+</table>
+
+<h4>3. 开发与部署安排</h4>
+<table class="tbl">
+  <tr><th style="width:22%">环节</th><th>安排</th></tr>
+  <tr><td>开发环境</td><td>Vite 6 + Vue 3.5 + vue-router 4；Node 内置 <code>http</code> 零依赖静态服务用于本地预览</td></tr>
+  <tr><td>构建与产物</td><td>前端构建产物入库，模型与 WASM 本地化随包交付；<strong>不依赖运行时 CDN</strong></td></tr>
+  <tr><td>部署形态</td><td>静态站点：任意静态服务器、内网服务器或本地文件服务均可承载；机构场景可私有化部署</td></tr>
+  <tr><td>场景化发布</td><td>机构端只需分享一个网址；居家端在手机浏览器打开同一网址</td></tr>
+</table>
+
+<h3>（二）技术实现</h3>
+
+<h4>1. 判定算法的关键实现</h4>
+<p>以三个代表式说明判定逻辑（完整特征与权重见附录）：</p>
+<p class="sub">① 第 1 式「双手托天理三焦」——静态姿态型</p>
+<pre class="flow">lower_raise = min(raiseL, raiseR)    okUp(1.0,1.9)    w=0.28
+avg_raise   = (raiseL + raiseR)/2    okUp(1.2,2.2)    w=0.26
+elbow_str   = (∠左肘 + ∠右肘)/360°   okUp(0.78,0.94)  w=0.24
+apart       = ‖双腕距离‖/T          okUp(1.3,2.4)    w=0.22
+
+score1 = 0.28·lower_raise + 0.26·avg_raise
+       + 0.24·elbow_str   + 0.22·apart</pre>
+<p class="sub">② 第 4 式「五劳七伤往后瞧」——需要头部朝向解算</p>
+<p>仅用「鼻 + 双眼」三点存在两个问题：正侧面转 90° 时鼻子投影不再明显；且无法区分「头在转」与「整个人在转」。因此系统取用 MediaPipe Pose 的全部头部关键点（鼻、双眼内/外眼角、双耳、双嘴角共 11 点）并结合 <strong>3D 世界坐标</strong>：耳间距的投影变化 → 侧面程度；鼻相对双耳中点的偏移 → 头部朝向；眼/口连线与双耳连线的夹角 → 头部 yaw。当 3D 数据不可用时，相关式子直接判 0，避免用不可靠的 2D 投影硬判。</p>
+<p class="sub">③ 第 8 式「背后七颠百病消」——时序型 + 下肢降级</p>
+<p>主信号是躯干中点在滑动窗口内的<strong>垂直起伏幅度</strong>（<code>__bob</code>，权重 0.46）。当膝/踝不可用（近距离半身取景）时，自动切换到「双臂下垂 + 躯干竖直 + 躯干规律起伏」的纯上半身分支，保证在机构活动室的近距取景下仍可判定。</p>
+
+<h4>2. 工程实现与工具链</h4>
+<table class="tbl">
+  <tr><th style="width:22%">类别</th><th>选型与用途</th></tr>
+  <tr><td>前端工程</td><td>Vite 6 + Vue 3.5 + vue-router 4</td></tr>
+  <tr><td>姿态识别</td><td>@mediapipe/tasks-vision · Pose Landmarker Lite（33 点关键点 + 3D 世界坐标）</td></tr>
+  <tr><td>模型 / WASM</td><td>本地 <code>pose_landmarker_lite.task</code>（约 5.5MB）与本地推理 WASM，<strong>不依赖运行时 CDN</strong></td></tr>
+  <tr><td>动作判定</td><td>关节角度 + 关键点相对关系 + 保持帧（约 300–500ms）+ 每式锁存（纯函数，不依赖 Vue/DOM）</td></tr>
+  <tr><td>音频</td><td>Web Audio + 真实古琴散音采样</td></tr>
+  <tr><td>存储</td><td>localStorage 本地打卡记录，读写均做容错</td></tr>
+  <tr><td>测试</td><td>Node 原生测试脚本（纯函数可在 Node 直接跑）；端到端以无头浏览器驱动</td></tr>
+  <tr><td>文档与出图</td><td>调研统计脚本用 Python 实现（openpyxl 读台账 + Pillow 自绘图表），不依赖第三方绘图库与联网</td></tr>
+</table>
+
+<h4>3. 关键技术难点及解决措施</h4>
+<table class="tbl">
+  <tr><th style="width:26%">难点</th><th style="width:30%">现象</th><th>解决措施</th></tr>
+  <tr><td>出画关键点污染几何量</td><td>脚踝可见度 0.02，却返回 y≈1.55 的猜测坐标</td><td>越界 + 低置信剔除，坐标冻结；下肢门槛一律不放宽，改用上半身信号</td></tr>
+  <tr><td>抖动与可见度强相关</td><td>低可见度帧抖动为可信帧约 3 倍</td><td>净化阈值取 0.30；放弃时序平滑（会牺牲 48% 的动作速度分量）</td></tr>
+  <tr><td>画面镜像导致朝向判断失效</td><td>95.6% 的帧「左肩 x &gt; 右肩」</td><td>第 7 式出拳方向自适应，丢弃硬编码</td></tr>
+  <tr><td>俯身动作单帧不可分</td><td>第 5 / 6 式单帧特征几乎重合</td><td>引入滑动窗口时序特征 + 互斥硬门槛 + 窗口就绪判定</td></tr>
+  <tr><td>跟练不命中时卡死</td><td>用户做不对就永远停在同一式</td><td>陪练教练状态机：判定闸门下按 <code>attemptMs</code> 重播示范，并保留跳过出口</td></tr>
+  <tr><td>近距取景下肢不可用</td><td>机构活动室中人与镜头距离受限</td><td>半身模式髋门槛降级到 0.15；第 5 / 6 / 8 式切换纯上半身分支</td></tr>
+</table>
+
+<h3>（三）团队协作</h3>
+
+<h4>1. 成员专业背景与分工</h4>
+<p>本项目为<strong>跨专业组队</strong>，覆盖算法、前端工程、音乐与内容、产品与调研、测试与验收五个方向。下表按角色说明专业背景与分工：</p>
+<table class="tbl">
+  <tr><th class="c" style="width:8%">序</th><th style="width:18%">角色</th><th style="width:26%">专业背景方向</th><th>主要职责</th></tr>
+  <tr><td class="c">1</td><td>队长 / 算法负责人</td><td>计算机 / 人工智能相关</td><td>整体技术路线、姿态识别与判定算法、阈值标定与消融实验</td></tr>
+  <tr><td class="c">2</td><td>前端工程</td><td>软件工程 / 数字媒体相关</td><td>跟练页与场景化界面、端侧集成、构建与部署、性能优化</td></tr>
+  <tr><td class="c">3</td><td>音乐与内容</td><td>音乐 / 艺术相关</td><td>五音定弦与调式设计、音频弧线编排、古琴音色与赏听素材整理</td></tr>
+  <tr><td class="c">4</td><td>产品与调研</td><td>设计 / 社会学 / 公共管理相关</td><td>场景定义与优先级、调研工具包设计与执行、试点组织与数据统计</td></tr>
+  <tr><td class="c">5</td><td>测试与验收</td><td>质量 / 测试相关</td><td>测试方案与用例、单元与端到端测试执行、验收门槛核对</td></tr>
+</table>
+<div class="box fill">
+  <p style="margin:0"><span class="tag">【待填写 · 成员信息】</span></p>
+  <p style="margin:4pt 0 0 0" class="note">上表给出的是角色与分工框架。正式提交前请按实际情况补充每位成员的姓名与所在专业（<strong>按赛规公平性要求，正文与佐证材料中不出现学校、院系等标识信息</strong>）。姓名可另附于报名信息表，本报告正文保持匿名。</p>
+</div>
+
+<h4>2. 协作机制</h4>
+<table class="tbl">
+  <tr><th style="width:22%">协作维度</th><th>机制</th></tr>
+  <tr><td>代码与版本</td><td>统一代码仓 + 分支协作；构建产物与源码分离管理；关键改动需通过测试脚本后方可合并</td></tr>
+  <tr><td>跨学科对齐</td><td>算法侧与音乐侧以「契约」沟通：算法只产出 <code>onHit(1..7|choir)</code>，音乐侧只消费该事件——用接口代替术语，避免专业语言不一致造成的返工</td></tr>
+  <tr><td>测试驱动</td><td>判定器与教练状态机均为纯函数，改动后可直接跑单元测试；端到端用无头浏览器脚本做「不跳式」等行为断言</td></tr>
+  <tr><td>场景验证</td><td>调研与算法通过台账字段对齐（每个调研问题映射到一个方案指标），确保「调研所得」能直接指导「方案修改」</td></tr>
+  <tr><td>诚实边界约定</td><td>全队约定：不把「规划」讲成「已完成」、不宣称未验证的合作与数据、不冒称自研基础模型</td></tr>
+</table>
+
+<!-- ==================== 五、测试与验证 ==================== -->
+<h2 class="sec">五、测试与验证</h2>
+
+<h3>（一）测试方案</h3>
+
+<h4>1. 功能测试</h4>
+<p>判定器与 Vue / DOM / MediaPipe 完全解耦，是纯函数，因此可用 Node 直接做单元测试：</p>
+<table class="tbl">
+  <tr><th style="width:26%">测试组</th><th>内容</th></tr>
+  <tr><td>正例（八式全通）</td><td>构造八式的标准姿态序列，验证每一式都能在保持帧内命中</td></tr>
+  <tr><td>盲测 / 互斥</td><td>验证式间不会互相误触发（式 2↔式 7、式 5↔式 6）</td></tr>
+  <tr><td>消融</td><td>逐项关闭特征，观察得分变化，确认各特征均有效</td></tr>
+  <tr><td>复杂度定级</td><td>确认单帧判定为常数级</td></tr>
+  <tr><td>半身模式髋降级</td><td>全身模式 + 髋 vis=0.20 → 判 0（保持旧行为）；半身模式 + 髋 vis=0.20 → 可判；髋 vis=0.05（真出画）→ 仍判 0；膝/踝门槛不因半身模式放宽</td></tr>
+</table>
+
+<h4>2. 性能测试</h4>
+<table class="tbl">
+  <tr><th style="width:26%">环节</th><th class="c" style="width:20%">时间复杂度</th><th>说明</th></tr>
+  <tr><td>关键点净化</td><td class="c mono">O(K)，K=12</td><td>固定 12 个点，常数级</td></tr>
+  <tr><td>八式打分</td><td class="c mono">O(N)，N=8</td><td>每式固定数量特征，与人数/画面无关</td></tr>
+  <tr><td>时序特征更新</td><td class="c mono">O(W)，W=45</td><td>滑动窗口仅入队/出队；极值用窗口内常数扫描</td></tr>
+  <tr><td>仲裁与锁存</td><td class="c mono">O(N)</td><td>一次求最值与次最值</td></tr>
+  <tr><td><strong>单帧合计</strong></td><td class="c mono"><strong>O(1)</strong></td><td>与画面分辨率、人体数量、练习时长均无关</td></tr>
+</table>
+<p>内存方面，判定器仅维护 4 个长度为 45 的窗口数组与若干计数器，占用为常数级；模型推理开销由 MediaPipe 承担（本地 WASM，约 5.5MB 模型）。</p>
+
+<h4>3. 可靠性测试</h4>
+<table class="tbl">
+  <tr><th class="c" style="width:10%">编号</th><th style="width:26%">验收项</th><th>通过条件</th></tr>
+  <tr><td class="c">D1</td><td>双手托天</td><td>现场做一次，听到对应琴响</td></tr>
+  <tr><td class="c">D2</td><td>八式映射</td><td>1–7 式对应弦正确，第 8 式七弦齐鸣</td></tr>
+  <tr><td class="c">D3</td><td>全链路</td><td>选式 → 跟练 → 识别 → 拨弦 → 记录贯通</td></tr>
+  <tr><td class="c">D5</td><td>断网</td><td>断网后核心流程仍成立</td></tr>
+  <tr><td class="c">D7</td><td>抗误触</td><td>原地晃动 10 秒不乱响</td></tr>
+  <tr><td class="c">D8</td><td>兜底时长</td><td>故障发生至可播放 ≤ 3 秒</td></tr>
+</table>
+
+<h4>4. 场景可用性测试（A/B 配对）</h4>
+<p>这是本项目<strong>面向场景</strong>的核心测试，用于回答「听觉反馈到底有没有用」这个问题。设计与第二章调研方法一致：</p>
+<table class="tbl">
+  <tr><th style="width:22%">要素</th><th>设计</th></tr>
+  <tr><td>自变量</td><td>A = 静音跟练（同样的画面与流程，不发出琴声）；B = 弦养跟练（有琴声反馈）</td></tr>
+  <tr><td>被试内配对</td><td>同一名受访者先后体验 A 与 B，以自身为对照计算 Δ = B − A</td></tr>
+  <tr><td>顺序平衡</td><td>一半受访者 A→B，一半 B→A，抵消学习与疲劳效应</td></tr>
+  <tr><td>任务</td><td>T1 打开摄像头并授权 / T2 找到入口并选式 / T3 双手托天至第一声琴响 / T4 完成第 2–3 式 / T5 查看练习记录</td></tr>
+  <tr><td>观测指标</td><td>TTFS（授权至第一声琴响）、五任务完成率、A/B 时长、主动重做次数、看屏次数、现场重做意愿（1–5）、问卷 B 主观回溯自评</td></tr>
+  <tr><td>Δ 的双口径</td><td>口径一：现场 A/B 重做意愿之差（主定义）；口径二：问卷 B 中 B1−B2 的回溯自评之差。两个口径<strong>都计算并要求同向</strong>，若不一致则如实说明而不择一取用</td></tr>
+</table>
+
+<h3>（二）验证结果</h3>
+
+<h4>1. 算法与功能验证结果</h4>
+<p>以下结果均为本轮已实现并通过验证的内容，可由测试脚本复现。</p>
+<table class="tbl">
+  <tr><th style="width:34%">脚本 / 门槛</th><th>覆盖内容</th></tr>
+  <tr><td><code>judge.test.mjs</code></td><td>八式判定器：正例 / 盲测 / 消融 / 复杂度定级 / 半身模式</td></tr>
+  <tr><td><code>coach.test.mjs</code>（26 项）</td><td>教练状态机的两档闸门、超时、重播、宽限</td></tr>
+  <tr><td><code>roomFigure.test.mjs</code>（10 项）</td><td>小窗教练形象姿态解算保真（2730 个数值 0 处不一致）</td></tr>
+  <tr><td><code>e2e-coach-judge.cjs</code>（21 项）</td><td>端到端：跟练推进不跳式；并以「计时闸门」档作反证对照</td></tr>
+</table>
+
+<h4>2. 真机数据驱动的阈值标定与端到端验收结果</h4>
+<p>在 2.2m 退后取景的真实场景下录制 <strong>8797 帧</strong>，得到以下关键标定依据，并全部已落地为算法参数：</p>
+<table class="tbl">
+  <tr><th style="width:28%">观测</th><th>数据</th><th style="width:28%">对算法的指导</th></tr>
+  <tr><td>抖动-可见度相关性</td><td>右腕 vis&gt;0.85 抖动 0.069；vis&lt;0.3 抖动 0.202（约 3×）</td><td>净化阈值取 0.30</td></tr>
+  <tr><td>出画点坐标</td><td>脚踝可见度约 0.02，但返回 y≈1.55 的猜测坐标</td><td>下肢门槛不放宽；改用上半身信号</td></tr>
+  <tr><td>画面镜像比例</td><td>95.6% 的帧「左肩 x &gt; 右肩」</td><td>第 7 式出拳方向自适应，丢弃硬编码</td></tr>
+  <tr><td>滤波消融</td><td>中值 5 + EMA 0.5：抖动 ↓42%，真实动作速度仅保留 52%</td><td>放弃时序平滑，改「净化不滤波」</td></tr>
+  <tr><td>右腕低置信值</td><td>深色物体 / 运动模糊时仅 0.47</td><td>可见度门槛由 0.5 降到 0.35</td></tr>
+</table>
+<p>端到端验收（D1–D8）中，可靠性与性能类门槛（原地晃动 10 秒零误触发、故障至可播放 ≤ 3 秒、单帧 O(1)、断网可跑）均已通过；场景类门槛（TTFS、任务完成率、Δ、SUS、NPS）待小样本试点后回填。</p>
+
+<h4>3. 场景可用性结果</h4>
+<div class="box fill">
+  <p style="margin:0"><span class="tag">【待回填 · 场景可用性验证结果】</span></p>
+  <p style="margin:4pt 0 0 0" class="note">本节的数值需在 S1–S5 试点完成后，由统计脚本 <code>弦养_调研统计出图.py</code> 输出后回填。回填时须同时保留两个 Δ 口径的结果，并说明两者是否同向；若出现「有受访者中途退出」等情况，须如实记录有效样本数（N）与实际录入数据人数。</p>
+</div>
+<table class="tbl">
+  <tr><th class="c" style="width:10%">编号</th><th style="width:32%">验证项</th><th class="c" style="width:16%">实测结果</th><th>判定标准 / 说明</th></tr>
+  <tr><td class="c">V1</td><td>首次授权至第一声琴响 TTFS</td><td class="tbd">待回填</td><td>中位数与最慢值均需报告；目标 &lt; 90 秒</td></tr>
+  <tr><td class="c">V2</td><td>五任务完成率（T1–T5）</td><td class="tbd">待回填</td><td>逐任务给出「独立完成 / 需协助 / 未完成」分布；目标总体 ≥ 80%</td></tr>
+  <tr><td class="c">V3</td><td>配对差值 Δ（现场重做意愿，主口径）</td><td class="tbd">待回填</td><td>Δ &gt; 0 说明听觉反馈正向；同时报告中位数以免被极端值拉偏</td></tr>
+  <tr><td class="c">V4</td><td>配对差值 Δ（问卷 B 回溯自评，口径二）</td><td class="tbd">待回填</td><td>须与 V3 同向；不同向时如实说明并分析原因</td></tr>
+  <tr><td class="c">V5</td><td>系统可用性量表 SUS</td><td class="tbd">待回填</td><td>0–100 分，基准 68；按 Brooke (1996) 标准计分（奇数题减 1、偶数题取 5 减）</td></tr>
+  <tr><td class="c">V6</td><td>净推荐值 NPS</td><td class="tbd">待回填</td><td>推荐者(9–10) 占比 − 贬损者(0–6) 占比；目标 ≥ 0</td></tr>
+  <tr><td class="c">V7</td><td>A/B 时长差与主动重做次数差</td><td class="tbd">待回填</td><td>作为行为层的补充证据，与意愿层结论相互印证</td></tr>
+  <tr><td class="c">V8</td><td>看屏次数差（A − B）</td><td class="tbd">待回填</td><td>若 B 条件看屏更少，可支撑「听觉反馈降低视觉依赖」这一论点</td></tr>
+</table>
+
+<h4>4. 问题分析与改进措施</h4>
+<table class="tbl">
+  <tr><th style="width:26%">已识别问题</th><th style="width:22%">影响</th><th>改进措施与状态</th></tr>
+  <tr><td>低可见度帧抖动大</td><td>判定忽高忽低</td><td>净化阈值 0.30 + 坐标冻结；<strong>已解决</strong></td></tr>
+  <tr><td>出画点返回猜测坐标</td><td>几何量被污染</td><td>越界剔除、下肢门槛不放宽；<strong>已解决</strong></td></tr>
+  <tr><td>横向镜像导致朝向误判</td><td>第 7 式失效</td><td>出拳方向自适应；<strong>已解决</strong></td></tr>
+  <tr><td>俯身两式易互串</td><td>误触发</td><td>时序特征 + 互斥硬门槛；<strong>已解决</strong></td></tr>
+  <tr><td>老年人操作路径仍偏长</td><td>TTFS 可能超出预期</td><td>拟依据试点 T1–T2 的实际卡点简化入口与授权引导；<strong>待试点结论后实施</strong></td></tr>
+  <tr><td>五禽戏、太极暂无可用形象素材</td><td>延展拳种不可演示</td><td>当前版本<strong>只交付八段锦可跑闭环</strong>；其他拳种的素材随包状态需如实标注，不宣称已上线；<strong>待补齐</strong></td></tr>
+</table>
+
+<!-- ==================== 六、应用效果与成果 ==================== -->
+<h2 class="sec">六、应用效果与成果</h2>
+
+<h3>（一）实际应用情况</h3>
+
+<h4>1. 试点范围、对象与方式</h4>
+<table class="tbl">
+  <tr><th style="width:18%">维度</th><th>说明</th></tr>
+  <tr><td>应用范围</td><td>覆盖 P0 两片场景（机构带练 → 居家延续；居家独自练习）与 P1 延展场景（校园职场久坐），共 5 名受访者</td></tr>
+  <tr><td>应用对象</td><td>S1/S2 居家长者、S3 社区或机构工作人员（仅访谈）、S4/S5 久坐青年</td></tr>
+  <tr><td>应用方式</td><td>在同一台设备上依次完成条件 A（静音）与条件 B（弦养），全程录音/记录由主持人按任务卡执行；数据录入统一台账并集中统计</td></tr>
+  <tr><td>场景落地条件</td><td>只需一部带摄像头的手机或平板 + 一个网址；无需专用硬件、无需安装、无需服务器</td></tr>
+  <tr><td>机构推广条件</td><td>活动室已有的投影/大屏可直接承载画面；带练人员无需培训即可操作</td></tr>
+</table>
+<p class="note">需要说明的是：本项目<strong>尚未与任何机构建立正式合作</strong>，因此本节只描述试点范围与方式，不宣称既有合作或已部署的机构名单。</p>
+
+<h4>2. 典型应用案例</h4>
+<div class="box fill">
+  <p style="margin:0"><span class="tag">【待回填 · 典型应用案例】</span></p>
+  <p style="margin:4pt 0 0 0" class="note">试点完成后，从 S1–S5 中选取 1–2 例写出案例叙述，建议包含：受访者画像（去标识化）、当时的具体困难、使用弦养的过程、可观察到的变化、受访者原话引语。<strong>引语须为原话，不做转述与润色。</strong></p>
+</div>
+
+<h3>（二）成果展示</h3>
+
+<h4>1. 技术成果</h4>
+<table class="tbl">
+  <tr><th style="width:26%">成果</th><th>内容与证据</th></tr>
+  <tr><td>可现场演示的端到端原型</td><td>手机浏览器打开即用；完成「授权 → 选式 → 跟练 → 拨弦 → 记录」全链路，可在评审现场按 D1–D8 复核</td></tr>
+  <tr><td>自研八式判定算法</td><td>「净化 — 归一化 — 几何打分 — 时序互斥仲裁」四段式；含保持帧、每式锁存、硬门槛与降级分支</td></tr>
+  <tr><td>真机数据标定结论</td><td>基于 8797 帧的抖动-可见度相关性、出画点分布、镜像比例与消融实验，结论已全部落地为参数</td></tr>
+  <tr><td>事件契约与可插拔架构</td><td><code>onHit(1..7|choir)</code> 契约；音 / 弦 / 势 / 解释四层解耦；输入输出设备可替换</td></tr>
+  <tr><td>音乐调度引擎</td><td>五音定弦频率表 + 点/线/面三阶段 + 720 秒九段弧线调度（含两处七弦齐鸣时刻）</td></tr>
+  <tr><td>调研方法学产物</td><td>需求调研工具包（11 页执行册）、试点数据台账（4 表含自动公式）、统计出图脚本（输出结论与图表）</td></tr>
+</table>
+<p class="note">诚实边界：上述均为<strong>已实现且可复现</strong>的成果。本作品<strong>没有</strong>训练独创的基础视觉模型，<strong>没有</strong>已发表论文或已授权专利（附录中如实标注），也<strong>没有</strong>已部署的机构合作案例。</p>
+
+<h4>2. 量化成效</h4>
+<div class="box fill">
+  <p style="margin:0"><span class="tag">【待回填 · 量化成效数据】</span></p>
+  <p style="margin:4pt 0 0 0" class="note">本节为「应用效果（15 分）」的核心得分区，须在小样本试点后由统计脚本输出回填。<strong>未测得前保留「待回填」。</strong></p>
+</div>
+<table class="tbl">
+  <tr><th class="c" style="width:10%">编号</th><th style="width:30%">成效指标</th><th class="c" style="width:16%">实测值</th><th>与预期的对比</th></tr>
+  <tr><td class="c">E1</td><td>听觉反馈相对静音的配对意愿提升 Δ</td><td class="tbd">待回填</td><td>预期 Δ &gt; 0</td></tr>
+  <tr><td class="c">E2</td><td>任务完成率（相对 80% 目标）</td><td class="tbd">待回填</td><td>预期 ≥ 80%</td></tr>
+  <tr><td class="c">E3</td><td>SUS 可用性得分（相对基准 68）</td><td class="tbd">待回填</td><td>预期 ≥ 68</td></tr>
+  <tr><td class="c">E4</td><td>NPS 净推荐值</td><td class="tbd">待回填</td><td>预期 ≥ 0</td></tr>
+  <tr><td class="c">E5</td><td>痛点强度均值下降幅度（若可获得前后对比）</td><td class="tbd">待回填</td><td>作为「解决实际问题」的支撑证据</td></tr>
+</table>
+
+<h4>3. 用户反馈评价</h4>
+<div class="box fill">
+  <p style="margin:0"><span class="tag">【待回填 · 用户反馈原话】</span></p>
+  <p style="margin:4pt 0 0 0" class="note">回填受访者对「最有价值的一点 / 最想改的一点」的原话，按长者、机构人员、久坐青年分组。<strong>只摘录原话，不加工、不夸大；负面反馈同样保留</strong>——负面反馈恰恰是「问题分析与改进措施」的依据。</p>
+</div>
+
+<h4>4. 社会效益与商业潜力</h4>
+<table class="tbl">
+  <tr><th style="width:18%">维度</th><th>说明（区分「已具备的能力」与「待验证的假设」）</th></tr>
+  <tr><td>社会效益</td><td><strong>已具备：</strong>方案对用户零成本、对机构零硬件投入、对网络条件零依赖，可在基层场景直接使用；把「专业带练」的效果延展到居家，有助于提升居家自我照护的可持续性。这部分社会效益由方案形态本身决定，不依赖商业验证</td></tr>
+  <tr><td>可复制性</td><td><strong>已具备：</strong>一套静态产物可复制到任意社区与机构；新增拳种/调式不改变核心链路</td></tr>
+  <tr><td>商业潜力</td><td><strong>待验证假设：</strong>基础跟练免费；未来可探索音乐内容、课程与团体活动服务的付费意愿。目前<strong>无收入证据，不写盈利承诺</strong></td></tr>
+  <tr><td>延展方向</td><td><strong>已预留接口、尚未实现：</strong>输出侧可接智能音箱、氛围灯、香薰与中控屏；输入侧可接体感手柄、可穿戴 IMU。以适配层实现同一 <code>onHit</code> 契约即可接入</td></tr>
+</table>
+
+<!-- ==================== 七、总结与展望 ==================== -->
+<h2 class="sec">七、总结与展望</h2>
+
+<h3>（一）成果总结</h3>
+<p>本项目围绕「居家传统功法跟练缺反馈、机构带练无法延续到居家」这一真实场景断点，完成了一件可现场演示的端侧系统，其核心成果可归纳为四点：</p>
+<ul>
+  <li><span class="kv">场景层：</span>把宽泛的「居家健身」收敛为<strong>「机构带练 → 居家延续」双场地闭环 + 校园职场久坐延展</strong>三片可调研、可交付的具体场景，并明确了方案需同时满足的五个设计条件；</li>
+  <li><span class="kv">技术层：</span>自研四段式八式动作判定算法，并以真机 8797 帧数据完成阈值标定；在低质量输入下实现「宁可不判，不误判」，原地晃动 10 秒零误触发；</li>
+  <li><span class="kv">体验层：</span>把判定结果转译为古琴七弦与七弦齐鸣，形成「做动作 → 听得见」的即时听觉反馈闭环，练完一套等于弹完一曲，反馈即完成感；</li>
+  <li><span class="kv">方法层：</span>沉淀出一套可复用的小样本调研方法学（Nielsen 5 人依据 + 单被试内配对 + 顺序平衡 + 双口径 Δ）与配套工具（执行册、台账、统计脚本），使小样本结论也具备可辩护的严谨性。</li>
+</ul>
+<p>实施过程中的关键突破在于两次「用数据改设计」：一是用抖动-可见度相关性把净化阈值定为 0.30，并<strong>因此放弃看起来更「高级」的时序滤波</strong>（它会牺牲 48% 的动作速度分量）；二是用 95.6% 的镜像比例推翻第 7 式的硬编码朝向假设。这两次都说明，在本场景下<strong>可解释的几何判定 + 真机标定</strong>比堆叠复杂模型更有效。</p>
+<p class="note">同时我们也如实说明当前的不足：小样本试点尚未执行，因此需求验证与应用成效的实测数据仍为「待回填」；五禽戏、太极等延展拳种的可用形象素材尚未随包交付，当前只交付八段锦的可跑闭环；机构侧的多账号与随访看板属规划内容，尚未实现。</p>
+
+<h3>（二）未来展望</h3>
+<table class="tbl">
+  <tr><th class="c" style="width:10%">优先级</th><th style="width:26%">方向</th><th>具体规划</th></tr>
+  <tr><td class="c">P0</td><td>完成小样本试点并回填数据</td><td>按工具包执行 S1–S5，产出需求验证与可用性数据，回填本报告第二、五、六章的「待回填」项，并据结论修订操作路径（重点解决长者操作路径偏长的问题）</td></tr>
+  <tr><td class="c">P0</td><td>扩充功法覆盖</td><td>补齐五禽戏、太极等拳种的形象素材与判定规则，使「延展拳种」从规划变为可演示；同步修正各拳种在首页与跟练页的素材状态口径，避免出现「主壳说未交付、内部说已上线」这类自相矛盾的标注</td></tr>
+  <tr><td class="c">P1</td><td>机构侧能力</td><td>在保持零后端的前提下，探索机构内网部署的轻量汇总方案（如局域网内的练习看板），并明确其数据边界</td></tr>
+  <tr><td class="c">P1</td><td>个体化适配</td><td>引入可选的身体数据（身高、活动能力）以调整判定容差与节奏，使方案对高龄、行动不便人群更友好；所有个体化处理仍在本机完成</td></tr>
+  <tr><td class="c">P2</td><td>硬件与生态延展</td><td>基于已预留的 <code>onHit</code> 适配层，接入智能音箱、氛围灯、香薰等输出设备与体感手柄、可穿戴 IMU 等输入设备，把「听得见」扩展为「听得见 + 感受得到」</td></tr>
+  <tr><td class="c">P2</td><td>学术与规范</td><td>在数据规模扩大后，开展更大样本的对照研究以检验听觉反馈对练习依从性的影响；同步完善非医疗产品的表述规范与调研伦理流程</td></tr>
+</table>
+<p>从更长的时间尺度看，本作品的价值不在于「做了一个八段锦 App」，而在于验证了一条可复制的路径：<strong>用端侧感知把「专业场景里的支撑结构」（如带练人员的纠正与监督）低成本地搬到「非专业场景」（居家），并以不增加用户负担的反馈形式维系它</strong>。这条路径可以迁移到更多「有专业指导、但难以居家延续」的民生场景——这正是「人工智能 + 民生」在场景创新层面的价值所在。</p>
+
+<!-- ==================== 八、附录 ==================== -->
+<h2 class="sec">八、附录</h2>
+
+<h3>（一）代码与模型</h3>
+<p class="sub">1. 核心算法代码片段</p>
+<p>判定器与教练状态机均为纯函数，不依赖框架与 DOM，因此可独立测试与复用。以下为关键接口与逻辑片段（详细实现随佐证材料提交）：</p>
+<pre class="flow">// ── 事件契约：全系统唯一的稳定切面（识别 → 音频）────────────────
+// stringIndex ∈ { 1,2,3,4,5,6,7 } ∪ { 'choir' }
+// 识别侧只产出该事件；音频侧只消费该事件，不关心信号来源
+export function emitHit(stringIndex) {
+  // 1..7 = 第 1~7 弦；'choir' = 七弦齐鸣
+}
+
+// ── 关键点净化器：越界剔除 / 低置信剔除 / 坐标冻结 ────────────────
+export function createLandmarkCleaner(prev) {
+  // ① x/y 超出 [-0.005, 1.005] → 无效
+  // ② visibility < LOW_VIS(0.30) → 无效
+  // ③ 无效点沿用 prev 坐标；整帧无有效点 → 返回 null
+}
+
+// ── 尺度归一化：以肩宽 T 为基准，使判定与离摄像头远近无关 ─────────
+const T = Math.max(1e-3, dist(L_shoulder, R_shoulder))
+
+// ── 判定状态机：打分 → 仲裁 → 保持 → 锁存 ────────────────────────
+// ① sc[i] = f_i(landmarks)  i = 0..7
+// ② best = argmax(sc)
+// ③ 若 sc[best] < THRESHOLD(0.55)
+//    或 sc[best]-second < MARGIN(0.10) → 不命中
+// ④ 命中 counts[best]++ ，否则清零
+// ⑤ counts[best] >= holdFrames(12) 且未锁存 → 触发一次
+
+// ── 教练状态机：纯函数，只暴露 tick(dtMs) ────────────────────────
+// demo → follow →(hit) done → advance；判定闸门下每 attemptMs 重播示范
+export function tick(dtMs) { /* 纯函数：不读系统时钟、不开定时器 */ }
+
+// ── 硬度门槛示例：第 5 / 6 式互斥（防止俯身动作互串）──────────────
+// 第 5 式（摇头摆尾）要求 __handSwing >= 0.18T
+// 第 6 式（两手攀足）要求 __handSwing <= 0.26T
+// 两者共同要求时序窗口已就绪（__ready），否则判 0</pre>
+<p>调研侧的统计与出图脚本同样随佐证材料提交，其核心逻辑为：读取台账 → 按表头名取值（避免列序变化导致错位）→ 计算五项指标（痛点均值、任务完成率、TTFS、配对差值 Δ、SUS/NPS）→ 输出结论文件与图表；对空数据做健壮处理，输出「未测清单」而非伪造数值。</p>
+
+<p class="sub">2. 模型与关键参数</p>
+<table class="tbl">
+  <tr><th style="width:38%">参数 / 资源</th><th class="c" style="width:18%">取值</th><th>含义</th></tr>
+  <tr><td class="mono">THRESHOLD</td><td class="c">0.55</td><td>触发阈值</td></tr>
+  <tr><td class="mono">MARGIN</td><td class="c">0.10</td><td>互斥仲裁所需领先幅度</td></tr>
+  <tr><td class="mono">holdFrames</td><td class="c">12</td><td>保持帧数（约 0.4s @30fps）</td></tr>
+  <tr><td class="mono">VIS_MIN</td><td class="c">0.35</td><td>关键点可见度门槛</td></tr>
+  <tr><td class="mono">HIP_VIS_HALF</td><td class="c">0.15</td><td>半身模式下髋可见度门槛</td></tr>
+  <tr><td class="mono">LEG_VIS</td><td class="c">0.35</td><td>下肢关键点门槛（不放宽）</td></tr>
+  <tr><td class="mono">LOW_VIS</td><td class="c">0.30</td><td>净化器低置信剔除阈值</td></tr>
+  <tr><td class="mono">BOB_WINDOW / MIN_WINDOW</td><td class="c">45 / 12</td><td>时序窗口长度 / 就绪帧数</td></tr>
+  <tr><td>姿态模型</td><td class="c">Pose Landmarker Lite</td><td>本地约 5.5MB + 本地推理 WASM，<strong>不依赖运行时 CDN</strong></td></tr>
+</table>
+
+<p class="sub">3. 八式判定特征与权重表</p>
+<p class="cap">表 A-1　八段锦八式判定特征、硬门槛与权重</p>
+<table class="tbl">
+  <tr><th class="c" style="width:5%">式</th><th style="width:20%">招式</th><th>特征（权重）</th><th style="width:26%">硬门槛 / 互斥</th></tr>
+  <tr><td class="c">1</td><td>双手托天理三焦</td><td>较低腕举高 0.28 · 平均举高 0.26 · 双肘伸展 0.24 · 双腕分开 0.22</td><td>—</td></tr>
+  <tr><td class="c">2</td><td>左右开弓似射雕</td><td>双腕横向距离 0.30 · 手与肩同高 0.22 · 至少一手伸直 0.26 · 至少一手屈肘 0.22</td><td>—</td></tr>
+  <tr><td class="c">3</td><td>调理脾胃须单举</td><td>双手高低差 0.34 · 举手高度 0.36 · 按手下探深度 0.30</td><td>举手须高过头顶且按手低于肩线，否则判 0</td></tr>
+  <tr><td class="c">4</td><td>五劳七伤往后瞧</td><td>头部偏移量 0.46 · 躯干竖直 0.34 · 双肩水平 0.20</td><td>躯干前倾 &gt; 28° 判 0；头部偏移 &lt; 0.22T 判 0</td></tr>
+  <tr><td class="c">5</td><td>摇头摆尾去心火</td><td>俯身 0.30 · 双手横摆 0.38 · 躯干横摆 0.18 · 手离脚踝 0.14<br>（无腿时：0.32 / 0.42 / 0.26）</td><td>手未下探 &gt;1.9T 判 0；横摆 &lt;0.18T 判 0；窗口未就绪判 0</td></tr>
+  <tr><td class="c">6</td><td>两手攀足固肾腰</td><td>手离脚踝 0.30 · 下探深度 0.26 · 双手同步 0.20 · 俯身 0.16 · 静止 0.08<br>（无腿时：0.34 / 0.30 / 0.24 / 0.12）</td><td>下探 &lt;2.1T 判 0；横摆 &gt;0.26T 判 0；窗口未就绪判 0</td></tr>
+  <tr><td class="c">7</td><td>攒拳怒目增气力</td><td>前伸距离 0.28 · 拳与肩同高 0.22 · 拳肘伸直 0.22 · 另一手收腰 0.18 · 双手高低差 0.10</td><td>无手明确前伸判 0；另一手未收腰侧（atWaist&lt;0.45）判 0</td></tr>
+  <tr><td class="c">8</td><td>背后七颠百病消</td><td>双脚并拢 0.30 · 躯干竖直 0.24 · 躯干起伏 0.46<br>（无腿时：双臂下垂 0.26 / 竖直 0.28 / 起伏 0.46）</td><td>躯干无起伏判 0；窗口未就绪判 0</td></tr>
+</table>
+
+<h3>（二）参考文献</h3>
+<table class="tbl">
+  <tr><th style="width:6%">序</th><th>文献</th></tr>
+  <tr><td class="c">1</td><td>国家统计局. 中华人民共和国 2025 年国民经济和社会发展统计公报. 2026-02-28. https://www.stats.gov.cn/sj/zxfb/202602/t20260228_1962662.html</td></tr>
+  <tr><td class="c">2</td><td>Nielsen, J. Usability Engineering. Morgan Kaufmann, 1993.</td></tr>
+  <tr><td class="c">3</td><td>Nielsen, J. Why You Only Need to Test with 5 Users. Nielsen Norman Group, 2000-03-19.</td></tr>
+  <tr><td class="c">4</td><td>Brooke, J. SUS: A "Quick and Dirty" Usability Scale. In: Usability Evaluation in Industry. Taylor &amp; Francis, 1996.</td></tr>
+  <tr><td class="c">5</td><td>Reichheld, F. F. The One Number You Need to Grow. Harvard Business Review, 2003-12.</td></tr>
+  <tr><td class="c">6</td><td>Bazarevsky, V., Grishchenko, I., Raveendran, K., Zhu, T., Zhang, F., Grundmann, M. BlazePose: On-device Real-time Body Pose Tracking. arXiv:2006.10204, 2020.</td></tr>
+  <tr><td class="c">7</td><td>Lugaresi, C., et al. MediaPipe: A Framework for Building Perception Pipelines. arXiv:1906.08172, 2019.</td></tr>
+  <tr><td class="c">8</td><td>国家体育总局健身气功管理中心. 健身气功·八段锦. 人民体育出版社.</td></tr>
+  <tr><td class="c">9</td><td>中共中央、国务院. 「健康中国 2030」规划纲要. 2016.</td></tr>
+  <tr><td class="c">10</td><td>国务院. 全民健身计划（2021—2025 年）. 2021.</td></tr>
+  <tr><td class="c">11</td><td>W3C. Web Content Accessibility Guidelines (WCAG) 2.1. 2018.</td></tr>
+</table>
+
+<h3>（三）其他材料</h3>
+<p>按赛题要求，如下佐证材料<strong>单独上传</strong>，本报告正文不重复附列：</p>
+<table class="tbl">
+  <tr><th style="width:26%">材料</th><th>内容</th></tr>
+  <tr><td>需求调研工具包（PDF）</td><td>11 页可打印执行册：调研设计、样本框、主持人口播脚本、知情同意与隐私说明、问卷 A（17 题）、问卷 B（SUS + 主观题 + NPS）、分人群访谈提纲、任务卡 T1–T5、A/B 配对记录表、数据台账字段映射</td></tr>
+  <tr><td>试点数据台账（xlsx）</td><td>4 个工作表（受访者 / 需求问卷 / 任务与 AB / 体验问卷），含下拉校验与自动公式（完成任务数、配对差值 Δ、SUS 计分、NPS 分类）</td></tr>
+  <tr><td>调研统计出图脚本（.py）</td><td>读取台账 → 输出「结论.md」「指标.json」与 5 张图表；对空数据输出「未测清单」而不伪造数值</td></tr>
+  <tr><td>功能演示视频 / 原型</td><td>可现场演示的端到端原型（手机浏览器打开即用）；演示视频另附</td></tr>
+  <tr><td>代码与测试脚本</td><td>判定器、教练状态机、音频调度等核心模块与单元/端到端测试脚本；随佐证材料打包提交</td></tr>
+  <tr><td>第三方素材与授权</td><td>见下方清单；对外发布保留署名</td></tr>
+</table>
+<pre class="flow">音色素材：RafaelCaro，来源：Freesound
+许可：CC BY 4.0（七弦散音，已作切分处理）
+赏听录音：《醉渔唱晚》卫仲乐 1934，CC0 1.0（可商用、免署名）
+赏听录音：《梅花三弄》前半与尾声，RafaelCaro，CC BY 4.0（必须署名）</pre>
+<div class="box">
+  <p style="margin:0"><span class="kv">非医疗声明与素材授权声明</span></p>
+  <p style="margin:4pt 0 0 0" class="note">弦养是运动与音乐体验产品，<strong>不提供诊断、治疗或医疗建议</strong>。五行五脏内容仅用于文化意象、氛围与编排叙事，不作为医疗判断；界面不展示任何诊断式表达。身体数据与姿态关键点<strong>只在当前设备本地处理，默认不上传、不保存视频</strong>，且可随时删除。对外发布保留第三方音源的署名；未明确授权的录音一律不对外使用。</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+<Slide style={{ width: 1280, height: 720, background: 'linear-gradient(160deg,#241C14 0%,#15100B 100%)', padding: '20px 72px', flexDirection: 'column' }}>
+    <Box style={{ height: 78, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Box style={{ flexDirection: 'column', gap: 6 }}>
+            <Text style={{ fontSize: 15, letterSpacing: 3, color: '#C9A97E', fontFamily: '"PingFang SC", sans-serif' }}>核 心 功 能 二 · 进 阶</Text>
+            <Text style={{ fontSize: 36, fontWeight: 'bold', color: '#FBF3E3', fontFamily: '"Songti SC","STSong",serif' }}>从单声回应，到一段沉浸</Text>
+        </Box>
+        <Box style={{ width: 44, height: 44, borderRadius: 4, background: 'linear-gradient(135deg,#C2543C 0%,#8F3F1F 100%)', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontSize: 20, color: '#FBEFD8', fontFamily: '"Songti SC",serif', fontWeight: 'bold' }}>弦</Text>
+        </Box>
+    </Box>
+    <Box style={{ height: 1, background: 'rgba(201,169,126,0.28)', marginTop: 6 }} />
+    <Animation animType="zoom" duration={700}>
+        <Box style={{ position: 'relative', width: 1136, height: 286, marginTop: 12 }}>
+            <svg width='1136' height='286' viewBox='0 0 1136 286'>
+                <defs>
+                    <linearGradient id='tl' x1='0' y1='0' x2='1' y2='0'>
+                        <stop offset='0%' stopColor='#C9A97E' stopOpacity='0.15' />
+                        <stop offset='50%' stopColor='#C9A97E' stopOpacity='0.55' />
+                        <stop offset='100%' stopColor='#E9B85F' stopOpacity='0.95' />
+                    </linearGradient>
+                </defs>
+                <line x1='200' y1='196' x2='936' y2='196' stroke='url(#tl)' strokeWidth='2' />
+                <circle cx='200' cy='196' r='30' fill='#C9A97E' opacity='0.14' />
+                <circle cx='200' cy='196' r='11' fill='#E9B85F' />
+                <path d='M470 196 q 24 -48 48 0 q 24 48 48 0 q 24 -48 48 0 q 24 48 48 0' fill='none' stroke='#E9B85F' strokeWidth='3.5' strokeLinecap='round' />
+                <circle cx='936' cy='196' r='16' fill='none' stroke='#E9B85F' strokeWidth='2.5' />
+                <circle cx='936' cy='196' r='36' fill='none' stroke='#C9A97E' strokeWidth='2' opacity='0.6' />
+                <circle cx='936' cy='196' r='56' fill='none' stroke='#C9A97E' strokeWidth='1.6' opacity='0.35' />
+                <circle cx='936' cy='196' r='76' fill='none' stroke='#C9A97E' strokeWidth='1.3' opacity='0.2' />
+            </svg>
+            <Box style={{ position: 'absolute', top: 32, left: 100, width: 200, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ fontSize: 76, fontWeight: 'bold', color: '#E9B85F', fontFamily: '"Songti SC",serif', lineHeight: 1.0 }}>点</Text>
+            </Box>
+            <Box style={{ position: 'absolute', top: 32, left: 468, width: 200, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ fontSize: 76, fontWeight: 'bold', color: '#E9B85F', fontFamily: '"Songti SC",serif', lineHeight: 1.0 }}>线</Text>
+            </Box>
+            <Box style={{ position: 'absolute', top: 32, left: 836, width: 200, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ fontSize: 76, fontWeight: 'bold', color: '#E9B85F', fontFamily: '"Songti SC",serif', lineHeight: 1.0 }}>面</Text>
+            </Box>
+        </Box>
+    </Animation>
+    <Animation animType="fadeIn" startType="afterPrevious" duration={600}>
+        <Box style={{ flexDirection: 'row', height: 172, marginTop: 12 }}>
+            <Box style={{ flex: 1, flexDirection: 'column', gap: 10, paddingRight: 30 }}>
+                <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#FBF3E3', fontFamily: '"PingFang SC", sans-serif' }}>学架子 · 点</Text>
+                <Text style={{ fontSize: 17, color: '#C9A97E', fontFamily: '"PingFang SC", sans-serif' }}>离散弦音，一次触发一声</Text>
+                <Text style={{ fontSize: 16, color: '#A2937A', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.6 }}>先感知身体与声音的联系；有独立交互预览，按键触发不冒充真人识别。</Text>
+            </Box>
+            <Box style={{ width: 1, background: 'rgba(201,169,126,0.25)' }} />
+            <Box style={{ flex: 1, flexDirection: 'column', gap: 10, paddingLeft: 30, paddingRight: 30 }}>
+                <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#FBF3E3', fontFamily: '"PingFang SC", sans-serif' }}>找气感 · 线</Text>
+                <Text style={{ fontSize: 17, color: '#C9A97E', fontFamily: '"PingFang SC", sans-serif' }}>可循环五声短句与句尾留白</Text>
+                <Text style={{ fontSize: 16, color: '#A2937A', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.6 }}>建立连续的动作与声音体验；有短句工坊，动作周期推进待接线。</Text>
+            </Box>
+            <Box style={{ width: 1, background: 'rgba(201,169,126,0.25)' }} />
+            <Box style={{ flex: 1, flexDirection: 'column', gap: 10, paddingLeft: 30 }}>
+                <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#FBF3E3', fontFamily: '"PingFang SC", sans-serif' }}>入静 · 面</Text>
+                <Text style={{ fontSize: 17, color: '#C9A97E', fontFamily: '"PingFang SC", sans-serif' }}>连续音乐弧线与单音点缀</Text>
+                <Text style={{ fontSize: 16, color: '#A2937A', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.6 }}>支撑完整的沉浸练习；有五调弧线原型，自适应收束待实现。</Text>
+            </Box>
+        </Box>
+    </Animation>
+    <Box style={{ flex: 1, justifyContent: 'center' }}>
+        <Text style={{ fontSize: 15, color: '#8E8069', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.5 }}>
+            音乐跟随动作周期，是后续增强方向，不是已验证的呼吸检测功能——摄像头姿态事件不能直接等同于真实呼吸信号。
+        </Text>
+    </Box>
+    <Box style={{ height: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <Text style={{ fontSize: 14, color: 'rgba(201,169,126,0.6)', fontFamily: '"PingFang SC", sans-serif' }}>弦养 · 以身为琴，以动为弦</Text>
+        <Text style={{ fontSize: 14, color: 'rgba(201,169,126,0.6)', fontFamily: '"PingFang SC", sans-serif' }}>06 / 12</Text>
+    </Box>
+</Slide>

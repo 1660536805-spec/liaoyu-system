@@ -1,0 +1,71 @@
+<Slide style={{ width: 1280, height: 720, background: '#FBF3E3', padding: '20px 72px', flexDirection: 'column' }}>
+    <Box style={{ height: 78, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Box style={{ flexDirection: 'column', gap: 6 }}>
+            <Text style={{ fontSize: 15, letterSpacing: 3, color: '#B0552E', fontFamily: '"PingFang SC", sans-serif' }}>声 音 设 计</Text>
+            <Text style={{ fontSize: 36, fontWeight: 'bold', color: '#241C14', fontFamily: '"Songti SC","STSong",serif' }}>三种听感，皆有来源</Text>
+        </Box>
+        <Box style={{ width: 44, height: 44, borderRadius: 4, background: 'linear-gradient(135deg,#C2543C 0%,#8F3F1F 100%)', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontSize: 20, color: '#FBEFD8', fontFamily: '"Songti SC",serif', fontWeight: 'bold' }}>弦</Text>
+        </Box>
+    </Box>
+    <Box style={{ height: 1, background: '#E3D6BC', marginTop: 6 }} />
+    <Box style={{ flexDirection: 'row', gap: 30, marginTop: 20, height: 530 }}>
+        <Animation animType="fadeIn" duration={600}>
+            <Box style={{ width: 340, height: 530, background: '#F2E7D2', borderRadius: 8, padding: 28, flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 10px 28px rgba(60,40,20,0.10)' }}>
+                <Box style={{ flexDirection: 'column', gap: 14 }}>
+                    <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#241C14', fontFamily: '"Songti SC",serif', lineHeight: 1.35 }}>不是采样回放，也非「古风」混响</Text>
+                    <Text style={{ fontSize: 17, color: '#5C4E3C', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.72 }}>
+                        弦养的古琴音色由物理发声模型合成：一至七弦用同一条算法、同一组定弦，所以高音弦与低音弦之间不会有「换了件乐器」的断层。
+                    </Text>
+                </Box>
+                <Box style={{ flexDirection: 'column', gap: 10, borderTop: '2px solid #C9A97E', paddingTop: 18 }}>
+                    <Text style={{ fontSize: 14, letterSpacing: 2, color: '#B08A3E', fontFamily: '"PingFang SC", sans-serif' }}>落 点</Text>
+                    <Text style={{ fontSize: 18, color: '#8F3F1F', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.68, fontWeight: 'bold' }}>
+                        「宫」被编号与音名拉扯了几百年；在这里，它最终落回一个可以精确测量的频率。
+                    </Text>
+                </Box>
+            </Box>
+        </Animation>
+        <Box style={{ flex: 1, flexDirection: 'column', gap: 16 }}>
+            <Animation animType="fadeIn" startType="afterPrevious" duration={600}>
+                <Box style={{ flexDirection: 'column' }}>
+                    <Box style={{ flexDirection: 'row', gap: 16 }}>
+                        <Box style={{ width: 3, background: '#C9A97E', borderRadius: 2 }} />
+                        <Box style={{ flex: 1, flexDirection: 'column', gap: 6, paddingBottom: 14 }}>
+                            <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#241C14', fontFamily: '"PingFang SC", sans-serif' }}>绵长</Text>
+                            <Text style={{ fontSize: 16, color: '#5C4E3C', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.62 }}>低音层里有一路与一弦同音（宫，F3）的持续音，它不衰减——弦音落下去之后由它接住，听起来就是「这声不落」。</Text>
+                        </Box>
+                    </Box>
+                    <Box style={{ height: 1, background: '#EBDFC7' }} />
+                    <Box style={{ flexDirection: 'row', gap: 16, marginTop: 14 }}>
+                        <Box style={{ width: 3, background: '#6E8F7C', borderRadius: 2 }} />
+                        <Box style={{ flex: 1, flexDirection: 'column', gap: 6, paddingBottom: 14 }}>
+                            <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#241C14', fontFamily: '"PingFang SC", sans-serif' }}>饱满</Text>
+                            <Text style={{ fontSize: 16, color: '#5C4E3C', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.62 }}>底下再垫一层宫的低八度（F2），补的是低音厚度，让声音站得住。</Text>
+                        </Box>
+                    </Box>
+                    <Box style={{ height: 1, background: '#EBDFC7' }} />
+                    <Box style={{ flexDirection: 'row', gap: 16, marginTop: 14 }}>
+                        <Box style={{ width: 3, background: '#B0552E', borderRadius: 2 }} />
+                        <Box style={{ flex: 1, flexDirection: 'column', gap: 6 }}>
+                            <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#241C14', fontFamily: '"PingFang SC", sans-serif' }}>颤音</Text>
+                            <Text style={{ fontSize: 16, color: '#5C4E3C', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.62 }}>它其实不是「颤音效果」：合成弦音的延迟线必须取整数个采样点，实发频率与理论频率差了一点点，与低音层纯正弦互相打拍子。</Text>
+                        </Box>
+                    </Box>
+                </Box>
+            </Animation>
+            <Animation animType="fadeIn" startType="afterPrevious" duration={600}>
+                <Box style={{ background: '#1E1710', borderRadius: 8, padding: '16px 22px', flexDirection: 'column', gap: 6 }}>
+                    <Text style={{ fontSize: 15, color: '#8A7A5E', fontFamily: '"PingFang SC", sans-serif', letterSpacing: 1 }}>那点「颤音」的算法来源</Text>
+                    <Text style={{ fontSize: 16, color: '#E9B85F', fontFamily: '"SF Mono","Menlo",monospace', lineHeight: 1.7 }}>48 kHz ÷ 174.614 Hz = 274.90  →  延迟线取整 275</Text>
+                    <Text style={{ fontSize: 16, color: '#C9A97E', fontFamily: '"SF Mono","Menlo",monospace', lineHeight: 1.7 }}>实发频率 ≈ 48000 ÷ 275.5 ≈ 174.23 Hz　|　低音层纯正弦 = 174.614 Hz</Text>
+                    <Text style={{ fontSize: 16, color: '#FBF3E3', fontFamily: '"SF Mono","Menlo",monospace', lineHeight: 1.7 }}>相差 ≈ 0.385 Hz　→　每约 2.6 秒打一次拍</Text>
+                </Box>
+            </Animation>
+        </Box>
+    </Box>
+    <Box style={{ height: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <Text style={{ fontSize: 14, color: '#A9977B', fontFamily: '"PingFang SC", sans-serif' }}>弦养 · 以身为琴，以动为弦</Text>
+        <Text style={{ fontSize: 14, color: '#A9977B', fontFamily: '"PingFang SC", sans-serif' }}>07 / 12</Text>
+    </Box>
+</Slide>

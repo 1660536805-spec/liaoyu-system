@@ -1,0 +1,50 @@
+<Slide style={{ width: 1280, height: 720, background: '#FBF3E3', padding: '20px 72px', flexDirection: 'column' }}>
+    <Box style={{ height: 84, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Box style={{ flexDirection: 'column', gap: 6 }}>
+            <Text style={{ fontSize: 15, letterSpacing: 3, color: '#B0552E', fontFamily: '"PingFang SC", sans-serif' }}>核 心 功 能 一</Text>
+            <Text style={{ fontSize: 36, fontWeight: 'bold', color: '#241C14', fontFamily: '"Songti SC","STSong",serif' }}>静听与跟练：让身体参与声音</Text>
+        </Box>
+        <Box style={{ width: 44, height: 44, borderRadius: 4, background: 'linear-gradient(135deg,#C2543C 0%,#8F3F1F 100%)', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontSize: 20, color: '#FBEFD8', fontFamily: '"Songti SC",serif', fontWeight: 'bold' }}>弦</Text>
+        </Box>
+    </Box>
+    <Box style={{ height: 1, background: '#E3D6BC', marginTop: 6 }} />
+    <Box style={{ flexDirection: 'row', gap: 28, marginTop: 22, height: 520 }}>
+        <Box style={{ width: 680, height: 520, position: 'relative', borderRadius: 8, overflow: 'hidden', boxShadow: '0 12px 34px rgba(60,40,20,0.16)' }}>
+            <Image src="assets/listen_tone.png" style={{ position: 'absolute', top: 0, left: 0, width: 680, height: 520, objectFit: 'cover' }} />
+            <Box style={{ position: 'absolute', top: 252, left: 0, width: 680, height: 268, background: 'linear-gradient(0deg, rgba(24,17,11,0.94) 0%, rgba(24,17,11,0.62) 46%, rgba(24,17,11,0) 100%)' }} />
+            <Box style={{ position: 'absolute', top: 0, left: 0, width: 680, height: 520, flexDirection: 'column', justifyContent: 'flex-end', paddingLeft: 34, paddingRight: 34, paddingBottom: 30, gap: 10 }}>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#FBF3E3', fontFamily: '"Songti SC",serif' }}>静听</Text>
+                    <Box style={{ width: 34, height: 1, background: '#C9A97E' }} />
+                    <Text style={{ fontSize: 16, color: '#C9A97E', fontFamily: '"PingFang SC", sans-serif' }}>进入五音氛围</Text>
+                </Box>
+                <Text style={{ fontSize: 18, color: '#E4D9C0', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.68 }}>
+                    不必启动摄像头，也能进入音疗：以「今天想照顾哪里」「今天想要什么氛围」选择声音内容。五脏组织入口，五音组织氛围，古琴短句与已授权录音构成声音素材。
+                </Text>
+            </Box>
+        </Box>
+        <Box style={{ flex: 1, flexDirection: 'column', gap: 14 }}>
+            <Box style={{ height: 206, borderRadius: 8, overflow: 'hidden', boxShadow: '0 12px 34px rgba(60,40,20,0.16)' }}>
+                <Image src="assets/practice_body.png" style={{ width: '100%', height: 206, objectFit: 'cover' }} />
+            </Box>
+            <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 2 }}>
+                <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#241C14', fontFamily: '"Songti SC",serif' }}>跟练</Text>
+                <Box style={{ width: 34, height: 1, background: '#B0552E' }} />
+                <Text style={{ fontSize: 16, color: '#B0552E', fontFamily: '"PingFang SC", sans-serif' }}>身体参与声音</Text>
+            </Box>
+            <Text style={{ fontSize: 18, color: '#5C4E3C', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.68 }}>
+                在摄像头前完成八段锦，系统读取身体关键点，按当前动作的判定条件产生反馈——弦位亮起，并发出琴音。
+            </Text>
+            <Box style={{ flex: 1, justifyContent: 'center', background: '#F2E7D2', borderRadius: 6, padding: 18, borderLeft: '3px solid #6E8F7C' }}>
+                <Text style={{ fontSize: 17, color: '#4E5B4F', fontFamily: '"PingFang SC", sans-serif', lineHeight: 1.66 }}>
+                    一次动作命中表示「达到本原型的判定条件」，不是全面的动作标准认证，更不是身体健康结论。
+                </Text>
+            </Box>
+        </Box>
+    </Box>
+    <Box style={{ height: 32, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <Text style={{ fontSize: 14, color: '#A9977B', fontFamily: '"PingFang SC", sans-serif' }}>弦养 · 以身为琴，以动为弦</Text>
+        <Text style={{ fontSize: 14, color: '#A9977B', fontFamily: '"PingFang SC", sans-serif' }}>04 / 10</Text>
+    </Box>
+</Slide>
