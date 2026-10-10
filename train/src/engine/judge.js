@@ -332,6 +332,10 @@ export class MoveJudge {
     headYawTol = 18,
     style = 'baduanjin',
     count = 8,
+    /** 该拳种的式名（长度应与 count 一致）。
+     *  八段锦沿用内置 NAMES；五禽戏/太极由调用方传 style.moves.map(m => m.name)。
+     *  不传时退回 NAMES —— 保证老调用点（测试）行为不变。 */
+    names = null,
   } = {}) {
     this.holdFrames = holdFrames
     this.threshold = threshold
@@ -341,6 +345,7 @@ export class MoveJudge {
     this.headYawTol = headYawTol
     this.style = style
     this.count = count                    // 该拳种的式数
+    this.names = Array.isArray(names) && names.length ? names : NAMES
     this.reset()
   }
 
@@ -357,6 +362,7 @@ export class MoveJudge {
     this.headErr = null
     this.hipHist = []
     this.xHist = []
+    this.shoXHist = []
     this.wriXHist = []
     this.wriGapHist = []
     this.lastScores = new Array(this.count).fill(0)
@@ -364,7 +370,7 @@ export class MoveJudge {
 
   // 只算分，不触发（UI 显示实时强度用）
   scores(p) {
-    if (!p || p.length < 29) return new Array(8).fill(0)
+    if (!p || p.length < 29) return new Array(this.count).fill(0)
     return this.rules.map((fn) => fn(this._withBob(p), makeCtx()))
   }
 
@@ -377,11 +383,15 @@ export class MoveJudge {
     const src = useHip ? hipMid(p) : shoMid(p)
     this.hipHist.push(src.y)
     this.xHist.push(src.x)
+    // 肩中点横移：五禽戏「熊运」是「以腰为轴、上体画圆」，画的是**肩**的圆，
+    // 髋基本是圆心不动；而 xHist 走的是「髋可见就用髋」的口径（为式8 踮脚设计），
+    // 拿不到肩的圆。故单独记一条肩中点序列（不影响八段锦任何规则）。
+    this.shoXHist.push(shoMid(p).x)
     // 双手横摆：摇头摆尾的核心信号（两手交替左右摆动 → 腕中点持续横移）
     this.wriXHist.push((v(p, LM.L_WRI).x + v(p, LM.R_WRI).x) / 2)
     this.wriGapHist.push(Math.abs(v(p, LM.L_WRI).x - v(p, LM.R_WRI).x) / t)
     if (this.hipHist.length > BOB_WINDOW) {
-      this.hipHist.shift(); this.xHist.shift()
+      this.hipHist.shift(); this.xHist.shift(); this.shoXHist.shift()
       this.wriXHist.shift(); this.wriGapHist.shift()
     }
     const enough = this.hipHist.length > MIN_WINDOW
@@ -392,7 +402,8 @@ export class MoveJudge {
       // 误判成「摆动的摇头摆尾」（窗口未满 → 式6 的 still 门槛失效）。故显式标记。
       p.__ready = enough
       p.__bob = enough ? rng(this.hipHist) / t : 0     // 躯干垂直起伏（踮脚，式8）
-      p.__sway = enough ? rng(this.xHist) / t : 0      // 躯干横摆（式5 辅助）
+      p.__sway = enough ? rng(this.xHist) / t : 0      // 躯干横摆（式5 辅助；髋可见时即髋）
+      p.__shoSway = enough ? rng(this.shoXHist) / t : 0 // 肩中点横摆（五禽戏「熊运」画圆的信号）
       p.__handSwing = enough ? rng(this.wriXHist) / t : 0  // 双手中点横摆（式5 主信号）
       p.__handGap = enough ? rng(this.wriGapHist) : 0   // 双手间距变化（式5 辅助）
       p.__bobSrc = useHip ? 'hip' : 'shoulder'
@@ -445,7 +456,7 @@ export class MoveJudge {
         this.counts[i]++
         if (this.counts[i] >= this.holdFrames && !this.latched[i]) {
           this.latched[i] = true                 // 锁存：同式不再重复响
-          hit.push({ index: i, name: NAMES[i], score: sc[i] })
+          hit.push({ index: i, name: this.names[i] ?? NAMES[i], score: sc[i] })
         }
       } else {
         this.counts[i] = 0

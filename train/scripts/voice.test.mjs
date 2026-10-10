@@ -55,7 +55,9 @@ console.log('\n=== 1. 播报文案生成（多拳种）===')
   okc(h1.includes('第1式') && h1.includes('虎举'), `五禽戏式1 播报：「${h1}」`)
   okc(h1.includes('虎爪'), '五禽戏式1 含要领（虎爪）')
   const names = [1, 2, 3, 4, 5].map((i) => getMoveSpeech('wuqinxi', i)?.voice)
-  okc(JSON.stringify(names) === JSON.stringify(['虎举', '鹿抵', '熊运', '猿攀', '鸟飞']),
+  // 第 4 式原名「猿攀」，与标准五禽戏（五式）的动作不符（那是「攀援引体」）；
+  // 标准为「猿提」（两手成猿钩上提至胸 + 耸肩提踵），2026-10-10 据此纠正。
+  okc(JSON.stringify(names) === JSON.stringify(['虎举', '鹿抵', '熊运', '猿提', '鸟飞']),
     `五禽戏五式齐全且顺序正确：${names.join('/')}`)
   const wqShort = [1, 2, 3, 4, 5].map((i) => buildSpeech('wuqinxi', i, 'short'))
   okc(wqShort.every((t) => t && t.length <= 4), `五禽戏简称均 ≤4 字：${wqShort.join('、')}`)

@@ -285,7 +285,7 @@ import { createPoseEngine, drawPose, drawGhostPose, KEY_POINTS, HEAD_POINTS, lis
 import { framingMetrics, diagText, pctText, barWidth } from '../engine/framing'
 import standardPoses from '../data/baduanjin-8.json'
 import { headPose, bodyPose, createTurnTracker } from '../engine/pose'
-import { MoveJudge, NAMES, THRESHOLD } from '../engine/judge'
+import { MoveJudge, THRESHOLD } from '../engine/judge'
 import { pluck, chordAll, unlockAudio, preloadSamples } from '../engine/guqin'
 import { FallbackSwitch, frameAlive, FALLBACK_SRC, FALLBACK_CFG } from '../engine/fallback'
 import { createCoach, PHASE } from '../engine/coach'
@@ -590,6 +590,9 @@ function resetStep() {
     // 拳种决定用哪套判定规则（八段锦内置 / 五禽戏、太极用 styleRules）
     style: style.value.id,
     count: style.value.moves.length,
+    // 式名随拳种走：命中上报的名字必须是当前拳种的（原先写死八段锦 NAMES，
+    // 五禽戏/太极命中时会报出八段锦的式子名或 undefined）。
+    names: style.value.moves.map((m) => m.name),
   })
   announcer.setStyle(style.value.id)
   // 播报当前式首式。必须在这里报（而非等 advance）：
@@ -1198,7 +1201,7 @@ function snapshotSession() {
   return {
     sid: String(sessionStartAt.value),
     moves: [...doneSet.value],
-    names: NAMES.filter((_, i) => doneSet.value.has(i)),
+    names: moves.value.map((m) => m.name).filter((_, i) => doneSet.value.has(i)),
     tone: tone.value?.key || '',
     seconds: Math.max(0, Math.round((Date.now() - sessionStartAt.value) / 1000)),
     scores: judge ? [...(judge.lastScores || [])] : [],

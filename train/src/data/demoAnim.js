@@ -140,6 +140,71 @@ export const DEMO_ANIMS = {
       { t: 7.0, phase: 'end', pose: P({}) },
     ],
   },
+
+  // ============================== 五禽戏五式 ==============================
+  // 一、虎举：双手十指张开如虎爪，缓缓上举过头，停一拍，再缓缓落下
+  'wuqinxi-1': {
+    dur: 6.0,
+    keys: [
+      { t: 0.0, phase: 'start', pose: P({}) },
+      { t: 1.4, phase: 'work', pose: P({ aL: 104, aR: 104, eL: 26, eR: 26 }) },
+      { t: 2.8, phase: 'end', pose: P({ aL: 170, aR: 170, eL: 8, eR: 8 }) },
+      { t: 4.2, phase: 'end', pose: P({ aL: 170, aR: 170, eL: 8, eR: 8 }) },
+      { t: 6.0, phase: 'start', pose: P({}) },
+    ],
+  },
+
+  // 二、鹿抵：双臂向前上方伸出，躯干向一侧舒展（左右交替），微屈膝
+  'wuqinxi-2': {
+    dur: 6.6,
+    keys: [
+      { t: 0.0, phase: 'start', pose: P({}) },
+      { t: 1.3, phase: 'work', pose: P({ aL: 150, eL: 12, aR: 150, eR: 12, lean: -15, crouch: 0.12 }) },
+      { t: 2.5, phase: 'end', pose: P({ aL: 150, eL: 12, aR: 150, eR: 12, lean: -15, crouch: 0.12 }) },
+      { t: 3.8, phase: 'work', pose: P({ aL: 150, eL: 12, aR: 150, eR: 12, lean: 15, crouch: 0.12 }) },
+      { t: 5.0, phase: 'end', pose: P({ aL: 150, eL: 12, aR: 150, eR: 12, lean: 15, crouch: 0.12 }) },
+      { t: 6.6, phase: 'start', pose: P({}) },
+    ],
+  },
+
+  // 三、熊运：屈膝含胸，双肩圆拱，腰腹带动躯干画圆（左右绕环）
+  'wuqinxi-3': {
+    dur: 6.0,
+    keys: [
+      { t: 0.0, phase: 'start', pose: P({}) },
+      { t: 1.0, phase: 'work', pose: P({ crouch: 0.45, legL: 26, legR: 26, lean: -16, aL: 34, eL: 82, aR: 58, eR: 62 }) },
+      { t: 2.1, phase: 'work', pose: P({ crouch: 0.45, legL: 26, legR: 26, lean: 0, aL: 48, eL: 72, aR: 48, eR: 72 }) },
+      { t: 3.2, phase: 'work', pose: P({ crouch: 0.45, legL: 26, legR: 26, lean: 16, aL: 58, eL: 62, aR: 34, eR: 82 }) },
+      { t: 4.3, phase: 'end', pose: P({ crouch: 0.45, legL: 26, legR: 26, lean: 0, aL: 48, eL: 72, aR: 48, eR: 72 }) },
+      { t: 6.0, phase: 'start', pose: P({}) },
+    ],
+  },
+
+  // 四、猿提：两手成猿钩收至胸前，屈肘上提；同时耸肩上顶、脚跟提起，再慢慢放下
+  'wuqinxi-4': {
+    dur: 6.0,
+    keys: [
+      { t: 0.0, phase: 'start', pose: P({}) },
+      { t: 1.2, phase: 'work', pose: P({ aL: 58, eL: 96, aR: 58, eR: 96 }) },
+      { t: 2.6, phase: 'end', pose: P({ aL: 80, eL: 108, aR: 80, eR: 108, lift: 0.65 }) },
+      { t: 3.6, phase: 'end', pose: P({ aL: 80, eL: 108, aR: 80, eR: 108, lift: 0.65 }) },
+      { t: 4.8, phase: 'work', pose: P({ aL: 58, eL: 96, aR: 58, eR: 96 }) },
+      { t: 6.0, phase: 'start', pose: P({}) },
+    ],
+  },
+
+  // 五、鸟飞：双手如鸟翅向两侧展开，再上举合拢（提踵），随后展翅回落
+  'wuqinxi-5': {
+    dur: 6.8,
+    keys: [
+      { t: 0.0, phase: 'start', pose: P({}) },
+      { t: 1.3, phase: 'work', pose: P({ aL: 92, eL: 6, aR: 92, eR: 6 }) },
+      { t: 2.7, phase: 'end', pose: P({ aL: 162, eL: 22, aR: 162, eR: 22, lift: 1 }) },
+      { t: 4.0, phase: 'end', pose: P({ aL: 162, eL: 22, aR: 162, eR: 22, lift: 1 }) },
+      { t: 5.3, phase: 'work', pose: P({ aL: 92, eL: 6, aR: 92, eR: 6 }) },
+      { t: 6.8, phase: 'start', pose: P({}) },
+    ],
+  },
 }
 
 /** 查询某式的动画数据；没有则返回 null（调用方降级为静态图示） */
