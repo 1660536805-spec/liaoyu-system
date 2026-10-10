@@ -104,7 +104,12 @@ var TRACKS=[
   credit:'《梅花三弄》真录音 · RafaelCaro · CC BY 4.0'},
  {key:'zuiyu',title:'醉渔唱晚',desc:'渔舟唱晚，水天一色，明快开阔。',tone:'徵 · 心',cls:'org',
   tags:['安神助眠','平稳情绪'],dur:184,img:'/art/card-landscape.jpg',pic:'',
-  credit:'《醉渔唱晚》卫仲乐 1934 · archive.org CC0'}
+  credit:'《醉渔唱晚》卫仲乐 1934 · archive.org CC0'},
+ /* 第三首：并入分支 web 曲库中唯一带真实音源的曲目（守红线：只收有音源的）。
+    key 复用 SRC.sanyin＝/guqin/listen/qixian-sanyin.mp3（实测 7.2s 散音试音）。 */
+ {key:'sanyin',title:'七弦散音',desc:'七弦依次拨响，宫商角徵羽。',tone:'宫 · 脾',cls:'org',
+  tags:['平和承载','收功静坐'],dur:7,img:'/art/card-landscape.jpg',pic:'filter:sepia(.5)',
+  credit:'《七弦散音》真录音 · RafaelCaro · CC BY 4.0'}
 ];
 var AUDIO={vol:.85,loop:false,sound:true,mus:null,pool:{},ctx:null};
 function loadAudioPref(){try{var x=JSON.parse(localStorage.getItem('xy-audio')||'null');if(!x||typeof x!=='object')return;
@@ -480,8 +485,8 @@ function pgAudio(){var organs=[
  +nav('audio',true)+'</main>'}
 
 /* ---------- 底部导航 ---------- */
-function nav(cur,four){var h='<nav class="nav">'
- if(four)h+='<button class="nitem'+(cur==='home'?' on':'')+'" data-a="nav-home">'+ic('home')+'首页</button>'
+function nav(cur){var h='<nav class="nav">'
+ h+='<button class="nitem'+(cur==='home'?' on':'')+'" data-a="nav-home">'+ic('home')+'首页</button>'
  h+='<button class="nitem'+(cur==='audio'?' on':'')+'" data-a="nav-audio">'+ic('music')+'音疗</button>'
  +'<button class="nitem" data-a="nav-intro"><span class="big">'+ic('yinyang')+'</span>开始练</button>'
  +'<button class="nitem'+(cur==='profile'?' on':'')+'" data-a="nav-profile">'+ic('user')+'我的</button></nav>'
@@ -762,6 +767,7 @@ function pgProfile(){var st=recordStats(),has=st.n>0,sk=has?streak():DESIGN.stre
    +'<p style="color:var(--brown);font-weight:600;margin-top:1rem">八段锦·中级阶段</p><p>已完成 '+on+' / 8 节</p>'
    +'<div class="dots8">'+dots+'</div></section></div>'
  +'<section class="card setlist">'
+  +'<div class="setrow" data-a="go-lab" data-label="调养实验室"><span class="ic">'+ic('leaf')+'</span><b>调养实验室</b><span>五音 · 食养 · 香事 · 功法 · 问卷</span><span class="r">›</span></div>'
   +'<div class="setrow" data-a="set-basic" data-label="基础设置"><span class="ic">'+ic('gear')+'</span><b>基础设置</b><span>账号管理、提醒设置、个性化偏好</span><span class="r">›</span></div>'
   +'<div class="setrow" data-a="set-help" data-label="帮助与反馈"><span class="ic">'+ic('headset')+'</span><b>帮助与反馈</b><span>常见问题、意见反馈、联系我们</span><span class="r">›</span></div>'
   +'<div class="setrow" data-a="set-about" data-label="版本信息"><span class="ic">'+ic('info')+'</span><b>版本信息</b><span>当前版本为最新版</span><span class="r">v1.0.0 ›</span></div></section>'
@@ -857,13 +863,13 @@ function helpHTML(){
 function noticesHTML(){var st=recordStats(),A=[];
   A.push(st.n?['打卡已记录','最近一次 '+st.last.d+' · '+(+st.last.poses||0)+' 式 · '+fmtDur(+st.last.sec||0)+'；已连续 '+streak()+' 天。']
             :['欢迎来到弦养','还没有打卡记录。完成一次练习并在结束页点「完成打卡」，这里就会出现你的记录。']);
-  A.push(['曲库已接入','新增两首可播放真录音：《梅花三弄》6:28、《醉渔唱晚》3:04。其余曲目暂无干净音源，未在界面列出。']);
+  A.push(['曲库已接入','新增三首可播放真录音：《梅花三弄》6:28、《醉渔唱晚》3:04、《七弦散音》0:07（七弦散音试音）。其余曲目暂无干净音源，未在界面列出。']);
   A.push(['七弦已接通','跟练页每式起势自动拨弦；右侧那排七弦可以直接点着试音。']);
   A.push(['素材授权','七弦散音 / 《梅花三弄》：RafaelCaro · CC BY 4.0；《醉渔唱晚》：卫仲乐 1934 · archive.org CC0。']);
   A.push(['关于动作识别','摄像头识别与陪练教练在真实跟练页运行，主壳是界面预览。']);
   return A.map(function(x){return '<div class="xs-item"><b>'+x[0]+'</b><p>'+x[1]+'</p></div>'}).join('')}
 function aboutHTML(){return '<div class="xs-item"><b>弦养 · Xianyang v1.0.0</b><p>以身为琴，以动为弦。主壳是最终版 9 张设计稿的 1:1 复刻；真实识别与陪练教练在跟练子应用里。</p></div>'
-  +'<div class="xs-item"><b>已接入的真实能力</b><p>古琴曲目播放（2 首真人录音）、七弦散音试音与「动作→琴弦」触发、练习打卡与本地记录、头像更换、分享图导出。</p></div>'
+  +'<div class="xs-item"><b>已接入的真实能力</b><p>古琴曲目播放（3 首真录音）、七弦散音试音与「动作→琴弦」触发、练习打卡与本地记录、头像更换、分享图导出。</p></div>'
   +'<div class="xs-item"><b>仍未接入（界面已如实标注）</b><p>五禽戏素材、设备体征（心率 / 睡眠）、线上账号与云同步。</p></div>'
   +'<div class="xs-note">素材署名：七弦散音 · RafaelCaro · CC BY 4.0；《梅花三弄》· RafaelCaro · CC BY 4.0；《醉渔唱晚》· 卫仲乐 1934 · archive.org CC0。</div>'}
 function analysisHTML(){var poses=practicePoses();var S=lastSession(),avg=doneAvg(S);
@@ -1085,6 +1091,8 @@ document.addEventListener('click',function(e){
       else{el.dataset.arm='1';el.textContent='再点一次确认清空';toast('再点一次即可清空本机打卡记录');}break
     case 'sheet-close':closeSheet();break
     case 'unavailable':toast((el.dataset.label||el.getAttribute('aria-label')||el.textContent.trim()||'此功能')+'：这条暂未接入，已接入的功能清单见「我的 › 版本信息」');break
+    /* ---- 我的：调养实验室入口（本次新增 · 唯一改动）---- */
+    case 'go-lab':toast('正在进入调养实验室…');location.href='s4/#/preview';break
     /* ---- 身体数据 ---- */
     case 'go-body':closeSheet();go('body');break
     case 'stp':var k=el.getAttribute('data-k'),d=+el.getAttribute('data-d');if(!Object.prototype.hasOwnProperty.call(BODY_LIMITS,k)||(d!==1&&d!==-1))return;
