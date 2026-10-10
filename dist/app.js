@@ -11,7 +11,8 @@ var root, state={
   progress:0, running:false,
   side:0, breath:0, hold:0,
   body:{h:165,w:55,a:28},
-  inj:['无'], goals:['舒缓肩颈'], diet:['少盐'], recipe:true
+  inj:['无'], goals:['舒缓肩颈'], diet:['少盐'], recipe:true,
+  ask:{msgs:[],typing:false}        // 问询页的对话；只存本次访问内存，不落盘（同「不假装已接入」原则）
 };
 
 /* ---------- 图标库（描边风格 SVG） ---------- */
@@ -489,6 +490,7 @@ function nav(cur){var h='<nav class="nav">'
  h+='<button class="nitem'+(cur==='home'?' on':'')+'" data-a="nav-home">'+ic('home')+'首页</button>'
  h+='<button class="nitem'+(cur==='audio'?' on':'')+'" data-a="nav-audio">'+ic('music')+'音疗</button>'
  +'<button class="nitem" data-a="nav-intro"><span class="big">'+ic('yinyang')+'</span>开始练</button>'
+ +'<button class="nitem'+(cur==='inquiry'?' on':'')+'" data-a="nav-inquiry">'+ic('qmark')+'问询</button>'
  +'<button class="nitem'+(cur==='profile'?' on':'')+'" data-a="nav-profile">'+ic('user')+'我的</button></nav>'
  return h}
 
@@ -799,8 +801,63 @@ function pgBody(){function chips(name,opts,multi){return '<div class="chips">'+o
  +'<div class="save-wrap"><button class="btn" data-a="save-body">保存身体设置 '+ic('chev','width:1.5rem;height:1.5rem')+'</button></div>'
  +'</main>'}
 
+/* ==================== 问询（智能体交互页） ====================
+   ⚠️ 诚实边界：本页只提供「智能体对话」的**交互结构**，尚未接入任何模型服务。
+      真实回答的唯一接入点在 askSend() 里那处 setTimeout —— 换成对模型的 fetch 即可（注释已给示例）。
+      当前回复由本地占位函数 askStub() 生成，气泡文案与页脚都明确标注「本地占位」，
+      不让界面伪装成已接入（与主壳「真 / 假如实标注」的既有原则一致）。 */
+var ASK_CHIPS=['八段锦第一式怎么做？','今天适合练什么？','徵调适合什么时候听？'];
+var ASK_SEED=[
+  {who:'a',text:'你好，我是弦养的练习助手。功法要领、五音调养、今日安排，都可以问我。'},
+  {who:'n',text:'本页是智能体交互结构的预览，尚未接入模型服务；下方回复为本地占位，不代表真实回答。'}
+];
+function askEsc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function askMsgs(){if(!state.ask.msgs.length)state.ask.msgs=ASK_SEED.slice();return state.ask.msgs}
+function askStub(q){return '（本地占位）已收到你的问题：「'+q+'」。真实回答需接入模型服务后生成，接入点见本页底部说明。'}
+function askListHTML(){return askMsgs().map(function(m){var mine=m.who==='u';
+    return '<div class="ask-row'+(mine?' r':'')+'"><div class="ask-b ask-'+m.who+'">'+askEsc(m.text)+'</div></div>'}).join('')
+  +(state.ask.typing?'<div class="ask-row"><div class="ask-b ask-a ask-typing" aria-label="正在输入">'+ic('dots')+'</div></div>':'')}
+/* 只改对话区、不重绘整页 —— 与 syncAudioUI 同一思路：重绘会让输入框失焦 */
+function syncAskUI(){
+  if(!root)return
+  var list=root.querySelector('#ask-list');if(!list)return
+  list.innerHTML=askListHTML();list.scrollTop=list.scrollHeight;
+  var sb=root.querySelector('[data-a="ask-send"]');if(sb)sb.disabled=!!state.ask.typing}
+function askSend(){
+  if(state.ask.typing)return
+  var inp=root.querySelector('#ask-input');if(!inp)return
+  var q=(inp.value||'').trim();if(!q){toast('先写下你想问的问题');inp.focus();return}
+  inp.value='';state.ask.msgs=askMsgs().concat([{who:'u',text:q}]);state.ask.typing=true;syncAskUI();
+  /* ── 真实模型接入点（当前为本地占位，替换下面这段即可）──────────────
+     fetch('https://<你的模型服务>/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+       body:JSON.stringify({question:q})})
+       .then(function(r){return r.json()})
+       .then(function(d){state.ask.typing=false;state.ask.msgs=askMsgs().concat([{who:'a',text:d.answer}]);syncAskUI()})
+       .catch(function(){state.ask.typing=false;state.ask.msgs=askMsgs().concat([{who:'n',text:'模型服务暂时不可用。'}]);syncAskUI()})
+     另需把 ASK_SEED / 页脚那两句「未接入」的标注一并去掉。 ───────────────── */
+  setTimeout(function(){state.ask.typing=false;
+    if(state.screen==='inquiry'){state.ask.msgs=askMsgs().concat([{who:'a',text:askStub(q)}]);syncAskUI()}},420)}
+
+/* ---------- 问询页 ---------- */
+function pgInquiry(){
+ return '<main class="sc navpad">'
+ +'<div class="ask-head">'
+  +'<div class="ask-brand">'+knot()+'<b>问询 · 弦养顾问</b><span class="ask-badge">智能体</span></div>'
+  +'<p class="ask-sub">关于功法要领、五音调养与今日练习安排，都可以问一问。</p>'
+ +'</div>'
+ +'<section class="card ask-card">'
+  +'<div id="ask-list" class="ask-list" role="log" aria-live="polite">'+askListHTML()+'</div>'
+  +'<div class="ask-chips">'+ASK_CHIPS.map(function(c){return '<button class="ask-chip" data-a="ask-chip" data-q="'+askEsc(c)+'">'+askEsc(c)+'</button>'}).join('')+'</div>'
+  +'<div class="ask-input">'
+   +'<input id="ask-input" type="text" autocomplete="off" maxlength="200" placeholder="写下你想问的…" aria-label="输入要问的问题">'
+   +'<button class="ask-send" data-a="ask-send" aria-label="发送">'+ic('chev','width:2rem;height:2rem')+'</button>'
+  +'</div>'
+ +'</section>'
+ +'<p class="ask-note">'+ic('info')+'<span>本页为智能体交互结构预览，<b>尚未接入模型服务</b>，回复为本地占位；接入方式见 <b>askSend()</b> 注释。</span></p>'
+ +nav('inquiry')+'</main>'}
+
 /* ---------- 渲染 & 事件 ---------- */
-var PAGES={loading:pgLoading,question:pgQuestion,audio:pgAudio,home:pgHome,intro:pgIntro,practice:pgPractice,done:pgDone,profile:pgProfile,body:pgBody}
+var PAGES={loading:pgLoading,question:pgQuestion,audio:pgAudio,home:pgHome,intro:pgIntro,practice:pgPractice,done:pgDone,profile:pgProfile,body:pgBody,inquiry:pgInquiry}
 function paint(){
   var active=document.activeElement,buttons=Array.from(root.querySelectorAll('button')),focusIndex=buttons.indexOf(active);
   document.title='弦养';root.dataset.screen=state.screen;root.innerHTML=(PAGES[state.screen]||pgLoading)();
@@ -818,6 +875,7 @@ function paint(){
   var stage=root.querySelector('.stage');if(stage){stage.classList.toggle('paused',!state.running);stage.dataset.preview='true'}
   if(focusIndex>=0){var next=root.querySelectorAll('button')[focusIndex];if(next)next.focus({preventScroll:true})}
   syncAudioUI();
+  syncAskUI();
 }
 function go(s){if(typeof stopHold==='function')stopHold(true);if(typeof stopBreath==='function')stopBreath(true);state.screen=s;paint();window.scrollTo(0,0);root.querySelector('main').focus({preventScroll:true})}
 
@@ -990,6 +1048,7 @@ document.addEventListener('click',function(e){
     case 'nav-audio':go('audio');break
     case 'nav-home':go('home');break
     case 'nav-intro':go('intro');break
+    case 'nav-inquiry':go('inquiry');break
     case 'nav-profile':go('profile');break
     case 'go-intro':go('intro');break
     /* ---- 首页 ---- */
@@ -1091,8 +1150,11 @@ document.addEventListener('click',function(e){
       else{el.dataset.arm='1';el.textContent='再点一次确认清空';toast('再点一次即可清空本机打卡记录');}break
     case 'sheet-close':closeSheet();break
     case 'unavailable':toast((el.dataset.label||el.getAttribute('aria-label')||el.textContent.trim()||'此功能')+'：这条暂未接入，已接入的功能清单见「我的 › 版本信息」');break
-    /* ---- 我的：调养实验室入口（本次新增 · 唯一改动）---- */
+    /* ---- 我的：调养实验室入口 ---- */
     case 'go-lab':toast('正在进入调养实验室…');location.href='s4/#/preview';break
+    /* ---- 问询（智能体交互页 · 结构预览）---- */
+    case 'ask-send':askSend();break
+    case 'ask-chip':{var ai=root.querySelector('#ask-input');if(ai){ai.value=el.getAttribute('data-q')||'';ai.focus()}break}
     /* ---- 身体数据 ---- */
     case 'go-body':closeSheet();go('body');break
     case 'stp':var k=el.getAttribute('data-k'),d=+el.getAttribute('data-d');if(!Object.prototype.hasOwnProperty.call(BODY_LIMITS,k)||(d!==1&&d!==-1))return;
@@ -1109,6 +1171,8 @@ document.addEventListener('input',function(e){var el=e.target;if(!el||!el.datase
   AUDIO.vol=Math.max(0,Math.min(1,(+el.value||0)/100));saveAudioPref();if(AUDIO.mus)AUDIO.mus.volume=AUDIO.vol})
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'&&sheetOpen()){closeSheet();return}
+  /* 问询页：回车即发送 */
+  if(e.key==='Enter'&&e.target&&e.target.id==='ask-input'){e.preventDefault();askSend();return}
   var el=e.target.closest('[role="button"][data-a]');if(el&&(e.key==='Enter'||e.key===' ')){e.preventDefault();el.click()}})
 
 /* URL 直达（预览用） */
