@@ -1,0 +1,60 @@
+{
+  "root": "http://127.0.0.1:5400",
+  "at": "2026-10-11T14:34:41.607Z",
+  "styles": {
+    "baduanjin": {
+      "facts": {
+        "fbOn": true,
+        "fbSrc": "/s4/assets/fallback-baduanjin.mp4",
+        "fbResolved": "http://127.0.0.1:5400/s4/assets/fallback-baduanjin.mp4",
+        "fbReady": 4,
+        "curIdx": "第 1 式",
+        "curName": "双手托天理三焦",
+        "hudIdx": "第 1 式",
+        "hudName": "双手托天理三焦",
+        "fbBar": "预录演示中 · 摄像头初始化失败：Requested device not fo"
+      },
+      "consoleErr": [
+        "NotFoundError: Requested device not found"
+      ],
+      "expectSrc": "/assets/fallback-baduanjin.mp4",
+      "srcOk": true
+    },
+    "wuqinxi": {
+      "facts": {
+        "fbOn": true,
+        "fbSrc": "/s4/assets/fallback-wuqinxi.mp4",
+        "fbResolved": "http://127.0.0.1:5400/s4/assets/fallback-wuqinxi.mp4",
+        "fbReady": 4,
+        "curIdx": "第 1 式",
+        "curName": "虎举",
+        "hudIdx": "第 1 式",
+        "hudName": "虎举",
+        "fbBar": "预录演示中 · 摄像头初始化失败：Requested device not fo"
+      },
+      "consoleErr": [
+        "NotFoundError: Requested device not found"
+      ],
+      "expectSrc": "/assets/fallback-wuqinxi.mp4",
+      "srcOk": true
+    },
+    "taiji": {
+      "facts": {
+        "fbOn": true,
+        "fbSrc": "/s4/assets/fallback-taiji.mp4",
+        "fbResolved": "http://127.0.0.1:5400/s4/assets/fallback-taiji.mp4",
+        "fbReady": 4,
+        "curIdx": "第 1 式",
+        "curName": "起势",
+        "hudIdx": "第 1 式",
+        "hudName": "起势",
+        "fbBar": "预录演示中 · 摄像头初始化失败：Requested device not fo"
+      },
+      "consoleErr": [
+        "NotFoundError: Requested device not found"
+      ],
+      "expectSrc": "/assets/fallback-taiji.mp4",
+      "srcOk": true
+    }
+  }
+}

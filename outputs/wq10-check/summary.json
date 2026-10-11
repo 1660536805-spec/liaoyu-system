@@ -1,0 +1,236 @@
+{
+  "root": "http://127.0.0.1:5400",
+  "at": "2026-10-11T13:41:35.229Z",
+  "targets": {
+    "after": {
+      "base": "http://127.0.0.1:5400/s4",
+      "steps": [
+        {
+          "n": 1,
+          "idxText": "第 1 式",
+          "curName": "虎举",
+          "cbName": "第 1 式 · 虎举",
+          "cfSvg": true,
+          "canvas": false,
+          "miss": false,
+          "paths": 37,
+          "shot": "after-step-01.png",
+          "status": "房间版小人"
+        },
+        {
+          "n": 2,
+          "idxText": "第 2 式",
+          "curName": "虎扑",
+          "cbName": "第 2 式 · 虎扑",
+          "cfSvg": true,
+          "canvas": false,
+          "miss": false,
+          "paths": 37,
+          "shot": "after-step-02.png",
+          "status": "房间版小人"
+        },
+        {
+          "n": 3,
+          "idxText": "第 3 式",
+          "curName": "鹿抵",
+          "cbName": "第 3 式 · 鹿抵",
+          "cfSvg": true,
+          "canvas": false,
+          "miss": false,
+          "paths": 37,
+          "shot": "after-step-03.png",
+          "status": "房间版小人"
+        },
+        {
+          "n": 4,
+          "idxText": "第 4 式",
+          "curName": "鹿奔",
+          "cbName": "第 4 式 · 鹿奔",
+          "cfSvg": true,
+          "canvas": false,
+          "miss": false,
+          "paths": 37,
+          "shot": "after-step-04.png",
+          "status": "房间版小人"
+        },
+        {
+          "n": 5,
+          "idxText": "第 5 式",
+          "curName": "熊运",
+          "cbName": "第 5 式 · 熊运",
+          "cfSvg": true,
+          "canvas": false,
+          "miss": false,
+          "paths": 37,
+          "shot": "after-step-05.png",
+          "status": "房间版小人"
+        },
+        {
+          "n": 6,
+          "idxText": "第 6 式",
+          "curName": "熊晃",
+          "cbName": "第 6 式 · 熊晃",
+          "cfSvg": true,
+          "canvas": false,
+          "miss": false,
+          "paths": 37,
+          "shot": "after-step-06.png",
+          "status": "房间版小人"
+        },
+        {
+          "n": 7,
+          "idxText": "第 7 式",
+          "curName": "猿提",
+          "cbName": "第 7 式 · 猿提",
+          "cfSvg": true,
+          "canvas": false,
+          "miss": false,
+          "paths": 37,
+          "shot": "after-step-07.png",
+          "status": "房间版小人"
+        },
+        {
+          "n": 8,
+          "idxText": "第 8 式",
+          "curName": "猿摘",
+          "cbName": "第 8 式 · 猿摘",
+          "cfSvg": true,
+          "canvas": false,
+          "miss": false,
+          "paths": 37,
+          "shot": "after-step-08.png",
+          "status": "房间版小人"
+        },
+        {
+          "n": 9,
+          "idxText": "第 9 式",
+          "curName": "鸟伸",
+          "cbName": "第 9 式 · 鸟伸",
+          "cfSvg": true,
+          "canvas": false,
+          "miss": false,
+          "paths": 37,
+          "shot": "after-step-09.png",
+          "status": "房间版小人"
+        },
+        {
+          "n": 10,
+          "idxText": "第 10 式",
+          "curName": "鸟飞",
+          "cbName": "第 10 式 · 鸟飞",
+          "cfSvg": true,
+          "canvas": false,
+          "miss": false,
+          "paths": 37,
+          "shot": "after-step-10.png",
+          "status": "房间版小人"
+        }
+      ],
+      "finished": true,
+      "strings": 5,
+      "totalSteps": 10,
+      "names": [
+        "虎举",
+        "虎扑",
+        "鹿抵",
+        "鹿奔",
+        "熊运",
+        "熊晃",
+        "猿提",
+        "猿摘",
+        "鸟伸",
+        "鸟飞"
+      ],
+      "errors": {
+        "console": 0,
+        "page": 0,
+        "consoleSample": [],
+        "pageSample": []
+      }
+    },
+    "before": {
+      "base": "http://127.0.0.1:5400/s4b",
+      "steps": [
+        {
+          "n": 1,
+          "idxText": "第 1 式",
+          "curName": "虎举",
+          "cbName": "第 1 式 · 虎举",
+          "cfSvg": true,
+          "canvas": false,
+          "miss": false,
+          "paths": 37,
+          "shot": "before-step-01.png",
+          "status": "房间版小人"
+        },
+        {
+          "n": 2,
+          "idxText": "第 2 式",
+          "curName": "鹿抵",
+          "cbName": "第 2 式 · 鹿抵",
+          "cfSvg": true,
+          "canvas": false,
+          "miss": false,
+          "paths": 37,
+          "shot": "before-step-02.png",
+          "status": "房间版小人"
+        },
+        {
+          "n": 3,
+          "idxText": "第 3 式",
+          "curName": "熊运",
+          "cbName": "第 3 式 · 熊运",
+          "cfSvg": true,
+          "canvas": false,
+          "miss": false,
+          "paths": 37,
+          "shot": "before-step-03.png",
+          "status": "房间版小人"
+        },
+        {
+          "n": 4,
+          "idxText": "第 4 式",
+          "curName": "猿提",
+          "cbName": "第 4 式 · 猿提",
+          "cfSvg": true,
+          "canvas": false,
+          "miss": false,
+          "paths": 37,
+          "shot": "before-step-04.png",
+          "status": "房间版小人"
+        },
+        {
+          "n": 5,
+          "idxText": "第 5 式",
+          "curName": "鸟飞",
+          "cbName": "第 5 式 · 鸟飞",
+          "cfSvg": true,
+          "canvas": false,
+          "miss": false,
+          "paths": 37,
+          "shot": "before-step-05.png",
+          "status": "房间版小人"
+        }
+      ],
+      "finished": true,
+      "strings": 5,
+      "totalSteps": 5,
+      "names": [
+        "虎举",
+        "鹿抵",
+        "熊运",
+        "猿提",
+        "鸟飞"
+      ],
+      "errors": {
+        "console": 2,
+        "page": 0,
+        "consoleSample": [
+          "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "[fallback] 预录兜底未就绪：取不到 /assets/fallback.mp4（文件缺失或编码不受支持）"
+        ],
+        "pageSample": []
+      }
+    }
+  }
+}

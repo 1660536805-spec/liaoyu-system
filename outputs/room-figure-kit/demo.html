@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>房间版小人 · 动作演示套件（五禽戏 / 太极）</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="roomFigureKit.css">
+<style>
+  :root {
+    --paper: #FBF3E3; --ochre: #B0552E; --jade: #6E8F7C; --gold: #C9A97E;
+    --ink: #2A2622; --ink-soft: #6B6156; --line: #E2D6C2;
+    --serif: 'Songti SC', 'STSong', 'SimSun', serif;
+    --sans: -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper); color: var(--ink); font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  .k-wrap { max-width: 1280px; margin: 0 auto; padding: 28px 20px 64px; }
+  .k-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 16px; }
+  .k-head h1 { font-family: var(--serif); font-size: clamp(22px, 3.2vw, 32px); font-weight: 500; letter-spacing: .04em; margin: 0 0 6px; }
+  .k-head p { margin: 0; color: var(--ink-soft); font-size: 14px; line-height: 1.7; max-width: 62ch; }
+  .k-tag { display: inline-block; padding: 2px 9px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; color: var(--ink-soft); background: #fff9ee; }
+
+  .k-main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 22px; align-items: start; margin-top: 16px; }
+  @media (max-width: 940px) { .k-main { grid-template-columns: 1fr; } }
+
+  /* ---- 舞台 + 控制条 ---- */
+  .k-col { min-width: 0; }
+  #stage { border-radius: 8px; overflow: hidden; }
+
+  .k-bar { margin-top: 14px; border: 1px solid var(--line); border-radius: 10px; background: #fffdf7; padding: 14px 16px; }
+  .k-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .k-tab {
+    appearance: none; border: 1px solid var(--line); background: #fff; color: var(--ink);
+    border-radius: 999px; padding: 6px 16px; font-size: 14px; cursor: pointer; font-family: var(--serif); letter-spacing: .05em;
+  }
+  .k-tab[aria-pressed="true"] { background: var(--ochre); border-color: var(--ochre); color: #fff; }
+
+  .k-info { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .k-idx { font-size: 12px; letter-spacing: .1em; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .k-name { font-family: var(--serif); font-size: clamp(20px, 2.6vw, 26px); color: var(--ink); letter-spacing: .06em; }
+  .k-desc { margin: 6px 0 0; font-size: 14px; color: var(--ink-soft); line-height: 1.7; min-height: 2.6em; }
+  .k-hint { margin: 4px 0 0; font-size: 13px; color: var(--jade); line-height: 1.7; }
+
+  .k-transport { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .k-btn {
+    appearance: none; border: 1px solid var(--line); background: #fff; color: var(--ink);
+    border-radius: 8px; padding: 7px 14px; font-size: 14px; cursor: pointer;
+  }
+  .k-btn:hover { border-color: var(--gold); }
+  .k-btn.primary { background: var(--jade); border-color: var(--jade); color: #fff; }
+  .k-btn.primary:hover { filter: brightness(1.06); }
+  .k-seek { flex: 1 1 200px; min-width: 160px; accent-color: var(--ochre); }
+  .k-chk { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-soft); }
+  .k-sel { border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 6px 8px; font-size: 13px; color: var(--ink); }
+
+  /* ---- 检查器 ---- */
+  .k-side { display: grid; gap: 14px; }
+  .k-card { border: 1px solid var(--line); border-radius: 10px; background: #fffdf7; padding: 14px; }
+  .k-card h2 { font-family: var(--serif); font-size: 16px; font-weight: 500; margin: 0 0 4px; letter-spacing: .05em; }
+  .k-card .k-note { margin: 0 0 10px; font-size: 12px; color: var(--ink-soft); line-height: 1.6; }
+  .k-parts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .k-part {
+    appearance: none; border: 1px solid var(--line); background: #fff; color: var(--ink-soft);
+    border-radius: 6px; padding: 3px 8px; font-size: 12px; cursor: pointer; font-family: ui-monospace, Menlo, monospace;
+  }
+  .k-part[aria-pressed="true"] { background: #F2E7D3; border-color: var(--gold); color: var(--ink); }
+  .k-part[aria-pressed="false"] { opacity: .48; text-decoration: line-through; }
+  .k-row { display: grid; grid-template-columns: 62px 1fr 52px; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: var(--ink-soft); }
+  .k-row input[type=range] { width: 100%; accent-color: var(--ochre); }
+  .k-row b { font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; font-family: ui-monospace, Menlo, monospace; }
+  .k-state { margin: 8px 0 0; font: 11px/1.6 ui-monospace, Menlo, monospace; color: var(--ink-soft); white-space: pre-wrap; word-break: break-all; max-height: 128px; overflow: auto; }
+  .k-foot { margin-top: 20px; font-size: 12px; color: var(--ink-soft); line-height: 1.8; }
+  .k-foot code { font-family: ui-monospace, Menlo, monospace; background: #F2E7D3; padding: 1px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="k-wrap">
+  <div class="k-head">
+    <div>
+      <h1>房间版小人 · 动作演示套件</h1>
+      <p>把原来的「八段锦专用小窗」抽成一套与招式无关的通用演示器：小人外观、比例、房间场景原样保留，动作拆成可单独读写的<b>分层肢体</b>与<b>关节</b>，招式可切换 / 播放 / 循环 / 拖动 / 变速，切换时带姿态混合。</p>
+    </div>
+    <span class="k-tag" id="k-ver">RoomFigureKit</span>
+  </div>
+
+  <div class="k-main">
+    <div class="k-col">
+      <div id="stage"></div>
+
+      <div class="k-bar">
+        <div class="k-tabs" id="k-tabs"></div>
+        <div class="k-info">
+          <span class="k-idx" id="k-idx">—</span>
+          <span class="k-name" id="k-name">—</span>
+        </div>
+        <p class="k-desc" id="k-desc"></p>
+        <p class="k-hint" id="k-hint"></p>
+        <div class="k-transport">
+          <button class="k-btn" id="k-prev">上一式</button>
+          <button class="k-btn primary" id="k-play">暂停</button>
+          <button class="k-btn" id="k-next">下一式</button>
+          <button class="k-btn" id="k-replay">重放</button>
+          <input class="k-seek" id="k-seek" type="range" min="0" max="1000" value="0" aria-label="进度">
+          <label class="k-chk"><input type="checkbox" id="k-loop" checked>循环</label>
+          <select class="k-sel" id="k-speed" aria-label="速度">
+            <option value="0.5">0.5×</option>
+            <option value="0.75">0.75×</option>
+            <option value="1" selected>1.0×</option>
+            <option value="1.5">1.5×</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <aside class="k-side">
+      <div class="k-card">
+        <h2>分层肢体</h2>
+        <p class="k-note">点一下即单独隐藏/显示该层（正在播放也生效）。这是「可独立控制」的第一层证据。</p>
+        <div class="k-parts" id="k-parts"></div>
+      </div>
+      <div class="k-card">
+        <h2>关节微调</h2>
+        <p class="k-note">拖动即<b>暂停</b>并只改这一个关节，其余原样 —— 第二层证据。点「复位」回到当前式的姿态。</p>
+        <div class="k-row"><span>侧倾 lean</span><input id="j-lean" type="range" min="-35" max="35" value="0"><b id="j-lean-v">0.00</b></div>
+        <div class="k-row"><span>前俯 fold</span><input id="j-fold" type="range" min="-40" max="100" value="0"><b id="j-fold-v">0.00</b></div>
+        <div class="k-row"><span>转头 head</span><input id="j-head" type="range" min="-12" max="12" value="0"><b id="j-head-v">0.0</b></div>
+        <div class="k-row" style="grid-template-columns:62px 1fr;"><span>右腕 r</span><input id="j-wr" type="range" min="28" max="60" value="60"><b id="j-wr-v">60</b></div>
+        <div class="k-row" style="grid-template-columns:62px 1fr;"><span>右腕 θ°</span><input id="j-wt" type="range" min="-180" max="180" value="0"><b id="j-wt-v">0</b></div>
+        <div style="margin-top:10px"><button class="k-btn" id="k-reset">复位关节</button></div>
+        <pre class="k-state" id="k-state"></pre>
+      </div>
+    </aside>
+  </div>
+
+  <p class="k-foot">
+    这一页只依赖同目录四个文件：<code>roomFigureKit.css</code>（房间场景样式）、<code>roomFigureKit.js</code>（几何 + 绘制 + 舞台 + 播放器）、
+    <code>moves-wuqinxi.js</code> / <code>moves-taiji.js</code>（手工关键帧动作库）。整套是矢量 SVG，房间按 <code>--rfk-scale</code> 等比缩放，任意屏幕尺寸都清晰。
+  </p>
+</div>
+
+<script src="roomFigureKit.js"></script>
+<script src="moves-wuqinxi.js"></script>
+<script src="moves-taiji.js"></script>
+<script src="demo.js"></script>
+</body>
+</html>

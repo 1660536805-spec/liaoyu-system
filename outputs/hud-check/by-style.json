@@ -1,0 +1,84 @@
+{
+  "root": "http://127.0.0.1:5400",
+  "at": "2026-10-11T13:40:25.381Z",
+  "styles": {
+    "baduanjin": {
+      "style": "baduanjin",
+      "exp": {
+        "tip": "双臂上举，舒展肩背。久坐之后，让身体从下往上松一遍。",
+        "done": "八式俱毕 · 七弦和鸣"
+      },
+      "pass": {
+        "bubble": true,
+        "tips": true,
+        "doneSub": true
+      },
+      "bubble": "双臂上举，舒展肩背。久坐之后，让身体从下往上松一遍。",
+      "tips": [
+        "• 双臂上举，舒展肩背。久坐之后，让身体从下往上松一遍。",
+        "• 双臂向上举过头顶，手掌相对，手指轻扣，保持几秒缓缓落下。"
+      ],
+      "doneSub": "八式俱毕 · 七弦和鸣",
+      "errors": {
+        "console": 0,
+        "page": 0,
+        "consoleSample": [],
+        "pageSample": []
+      }
+    },
+    "wuqinxi": {
+      "style": "wuqinxi",
+      "exp": {
+        "tip": "两手十指撑开成虎爪、再握拳，沿体前中线上提，开筋展肩。",
+        "done": "十式俱毕 · 五弦和鸣"
+      },
+      "pass": {
+        "bubble": true,
+        "tips": true,
+        "doneSub": true
+      },
+      "bubble": "两手十指撑开成虎爪、再握拳，沿体前中线上提，开筋展肩。",
+      "tips": [
+        "• 两手十指撑开成虎爪、再握拳，沿体前中线上提，开筋展肩。",
+        "• 两手十指撑开、屈指成虎爪，再外旋握拳，沿体前中线上提；至肩前松拳成虎爪举过头顶、再下拉还原。"
+      ],
+      "doneSub": "十式俱毕 · 五弦和鸣",
+      "errors": {
+        "console": 0,
+        "page": 0,
+        "consoleSample": [],
+        "pageSample": []
+      }
+    },
+    "taiji": {
+      "style": "taiji",
+      "exp": {
+        "tip": "两脚开立与肩同宽，两臂自然下垂，浑身松沉。",
+        "done": "廿四式俱毕 · 七弦和鸣"
+      },
+      "pass": {
+        "bubble": true,
+        "tips": true,
+        "doneSub": true
+      },
+      "bubble": "两脚开立与肩同宽，两臂自然下垂，浑身松沉。",
+      "tips": [
+        "• 两脚开立与肩同宽，两臂自然下垂，浑身松沉。",
+        "• 两脚与肩同宽站直，双手自然下垂，肩松、肘沉，气沉丹田。"
+      ],
+      "doneSub": "廿四式俱毕 · 七弦和鸣",
+      "errors": {
+        "console": 0,
+        "page": 0,
+        "consoleSample": [],
+        "pageSample": []
+      }
+    }
+  },
+  "prot": {
+    "hasFrame": 1,
+    "cerr": 0,
+    "perr": 0,
+    "cerrSample": []
+  }
+}

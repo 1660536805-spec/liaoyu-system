@@ -1,0 +1,308 @@
+{
+  "base": "http://127.0.0.1:5400",
+  "generatedAt": "2026-10-11T14:43:29.882Z",
+  "checks": {
+    "baduanjin.home.segCount=4": {
+      "ok": true,
+      "detail": 4
+    },
+    "baduanjin.home.labels": {
+      "ok": true,
+      "detail": [
+        "八段锦",
+        "五禽戏",
+        "太极拳",
+        "帮我选"
+      ]
+    },
+    "baduanjin.home.noOverflowX": {
+      "ok": true,
+      "detail": {
+        "sum": 423,
+        "avail": 425,
+        "rows": 1
+      }
+    },
+    "baduanjin.home.singleRow": {
+      "ok": true,
+      "detail": 1
+    },
+    "baduanjin.intro.mode=0": {
+      "ok": true,
+      "detail": 0
+    },
+    "baduanjin.intro.fullN=8": {
+      "ok": true,
+      "detail": [
+        "全套 8 式",
+        "招牌 3 式"
+      ]
+    },
+    "baduanjin.intro.shortCard": {
+      "ok": true,
+      "detail": 2
+    },
+    "baduanjin.s4url.style=baduanjin": {
+      "ok": true,
+      "detail": "s4/#/train?stage=point&mode=full&style=baduanjin&tone=gong"
+    },
+    "baduanjin.practice.dots<=8": {
+      "ok": true,
+      "detail": {
+        "n": 8,
+        "text": "1,2,3,4,5,6,7,8"
+      }
+    },
+    "baduanjin.practice.noOverflow": {
+      "ok": true,
+      "detail": {
+        "sw": 8
+      }
+    },
+    "baduanjin.practice.first=双手托天理三焦": {
+      "ok": true,
+      "detail": "第1式 双手托天理三焦"
+    },
+    "baduanjin.side.points": {
+      "ok": true,
+      "detail": "马步拉弓，打开胸背，气机一开一合。左脚开步略宽于肩，屈膝下蹲成马步两手在胸前交叠，一手成「弓手」向侧推出另一手成「箭手」屈肘后拉，如拉满弓目视推出手的食指方向，左右各做一次"
+    },
+    "baduanjin.done.head": {
+      "ok": true,
+      "detail": {
+        "h": "动作预览完成",
+        "track": "8 式预览 · 综合 · 收束",
+        "fretRows": 7
+      }
+    },
+    "baduanjin.done.trackHasN=8": {
+      "ok": true,
+      "detail": "8 式预览 · 综合 · 收束"
+    },
+    "baduanjin.about.noWuqinxiGap": {
+      "ok": true,
+      "detail": null
+    },
+    "baduanjin.about.threeStyles": {
+      "ok": true,
+      "detail": null
+    },
+    "baduanjin.help.styleSwitch": {
+      "ok": true,
+      "detail": null
+    },
+    "baduanjin.share.dataUrl": {
+      "ok": true,
+      "detail": 428530
+    },
+    "wuqinxi.home.segCount=4": {
+      "ok": true,
+      "detail": 4
+    },
+    "wuqinxi.home.labels": {
+      "ok": true,
+      "detail": [
+        "八段锦",
+        "五禽戏",
+        "太极拳",
+        "帮我选"
+      ]
+    },
+    "wuqinxi.home.noOverflowX": {
+      "ok": true,
+      "detail": {
+        "sum": 423,
+        "avail": 425,
+        "rows": 1
+      }
+    },
+    "wuqinxi.home.singleRow": {
+      "ok": true,
+      "detail": 1
+    },
+    "wuqinxi.intro.mode=1": {
+      "ok": true,
+      "detail": 1
+    },
+    "wuqinxi.intro.fullN=10": {
+      "ok": true,
+      "detail": [
+        "全套 10 式"
+      ]
+    },
+    "wuqinxi.intro.shortCard": {
+      "ok": true,
+      "detail": 1
+    },
+    "wuqinxi.s4url.style=wuqinxi": {
+      "ok": true,
+      "detail": "s4/#/train?stage=point&mode=full&style=wuqinxi&tone=gong"
+    },
+    "wuqinxi.practice.dots<=8": {
+      "ok": true,
+      "detail": {
+        "n": 8,
+        "text": "1,2,3,4,5,6,7,8"
+      }
+    },
+    "wuqinxi.practice.noOverflow": {
+      "ok": true,
+      "detail": {
+        "sw": 8
+      }
+    },
+    "wuqinxi.practice.first=虎举": {
+      "ok": true,
+      "detail": "第1式 虎举"
+    },
+    "wuqinxi.side.points": {
+      "ok": true,
+      "detail": "两手成虎爪上举，再前俯下扑、起身后仰，一起一伏如虎扑食。两手成虎爪沿体前上举过头；再以腰胯带动上体向前下方扑落，两爪随之下按；然后起身、伸膝、送髋挺腹，上体顺劲向后一仰，回到体前抱球。"
+    },
+    "wuqinxi.done.head": {
+      "ok": true,
+      "detail": {
+        "h": "动作预览完成",
+        "track": "10 式预览 · 综合 · 收束",
+        "fretRows": 7
+      }
+    },
+    "wuqinxi.done.trackHasN=10": {
+      "ok": true,
+      "detail": "10 式预览 · 综合 · 收束"
+    },
+    "wuqinxi.about.noWuqinxiGap": {
+      "ok": true,
+      "detail": null
+    },
+    "wuqinxi.about.threeStyles": {
+      "ok": true,
+      "detail": null
+    },
+    "wuqinxi.help.styleSwitch": {
+      "ok": true,
+      "detail": null
+    },
+    "wuqinxi.share.dataUrl": {
+      "ok": true,
+      "detail": 330762
+    },
+    "taiji.home.segCount=4": {
+      "ok": true,
+      "detail": 4
+    },
+    "taiji.home.labels": {
+      "ok": true,
+      "detail": [
+        "八段锦",
+        "五禽戏",
+        "太极拳",
+        "帮我选"
+      ]
+    },
+    "taiji.home.noOverflowX": {
+      "ok": true,
+      "detail": {
+        "sum": 423,
+        "avail": 425,
+        "rows": 1
+      }
+    },
+    "taiji.home.singleRow": {
+      "ok": true,
+      "detail": 1
+    },
+    "taiji.intro.mode=2": {
+      "ok": true,
+      "detail": 2
+    },
+    "taiji.intro.fullN=24": {
+      "ok": true,
+      "detail": [
+        "全套 24 式"
+      ]
+    },
+    "taiji.intro.shortCard": {
+      "ok": true,
+      "detail": 1
+    },
+    "taiji.s4url.style=taiji": {
+      "ok": true,
+      "detail": "s4/#/train?stage=point&mode=full&style=taiji&tone=gong"
+    },
+    "taiji.practice.dots<=8": {
+      "ok": true,
+      "detail": {
+        "n": 8,
+        "text": "1,2,3,4,5,6,7,8"
+      }
+    },
+    "taiji.practice.noOverflow": {
+      "ok": true,
+      "detail": {
+        "sw": 8
+      }
+    },
+    "taiji.practice.first=起势": {
+      "ok": true,
+      "detail": "第1式 起势"
+    },
+    "taiji.side.points": {
+      "ok": true,
+      "detail": "一手向前上掤出、一手下按，如野马分鬃，左右交替。一手向前上方掤出，另一手按于胯旁，两臂分开如分鬃，弓步左右交替。"
+    },
+    "taiji.done.head": {
+      "ok": true,
+      "detail": {
+        "h": "动作预览完成",
+        "track": "24 式预览 · 综合 · 收束",
+        "fretRows": 7
+      }
+    },
+    "taiji.done.trackHasN=24": {
+      "ok": true,
+      "detail": "24 式预览 · 综合 · 收束"
+    },
+    "taiji.about.noWuqinxiGap": {
+      "ok": true,
+      "detail": null
+    },
+    "taiji.about.threeStyles": {
+      "ok": true,
+      "detail": null
+    },
+    "taiji.help.styleSwitch": {
+      "ok": true,
+      "detail": null
+    },
+    "taiji.share.dataUrl": {
+      "ok": true,
+      "detail": 444418
+    },
+    "console.errors=0": {
+      "ok": true,
+      "detail": []
+    }
+  },
+  "shots": [
+    "outputs/style-shell/home-baduanjin.png",
+    "outputs/style-shell/intro-baduanjin.png",
+    "outputs/style-shell/practice-baduanjin.png",
+    "outputs/style-shell/side-baduanjin.png",
+    "outputs/style-shell/done-baduanjin.png",
+    "outputs/style-shell/share-baduanjin.png",
+    "outputs/style-shell/home-wuqinxi.png",
+    "outputs/style-shell/intro-wuqinxi.png",
+    "outputs/style-shell/practice-wuqinxi.png",
+    "outputs/style-shell/side-wuqinxi.png",
+    "outputs/style-shell/done-wuqinxi.png",
+    "outputs/style-shell/share-wuqinxi.png",
+    "outputs/style-shell/home-taiji.png",
+    "outputs/style-shell/intro-taiji.png",
+    "outputs/style-shell/practice-taiji.png",
+    "outputs/style-shell/side-taiji.png",
+    "outputs/style-shell/done-taiji.png",
+    "outputs/style-shell/share-taiji.png"
+  ],
+  "fails": 0
+}

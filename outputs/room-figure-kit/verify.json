@@ -1,0 +1,808 @@
+{
+  "base": "http://127.0.0.1:5400/outputs/room-figure-kit",
+  "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "desktop": {
+    "facts": {
+      "style": "wuqinxi",
+      "index": 0,
+      "total": 10,
+      "u": 0.193,
+      "playing": true,
+      "loop": true,
+      "speed": 1,
+      "moveName": "虎举",
+      "figures": 2,
+      "reflectFigures": 1,
+      "svgBox": {
+        "w": 359,
+        "h": 180
+      },
+      "stageBox": {
+        "w": 898,
+        "h": 505
+      },
+      "scale": 0.898,
+      "parts": {
+        "shadow": true,
+        "legL": true,
+        "legR": true,
+        "shoeL": true,
+        "shoeR": true,
+        "jacket": true,
+        "placket": true,
+        "buttons": true,
+        "sash": true,
+        "rb0": true,
+        "rb1": true,
+        "knot": true,
+        "neck": true,
+        "head": true,
+        "face": true,
+        "armL": true,
+        "armR": true,
+        "trails": true
+      },
+      "drawnPaths": 37,
+      "errors": 0
+    }
+  },
+  "mobile": {
+    "facts": {
+      "style": "taiji",
+      "index": 7,
+      "total": 24,
+      "u": 0.833,
+      "playing": true,
+      "loop": true,
+      "speed": 1,
+      "moveName": "右揽雀尾",
+      "figures": 2,
+      "reflectFigures": 1,
+      "svgBox": {
+        "w": 140,
+        "h": 70
+      },
+      "stageBox": {
+        "w": 350,
+        "h": 197
+      },
+      "scale": 0.35,
+      "parts": {
+        "shadow": true,
+        "legL": true,
+        "legR": true,
+        "shoeL": true,
+        "shoeR": true,
+        "jacket": true,
+        "placket": true,
+        "buttons": true,
+        "sash": true,
+        "rb0": true,
+        "rb1": true,
+        "knot": true,
+        "neck": true,
+        "head": true,
+        "face": true,
+        "armL": true,
+        "armR": true,
+        "trails": true
+      },
+      "drawnPaths": 37,
+      "errors": 0
+    }
+  },
+  "moves": [
+    {
+      "style": "wuqinxi",
+      "index": 0,
+      "name": "虎举",
+      "desc": "两手十指撑开、屈指成虎爪，再外旋握拳，沿体前中线上提；至肩前松拳成虎爪，举过头顶再下拉还原。",
+      "dur": 6.4,
+      "file": "shots/pose-wuqinxi-00.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "name": "虎扑",
+      "desc": "两手成虎爪上举，上体前俯下扑，再起身、伸膝送髋、上体后仰；一起一伏如虎扑食。",
+      "dur": 7.2,
+      "file": "shots/pose-wuqinxi-01.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 2,
+      "name": "鹿抵",
+      "desc": "迈步成弓步，以腰为轴左转，躯干侧屈拧转；左臂屈肘抵靠左腰侧，右臂举至头前向左后方伸抵，转头目视后腿脚跟。",
+      "dur": 6.4,
+      "file": "shots/pose-wuqinxi-02.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 3,
+      "name": "鹿奔",
+      "desc": "两臂向前伸出，上体前俯、收腹弓背，如鹿疾奔前冲，再缓缓还原。",
+      "dur": 7,
+      "file": "shots/pose-wuqinxi-03.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 4,
+      "name": "熊运",
+      "desc": "腰腹带动，躯干缓缓画圆，臀部随重心左右起伏，双膝微屈含胸。",
+      "dur": 8,
+      "file": "shots/pose-wuqinxi-04.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 5,
+      "name": "熊晃",
+      "desc": "提髋提腿、落步踏实，身体随之左右晃动，两臂自然摆动，如熊走路。",
+      "dur": 8,
+      "file": "shots/pose-wuqinxi-05.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 6,
+      "name": "猿提",
+      "desc": "两手成猿钩收在体前，缓缓上提至胸前；同时耸肩缩项、收腹提肛，脚跟提起，头先向左、再向右各看一眼，然后慢慢放下。",
+      "dur": 6.4,
+      "file": "shots/pose-wuqinxi-06.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 7,
+      "name": "猿摘",
+      "desc": "一手成猿钩收于腰侧，另一手向斜上方摘取，眼随手动；一腿虚步点地。",
+      "dur": 6.8,
+      "file": "shots/pose-wuqinxi-07.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 8,
+      "name": "鸟伸",
+      "desc": "两手在腹前相叠、上举过头，再向前下方按落；同时一腿后伸，如鸟伸颈展翅。",
+      "dur": 6.6,
+      "file": "shots/pose-wuqinxi-08.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 9,
+      "name": "鸟飞",
+      "desc": "一腿独立站稳，另一腿屈膝上提；两掌成鸟翅沿体侧上摆至头顶上方，再收翅、落腿还原。",
+      "dur": 6.4,
+      "file": "shots/pose-wuqinxi-09.png"
+    },
+    {
+      "style": "taiji",
+      "index": 0,
+      "name": "起势",
+      "desc": "两脚开立与肩同宽，两臂自然下垂，浑身松沉。",
+      "dur": 5,
+      "file": "shots/pose-taiji-00.png"
+    },
+    {
+      "style": "taiji",
+      "index": 1,
+      "name": "左右野马分鬃",
+      "desc": "一手向前上掤出、一手下按，如野马分鬃，左右交替。",
+      "dur": 7.2,
+      "file": "shots/pose-taiji-01.png"
+    },
+    {
+      "style": "taiji",
+      "index": 2,
+      "name": "白鹤亮翅",
+      "desc": "一手举于额前、一手按于胯旁，如白鹤展翅。",
+      "dur": 6.2,
+      "file": "shots/pose-taiji-02.png"
+    },
+    {
+      "style": "taiji",
+      "index": 3,
+      "name": "左右搂膝拗步",
+      "desc": "一手搂膝、一手前推，弓步拗身，左右交替。",
+      "dur": 7.2,
+      "file": "shots/pose-taiji-03.png"
+    },
+    {
+      "style": "taiji",
+      "index": 4,
+      "name": "手挥琵琶",
+      "desc": "两手一前一后合抱于胸前，如抱琵琶。",
+      "dur": 5.6,
+      "file": "shots/pose-taiji-04.png"
+    },
+    {
+      "style": "taiji",
+      "index": 5,
+      "name": "左右倒卷肱",
+      "desc": "两手交替向后卷收、再向前推，退步连环。",
+      "dur": 7.2,
+      "file": "shots/pose-taiji-05.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "name": "左揽雀尾",
+      "desc": "掤、捋、挤、按四法，左式一遍。",
+      "dur": 8,
+      "file": "shots/pose-taiji-06.png"
+    },
+    {
+      "style": "taiji",
+      "index": 7,
+      "name": "右揽雀尾",
+      "desc": "掤、捋、挤、按四法，右式一遍。",
+      "dur": 8,
+      "file": "shots/pose-taiji-07.png"
+    },
+    {
+      "style": "taiji",
+      "index": 8,
+      "name": "单鞭",
+      "desc": "一手成勾手侧伸、一手立掌前推，如挥鞭。",
+      "dur": 6,
+      "file": "shots/pose-taiji-08.png"
+    },
+    {
+      "style": "taiji",
+      "index": 9,
+      "name": "云手",
+      "desc": "两手在体前上下交替划圆，腰随手动。",
+      "dur": 8,
+      "file": "shots/pose-taiji-09.png"
+    },
+    {
+      "style": "taiji",
+      "index": 10,
+      "name": "单鞭",
+      "desc": "一手成勾手侧伸、一手立掌前推，如挥鞭。",
+      "dur": 6,
+      "file": "shots/pose-taiji-10.png"
+    },
+    {
+      "style": "taiji",
+      "index": 11,
+      "name": "高探马",
+      "desc": "一手向前探出如探马，虚步轻灵。",
+      "dur": 5.6,
+      "file": "shots/pose-taiji-11.png"
+    },
+    {
+      "style": "taiji",
+      "index": 12,
+      "name": "右蹬脚",
+      "desc": "两手分开、右腿蹬出，劲贯脚跟。",
+      "dur": 6.4,
+      "file": "shots/pose-taiji-12.png"
+    },
+    {
+      "style": "taiji",
+      "index": 13,
+      "name": "双峰贯耳",
+      "desc": "两拳从两侧向前上方合击，如双峰贯耳。",
+      "dur": 6,
+      "file": "shots/pose-taiji-13.png"
+    },
+    {
+      "style": "taiji",
+      "index": 14,
+      "name": "转身左蹬脚",
+      "desc": "转身后两手分开、左腿蹬出。",
+      "dur": 6.4,
+      "file": "shots/pose-taiji-14.png"
+    },
+    {
+      "style": "taiji",
+      "index": 15,
+      "name": "左下势独立",
+      "desc": "先下势穿掌，再一腿独立、一手上举。",
+      "dur": 7.2,
+      "file": "shots/pose-taiji-15.png"
+    },
+    {
+      "style": "taiji",
+      "index": 16,
+      "name": "右下势独立",
+      "desc": "先下势穿掌，再右腿独立、一手上举。",
+      "dur": 7,
+      "file": "shots/pose-taiji-16.png"
+    },
+    {
+      "style": "taiji",
+      "index": 17,
+      "name": "左右穿梭",
+      "desc": "一手架于额前、一手前推，左右穿梭。",
+      "dur": 7.2,
+      "file": "shots/pose-taiji-17.png"
+    },
+    {
+      "style": "taiji",
+      "index": 18,
+      "name": "海底针",
+      "desc": "俯身向前，一手向下插如探海底。",
+      "dur": 6.4,
+      "file": "shots/pose-taiji-18.png"
+    },
+    {
+      "style": "taiji",
+      "index": 19,
+      "name": "闪通臂",
+      "desc": "一手架额、一手前推，如闪身通臂。",
+      "dur": 5.6,
+      "file": "shots/pose-taiji-19.png"
+    },
+    {
+      "style": "taiji",
+      "index": 20,
+      "name": "转身搬拦捶",
+      "desc": "转身搬拳、拦掌、冲拳，三式连贯。",
+      "dur": 7.2,
+      "file": "shots/pose-taiji-20.png"
+    },
+    {
+      "style": "taiji",
+      "index": 21,
+      "name": "如封似闭",
+      "desc": "两手回收再向前按出，如封似闭。",
+      "dur": 6.4,
+      "file": "shots/pose-taiji-21.png"
+    },
+    {
+      "style": "taiji",
+      "index": 22,
+      "name": "十字手",
+      "desc": "两手交叉合抱于胸前，如十字。",
+      "dur": 6,
+      "file": "shots/pose-taiji-22.png"
+    },
+    {
+      "style": "taiji",
+      "index": 23,
+      "name": "收势",
+      "desc": "翻掌分手、两臂徐徐下垂，两手落于大腿外侧，收脚并步还原，气归丹田。",
+      "dur": 5.6,
+      "file": "shots/pose-taiji-23.png"
+    }
+  ],
+  "loop": [
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 0,
+      "u": 0,
+      "file": "shots/loop-wuqinxi-01-00.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 1,
+      "u": 0.0417,
+      "file": "shots/loop-wuqinxi-01-01.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 2,
+      "u": 0.0833,
+      "file": "shots/loop-wuqinxi-01-02.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 3,
+      "u": 0.125,
+      "file": "shots/loop-wuqinxi-01-03.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 4,
+      "u": 0.1667,
+      "file": "shots/loop-wuqinxi-01-04.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 5,
+      "u": 0.2083,
+      "file": "shots/loop-wuqinxi-01-05.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 6,
+      "u": 0.25,
+      "file": "shots/loop-wuqinxi-01-06.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 7,
+      "u": 0.2917,
+      "file": "shots/loop-wuqinxi-01-07.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 8,
+      "u": 0.3333,
+      "file": "shots/loop-wuqinxi-01-08.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 9,
+      "u": 0.375,
+      "file": "shots/loop-wuqinxi-01-09.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 10,
+      "u": 0.4167,
+      "file": "shots/loop-wuqinxi-01-10.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 11,
+      "u": 0.4583,
+      "file": "shots/loop-wuqinxi-01-11.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 12,
+      "u": 0.5,
+      "file": "shots/loop-wuqinxi-01-12.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 13,
+      "u": 0.5417,
+      "file": "shots/loop-wuqinxi-01-13.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 14,
+      "u": 0.5833,
+      "file": "shots/loop-wuqinxi-01-14.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 15,
+      "u": 0.625,
+      "file": "shots/loop-wuqinxi-01-15.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 16,
+      "u": 0.6667,
+      "file": "shots/loop-wuqinxi-01-16.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 17,
+      "u": 0.7083,
+      "file": "shots/loop-wuqinxi-01-17.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 18,
+      "u": 0.75,
+      "file": "shots/loop-wuqinxi-01-18.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 19,
+      "u": 0.7917,
+      "file": "shots/loop-wuqinxi-01-19.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 20,
+      "u": 0.8333,
+      "file": "shots/loop-wuqinxi-01-20.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 21,
+      "u": 0.875,
+      "file": "shots/loop-wuqinxi-01-21.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 22,
+      "u": 0.9167,
+      "file": "shots/loop-wuqinxi-01-22.png"
+    },
+    {
+      "style": "wuqinxi",
+      "index": 1,
+      "k": 23,
+      "u": 0.9583,
+      "file": "shots/loop-wuqinxi-01-23.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 0,
+      "u": 0,
+      "file": "shots/loop-taiji-06-00.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 1,
+      "u": 0.0417,
+      "file": "shots/loop-taiji-06-01.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 2,
+      "u": 0.0833,
+      "file": "shots/loop-taiji-06-02.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 3,
+      "u": 0.125,
+      "file": "shots/loop-taiji-06-03.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 4,
+      "u": 0.1667,
+      "file": "shots/loop-taiji-06-04.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 5,
+      "u": 0.2083,
+      "file": "shots/loop-taiji-06-05.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 6,
+      "u": 0.25,
+      "file": "shots/loop-taiji-06-06.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 7,
+      "u": 0.2917,
+      "file": "shots/loop-taiji-06-07.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 8,
+      "u": 0.3333,
+      "file": "shots/loop-taiji-06-08.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 9,
+      "u": 0.375,
+      "file": "shots/loop-taiji-06-09.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 10,
+      "u": 0.4167,
+      "file": "shots/loop-taiji-06-10.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 11,
+      "u": 0.4583,
+      "file": "shots/loop-taiji-06-11.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 12,
+      "u": 0.5,
+      "file": "shots/loop-taiji-06-12.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 13,
+      "u": 0.5417,
+      "file": "shots/loop-taiji-06-13.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 14,
+      "u": 0.5833,
+      "file": "shots/loop-taiji-06-14.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 15,
+      "u": 0.625,
+      "file": "shots/loop-taiji-06-15.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 16,
+      "u": 0.6667,
+      "file": "shots/loop-taiji-06-16.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 17,
+      "u": 0.7083,
+      "file": "shots/loop-taiji-06-17.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 18,
+      "u": 0.75,
+      "file": "shots/loop-taiji-06-18.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 19,
+      "u": 0.7917,
+      "file": "shots/loop-taiji-06-19.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 20,
+      "u": 0.8333,
+      "file": "shots/loop-taiji-06-20.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 21,
+      "u": 0.875,
+      "file": "shots/loop-taiji-06-21.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 22,
+      "u": 0.9167,
+      "file": "shots/loop-taiji-06-22.png"
+    },
+    {
+      "style": "taiji",
+      "index": 6,
+      "k": 23,
+      "u": 0.9583,
+      "file": "shots/loop-taiji-06-23.png"
+    }
+  ],
+  "independence": {
+    "joint": {
+      "before": {
+        "wrists": [
+          [
+            49.20712871433643,
+            -12.250134976973932
+          ],
+          [
+            40.210282408278054,
+            53.52323806934043
+          ]
+        ],
+        "feet": [
+          [
+            96.1875,
+            266
+          ],
+          [
+            143.8125,
+            266
+          ]
+        ],
+        "root": [
+          120,
+          175.6875
+        ],
+        "lean": 0,
+        "fold": 0.06,
+        "headOff": 0
+      },
+      "after": {
+        "wrists": [
+          [
+            49.20712871433643,
+            -12.250134976973932
+          ],
+          [
+            40.210282408278054,
+            53.52323806934043
+          ]
+        ],
+        "feet": [
+          [
+            96.1875,
+            266
+          ],
+          [
+            143.8125,
+            266
+          ]
+        ],
+        "root": [
+          120,
+          175.6875
+        ],
+        "lean": 0.25,
+        "fold": 0.06,
+        "headOff": 0
+      },
+      "leanChanged": true,
+      "wristsUntouched": true,
+      "feetUntouched": true,
+      "rootUntouched": true,
+      "foldUntouched": true,
+      "headUntouched": true,
+      "drawPoseChanged": true
+    },
+    "part": {
+      "trailsHidden": true,
+      "othersIntact": true,
+      "countVisible": 18,
+      "total": 18
+    },
+    "jointNames": {
+      "jointNames": [
+        "root",
+        "lean",
+        "fold",
+        "head",
+        "wristL",
+        "wristR",
+        "footL",
+        "footR"
+      ],
+      "result": {
+        "root": "ok",
+        "lean": "ok",
+        "fold": "ok",
+        "headOff": "ok",
+        "wristL": "ok",
+        "wristR": "ok",
+        "footL": "ok",
+        "footR": "ok"
+      },
+      "sampleRoot": [
+        126,
+        170
+      ]
+    }
+  },
+  "errors": []
+}

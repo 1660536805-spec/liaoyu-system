@@ -1,0 +1,861 @@
+{
+  "styles": {
+    "wuqinxi": {
+      "title": "五禽戏 · 十式",
+      "count": 10,
+      "expectCount": 10,
+      "ids": [
+        "huju",
+        "hupu",
+        "ludi",
+        "luben",
+        "xiongyun",
+        "xionghuang",
+        "yuanting",
+        "yuanzhai",
+        "niaoshen",
+        "niaofei"
+      ],
+      "names": [
+        "虎举",
+        "虎扑",
+        "鹿抵",
+        "鹿奔",
+        "熊运",
+        "熊晃",
+        "猿提",
+        "猿摘",
+        "鸟伸",
+        "鸟飞"
+      ],
+      "perMove": [
+        {
+          "i": 0,
+          "id": "huju",
+          "name": "虎举",
+          "dur": 6.4,
+          "kfN": 8,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": null,
+          "maxStep": 3.7712,
+          "symR": 0
+        },
+        {
+          "i": 1,
+          "id": "hupu",
+          "name": "虎扑",
+          "dur": 7.2,
+          "kfN": 9,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 6.286,
+          "symR": 4
+        },
+        {
+          "i": 2,
+          "id": "ludi",
+          "name": "鹿抵",
+          "dur": 6.4,
+          "kfN": 7,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 5.6923,
+          "symR": 1
+        },
+        {
+          "i": 3,
+          "id": "luben",
+          "name": "鹿奔",
+          "dur": 7,
+          "kfN": 7,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 1.6481,
+          "symR": 4
+        },
+        {
+          "i": 4,
+          "id": "xiongyun",
+          "name": "熊运",
+          "dur": 8,
+          "kfN": 11,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 0.9366,
+          "symR": 0
+        },
+        {
+          "i": 5,
+          "id": "xionghuang",
+          "name": "熊晃",
+          "dur": 8,
+          "kfN": 10,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 1.2471,
+          "symR": 0
+        },
+        {
+          "i": 6,
+          "id": "yuanting",
+          "name": "猿提",
+          "dur": 6.4,
+          "kfN": 8,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 3.6537,
+          "symR": 2
+        },
+        {
+          "i": 7,
+          "id": "yuanzhai",
+          "name": "猿摘",
+          "dur": 6.8,
+          "kfN": 7,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 5.2022,
+          "symR": 0
+        },
+        {
+          "i": 8,
+          "id": "niaoshen",
+          "name": "鸟伸",
+          "dur": 6.6,
+          "kfN": 7,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 6.2452,
+          "symR": 2
+        },
+        {
+          "i": 9,
+          "id": "niaofei",
+          "name": "鸟飞",
+          "dur": 6.4,
+          "kfN": 7,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 4.1451,
+          "symR": 0
+        }
+      ],
+      "clampEvents": [],
+      "minWristY": 152.52,
+      "maxFootY": 266,
+      "maxFrameStep": 6.286,
+      "wraps": [
+        {
+          "from": "虎举",
+          "to": "虎扑",
+          "d": 0
+        },
+        {
+          "from": "虎扑",
+          "to": "鹿抵",
+          "d": 0
+        },
+        {
+          "from": "鹿抵",
+          "to": "鹿奔",
+          "d": 0
+        },
+        {
+          "from": "鹿奔",
+          "to": "熊运",
+          "d": 0
+        },
+        {
+          "from": "熊运",
+          "to": "熊晃",
+          "d": 0
+        },
+        {
+          "from": "熊晃",
+          "to": "猿提",
+          "d": 0
+        },
+        {
+          "from": "猿提",
+          "to": "猿摘",
+          "d": 0
+        },
+        {
+          "from": "猿摘",
+          "to": "鸟伸",
+          "d": 0
+        },
+        {
+          "from": "鸟伸",
+          "to": "鸟飞",
+          "d": 0
+        }
+      ]
+    },
+    "taiji": {
+      "title": "太极拳 · 二十四式",
+      "count": 24,
+      "expectCount": 24,
+      "ids": [
+        "qishi",
+        "yema",
+        "baihe",
+        "louxi",
+        "shouhui",
+        "daojuan",
+        "lianqueL",
+        "lianqueR",
+        "danbian1",
+        "yunshou",
+        "danbian2",
+        "gaotanma",
+        "dengjiaoR",
+        "shuangfeng",
+        "dengjiaoL",
+        "xiashiL",
+        "xiashiR",
+        "chuansuo",
+        "haidi",
+        "shantong",
+        "banlanchui",
+        "rufeng",
+        "shizi",
+        "shoushi"
+      ],
+      "names": [
+        "起势",
+        "左右野马分鬃",
+        "白鹤亮翅",
+        "左右搂膝拗步",
+        "手挥琵琶",
+        "左右倒卷肱",
+        "左揽雀尾",
+        "右揽雀尾",
+        "单鞭",
+        "云手",
+        "单鞭",
+        "高探马",
+        "右蹬脚",
+        "双峰贯耳",
+        "转身左蹬脚",
+        "左下势独立",
+        "右下势独立",
+        "左右穿梭",
+        "海底针",
+        "闪通臂",
+        "转身搬拦捶",
+        "如封似闭",
+        "十字手",
+        "收势"
+      ],
+      "perMove": [
+        {
+          "i": 0,
+          "id": "qishi",
+          "name": "起势",
+          "dur": 5,
+          "kfN": 5,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 23.944487,
+          "wrap": null,
+          "maxStep": 0.6609,
+          "symR": 4
+        },
+        {
+          "i": 1,
+          "id": "yema",
+          "name": "左右野马分鬃",
+          "dur": 7.2,
+          "kfN": 7,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 4.1573,
+          "symR": 0
+        },
+        {
+          "i": 2,
+          "id": "baihe",
+          "name": "白鹤亮翅",
+          "dur": 6.2,
+          "kfN": 7,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 7.927,
+          "symR": 0
+        },
+        {
+          "i": 3,
+          "id": "louxi",
+          "name": "左右搂膝拗步",
+          "dur": 7.2,
+          "kfN": 7,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 5.5396,
+          "symR": 6
+        },
+        {
+          "i": 4,
+          "id": "shouhui",
+          "name": "手挥琵琶",
+          "dur": 5.6,
+          "kfN": 5,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 2.0768,
+          "symR": 0
+        },
+        {
+          "i": 5,
+          "id": "daojuan",
+          "name": "左右倒卷肱",
+          "dur": 7.2,
+          "kfN": 7,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 5.684,
+          "symR": 1
+        },
+        {
+          "i": 6,
+          "id": "lianqueL",
+          "name": "左揽雀尾",
+          "dur": 8,
+          "kfN": 7,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 4.2325,
+          "symR": 0
+        },
+        {
+          "i": 7,
+          "id": "lianqueR",
+          "name": "右揽雀尾",
+          "dur": 8,
+          "kfN": 7,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 4.2325,
+          "symR": 0
+        },
+        {
+          "i": 8,
+          "id": "danbian1",
+          "name": "单鞭",
+          "dur": 6,
+          "kfN": 6,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 3.8585,
+          "symR": 1
+        },
+        {
+          "i": 9,
+          "id": "yunshou",
+          "name": "云手",
+          "dur": 8,
+          "kfN": 5,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 2.3729,
+          "symR": 0
+        },
+        {
+          "i": 10,
+          "id": "danbian2",
+          "name": "单鞭",
+          "dur": 6,
+          "kfN": 6,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 3.8585,
+          "symR": 1
+        },
+        {
+          "i": 11,
+          "id": "gaotanma",
+          "name": "高探马",
+          "dur": 5.6,
+          "kfN": 6,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 2.5543,
+          "symR": 2
+        },
+        {
+          "i": 12,
+          "id": "dengjiaoR",
+          "name": "右蹬脚",
+          "dur": 6.4,
+          "kfN": 7,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 4.9321,
+          "symR": 2
+        },
+        {
+          "i": 13,
+          "id": "shuangfeng",
+          "name": "双峰贯耳",
+          "dur": 6,
+          "kfN": 6,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 5.408,
+          "symR": 4
+        },
+        {
+          "i": 14,
+          "id": "dengjiaoL",
+          "name": "转身左蹬脚",
+          "dur": 6.4,
+          "kfN": 7,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 4.9321,
+          "symR": 2
+        },
+        {
+          "i": 15,
+          "id": "xiashiL",
+          "name": "左下势独立",
+          "dur": 7.2,
+          "kfN": 6,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 6.4086,
+          "symR": 4
+        },
+        {
+          "i": 16,
+          "id": "xiashiR",
+          "name": "右下势独立",
+          "dur": 7,
+          "kfN": 6,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 6.4086,
+          "symR": 4
+        },
+        {
+          "i": 17,
+          "id": "chuansuo",
+          "name": "左右穿梭",
+          "dur": 7.2,
+          "kfN": 7,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 6.6548,
+          "symR": 2
+        },
+        {
+          "i": 18,
+          "id": "haidi",
+          "name": "海底针",
+          "dur": 6.4,
+          "kfN": 6,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 1.2465,
+          "symR": 4
+        },
+        {
+          "i": 19,
+          "id": "shantong",
+          "name": "闪通臂",
+          "dur": 5.6,
+          "kfN": 6,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 4.967,
+          "symR": 0
+        },
+        {
+          "i": 20,
+          "id": "banlanchui",
+          "name": "转身搬拦捶",
+          "dur": 7.2,
+          "kfN": 7,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 5.3031,
+          "symR": 0
+        },
+        {
+          "i": 21,
+          "id": "rufeng",
+          "name": "如封似闭",
+          "dur": 6.4,
+          "kfN": 6,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 0.8395,
+          "symR": 2
+        },
+        {
+          "i": 22,
+          "id": "shizi",
+          "name": "十字手",
+          "dur": 6,
+          "kfN": 6,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 0,
+          "wrap": 0,
+          "maxStep": 10.3831,
+          "symR": 6
+        },
+        {
+          "i": 23,
+          "id": "shoushi",
+          "name": "收势",
+          "dur": 5.6,
+          "kfN": 5,
+          "nan": 0,
+          "rViol": 0,
+          "footSink": 0,
+          "wristLow": 0,
+          "closed": 23.944487,
+          "wrap": 0,
+          "maxStep": 0.6719,
+          "symR": 2
+        }
+      ],
+      "clampEvents": [],
+      "minWristY": 166.07,
+      "maxFootY": 266,
+      "maxFrameStep": 10.3831,
+      "wraps": [
+        {
+          "from": "起势",
+          "to": "左右野马分鬃",
+          "d": 0
+        },
+        {
+          "from": "左右野马分鬃",
+          "to": "白鹤亮翅",
+          "d": 0
+        },
+        {
+          "from": "白鹤亮翅",
+          "to": "左右搂膝拗步",
+          "d": 0
+        },
+        {
+          "from": "左右搂膝拗步",
+          "to": "手挥琵琶",
+          "d": 0
+        },
+        {
+          "from": "手挥琵琶",
+          "to": "左右倒卷肱",
+          "d": 0
+        },
+        {
+          "from": "左右倒卷肱",
+          "to": "左揽雀尾",
+          "d": 0
+        },
+        {
+          "from": "左揽雀尾",
+          "to": "右揽雀尾",
+          "d": 0
+        },
+        {
+          "from": "右揽雀尾",
+          "to": "单鞭",
+          "d": 0
+        },
+        {
+          "from": "单鞭",
+          "to": "云手",
+          "d": 0
+        },
+        {
+          "from": "云手",
+          "to": "单鞭",
+          "d": 0
+        },
+        {
+          "from": "单鞭",
+          "to": "高探马",
+          "d": 0
+        },
+        {
+          "from": "高探马",
+          "to": "右蹬脚",
+          "d": 0
+        },
+        {
+          "from": "右蹬脚",
+          "to": "双峰贯耳",
+          "d": 0
+        },
+        {
+          "from": "双峰贯耳",
+          "to": "转身左蹬脚",
+          "d": 0
+        },
+        {
+          "from": "转身左蹬脚",
+          "to": "左下势独立",
+          "d": 0
+        },
+        {
+          "from": "左下势独立",
+          "to": "右下势独立",
+          "d": 0
+        },
+        {
+          "from": "右下势独立",
+          "to": "左右穿梭",
+          "d": 0
+        },
+        {
+          "from": "左右穿梭",
+          "to": "海底针",
+          "d": 0
+        },
+        {
+          "from": "海底针",
+          "to": "闪通臂",
+          "d": 0
+        },
+        {
+          "from": "闪通臂",
+          "to": "转身搬拦捶",
+          "d": 0
+        },
+        {
+          "from": "转身搬拦捶",
+          "to": "如封似闭",
+          "d": 0
+        },
+        {
+          "from": "如封似闭",
+          "to": "十字手",
+          "d": 0
+        },
+        {
+          "from": "十字手",
+          "to": "收势",
+          "d": 0
+        }
+      ]
+    }
+  },
+  "errors": [],
+  "warnings": [],
+  "prodCompare": {
+    "taiji": {
+      "prod": [
+        "起势",
+        "左右野马分鬃",
+        "白鹤亮翅",
+        "左右搂膝拗步",
+        "手挥琵琶",
+        "左右倒卷肱",
+        "左揽雀尾",
+        "右揽雀尾",
+        "单鞭",
+        "云手",
+        "单鞭",
+        "高探马",
+        "右蹬脚",
+        "双峰贯耳",
+        "转身左蹬脚",
+        "左下势独立",
+        "右下势独立",
+        "左右穿梭",
+        "海底针",
+        "闪通臂",
+        "转身搬拦捶",
+        "如封似闭",
+        "十字手",
+        "收势"
+      ],
+      "kit": [
+        "起势",
+        "左右野马分鬃",
+        "白鹤亮翅",
+        "左右搂膝拗步",
+        "手挥琵琶",
+        "左右倒卷肱",
+        "左揽雀尾",
+        "右揽雀尾",
+        "单鞭",
+        "云手",
+        "单鞭",
+        "高探马",
+        "右蹬脚",
+        "双峰贯耳",
+        "转身左蹬脚",
+        "左下势独立",
+        "右下势独立",
+        "左右穿梭",
+        "海底针",
+        "闪通臂",
+        "转身搬拦捶",
+        "如封似闭",
+        "十字手",
+        "收势"
+      ],
+      "same": true
+    },
+    "wuqinxi": {
+      "prod": [
+        "虎举",
+        "虎扑",
+        "鹿抵",
+        "鹿奔",
+        "熊运",
+        "熊晃",
+        "猿提",
+        "猿摘",
+        "鸟伸",
+        "鸟飞"
+      ],
+      "kit": [
+        "虎举",
+        "虎扑",
+        "鹿抵",
+        "鹿奔",
+        "熊运",
+        "熊晃",
+        "猿提",
+        "猿摘",
+        "鸟伸",
+        "鸟飞"
+      ]
+    }
+  }
+}

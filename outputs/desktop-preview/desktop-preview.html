@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>弦养 · 桌面端预览台</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2316130f'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='%23c8553d'%3E弦%3C/text%3E%3C/svg%3E" />
+<style>
+  :root{
+    --paper:#FBF3E3; --paper2:#F6EEDD; --ink:#3A3128; --muted:#8A7A64;
+    --brown:#B0552E; --jade:#6E8F7C; --gold:#C9A97E; --line:#E2D6BE;
+    --ok:#4E7A5A; --bad:#B0552E;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--paper); color:var(--ink);
+    font:14px/1.6 "Hiragino Sans GB","STHeiti","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    display:flex; flex-direction:column; min-height:100%;
+  }
+  header{
+    padding:14px 20px 12px; border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#FFFBF2,#FBF3E3);
+  }
+  .title{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .title b{font-family:"STKaiti","Kaiti SC",var(--serif,serif);font-size:20px;letter-spacing:.06em;color:var(--brown)}
+  .title span{color:var(--muted);font-size:12.5px}
+  .bar{display:flex;flex-wrap:wrap;gap:18px;margin-top:12px}
+  .grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .grp>label{font-size:12px;color:var(--muted);letter-spacing:.04em}
+  button{
+    font:inherit;font-size:12.5px;padding:5px 11px;border-radius:999px;cursor:pointer;
+    border:1px solid var(--line);background:#FFFDF8;color:var(--ink);transition:.15s;
+  }
+  button:hover{border-color:var(--gold)}
+  button.on{background:var(--brown);border-color:var(--brown);color:#FFF6E8;font-weight:700}
+  .sep{width:1px;height:22px;background:var(--line)}
+  .switch{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:#FFFDF8}
+  .switch button{border:0;border-radius:0;padding:5px 12px}
+  .switch button.on{background:var(--jade);color:#F4FBF5}
+  main{flex:1;min-height:0;padding:18px 20px 28px;display:flex;flex-direction:column;gap:10px}
+  .status{
+    display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;
+    font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--muted);
+  }
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;
+    border:1px solid var(--line);background:#FFFDF8;
+  }
+  .dot{width:8px;height:8px;border-radius:50%;background:#C9BFA8}
+  .pill.ok{border-color:#BFD6C4;color:var(--ok)}
+  .pill.ok .dot{background:var(--ok)}
+  .pill.bad{border-color:#E3C3B4;color:var(--bad)}
+  .pill.bad .dot{background:var(--bad)}
+  .stage{
+    flex:1;min-height:0;overflow:auto;padding:14px;border-radius:14px;
+    border:1px solid var(--line);background:
+      repeating-linear-gradient(45deg,#F3EAD6 0 12px,#F6EEDD 12px 24px);
+    display:flex;align-items:flex-start;justify-content:center;
+  }
+  .frame{
+    position:relative;background:#fff;border-radius:12px;overflow:hidden;
+    box-shadow:0 18px 48px rgba(90,68,40,.22),0 2px 6px rgba(90,68,40,.12);
+    outline:1px solid rgba(120,96,60,.18);
+  }
+  .frame iframe{display:block;border:0;transform-origin:top left;background:#fff}
+  .ruler{
+    position:absolute;top:-1px;left:0;right:0;height:22px;pointer-events:none;
+    background:linear-gradient(180deg,rgba(176,85,46,.10),transparent);
+    color:#8A5A3A;font-size:11px;display:flex;align-items:center;justify-content:center;
+    letter-spacing:.14em;
+  }
+  .hint{margin:0;color:var(--muted);font-size:12px}
+  .hint code{background:#FFFDF8;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--brown)}
+  a{color:var(--brown)}
+</style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <b>弦养 · 桌面端预览台</b>
+    <span>桌面版布局层在 <b>视口 ≥ 960px</b> 时才生效；预览台把站点放进固定像素宽的画框里，再等比缩放，<b>面板再窄也能看到桌面档</b>。</span>
+  </div>
+  <div class="bar">
+    <div class="grp">
+      <label>宽度</label>
+      <span id="wset"></span>
+    </div>
+    <span class="sep"></span>
+    <div class="grp">
+      <label>适配</label>
+      <span class="switch" id="fitSet">
+        <button data-fit="fit" class="on">适应面板</button>
+        <button data-fit="1">1:1 原始</button>
+      </span>
+    </div>
+    <span class="sep"></span>
+    <div class="grp">
+      <label>打开</label>
+      <button id="pop">在新窗口打开当前屏 ↗</button>
+    </div>
+  </div>
+  <div class="bar">
+    <div class="grp">
+      <label>屏</label>
+      <span id="sset"></span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="status">
+    <span class="pill" id="pWidth"><i class="dot"></i>画框内宽 <b id="vw">—</b>px</span>
+    <span class="pill" id="pDesktop"><i class="dot"></i>桌面档 <b id="dtTxt">检测中…</b></span>
+    <span class="pill" id="pSide"><i class="dot"></i>侧栏 <b id="sideTxt">—</b></span>
+    <span class="pill" id="pCol"><i class="dot"></i>两列 <b id="colTxt">—</b></span>
+    <span class="pill" id="pScale"><i class="dot"></i>显示缩放 <b id="scale">100%</b></span>
+  </div>
+  <div class="stage" id="stage">
+    <div class="frame" id="frame">
+      <div class="ruler" id="ruler">1280 × 900</div>
+      <iframe id="site" title="弦养站点" src="/?screen=home" width="1280" height="900"></iframe>
+    </div>
+  </div>
+  <p class="hint">
+    小屏（&lt;960px）请用宽度 <code>960</code> 以上看桌面档；想看手机版把面板拖窄即可 —— 预览台只在下方画框内模拟宽度，不影响其它页面。
+    站点本身仍可用 <code>http://127.0.0.1:5400/</code> 直接打开。
+  </p>
+</main>
+
+<script>
+(function () {
+  'use strict'
+  var WIDTHS = [960, 1024, 1280, 1440, 1680, 1920]
+  var SCREENS = [
+    ['home', '首页'], ['question', '问询向导'], ['audio', '音疗'], ['intro', '开始练'],
+    ['practice', '跟练'], ['done', '完成'], ['profile', '我的'], ['body', '身体数据'],
+    ['inquiry', '问询'], ['loading', '加载']
+  ]
+  var H = 900
+  var W = 1280
+  var screen = 'home'
+  var fit = 'fit'
+
+  var $ = function (id) { return document.getElementById(id) }
+  var stage = $('stage'), frame = $('frame'), iframe = $('site'), ruler = $('ruler')
+
+  /* ---- 宽度按钮 ---- */
+  WIDTHS.forEach(function (w) {
+    var b = document.createElement('button')
+    b.textContent = w
+    b.dataset.w = w
+    if (w === W) b.classList.add('on')
+    b.onclick = function () { W = w; paintBtns(); layout() }
+    $('wset').appendChild(b)
+  })
+  /* ---- 屏按钮 ---- */
+  SCREENS.forEach(function (s) {
+    var b = document.createElement('button')
+    b.textContent = s[1]
+    b.dataset.s = s[0]
+    if (s[0] === screen) b.classList.add('on')
+    b.onclick = function () { screen = s[0]; paintBtns(); iframe.src = '/?screen=' + screen; ruler.textContent = W + ' × ' + H + '  ·  ' + s[1] }
+    $('sset').appendChild(b)
+  })
+  /* ---- 适配开关 ---- */
+  Array.prototype.forEach.call($('fitSet').children, function (b) {
+    b.onclick = function () {
+      fit = b.dataset.fit
+      Array.prototype.forEach.call($('fitSet').children, function (x) { x.classList.toggle('on', x === b) })
+      layout()
+    }
+  })
+  $('pop').onclick = function () { window.open('/?screen=' + screen, '_blank') }
+
+  function paintBtns () {
+    Array.prototype.forEach.call($('wset').children, function (b) { b.classList.toggle('on', Number(b.dataset.w) === W) })
+    Array.prototype.forEach.call($('sset').children, function (b) { b.classList.toggle('on', b.dataset.s === screen) })
+  }
+
+  function layout () {
+    var pad = 28
+    var avail = stage.clientWidth - pad
+    var k = fit === 'fit' ? Math.min(1, avail / W) : 1
+    if (!isFinite(k) || k <= 0) k = 1
+    iframe.setAttribute('width', W)
+    iframe.setAttribute('height', H)
+    iframe.style.width = W + 'px'
+    iframe.style.height = H + 'px'
+    iframe.style.transform = 'scale(' + k + ')'
+    frame.style.width = (W * k) + 'px'
+    frame.style.height = (H * k) + 'px'
+    ruler.textContent = W + ' × ' + H + '  ·  ' + (SCREENS.filter(function (s) { return s[0] === screen })[0] || ['', ''])[1]
+    $('scale').textContent = Math.round(k * 100) + '%'
+  }
+
+  /* ---- 读 iframe 内部（同源）：确认桌面档真的生效 ----
+     注意：window.__xyDesktop 在 <960px 时也存在（boot 必赋值），
+     且它的 .on 是一个**函数**而不是布尔 —— 必须调用 .on() 或读 .dbg()，不能直接判真假。 */
+  function probe () {
+    var win, doc
+    try { win = iframe.contentWindow; doc = iframe.contentDocument } catch (e) { win = null }
+    if (!win || !doc) return
+    var vw = win.innerWidth
+    $('vw').textContent = vw
+    $('pWidth').className = 'pill ' + (vw >= 960 ? 'ok' : '')
+
+    var flag = win.__xyDesktop
+    var d = null
+    try { d = flag && flag.dbg ? flag.dbg() : null } catch (e) { d = null }
+    var on = d ? !!d.on : !!(flag && typeof flag.on === 'function' ? flag.on() : flag && flag.on)
+    $('dtTxt').textContent = on ? '已生效' : '未生效'
+    $('pDesktop').className = 'pill ' + (on ? 'ok' : 'bad')
+
+    var side = doc.querySelector('.dt-side')
+    var hasSide = d ? !!d.side : !!side
+    $('sideTxt').textContent = hasSide ? '已注入' : '无'
+    $('pSide').className = 'pill ' + (hasSide ? 'ok' : '')
+
+    var cols = doc.querySelectorAll('main .dt-col')
+    var hasCol = d ? !!d.grouped : cols.length > 0
+    $('colTxt').textContent = hasCol ? (cols.length + ' 列') : '单列'
+    $('pCol').className = 'pill ' + (hasCol ? 'ok' : '')
+  }
+
+  var t = null
+  function schedule () { clearTimeout(t); t = setTimeout(probe, 260) }
+  iframe.addEventListener('load', function () { probe(); setTimeout(probe, 500); setTimeout(probe, 1200) })
+  window.addEventListener('resize', function () { layout(); schedule() })
+
+  layout()
+  probe()
+  setInterval(probe, 1500)
+})()
+</script>
+</body>
+</html>

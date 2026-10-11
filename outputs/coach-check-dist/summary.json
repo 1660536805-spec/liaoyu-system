@@ -1,0 +1,235 @@
+{
+  "base": "http://127.0.0.1:5198/s4",
+  "at": "2026-10-11T05:25:08.047Z",
+  "styles": {
+    "baduanjin": {
+      "style": "baduanjin",
+      "seriesShots": [
+        "baduanjin-play-0.png",
+        "baduanjin-play-1.png",
+        "baduanjin-play-2.png",
+        "baduanjin-play-3.png"
+      ],
+      "switchShots": [
+        {
+          "file": "baduanjin-switch-0.png",
+          "name": "第 2 式 · 左右开弓似射雕",
+          "hasCfSvg": true,
+          "hasCanvas": false,
+          "hasMiss": false
+        },
+        {
+          "file": "baduanjin-switch-1.png",
+          "name": "第 3 式 · 调理脾胃须单举",
+          "hasCfSvg": true,
+          "hasCanvas": false,
+          "hasMiss": false
+        },
+        {
+          "file": "baduanjin-switch-2.png",
+          "name": "第 4 式 · 五劳七伤往后瞧",
+          "hasCfSvg": true,
+          "hasCanvas": false,
+          "hasMiss": false
+        }
+      ],
+      "facts": {
+        "coachBar": true,
+        "cbName": "第 1 式 · 双手托天理三焦",
+        "cbChip": "教练待命",
+        "cap": "循环陪练中…",
+        "hasCoachFigureRoot": true,
+        "coachFigureRootVis": {
+          "display": "block",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 94,
+          "h": 106,
+          "visible": true
+        },
+        "hasCfSvg": true,
+        "cfSvgVis": {
+          "display": "block",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 94,
+          "h": 106,
+          "visible": true
+        },
+        "hasCanvas": false,
+        "canvasVis": null,
+        "hasMiss": false,
+        "missVis": null,
+        "hasLoadingPh": false,
+        "loadingPhVis": null,
+        "missNote": null,
+        "cvBox": {
+          "display": "block",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 96,
+          "h": 108,
+          "visible": true
+        },
+        "svgPathCount": 37,
+        "canvasPx": null
+      },
+      "rc": {
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "consoleErrSample": [],
+        "pageErrSample": []
+      }
+    },
+    "wuqinxi": {
+      "style": "wuqinxi",
+      "seriesShots": [
+        "wuqinxi-play-0.png",
+        "wuqinxi-play-1.png",
+        "wuqinxi-play-2.png",
+        "wuqinxi-play-3.png"
+      ],
+      "switchShots": [
+        {
+          "file": "wuqinxi-switch-0.png",
+          "name": "第 2 式 · 鹿抵",
+          "hasCfSvg": false,
+          "hasCanvas": true,
+          "hasMiss": true
+        },
+        {
+          "file": "wuqinxi-switch-1.png",
+          "name": "第 3 式 · 熊运",
+          "hasCfSvg": false,
+          "hasCanvas": true,
+          "hasMiss": true
+        },
+        {
+          "file": "wuqinxi-switch-2.png",
+          "name": "第 4 式 · 猿攀",
+          "hasCfSvg": false,
+          "hasCanvas": true,
+          "hasMiss": true
+        }
+      ],
+      "facts": {
+        "coachBar": true,
+        "cbName": "第 1 式 · 虎举",
+        "cbChip": "教练待命",
+        "cap": "无动画 · 看要领",
+        "hasCoachFigureRoot": false,
+        "coachFigureRootVis": null,
+        "hasCfSvg": false,
+        "cfSvgVis": null,
+        "hasCanvas": true,
+        "canvasVis": {
+          "display": "none",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 0,
+          "h": 0,
+          "visible": false
+        },
+        "hasMiss": true,
+        "missVis": {
+          "display": "flex",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 94,
+          "h": 106,
+          "visible": true
+        },
+        "hasLoadingPh": false,
+        "loadingPhVis": null,
+        "missNote": "暂无示范动画 · 看要领跟练",
+        "cvBox": {
+          "display": "block",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 96,
+          "h": 108,
+          "visible": true
+        },
+        "svgPathCount": 0,
+        "canvasPx": "192x216"
+      },
+      "rc": {
+        "consoleErrors": 5,
+        "pageErrors": 0,
+        "consoleErrSample": [
+          "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ],
+        "pageErrSample": []
+      }
+    },
+    "taiji": {
+      "style": "taiji",
+      "seriesShots": [
+        "taiji-play-0.png",
+        "taiji-play-1.png",
+        "taiji-play-2.png",
+        "taiji-play-3.png"
+      ],
+      "switchShots": [
+        {
+          "file": null,
+          "name": null,
+          "note": "finished(教练条消失)"
+        }
+      ],
+      "facts": {
+        "coachBar": true,
+        "cbName": "第 1 式 · 起势",
+        "cbChip": "教练待命",
+        "cap": "无动画 · 看要领",
+        "hasCoachFigureRoot": false,
+        "coachFigureRootVis": null,
+        "hasCfSvg": false,
+        "cfSvgVis": null,
+        "hasCanvas": true,
+        "canvasVis": {
+          "display": "none",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 0,
+          "h": 0,
+          "visible": false
+        },
+        "hasMiss": true,
+        "missVis": {
+          "display": "flex",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 94,
+          "h": 106,
+          "visible": true
+        },
+        "hasLoadingPh": false,
+        "loadingPhVis": null,
+        "missNote": "暂无示范动画 · 看要领跟练",
+        "cvBox": {
+          "display": "block",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 96,
+          "h": 108,
+          "visible": true
+        },
+        "svgPathCount": 0,
+        "canvasPx": "192x216"
+      },
+      "rc": {
+        "consoleErrors": 2,
+        "pageErrors": 0,
+        "consoleErrSample": [
+          "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ],
+        "pageErrSample": []
+      }
+    }
+  },
+  "errors": {}
+}

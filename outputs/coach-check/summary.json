@@ -1,0 +1,230 @@
+{
+  "base": "http://127.0.0.1:5197",
+  "at": "2026-10-11T05:17:18.707Z",
+  "styles": {
+    "baduanjin": {
+      "style": "baduanjin",
+      "seriesShots": [
+        "baduanjin-play-0.png",
+        "baduanjin-play-1.png",
+        "baduanjin-play-2.png",
+        "baduanjin-play-3.png"
+      ],
+      "switchShots": [
+        {
+          "file": "baduanjin-switch-0.png",
+          "name": "第 2 式 · 左右开弓似射雕",
+          "hasCfSvg": true,
+          "hasCanvas": false,
+          "hasMiss": false
+        },
+        {
+          "file": "baduanjin-switch-1.png",
+          "name": "第 3 式 · 调理脾胃须单举",
+          "hasCfSvg": true,
+          "hasCanvas": false,
+          "hasMiss": false
+        },
+        {
+          "file": "baduanjin-switch-2.png",
+          "name": "第 4 式 · 五劳七伤往后瞧",
+          "hasCfSvg": true,
+          "hasCanvas": false,
+          "hasMiss": false
+        }
+      ],
+      "facts": {
+        "coachBar": true,
+        "cbName": "第 1 式 · 双手托天理三焦",
+        "cbChip": "教练待命",
+        "cap": "循环陪练中…",
+        "hasCoachFigureRoot": true,
+        "coachFigureRootVis": {
+          "display": "block",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 94,
+          "h": 106,
+          "visible": true
+        },
+        "hasCfSvg": true,
+        "cfSvgVis": {
+          "display": "block",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 94,
+          "h": 106,
+          "visible": true
+        },
+        "hasCanvas": false,
+        "canvasVis": null,
+        "hasMiss": false,
+        "missVis": null,
+        "hasLoadingPh": false,
+        "loadingPhVis": null,
+        "missNote": null,
+        "cvBox": {
+          "display": "block",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 96,
+          "h": 108,
+          "visible": true
+        },
+        "svgPathCount": 37,
+        "canvasPx": null
+      },
+      "rc": {
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "consoleErrSample": [],
+        "pageErrSample": []
+      }
+    },
+    "wuqinxi": {
+      "style": "wuqinxi",
+      "seriesShots": [
+        "wuqinxi-play-0.png",
+        "wuqinxi-play-1.png",
+        "wuqinxi-play-2.png",
+        "wuqinxi-play-3.png"
+      ],
+      "switchShots": [
+        {
+          "file": "wuqinxi-switch-0.png",
+          "name": "第 2 式 · 鹿抵",
+          "hasCfSvg": false,
+          "hasCanvas": true,
+          "hasMiss": false
+        },
+        {
+          "file": "wuqinxi-switch-1.png",
+          "name": "第 3 式 · 熊运",
+          "hasCfSvg": false,
+          "hasCanvas": true,
+          "hasMiss": false
+        },
+        {
+          "file": "wuqinxi-switch-2.png",
+          "name": "第 4 式 · 猿提",
+          "hasCfSvg": false,
+          "hasCanvas": true,
+          "hasMiss": false
+        }
+      ],
+      "facts": {
+        "coachBar": true,
+        "cbName": "第 1 式 · 虎举",
+        "cbChip": "教练待命",
+        "cap": "循环陪练中…",
+        "hasCoachFigureRoot": false,
+        "coachFigureRootVis": null,
+        "hasCfSvg": false,
+        "cfSvgVis": null,
+        "hasCanvas": true,
+        "canvasVis": {
+          "display": "block",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 94,
+          "h": 106,
+          "visible": true
+        },
+        "hasMiss": false,
+        "missVis": null,
+        "hasLoadingPh": false,
+        "loadingPhVis": null,
+        "missNote": null,
+        "cvBox": {
+          "display": "block",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 96,
+          "h": 108,
+          "visible": true
+        },
+        "svgPathCount": 0,
+        "canvasPx": "192x216"
+      },
+      "rc": {
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "consoleErrSample": [],
+        "pageErrSample": []
+      }
+    },
+    "taiji": {
+      "style": "taiji",
+      "seriesShots": [
+        "taiji-play-0.png",
+        "taiji-play-1.png",
+        "taiji-play-2.png",
+        "taiji-play-3.png"
+      ],
+      "switchShots": [
+        {
+          "file": "taiji-switch-0.png",
+          "name": "第 2 式 · 左右野马分鬃",
+          "hasCfSvg": false,
+          "hasCanvas": true,
+          "hasMiss": false
+        },
+        {
+          "file": "taiji-switch-1.png",
+          "name": "第 3 式 · 白鹤亮翅",
+          "hasCfSvg": false,
+          "hasCanvas": true,
+          "hasMiss": false
+        },
+        {
+          "file": "taiji-switch-2.png",
+          "name": "第 4 式 · 左右搂膝拗步",
+          "hasCfSvg": false,
+          "hasCanvas": true,
+          "hasMiss": false
+        }
+      ],
+      "facts": {
+        "coachBar": true,
+        "cbName": "第 1 式 · 起势",
+        "cbChip": "教练待命",
+        "cap": "循环陪练中…",
+        "hasCoachFigureRoot": false,
+        "coachFigureRootVis": null,
+        "hasCfSvg": false,
+        "cfSvgVis": null,
+        "hasCanvas": true,
+        "canvasVis": {
+          "display": "block",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 94,
+          "h": 106,
+          "visible": true
+        },
+        "hasMiss": false,
+        "missVis": null,
+        "hasLoadingPh": false,
+        "loadingPhVis": null,
+        "missNote": null,
+        "cvBox": {
+          "display": "block",
+          "visibility": "visible",
+          "opacity": 1,
+          "w": 96,
+          "h": 108,
+          "visible": true
+        },
+        "svgPathCount": 0,
+        "canvasPx": "192x216"
+      },
+      "rc": {
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "consoleErrSample": [],
+        "pageErrSample": []
+      }
+    }
+  },
+  "errors": {}
+}
