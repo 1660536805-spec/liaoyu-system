@@ -1,6 +1,6 @@
 {
   "base": "http://127.0.0.1:5400",
-  "generatedAt": "2026-10-11T15:04:35.174Z",
+  "generatedAt": "2026-10-11T15:20:49.739Z",
   "checks": {
     "baduanjin.home.segCount=4": {
       "ok": true,
@@ -93,7 +93,7 @@
     },
     "baduanjin.share.dataUrl": {
       "ok": true,
-      "detail": 414822
+      "detail": 408582
     },
     "baduanjin.share.geom.cols=1": {
       "ok": true,
@@ -251,7 +251,7 @@
     },
     "wuqinxi.share.dataUrl": {
       "ok": true,
-      "detail": 330762
+      "detail": 328474
     },
     "wuqinxi.share.geom.cols=1": {
       "ok": true,
@@ -409,7 +409,7 @@
     },
     "taiji.share.dataUrl": {
       "ok": true,
-      "detail": 444418
+      "detail": 439878
     },
     "taiji.share.geom.cols=2": {
       "ok": true,

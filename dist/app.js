@@ -1077,9 +1077,18 @@ function shareCard(){
     g.textAlign='right';g.fillStyle='#6E8F7C';g.font=fsLatex+'px "PingFang SC","Microsoft YaHei",sans-serif';
     g.fillText(p.string?('第 '+p.string+' 弦'):'七弦齐鸣',x1,y);
     g.strokeStyle='#EEE1CA';g.lineWidth=1;g.beginPath();g.moveTo(x0,y+Math.round(step*0.31));g.lineTo(x1,y+Math.round(step*0.31));g.stroke()});
-  g.textAlign='center';g.fillStyle='#97836D';g.font='22px "PingFang SC","Microsoft YaHei",sans-serif';
+  /* 页脚版权：字号按实测文本宽自适应，保证不越出画布左右边界。
+     写死 22px 时（2026-10-11 实测）第二行宽 763.6px > 画布 750px ⇒ 居中后左右各被切 6.8px
+     （右端「CC0」的 0 看着像「CC(」）。且不同机器回退字体宽度不同，故用 measureText 反算。 */
+  g.textAlign='center';g.fillStyle='#97836D';
+  var FOOT='《梅花三弄》· RafaelCaro · CC BY 4.0   《醉渔唱晚》· 卫仲乐 1934 · CC0';
+  var fpx=22,fLim=W-56;
+  g.font=fpx+'px "PingFang SC","Microsoft YaHei",sans-serif';
+  var fw=g.measureText(FOOT).width;
+  if(fw>fLim)fpx=Math.max(14,Math.floor(fpx*fLim/fw));
+  g.font=fpx+'px "PingFang SC","Microsoft YaHei",sans-serif';
   g.fillText('音源：七弦散音 · RafaelCaro · CC BY 4.0',W/2,H-104);
-  g.fillText('《梅花三弄》· RafaelCaro · CC BY 4.0   《醉渔唱晚》· 卫仲乐 1934 · CC0',W/2,H-68);
+  g.fillText(FOOT,W/2,H-68);
   return c.toDataURL('image/png')}
 function shareHTML(){var u=shareCard();
   return '<div class="xs-note">这张图可以直接长按保存（手机）；桌面端点下面「下载图片」。</div>'
