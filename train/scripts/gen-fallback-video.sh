@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ⚠️ 已被 train/scripts/gen-fallback-videos.py 取代（2026-10-11）——
+#    旧版只出一支「八段锦」字幕卡、全拳种共用，导致演五禽戏/太极时主画面式名对不上；
+#    且本机 ffmpeg 无 drawtext（缺 freetype）跑不了。保留本文件仅作历史参照，勿再使用。
+#    新的按拳种生成：python3 train/scripts/gen-fallback-videos.py
+#
 # 生成兜底预录视频（60 秒）
 #
 # 【为什么需要】三级兜底的第一级。此前 public/assets/ 只有 README，

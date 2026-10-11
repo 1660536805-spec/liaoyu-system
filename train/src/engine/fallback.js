@@ -20,8 +20,34 @@
 //   fb.enter('摄像头初始化失败')         // 触发切换
 //   fb.exit()                          // 回到实时
 
-/** 预录视频路径（本地资源，不走 CDN） */
-export const FALLBACK_SRC = '/assets/fallback.mp4'
+/**
+ * 部署基路径。s4 以 `vite build --base=/s4/` 构建 ⇒ import.meta.env.BASE_URL === '/s4/'。
+ * 【为什么不能写死 '/assets/…'】写成根绝对路径会**绕过 base**：在 /s4/ 部署下
+ *   `/assets/fallback.mp4` 命中的是主壳 dist/assets/ 里那份（历史遗留的旧八段锦卡），
+ *   于是「演五禽戏时主画面仍在念八段锦」。Node 里跑单测没有 import.meta.env，回落 '/'。
+ */
+const BASE = (import.meta.env && import.meta.env.BASE_URL) || '/'
+const assetPath = (rel) => `${BASE.replace(/\/+$/, '')}/${rel}`
+
+/**
+ * 各拳种的预录兜底视频（本地路径，不走 CDN）。
+ * 【为什么按拳种分】字幕卡里烧录了「第 N 式 / 式名 / 要领 / N-总数」。
+ *   早先只有一支八段锦卡、全拳种共用 ⇒ 演五禽戏时主画面仍在念八段锦，
+ *   于是「检测人体界面」的招数与教练小窗对不上。现按拳种各出一支。
+ * 生成：python3 train/scripts/gen-fallback-videos.py（读 styles.js / moves.json）
+ */
+export const FALLBACK_BY_STYLE = {
+  baduanjin: assetPath('assets/fallback-baduanjin.mp4'),
+  wuqinxi: assetPath('assets/fallback-wuqinxi.mp4'),
+  taiji: assetPath('assets/fallback-taiji.mp4'),
+}
+/** 默认兜底视频（拳种未知 / 未配置时）：沿用八段锦卡 */
+export const FALLBACK_SRC = FALLBACK_BY_STYLE.baduanjin
+
+/** 取某拳种的预录视频路径；未知拳种回落到默认 */
+export function fallbackSrcFor(styleId) {
+  return FALLBACK_BY_STYLE[styleId] || FALLBACK_SRC
+}
 
 export const FALLBACK_CFG = {
   /**
@@ -84,12 +110,14 @@ export function frameAlive(landmarks, cfg = FALLBACK_CFG) {
  * 状态：idle → loading → ready | error → （enter）active → （exit）idle
  */
 export class FallbackSwitch {
-  constructor(el, { onEnter = () => {}, onExit = () => {}, onError = () => {}, now = () => performance.now() } = {}) {
+  constructor(el, { onEnter = () => {}, onExit = () => {}, onError = () => {}, now = () => performance.now(), src = FALLBACK_SRC } = {}) {
     this.el = el
     this.onEnter = onEnter
     this.onExit = onExit
     this.onError = onError
     this.now = now
+    // src 可为字符串，也可为「取当前拳种路径」的函数（拳种可能随路由变）
+    this.src = src
     this.state = 'idle'
     this.ready = false
     this.enteredAt = 0
@@ -109,11 +137,12 @@ export class FallbackSwitch {
       this.onError(new Error('fallback: 没有预录视频元素'))
       return Promise.resolve(false)
     }
+    const src = typeof this.src === 'function' ? this.src() : this.src
     el.loop = true
     el.muted = true
     el.playsInline = true
     el.preload = 'auto'
-    el.src = FALLBACK_SRC
+    el.src = src
     this.state = 'loading'
 
     return new Promise((resolve) => {
@@ -135,7 +164,7 @@ export class FallbackSwitch {
       }
       const ok = () => finish('ready', true)
       const bad = () => {
-        const e = new Error(`预录兜底未就绪：取不到 ${FALLBACK_SRC}（文件缺失或编码不受支持）`)
+        const e = new Error(`预录兜底未就绪：取不到 ${src}（文件缺失或编码不受支持）`)
         console.error('[fallback]', e.message)
         this.onError(e)
         finish('error', false)

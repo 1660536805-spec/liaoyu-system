@@ -1,10 +1,14 @@
-// 五禽戏五式「示范动作 × 判定规则」回放验收 + 对照图
+// 五禽戏十式「示范动作 × 判定规则」回放验收 + 对照图
 // ============================================================================
 // 【为什么存在】
-//   第二批内容工程（阶段 E1）为五禽戏补了 5 式示范动画（src/data/demoAnim.js 的
-//   wuqinxi-1..5）与 5 式判定规则（src/engine/styleRules.js 的 WUQINXI_RULES）。
+//   内容工程为五禽戏补了 10 式示范动画（src/data/demoAnim.js 的 wuqinxi-1..10）
+//   与 10 式判定规则（src/engine/styleRules.js 的 WUQINXI_RULES）。
 //   两者必须自洽：把示范动画逐帧还原成 MediaPipe 33 点、喂给该拳种的判定器，
 //   应当能「自己判中自己」，且不串到别的式。
+//
+// 【「串扰」怎么看】与 verify-taiji-standard.mjs 同口径：每段示范首尾都过中立站姿、
+//   举臂过渡会扫过别的式的高位构型，故真正衡量「规则是否太松」的是 **core 口径**
+//   （只取停留段 t/dur∈[0.45,0.75]），raw（全帧）只作参考。
 //
 // 【与 verify-demo-standard.mjs 的关系】
 //   那个脚本只覆盖八段锦 8 式（写死 8 与内置 MOVES）。本脚本复用它同一套几何
@@ -33,7 +37,7 @@ const wqBlock = stylesSrc.slice(stylesSrc.indexOf('const WUQINXI_MOVES = ['),
 const IDS = [...wqBlock.matchAll(/id:\s*(\d+)/g)].map((m) => Number(m[1]))
 const NAMES = [...wqBlock.matchAll(/name:\s*'([^']+)'/g)].map((m) => m[1])
 const N = NAMES.length
-if (N !== 5) { console.error(`从 styles.js 解析到 ${N} 式（期望 5）`); process.exit(1) }
+if (N !== 10) { console.error(`从 styles.js 解析到 ${N} 式（期望 10）`); process.exit(1) }
 
 // ---------------------------------------------------------------- 姿态插值
 // 与 DemoAnimation.vue 的 ease / lerpPose 完全一致（保证测的就是播放出来的画面）
@@ -106,23 +110,35 @@ function poseToLandmarks(p) {
 }
 
 // ---------------------------------------------------------------- 逐式打分
+// 【串扰两个口径】与 verify-taiji-standard.mjs 完全一致：
+//   · raw ：整段动画（含首尾中立帧与抬手过渡）—— 只作参考
+//   · core：只取「停留段」t/dur ∈ [0.45,0.75]（该式定式）—— 判「是否真的像别的式」
+//   每式示范的首尾都要经过中立站姿、举臂过渡会扫过别的式的高位构型，全帧口径会把
+//   「虎举」这类高位式刷满；产品走顺序模式（order=当前式）只判当前式，故 core 口径
+//   才是「规则会不会把别的式误认」的真实检验。core 串扰只用来发现「规则太松」。
 const FPS = 30
+const CORE = [0.45, 0.75]   // 「停留段」占比
 function measure(keys, dur, moveIdx) {
   const frames = Math.max(12, Math.round(dur * FPS))
   const judge = new MoveJudge({ style: 'wuqinxi', count: N, names: NAMES })
-  const self = [], cross = new Array(N).fill(0)
+  const self = [], crossAll = new Array(N).fill(0), crossCore = new Array(N).fill(0)
   for (let f = 0; f < frames; f++) {
-    const tt = (f / frames) * dur
+    const ratio = f / frames
+    const tt = ratio * dur
     const lm = poseToLandmarks(samplePose(keys, tt))
     const sc = judge.scores(lm)
-    for (let i = 0; i < N; i++) cross[i] = Math.max(cross[i], sc[i] || 0)
+    const inCore = ratio >= CORE[0] && ratio <= CORE[1]
+    for (let i = 0; i < N; i++) {
+      crossAll[i] = Math.max(crossAll[i], sc[i] || 0)
+      if (inCore) crossCore[i] = Math.max(crossCore[i], sc[i] || 0)
+    }
     self.push(sc[moveIdx] || 0)
   }
   return {
     max: Math.max(...self),
     avg: self.reduce((a, b) => a + b, 0) / self.length,
     pass: self.filter((s) => s >= THRESHOLD).length / self.length,
-    cross,
+    crossAll, crossCore,
   }
 }
 
@@ -146,17 +162,27 @@ for (const x of rows) {
 }
 console.log('─'.repeat(60))
 
-console.log('\n串扰检查（演示某式时其它式的最高分，>0.8 视为长得像）')
+console.log('\n串扰检查 · core 口径（定式停留段 t/dur∈[0.45,0.75]；>0.80 视为「构型太像」）')
 let cross = 0
 for (const x of rows) {
   if (!x.r) continue
-  const others = x.r.cross.map((v, i) => ({ v, i })).filter((o) => o.i !== x.m && o.v > 0.8)
+  const others = x.r.crossCore.map((v, i) => ({ v, i })).filter((o) => o.i !== x.m && o.v > 0.8)
   if (others.length) {
     cross++
     console.log(`  ${x.name} → 被判成 ` + others.map((o) => `${NAMES[o.i]}(${o.v.toFixed(2)})`).join('、'))
   }
 }
 if (!cross) console.log('  无（没有一式被误认成别的式）')
+// 参考：raw 口径（含过渡帧）里超过 0.8 的，只在 core 之外出现则说明是「举臂过渡扫到」
+const rawExtra = []
+for (const x of rows) {
+  if (!x.r) continue
+  for (let i = 0; i < N; i++) {
+    if (i === x.m) continue
+    if (x.r.crossAll[i] > 0.8 && x.r.crossCore[i] <= 0.8) rawExtra.push(`${x.name}→${NAMES[i]}(${x.r.crossAll[i].toFixed(2)})`)
+  }
+}
+if (rawExtra.length) console.log(`  （raw 口径另有 ${rawExtra.length} 处 >0.8，均落在停留段之外：${rawExtra.join('、')}）`)
 
 let fail = 0
 const okc = (c, m) => { console.log((c ? '  ✓ ' : '  ✗ ') + m); if (!c) fail++ }
@@ -165,15 +191,15 @@ for (const x of rows) {
   okc(x.r && x.r.max >= THRESHOLD,
     `${x.name}：示范动作能被自家判定器判中（最高分 ${x.r ? x.r.max.toFixed(2) : '—'}）`)
 }
-okc(cross === 0, `无跨式串扰（${cross} 处）`)
+okc(cross === 0, `无跨式串扰（core 口径 ${cross} 处）`)
 
 // ---------------------------------------------------------------- 对照图（SVG）
-// 版式：5 行（每式一行）× 4 列（一路取 4 个相位）。左侧标签注明式名与判定分。
+// 版式：10 行（每式一行）× 4 列（一路取 4 个相位）。左侧标签注明式名与判定分。
 const COL = 4
 const CELL = 132, GAP = 10, LBL = 118, PAD = 20, HEAD = 58, ROWGAP = 8
 const SVG_W = PAD * 2 + LBL + COL * CELL + (COL - 1) * GAP
 const SVG_H = HEAD + N * (CELL + ROWGAP) + PAD - ROWGAP + 14
-const PHASES = [0.15, 0.40, 0.65, 0.90]
+const PHASES = [0.18, 0.42, 0.60, 0.76]
 
 const BONES = [[11, 13], [13, 15], [12, 14], [14, 16], [11, 12], [11, 23], [12, 24], [23, 24],
   [23, 25], [25, 27], [24, 26], [26, 28]]
@@ -207,7 +233,7 @@ const rowOf = (x, oy) => {
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SVG_W}" height="${SVG_H}" viewBox="0 0 ${SVG_W} ${SVG_H}">
 <rect width="${SVG_W}" height="${SVG_H}" fill="#FBF3E3"/>
-<text x="${PAD}" y="30" font-size="18" font-weight="700" fill="#2b2b2b">五禽戏 · 五式示范动作对照图</text>
+<text x="${PAD}" y="30" font-size="18" font-weight="700" fill="#2b2b2b">五禽戏 · 十式示范动作对照图</text>
 <text x="${PAD}" y="50" font-size="12" fill="#8a7a63">每行一式，四列 = 该式 4 个相位；骨架由 demoAnim 关键帧经 DemoAnimation 同一套几何还原。判定器合格线 0.55。</text>
 ${rows.map((x, i) => rowOf(x, HEAD + i * (CELL + ROWGAP))).join('\n')}
 </svg>`
@@ -223,7 +249,8 @@ writeFileSync(resolve(outDir, 'verify-wuqinxi-standard.json'),
       max: x.r ? +x.r.max.toFixed(3) : null,
       avg: x.r ? +x.r.avg.toFixed(3) : null,
       pass: x.r ? x.r.pass : null,
-      cross: x.r ? x.r.cross.map((v) => +v.toFixed(3)) : null,
+      crossAll: x.r ? x.r.crossAll.map((v) => +v.toFixed(3)) : null,
+      crossCore: x.r ? x.r.crossCore.map((v) => +v.toFixed(3)) : null,
     })),
   }, null, 2), 'utf8')
 console.log(`\n对照图：outputs/wuqinxi-check/五禽戏-对照图.svg`)

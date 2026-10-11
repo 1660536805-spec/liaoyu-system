@@ -2,7 +2,7 @@
 // 目的：Done 判定「断识别 → 出视频 ≤3s / 切过去式号计时打卡连续」在 node 里先证一遍，
 //       真机再掐表复核一次。
 // 运行：node scripts/fallback.test.mjs
-import { FallbackSwitch, frameAlive, FALLBACK_SRC, FALLBACK_CFG } from '../src/engine/fallback.js'
+import { FallbackSwitch, frameAlive, FALLBACK_SRC, FALLBACK_CFG, FALLBACK_BY_STYLE, fallbackSrcFor } from '../src/engine/fallback.js'
 
 let fail = 0
 const okc = (c, m) => { console.log((c ? '  ✓ ' : '  ✗ ') + m); if (!c) fail++ }
@@ -115,13 +115,27 @@ console.log('\n=== 4. play() 被拒时要重试一次，而不是直接放弃 ==
 
 console.log('\n=== 5. 触发参数在合理区间 ===')
 {
-  okc(FALLBACK_CFG.noSignalMs > 0 && FALLBACK_CFG.noSignalMs <= 5000,
-    `noSignalMs=${FALLBACK_CFG.noSignalMs}（断识别后切预录，上限 5s）`)
+  // 2026-10-03 真机标定把 noSignalMs 由 4s 改 12s（覆盖弯腰/遮挡，防误切）；
+  // 原断言「≤5s」是标定前的旧值，未随代码更新 —— 这里对齐为「10~20s」。
+  okc(FALLBACK_CFG.noSignalMs >= 10000 && FALLBACK_CFG.noSignalMs <= 20000,
+    `noSignalMs=${FALLBACK_CFG.noSignalMs}（断识别后切预录；真机标定 12s，覆盖弯腰/遮挡）`)
   okc(FALLBACK_CFG.firstFrameMs >= FALLBACK_CFG.noSignalMs,
     `firstFrameMs=${FALLBACK_CFG.firstFrameMs} ≥ noSignalMs（没人入镜的容忍比断流更久）`)
   okc(FALLBACK_CFG.recoverFrames >= 20, `recoverFrames=${FALLBACK_CFG.recoverFrames}（回实时要连续有效帧防抖）`)
   okc(FALLBACK_CFG.autoAdvanceMs >= 8000, `autoAdvanceMs=${FALLBACK_CFG.autoAdvanceMs}（预录下不会卡死在某一式）`)
-  okc(/^\/assets\/fallback\.mp4$/.test(FALLBACK_SRC), '视频源是本地路径')
+  okc(/^\/assets\/fallback(-[a-z]+)?\.mp4$/.test(FALLBACK_SRC), '视频源是本地路径')
+}
+
+console.log('\n=== 6. 预录兜底按拳种分流 ===')
+{
+  // 字幕卡里烧录了式名/序号，全拳种共用会导致「主画面念八段锦、教练演五禽戏」
+  okc(typeof FALLBACK_BY_STYLE === 'object', '有按拳种的兜底视频表')
+  for (const sid of ['baduanjin', 'wuqinxi', 'taiji']) {
+    okc(/^\/assets\/fallback-[a-z]+\.mp4$/.test(FALLBACK_BY_STYLE[sid]),
+      `${sid} → ${FALLBACK_BY_STYLE[sid]}（本地路径）`)
+  }
+  okc(fallbackSrcFor('wuqinxi') !== fallbackSrcFor('baduanjin'), '五禽戏与八段锦不是同一支视频')
+  okc(fallbackSrcFor('不存在') === FALLBACK_SRC, '未知拳种回落到默认（八段锦）')
 }
 
 console.log('\n' + (fail === 0 ? '✅ 全部通过' : `❌ ${fail} 项失败`))

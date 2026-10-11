@@ -45,7 +45,7 @@
             <button class="btn ghost sm" @click="restartCam">重启摄像头</button>
             <button class="btn ghost sm" @click="bootJudge">重跑判定</button>
           </div>
-          <p class="tip">无摄像头时自动走 v2 的预录兜底（assets/fallback.mp4），判定器照样真跑；
+          <p class="tip">无摄像头时自动走 v2 的预录兜底（按拳种分流的 fallback 视频），判定器照样真跑；
             连兜底都不行才回退成设计稿原本的示例数字。</p>
         </div>
         <div class="box">
@@ -61,6 +61,7 @@
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { prescribe, query } from '../culture/api.js'
+import { FALLBACK_SRC } from '../engine/fallback'
 
 const router = useRouter()
 function go(p) { router.push(p) }
@@ -198,7 +199,7 @@ async function bootJudge() {
     } catch (e) {
       stream = null
       video.srcObject = null
-      video.src = '/assets/fallback.mp4'
+      video.src = FALLBACK_SRC
     }
     await video.play().catch(() => {})
     await eng2.start(video)

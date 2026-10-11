@@ -40,6 +40,12 @@ dist/shell.js
 dist/shell.css
 dist/flow.js
 dist/flow.css
+# 早期「整份 dist 复制一份」的实验构建（含 art/models/photos/wasm/audio 全量副本，约 76M），
+# 已被 dist/s4/ 正式产物取代，全仓零引用，不入库。
+dist/s4b/
+
+# 渲染/生成的备份文件
+outputs/aic-report/*.bak
 
 # ---- 文档生成流水线的工作目录（tencent-docx 残留）----
 output/

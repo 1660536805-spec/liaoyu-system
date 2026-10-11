@@ -22,10 +22,14 @@
 import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
 // VFOLD_K / lerp / ease / add / mixP：下面那段「原文搬运」的小人代码直接引用这几个顶层名字，
 // 所以必须一并从 roomMoves.js 取过来（原文件里它们是同一个作用域里的顶层常量）。
-import { roomPose, ROOM_VIEWBOX, VFOLD_K, lerp, ease, add, mixP } from '../data/roomMoves.js'
+import { ROOM_VIEWBOX, VFOLD_K, lerp, ease, add, mixP } from '../data/roomMoves.js'
+// 姿态入口按拳种分流：八段锦走 roomMoves.js，太极/五禽戏走 roomMovesExtra.js（三套库共用同一套几何）
+import { roomPoseFor } from '../data/coachFigure.js'
 
 const props = defineProps({
-  /** 房间版式号（应用第 i 式 → i+1，因为房间版头部多一个「起势」） */
+  /** 拳种 id（styles.js）—— 决定用哪一套房间版动作库 */
+  styleId: { type: String, default: 'baduanjin' },
+  /** 房间版式号（该拳种自己的下标；由 coachFigure.js 的 roomFigureIdxFor 算好） */
   idx: { type: Number, default: 1 },
   /** 本式进度 0~1（父组件的动画时间轴） */
   u: { type: Number, default: 0 },
@@ -160,14 +164,17 @@ function build() {
 
 function paint() {
   if (!render) return
+  // 按拳种取姿态；该拳种没有房间版动作库时返回 null（正常情况下 figureIdx 已为 null、不会走到这）
+  const st = roomPoseFor(props.styleId, props.idx, props.u)
+  if (!st) return
   // frozen 时不再推进飘带/拖影物理，但仍按当前姿态重绘（保证定格那一刻画面正确）
-  render(roomPose(props.idx, props.u), !props.frozen)
+  render(st, !props.frozen)
 }
 
 onMounted(build)
 
-// 切式 → 清拖影（否则上一式的轨迹会横着拉一条线穿过新姿势），并重建（新式姿态可能不同）
-watch(() => props.idx, () => {
+// 切式 / 换拳种 → 清拖影（否则上一式的轨迹会横着拉一条线穿过新姿势）
+watch(() => props.styleId + '|' + props.idx, () => {
   if (render && render.clear) render.clear()
   paint()
 })

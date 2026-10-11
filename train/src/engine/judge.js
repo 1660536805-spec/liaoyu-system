@@ -361,6 +361,7 @@ export class MoveJudge {
     this.headHit = false
     this.headErr = null
     this.hipHist = []
+    this.torsoMax = 0        // 本次会话「见过的最挺直躯干高」——前俯相对信号的基准
     this.xHist = []
     this.shoXHist = []
     this.wriXHist = []
@@ -407,6 +408,19 @@ export class MoveJudge {
       p.__handSwing = enough ? rng(this.wriXHist) / t : 0  // 双手中点横摆（式5 主信号）
       p.__handGap = enough ? rng(this.wriGapHist) : 0   // 双手间距变化（式5 辅助）
       p.__bobSrc = useHip ? 'hip' : 'shoulder'
+      // ② 「前俯」的相对信号（太极「搂膝拗步 / 海底针」等用）：
+      //    以**本次会话见过的最挺直躯干**为基准，弯腰时躯干变矮 → __bendRel 变大。
+      //    必须用相对量：示范小人是短臂、肩宽/身高比偏大的画风，真人臂长更长，
+      //    两者「躯干高 / 肩宽」的**绝对值不同**（示范 ≈1.53、真人 ≈1.1），
+      //    按绝对值标定的阈值不可移植；相对量在两边语义一致。
+      //    髋不可见（近距离半身取景）时置 0 —— 该分项降级，规则其余分项照常。
+      if (useHip) {
+        const th = (hipMid(p).y - shoMid(p).y) / t
+        if (th > this.torsoMax) this.torsoMax = th
+        p.__bendRel = this.torsoMax > 1e-3 ? Math.max(0, 1 - th / this.torsoMax) : 0
+      } else {
+        p.__bendRel = 0
+      }
     } catch { /* frozen */ }
     return p
   }

@@ -32,7 +32,7 @@
       <div class="hud-left">
         <div class="hud-tag">当前式名</div>
         <div class="hud-idx">第 {{ stepIdx + 1 }} 式</div>
-        <div class="hud-name">{{ currentMove?.name || '双手托天理三焦' }}</div>
+        <div class="hud-name">{{ currentMove?.name || '—' }}</div>
       </div>
       <div class="hud-metrics">
         <div class="m-card">
@@ -139,10 +139,10 @@
         <div class="harp-sub">气随弦动</div>
       </div>
 
-      <!-- 最终版设计稿：语音提示气泡 -->
+      <!-- 最终版设计稿：语音提示气泡（文案随当前式 tip 走，不写死八段锦） -->
       <div class="hud-bubble" v-if="!finished">
         <span class="spk">🔊</span>
-        <span>抬头上托，舒展胸廓，感受三焦通畅。</span>
+        <span>{{ currentMove && currentMove.tip ? currentMove.tip : '' }}</span>
       </div>
 
       <!-- 侧边弹层（切换右侧面板） -->
@@ -153,9 +153,8 @@
             <button class="sp-close" @click="activeSidePanel = null">✕</button>
           </div>
           <div class="sp-body" v-if="activeSidePanel === 'tips'">
-            <p>• 双掌自小腹前徐徐托起，至胸前翻掌上托。</p>
-            <p>• 抬头仰望两手，手掌用力上撑，脚跟略提。</p>
-            <p>• 保持 3 秒，舒展周身经络。</p>
+            <p>• {{ currentMove && currentMove.tip ? currentMove.tip : '' }}</p>
+            <p>• {{ currentMove && currentMove.cue ? currentMove.cue : '' }}</p>
           </div>
           <div class="sp-body" v-else>
             <p><b>Q: 识别不灵敏怎么办？</b><br/>A: 请确保正面受光，后退 1.5 米使全身入镜。</p>
@@ -185,6 +184,7 @@
         :replay-token="coachDemoToken"
         :collapsed-override="false"
         :figure-idx="roomFigureIdx"
+        :figure-style="style.id"
         @done="onCoachDemoDone"
       />
       </div>
@@ -217,7 +217,7 @@
       <span>计时与打卡不中断，按「下一个式」往下走</span>
     </div>
 
-    <!-- 弦位（数随拳种：八段锦 7 弦 / 五禽戏 5 弦） -->
+    <!-- 弦位（数随拳种：八段锦 7 弦 / 太极 7 弦 / 五禽戏 5 弦） -->
     <div class="strings">
       <div
         v-for="s in style.strings" :key="s"
@@ -249,7 +249,7 @@
     <!-- 完成 -->
     <div class="done" v-else>
       <div class="done-title">一曲完成</div>
-      <div class="done-sub">八式俱毕 · 七弦和鸣</div>
+      <div class="done-sub">{{ doneSub }}</div>
       <div class="done-actions">
         <button class="btn primary" @click="toShell('/?screen=profile')">查看记录</button>
         <button class="btn" @click="restart">再来一遍</button>
@@ -287,7 +287,7 @@ import standardPoses from '../data/baduanjin-8.json'
 import { headPose, bodyPose, createTurnTracker } from '../engine/pose'
 import { MoveJudge, THRESHOLD } from '../engine/judge'
 import { pluck, chordAll, unlockAudio, preloadSamples } from '../engine/guqin'
-import { FallbackSwitch, frameAlive, FALLBACK_SRC, FALLBACK_CFG } from '../engine/fallback'
+import { FallbackSwitch, frameAlive, fallbackSrcFor, FALLBACK_CFG } from '../engine/fallback'
 import { createCoach, PHASE } from '../engine/coach'
 // 房间版动作库：教练小窗的形象换成「房间版拆动作」里那个白练功服小人（见 CoachFigure.vue）
 // —— 只有八段锦有房间版小人，其余拳种由 roomFigureIdxFor 返回 null（不画小人）
@@ -336,7 +336,19 @@ const cfg = reactive({ threshold: THRESHOLD, holdFrames: 10, resId: RESOLUTIONS[
 // 各式期望的头部 yaw（度，绝对值）。null = 不要求头部角度。
 // 【设计原则】转身/转头是动作的一部分，判定看「有没有转到要求角度」，
 // 而非「是否正对镜头」。八段锦中仅式4 需转头；太极转身式将来在此配置。
-const HEAD_YAW_REQ = { 3: 40 }
+/** 「需转头到位」的式：按拳种分别指定（0-based 式号 → 需要的 |yaw| 度数）。
+ *  八段锦第 4 式「五劳七伤往后瞧」的要点就是转头，故必须转到 40° 才算完成；
+ *  五禽戏/太极没有「以转头为要点」的单式（太极的「转身」是全身转，不是转头；
+ *  五禽戏「猿提」的左右观只是过程、判定不卡头部角度），故留空。
+ *  ⚠️ 早先这里写死成 { 3: 40 }（不区分拳种），会让**五禽戏的「猿提」**（当时排在
+ *     第 4 式；2026-10-11 补成十式后为第 7 式）也被要求转头 40° —— 判定闸门下
+ *     coach 永远等不到 hit，该式卡死。故改为按拳种取。 */
+const HEAD_YAW_REQ = {
+  baduanjin: { 3: 40 },
+  wuqinxi: {},
+  taiji: {},
+}
+const headYawReqFor = (styleId, stepIdx) => HEAD_YAW_REQ[styleId]?.[stepIdx] ?? null
 const resetTick = ref(0)
 function resetCfg() {
   cfg.threshold = THRESHOLD
@@ -401,6 +413,12 @@ const totalMoves = computed(() => moves.value.length || 8)
 const currentMove = computed(() => moves.value[stepIdx.value])
 const doneCount = computed(() => doneSet.value.size)
 
+// 完成页副标题：式数与弦数都随拳种走（八段锦 8式·7弦 / 五禽戏 10式·5弦 / 太极 24式·7弦）
+// —— 原为写死的「八式俱毕 · 七弦和鸣」，五禽戏/太极下会显示错的式数与弦数
+const CN_NUM = { 5: '五', 7: '七', 8: '八', 10: '十', 24: '廿四' }
+const cnNum = (n) => CN_NUM[n] || String(n)
+const doneSub = computed(() => `${cnNum(moves.value.length)}式俱毕 · ${cnNum(style.value.strings)}弦和鸣`)
+
 // ================= 陪练教练（动作指引 + 陪练教练）=================
 // 【触发方式】
 //   · 默认开启 —— 进跟练页即自动开启「逐式教练引导」，**与摄像头同时运行**：
@@ -463,9 +481,10 @@ const coachDemoToken = ref(0)   // 递增 → 教练示范动画从 0 重播一�
 
 const coachAnimKey = computed(() => (coachOn.value ? `${style.value.id}-${stepIdx.value + 1}` : ''))
 
-/** 教练小窗用的「房间版式号」：只有八段锦有对应的房间版小人（起势 + 8 式 + 收势），
-    应用第 i 式(0-based) → 房间版 i+1。其余拳种没有形象 → 返回 null，
-    由 DemoAnimation 拦截、干脆不渲染小人（而不是错画成八段锦的动作）。
+/** 教练小窗用的「房间版式号」：八段锦 / 太极 / 五禽戏 都有对应的房间版小人。
+    八段锦 = 起势 + 8 式 + 收势，故应用第 i 式(0-based) → i+1；
+    太极 24 式、五禽戏 10 式都与 styles.js 同名同次序 → 1:1。
+    其余拳种没有形象 → 返回 null，由 DemoAnimation 拦截、干脆不渲染小人（而不是错画成八段锦的动作）。
     （见 train/src/data/coachFigure.js 的 roomFigureIdxFor）*/
 const roomFigureIdx = computed(() => roomFigureIdxFor(style.value.id, stepIdx.value))
 
@@ -585,7 +604,7 @@ function resetStep() {
     holdFrames: cfg.holdFrames,
     threshold: cfg.threshold,
     order: freeMode.value ? null : stepIdx.value,
-    headYaw: freeMode.value ? null : (HEAD_YAW_REQ[stepIdx.value] ?? null),
+    headYaw: freeMode.value ? null : headYawReqFor(style.value.id, stepIdx.value),
     headYawTol: 18,
     // 拳种决定用哪套判定规则（八段锦内置 / 五禽戏、太极用 styleRules）
     style: style.value.id,
@@ -874,6 +893,9 @@ function safeSet(k, v) { try { localStorage.setItem(k, v) } catch { /* file:// �
 // ================= 兜底第一级：预录视频 =================
 function setupFallback() {
   fbSwitch = new FallbackSwitch(fbVideo.value, {
+    // 预录字幕卡按拳种分流：主画面念的式名/序号必须与教练小窗、状态卡同源。
+    // （早先全拳种共用一支八段锦卡 ⇒ 演五禽戏时主画面仍在念八段锦。）
+    src: () => fallbackSrcFor(style.value.id),
     onEnter: (reason) => {
       fbActive.value = true
       fbReason.value = reason

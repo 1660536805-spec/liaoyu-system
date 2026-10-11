@@ -28,6 +28,7 @@
             v-if="useRoomFigure && figureIdx != null"
             v-show="state === 'ready'"
             :idx="figureIdx"
+            :style-id="figureStyle"
             :u="t"
             :frozen="frozen"
           />
@@ -95,7 +96,7 @@
 //   语音开始 → 动画从头播；语音暂停/结束 → 停在结束姿态或回到起始（可设）。
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { getAnim, DEFAULT_POSE, POSE_KEYS, PHASE_TEXT } from '../data/demoAnim'
-import { ROOM_MOVES } from '../data/roomMoves.js'
+import { roomFigureDurFor } from '../data/coachFigure.js'
 import CoachFigure from './CoachFigure.vue'
 
 const props = defineProps({
@@ -124,9 +125,12 @@ const props = defineProps({
   /** 形象来源：'auto' = coach 版式自动用「房间版小人」、drawer 仍用原来的疗养风小人；
       'room' = 强制房间版小人；'plain' = 强制原来的疗养风小人（canvas）。 */
   figure: { type: String, default: 'auto' },
-  /** 房间版式号：应用第 i 式(0-based) 传 i+1 —— 房间版头部多一个「起势」，名称逐条对齐。
-      **null = 该拳种没有房间版小人**（非八段锦），此时不渲染 CoachFigure。 */
+  /** 房间版式号：应用第 i 式(0-based) 传「该拳种的房间版式号」（八段锦 = i+1；
+      太极 = i；五禽戏查映射表）。**null = 该拳种没有房间版小人**，此时不渲染 CoachFigure。 */
   figureIdx: { type: Number, default: null },
+  /** 拳种 id（styles.js）—— 与 figureIdx 一起决定用哪一套房间版动作库：
+      'baduanjin' → roomMoves.js；'taiji' / 'wuqinxi' → roomMovesExtra.js。 */
+  figureStyle: { type: String, default: 'baduanjin' },
 })
 
 const emit = defineEmits(['done'])
@@ -182,12 +186,12 @@ function persist() {
 }
 
 const dur = computed(() => {
-  // 教练房间版小人：用**房间版动作库的作者时长**（ROOM_MOVES[idx].dur）当整段时长，
+  // 教练房间版小人：用**房间版动作库的作者时长**（roomFigureDurFor(拳种, 式号)）当整段时长，
   // 让 u 的推进速度与房间版逐帧一致（否则 8 式各自被拉长/压短）。
   // drawer（非房间版小人）仍用 demoAnim 的时长。
   if (useRoomFigure.value && props.figureIdx != null) {
-    const rm = ROOM_MOVES[props.figureIdx]
-    if (rm && rm.dur > 0) return rm.dur
+    const rm = roomFigureDurFor(props.figureStyle, props.figureIdx)
+    if (rm > 0) return rm
   }
   return anim.value?.dur || 1
 })
