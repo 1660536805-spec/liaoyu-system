@@ -409,9 +409,9 @@ def build_toc(doc, toc):
             fc2.set(qn('w:fldCharType'), 'separate')
             r3._r.append(fc2)
 
-        fmt_run(par.add_run(t), size=11, bold=(level == 1))
-        fmt_run(par.add_run('\t'), size=11)
-        fmt_run(par.add_run(pg), size=11, bold=(level == 1))
+        fmt_run(par.add_run(t), size=12, bold=(level == 1))
+        fmt_run(par.add_run('\t'), size=12)
+        fmt_run(par.add_run(pg), size=12, bold=(level == 1))
 
         if i == len(lines) - 1:
             r4 = par.add_run()

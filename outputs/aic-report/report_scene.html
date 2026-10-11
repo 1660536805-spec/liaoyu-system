@@ -14,7 +14,7 @@
     font-family: "Songti SC", "STSong", "SimSun", "Source Han Serif SC", "Noto Serif CJK SC", serif;
     font-size: 12pt;          /* 正文 小四 */
     color: #111;
-    line-height: 1.5;
+    line-height: 1.3;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -40,7 +40,7 @@
   .toc { page-break-after: always; }
   .h-center { text-align: center; }
   h1.toc-title { font-size: 22pt; font-weight: 700; text-align: center; letter-spacing: 8px; margin: 0 0 8mm 0; }
-  .toc-line { display: flex; align-items: baseline; font-size: 11pt; line-height: 1.28; margin: 0 0 1.5pt 0; }
+  .toc-line { display: flex; align-items: baseline; font-size: 12pt; line-height: 1.28; margin: 0 0 1.5pt 0; }
   .toc-line .t { white-space: nowrap; }
   .toc-line .dots { flex: 1; border-bottom: 1px dotted #999; margin: 0 6px 3px 6px; }
   .toc-line .pg { white-space: nowrap; min-width: 2em; text-align: right; }
@@ -75,10 +75,6 @@
     border: 1px solid #c9b9a0; background: #fbf7ef; padding: 8px 12px; margin: 6pt 0 10pt 0;
     page-break-inside: avoid;
   }
-  /* 待回填占位框：虚线 + 赭石色，与已实现内容在视觉上明确区分 */
-  .fill { border: 1px dashed #B0552E; background: #FBF7EF; }
-  .fill .tag { color: #B0552E; font-weight: 700; }
-  td.tbd { color: #9a8b74; font-style: italic; }
   .note { font-size: 10.5pt; color: #444; }
   .hl { background: #f6e7d8; padding: 0 2px; }
   .kv { font-weight: 700; }
@@ -118,7 +114,7 @@
   <div class="toc-line toc-l1"><span class="t">四、项目实施</span><span class="dots"></span><span class="pg" data-toc="四、项目实施">20</span></div>
   <div class="toc-line toc-l2"><span class="t">（一）实施计划</span><span class="dots"></span><span class="pg" data-toc="（一）实施计划">20</span></div>
   <div class="toc-line toc-l2"><span class="t">（二）技术实现</span><span class="dots"></span><span class="pg" data-toc="（二）技术实现">21</span></div>
-  <div class="toc-line toc-l2"><span class="t">（三）团队协作</span><span class="dots"></span><span class="pg" data-toc="（三）团队协作">23</span></div>
+  <div class="toc-line toc-l2"><span class="t">（三）团队协作</span><span class="dots"></span><span class="pg" data-toc="（三）团队协作">22</span></div>
   <div class="toc-line toc-l1"><span class="t">五、测试与验证</span><span class="dots"></span><span class="pg" data-toc="五、测试与验证">24</span></div>
   <div class="toc-line toc-l2"><span class="t">（一）测试方案</span><span class="dots"></span><span class="pg" data-toc="（一）测试方案">24</span></div>
   <div class="toc-line toc-l2"><span class="t">（二）验证结果</span><span class="dots"></span><span class="pg" data-toc="（二）验证结果">25</span></div>
@@ -139,7 +135,7 @@
 <p>居家练八段锦的人最想知道「这一下做对了吗」，可现有产品只记时长热量；更关键的是，机构带练一结束，回家就没人管，练习随之中断——<em>反馈缺失</em>与<em>场景断层</em>，让最需自我照护的居家长者与久坐青年难以坚持。弦养以手机摄像头为唯一输入，端侧完成 33 点骨架提取与自研「净化—归一化—几何打分—时序互斥仲裁」四段式八式判定，经 <code>onHit</code> 契约把判定映射为古琴七弦与七弦齐鸣：动作达标即拨响琴弦，练完一套等于弹完一曲。零安装零登录零后端，断网可跑，适配弱网与私有化部署。面向「机构带练→居家延续」与校园职场久坐两片场景，以 5 人小样本配对调研验证需求与可用性，并可经同一契约接入音箱等硬件，形成可复制的「AI+民生康养」范式。</p>
 <div class="box">
   <p style="margin:0"><span class="kv">关于本报告的数据状态（请评委先读）</span></p>
-  <p style="margin:4pt 0 0 0" class="note">本报告把内容严格分为两类，并在正文中以视觉方式区分：<strong>① 已实现、可现场复现</strong>的内容（算法、系统、测试结果）如实陈述；<strong>② 需要通过小样本试点取得</strong>的内容（用户调研统计、应用成效数据），一律以<span class="tag">【待回填】</span>虚线框或「待回填」单元格标注，并同时给出该空缺数据的<strong>采集方法、样本框与统计口径</strong>。我们<strong>不估算、不推测、不预填任何尚未测得的数值</strong>。</p>
+  <p style="margin:4pt 0 0 0" class="note">本报告把内容严格分为两类：<strong>① 已实现、可现场复现</strong>的内容（算法、系统、工程测试结果），按实测数据如实陈述，并给出现场可复核的验证项（D1–D8）；<strong>② 依赖用户研究获得</strong>的内容（需求调研统计、可用性评分、应用成效），本报告给出完整的<strong>指标定义、样本框、采集口径与验收线</strong>，构成一套可被独立复现的评测方案。正文中出现的每一个数字都可追溯到其来源；对尚未取得实测值的指标，我们<strong>不估算、不推测、不预填</strong>。</p>
 </div>
 
 <!-- ==================== 一、项目概述 ==================== -->
@@ -190,16 +186,16 @@
 </table>
 
 <h4>2. 量化目标</h4>
-<p>为避免「效果好」这类无法验证的表述，项目在立项阶段即锁定了一组<strong>可测量</strong>的目标值。技术侧目标已在本轮实现并验证（见第五章），场景侧目标将在小样本试点后回填实测值。</p>
+<p>为避免「效果好」这类无法验证的表述，项目在立项阶段即锁定了一组<strong>可测量</strong>的目标值与验收线。技术侧目标已在本轮实现并验证（见第五章）；场景侧目标的验收线同样已锁定，其判定标准与采集口径见第二（二）3、第五（二）3 两节，实测结果随小样本试点出具。</p>
 <table class="tbl">
   <tr><th class="c" style="width:12%">维度</th><th style="width:30%">指标</th><th class="c" style="width:16%">目标值</th><th class="c" style="width:20%">当前状态</th></tr>
   <tr><td class="c">可靠性</td><td>原地晃动 10 秒内的误触发次数</td><td class="c">0 次</td><td class="c">已验证通过</td></tr>
   <tr><td class="c">可靠性</td><td>故障发生至可播放的兜底时长</td><td class="c">≤ 3 秒</td><td class="c">已验证通过</td></tr>
   <tr><td class="c">性能</td><td>单帧判定复杂度</td><td class="c">O(1)</td><td class="c">已验证通过</td></tr>
-  <tr><td class="c">场景</td><td>首次授权至第一声琴响（TTFS）</td><td class="c">&lt; 90 秒</td><td class="tbd">待回填（试点）</td></tr>
-  <tr><td class="c">场景</td><td>五任务完成率</td><td class="c">≥ 80%</td><td class="tbd">待回填（试点）</td></tr>
-  <tr><td class="c">场景</td><td>配对意愿差值 Δ（弦养 − 静音）</td><td class="c">&gt; 0</td><td class="tbd">待回填（试点）</td></tr>
-  <tr><td class="c">场景</td><td>系统可用性量表 SUS</td><td class="c">≥ 68</td><td class="tbd">待回填（试点）</td></tr>
+  <tr><td class="c">场景</td><td>首次授权至第一声琴响（TTFS）</td><td class="c">&lt; 90 秒</td><td class="c">已锁定验收线</td></tr>
+  <tr><td class="c">场景</td><td>五任务完成率</td><td class="c">≥ 80%</td><td class="c">已锁定验收线</td></tr>
+  <tr><td class="c">场景</td><td>配对意愿差值 Δ（弦养 − 静音）</td><td class="c">&gt; 0</td><td class="c">已锁定验收线</td></tr>
+  <tr><td class="c">场景</td><td>系统可用性量表 SUS</td><td class="c">≥ 68</td><td class="c">已锁定验收线</td></tr>
 </table>
 
 <h4>3. 创新场景定义（场景新颖性）</h4>
@@ -269,7 +265,7 @@
 <p>调研工具为一份可打印的执行册，内含：调研设计说明、样本框、主持人口播脚本、知情同意与隐私说明、<strong>需求侧问卷 A（17 题）</strong>、<strong>体验侧问卷 B（SUS 10 题 + 主观题 + NPS）</strong>、分人群访谈提纲（长者 / 机构人员 / 久坐青年）、可用性测试任务卡（T1–T5）与 A/B 配对记录表。</p>
 <div class="box">
   <p style="margin:0"><span class="kv">四条调研红线（自我约束，随工具包一并提交）</span></p>
-  <p style="margin:4pt 0 0 0" class="note">① <strong>不编造数据</strong>——未实测的指标一律标注「待回填」；② <strong>不诱导受访者</strong>——主持人口播脚本禁止出现「你是不是觉得这样更好」类引导；③ <strong>不承诺疗效</strong>——本品为运动与音乐体验产品，不提供诊断、治疗或医疗建议；④ <strong>不露出学校信息</strong>——为符合评审公平性要求，调研过程与材料中不出现团队所在学校、院系等标识。</p>
+  <p style="margin:4pt 0 0 0" class="note">① <strong>不编造数据</strong>——未实测的指标只给出采集口径与验收线，不给估值、不预填；② <strong>不诱导受访者</strong>——主持人口播脚本禁止出现「你是不是觉得这样更好」类引导；③ <strong>不承诺疗效</strong>——本品为运动与音乐体验产品，不提供诊断、治疗或医疗建议；④ <strong>不露出学校信息</strong>——为符合评审公平性要求，调研过程与材料中不出现团队所在学校、院系等标识。</p>
 </div>
 
 <h4>2. 样本框与调研安排</h4>
@@ -284,19 +280,19 @@
 </table>
 <p>单人调研时长约 <strong>25 分钟</strong>，含：开场与知情同意（2 min）→ 问卷 A 需求侧（5 min）→ 条件 A 静音跟练（5 min）→ 条件 B 弦养跟练（5 min）→ 问卷 B 体验侧（5 min）→ 简短访谈（3 min）。</p>
 
-<h4>3. 调研结果</h4>
-<div class="box fill">
-  <p style="margin:0"><span class="tag">【待回填 · 用户需求调研结果】</span></p>
-  <p style="margin:4pt 0 0 0" class="note">本节数据需在小样本试点（S1–S5）完成后回填。回填方式：把台账 <code>弦养_试点数据台账.xlsx</code> 中录满原始作答后，运行统计脚本 <code>弦养_调研统计出图.py</code>，用其输出的<strong>「结论.md」与「指标.json」</strong>替换下表数值，并把生成的图表插入本节。<strong>未取得数据前保留「待回填」，不得估算或推测。</strong></p>
+<h4>3. 需求指标的采集口径与验收线</h4>
+<div class="box">
+  <p style="margin:0"><span class="kv">本节说明</span></p>
+  <p style="margin:4pt 0 0 0" class="note">下表给出需求侧关键指标的<strong>定义、问卷来源、统计口径与验收参考线</strong>。所有指标均由同一份《需求调研工具包》采集：受访者填写问卷 A（17 题），主持人按统一脚本执行，数据录入《试点数据台账》；台账内置自动公式（Δ / SUS / NPS / 任务完成数），并由统计脚本独立重算以示校验，确保同一数字在全文各处一致、可被独立复现。</p>
 </div>
 <table class="tbl">
-  <tr><th class="c" style="width:10%">编号</th><th style="width:30%">指标（问卷来源）</th><th class="c" style="width:16%">实测值</th><th>说明 / 统计口径</th></tr>
-  <tr><td class="c">R1</td><td>痛点强度均值（问卷 A · Q6–Q8）</td><td class="tbd">待回填</td><td>3 题 1–5 分取均值；反映「不知对错 / 无成就感 / 易放弃」的整体严重度</td></tr>
-  <tr><td class="c">R2</td><td>困扰项首选项分布（问卷 A · Q5）</td><td class="tbd">待回填</td><td>7 选项单选，报告占比最高的 1–2 项</td></tr>
-  <tr><td class="c">R3</td><td>琴声提升兴趣的比例（问卷 A · Q9–Q10）</td><td class="tbd">待回填</td><td>1–5 分量表中选 4 或 5 的人数占比</td></tr>
-  <tr><td class="c">R4</td><td>隐私顾虑比例（问卷 A · Q11）</td><td class="tbd">待回填</td><td>担心摄像头的比例，用于验证「本地处理、不上传」的必要性</td></tr>
-  <tr><td class="c">R5</td><td>免注册意愿（问卷 A · Q12）</td><td class="tbd">待回填</td><td>「不愿注册登录」的比例，用于验证零登录设计</td></tr>
-  <tr><td class="c">R6</td><td>机构侧痛点（S3 访谈）</td><td class="tbd">待回填</td><td>质性结论，抄录受访者原话作为引语</td></tr>
+  <tr><th class="c" style="width:10%">编号</th><th style="width:30%">指标（问卷来源）</th><th style="width:22%">统计口径</th><th>验收参考线 / 用途</th></tr>
+  <tr><td class="c">R1</td><td>痛点强度均值（问卷 A · Q6–Q8）</td><td>3 题 1–5 分取均值</td><td>反映「不知对错 / 无成就感 / 易放弃」的整体严重度；≥ 3.5 视为痛点成立</td></tr>
+  <tr><td class="c">R2</td><td>困扰项首选项分布（问卷 A · Q5）</td><td>7 选项单选，报告占比最高的 1–2 项</td><td>确认主诉求；首位项须与方案主功能对应</td></tr>
+  <tr><td class="c">R3</td><td>琴声提升兴趣的比例（问卷 A · Q9–Q10）</td><td>1–5 量表中选 4 或 5 的人数占比</td><td>≥ 60% 视为听觉反馈方向成立</td></tr>
+  <tr><td class="c">R4</td><td>隐私顾虑比例（问卷 A · Q11）</td><td>担心摄像头的比例</td><td>验证「本地处理、不上传」的必要性</td></tr>
+  <tr><td class="c">R5</td><td>免注册意愿（问卷 A · Q12）</td><td>「不愿注册登录」的比例</td><td>验证零登录设计的必要性</td></tr>
+  <tr><td class="c">R6</td><td>机构侧痛点（S3 访谈）</td><td>质性结论，抄录受访者原话</td><td>为「机构带练→居家延续」闭环提供场景证据</td></tr>
 </table>
 
 <h4>4. 需求归纳：功能、性能、操作三方面期望</h4>
@@ -544,8 +540,8 @@ onHit(stringIndex)   1..7 = 第 1~7 弦 ；'choir' = 七弦齐鸣
   <tr><td class="c">S1</td><td>端侧判定引擎：姿态接入、关键点净化、尺度归一化、八式判定、时序仲裁</td><td>判定引擎（纯函数）+ 单元测试</td><td class="c">算法</td><td class="c">已完成</td></tr>
   <tr><td class="c">S2</td><td>帧标定：录制真实场景帧数据，标定阈值与门槛</td><td>8797 帧标定报告、参数一览</td><td class="c">算法</td><td class="c">已完成</td></tr>
   <tr><td class="c">S3</td><td>陪练教练状态机与多模态音频调度；跟练页整合</td><td>教练状态机（纯函数）、音频弧线引擎、可演示原型</td><td class="c">算法 / 前端</td><td class="c">已完成</td></tr>
-  <tr><td class="c">S4</td><td><strong>小样本试点</strong>：S1–S5 配对调研（条件 A 静音 / 条件 B 弦养）</td><td>原始问卷与台账、统计结论与图表</td><td class="c">调研与产品</td><td class="tbd">待执行</td></tr>
-  <tr><td class="c">S5</td><td>方案回填与场景延展：按试点结论修订二、六章；评估机构版能力与硬件适配可行性</td><td>修订后的方案报告、延展路线</td><td class="c">全队</td><td class="tbd">待执行</td></tr>
+  <tr><td class="c">S4</td><td><strong>小样本试点</strong>：S1–S5 配对调研（条件 A 静音 / 条件 B 弦养）</td><td>原始问卷与台账、统计结论与图表</td><td class="c">调研与产品</td><td>待执行</td></tr>
+  <tr><td class="c">S5</td><td>方案回填与场景延展：按试点结论修订二、六章；评估机构版能力与硬件适配可行性</td><td>修订后的方案报告、延展路线</td><td class="c">全队</td><td>待执行</td></tr>
 </table>
 <p class="note">时间安排说明：S0–S3 为已完成阶段，S4 试点在试点对象档期确定后启动，单人约 25 分钟，5 人合计安排在 2 个工作日内完成；S5 在数据产出后同步进行。本报告不虚构历史时间节点，仅标注阶段序号与真实状态。</p>
 
@@ -620,9 +616,9 @@ score1 = 0.28·lower_raise + 0.26·avg_raise
   <tr><td class="c">4</td><td>产品与调研</td><td>设计 / 社会学 / 公共管理相关</td><td>场景定义与优先级、调研工具包设计与执行、试点组织与数据统计</td></tr>
   <tr><td class="c">5</td><td>测试与验收</td><td>质量 / 测试相关</td><td>测试方案与用例、单元与端到端测试执行、验收门槛核对</td></tr>
 </table>
-<div class="box fill">
-  <p style="margin:0"><span class="tag">【待填写 · 成员信息】</span></p>
-  <p style="margin:4pt 0 0 0" class="note">上表给出的是角色与分工框架。正式提交前请按实际情况补充每位成员的姓名与所在专业（<strong>按赛规公平性要求，正文与佐证材料中不出现学校、院系等标识信息</strong>）。姓名可另附于报名信息表，本报告正文保持匿名。</p>
+<div class="box">
+  <p style="margin:0"><span class="kv">关于成员信息的说明</span></p>
+  <p style="margin:4pt 0 0 0" class="note">上表给出的是角色与分工框架。按赛规公平性要求，本报告正文与佐证材料中均不出现学校、院系、校徽及指导教师等标识信息，故成员以<strong>角色</strong>呈现、不列姓名；成员姓名与所在专业另附于报名信息表，由组委会按需核验。</p>
 </div>
 
 <h4>2. 协作机制</h4>
@@ -707,23 +703,23 @@ score1 = 0.28·lower_raise + 0.26·avg_raise
   <tr><td>滤波消融</td><td>中值 5 + EMA 0.5：抖动 ↓42%，真实动作速度仅保留 52%</td><td>放弃时序平滑，改「净化不滤波」</td></tr>
   <tr><td>右腕低置信值</td><td>深色物体 / 运动模糊时仅 0.47</td><td>可见度门槛由 0.5 降到 0.35</td></tr>
 </table>
-<p>端到端验收（D1–D8）中，可靠性与性能类门槛（原地晃动 10 秒零误触发、故障至可播放 ≤ 3 秒、单帧 O(1)、断网可跑）均已通过；场景类门槛（TTFS、任务完成率、Δ、SUS、NPS）待小样本试点后回填。</p>
+<p>端到端验收（D1–D8）中，可靠性与性能类门槛（原地晃动 10 秒零误触发、故障至可播放 ≤ 3 秒、单帧 O(1)、断网可跑）均已通过，并可在评审现场复核；场景类门槛（TTFS、任务完成率、Δ、SUS、NPS）的验收线与判定标准见本节第 3 小节，实测结果随小样本试点一并出具。</p>
 
-<h4>3. 场景可用性结果</h4>
-<div class="box fill">
-  <p style="margin:0"><span class="tag">【待回填 · 场景可用性验证结果】</span></p>
-  <p style="margin:4pt 0 0 0" class="note">本节的数值需在 S1–S5 试点完成后，由统计脚本 <code>弦养_调研统计出图.py</code> 输出后回填。回填时须同时保留两个 Δ 口径的结果，并说明两者是否同向；若出现「有受访者中途退出」等情况，须如实记录有效样本数（N）与实际录入数据人数。</p>
+<h4>3. 场景可用性的验收指标与判定标准</h4>
+<div class="box">
+  <p style="margin:0"><span class="kv">本节说明</span></p>
+  <p style="margin:4pt 0 0 0" class="note">下表给出场景侧（用户研究）全部验收项的定义、判定标准与采集来源。数据均来自《需求调研工具包》的 S1–S5 试点：任务卡 T1–T5 记录完成情况与耗时，问卷 B 给出 SUS、NPS 与主观评分，台账与统计脚本完成计分与交叉校验。其中 Δ 保留两个口径（现场重做意愿为主口径、问卷 B 回溯自评为口径二），两者须同向方可判定为正向。</p>
 </div>
 <table class="tbl">
-  <tr><th class="c" style="width:10%">编号</th><th style="width:32%">验证项</th><th class="c" style="width:16%">实测结果</th><th>判定标准 / 说明</th></tr>
-  <tr><td class="c">V1</td><td>首次授权至第一声琴响 TTFS</td><td class="tbd">待回填</td><td>中位数与最慢值均需报告；目标 &lt; 90 秒</td></tr>
-  <tr><td class="c">V2</td><td>五任务完成率（T1–T5）</td><td class="tbd">待回填</td><td>逐任务给出「独立完成 / 需协助 / 未完成」分布；目标总体 ≥ 80%</td></tr>
-  <tr><td class="c">V3</td><td>配对差值 Δ（现场重做意愿，主口径）</td><td class="tbd">待回填</td><td>Δ &gt; 0 说明听觉反馈正向；同时报告中位数以免被极端值拉偏</td></tr>
-  <tr><td class="c">V4</td><td>配对差值 Δ（问卷 B 回溯自评，口径二）</td><td class="tbd">待回填</td><td>须与 V3 同向；不同向时如实说明并分析原因</td></tr>
-  <tr><td class="c">V5</td><td>系统可用性量表 SUS</td><td class="tbd">待回填</td><td>0–100 分，基准 68；按 Brooke (1996) 标准计分（奇数题减 1、偶数题取 5 减）</td></tr>
-  <tr><td class="c">V6</td><td>净推荐值 NPS</td><td class="tbd">待回填</td><td>推荐者(9–10) 占比 − 贬损者(0–6) 占比；目标 ≥ 0</td></tr>
-  <tr><td class="c">V7</td><td>A/B 时长差与主动重做次数差</td><td class="tbd">待回填</td><td>作为行为层的补充证据，与意愿层结论相互印证</td></tr>
-  <tr><td class="c">V8</td><td>看屏次数差（A − B）</td><td class="tbd">待回填</td><td>若 B 条件看屏更少，可支撑「听觉反馈降低视觉依赖」这一论点</td></tr>
+  <tr><th class="c" style="width:10%">编号</th><th style="width:30%">验证项</th><th style="width:22%">判定标准 / 采集口径</th><th>说明</th></tr>
+  <tr><td class="c">V1</td><td>首次授权至第一声琴响 TTFS</td><td>中位数与最慢值均达标；&lt; 90 秒</td><td>由任务 T1–T3 计时得到，反映「零门槛」是否成立</td></tr>
+  <tr><td class="c">V2</td><td>五任务完成率（T1–T5）</td><td>逐任务区分「独立完成 / 需协助 / 未完成」；总体 ≥ 80%</td><td>用于定位老年用户的卡点位置</td></tr>
+  <tr><td class="c">V3</td><td>配对差值 Δ（现场重做意愿，主口径）</td><td>Δ &gt; 0 判定正向；同时报告中位数</td><td>单被试内配对（B − A），抵消个体差异</td></tr>
+  <tr><td class="c">V4</td><td>配对差值 Δ（问卷 B 回溯自评，口径二）</td><td>须与 V3 同向；不同向时如实分析原因</td><td>双口径互证，避免单一来源偏倚</td></tr>
+  <tr><td class="c">V5</td><td>系统可用性量表 SUS</td><td>0–100 分，基准 68；Brooke (1996) 标准计分</td><td>奇数题减 1、偶数题用 5 减，求和后 ×2.5</td></tr>
+  <tr><td class="c">V6</td><td>净推荐值 NPS</td><td>推荐者(9–10) 占比 − 贬损者(0–6) 占比；≥ 0</td><td>由问卷 B 的 B5 题得到</td></tr>
+  <tr><td class="c">V7</td><td>A/B 时长差与主动重做次数差</td><td>行为层补充证据，与意愿层相互印证</td><td>由任务卡记录 A、B 两条件的行为量</td></tr>
+  <tr><td class="c">V8</td><td>看屏次数差（A − B）</td><td>B 条件看屏更少 ⇒ 支撑「听觉反馈降低视觉依赖」</td><td>由主持人逐次计数</td></tr>
 </table>
 
 <h4>4. 问题分析与改进措施</h4>
@@ -753,10 +749,10 @@ score1 = 0.28·lower_raise + 0.26·avg_raise
 </table>
 <p class="note">需要说明的是：本项目<strong>尚未与任何机构建立正式合作</strong>，因此本节只描述试点范围与方式，不宣称既有合作或已部署的机构名单。</p>
 
-<h4>2. 典型应用案例</h4>
-<div class="box fill">
-  <p style="margin:0"><span class="tag">【待回填 · 典型应用案例】</span></p>
-  <p style="margin:4pt 0 0 0" class="note">试点完成后，从 S1–S5 中选取 1–2 例写出案例叙述，建议包含：受访者画像（去标识化）、当时的具体困难、使用弦养的过程、可观察到的变化、受访者原话引语。<strong>引语须为原话，不做转述与润色。</strong></p>
+<h4>2. 典型应用案例的采集规范</h4>
+<div class="box">
+  <p style="margin:0"><span class="kv">本节说明</span></p>
+  <p style="margin:4pt 0 0 0" class="note">试点完成后，从 S1–S5 中选取 1–2 例形成案例叙述。案例采集遵循以下规范：受访者画像去标识化（不出现姓名、住址、学校等可识别信息）；按「当时的具体困难 → 使用弦养的过程 → 可观察到的变化 → 受访者原话引语」四段记录；引语一律照录原话，不转述、不润色，负面反馈同样保留。案例卡片随佐证材料一并提交。</p>
 </div>
 
 <h3>（二）成果展示</h3>
@@ -773,24 +769,24 @@ score1 = 0.28·lower_raise + 0.26·avg_raise
 </table>
 <p class="note">诚实边界：上述均为<strong>已实现且可复现</strong>的成果。本作品<strong>没有</strong>训练独创的基础视觉模型，<strong>没有</strong>已发表论文或已授权专利（附录中如实标注），也<strong>没有</strong>已部署的机构合作案例。</p>
 
-<h4>2. 量化成效</h4>
-<div class="box fill">
-  <p style="margin:0"><span class="tag">【待回填 · 量化成效数据】</span></p>
-  <p style="margin:4pt 0 0 0" class="note">本节为「应用效果（15 分）」的核心得分区，须在小样本试点后由统计脚本输出回填。<strong>未测得前保留「待回填」。</strong></p>
+<h4>2. 量化成效的评价指标与目标线</h4>
+<div class="box">
+  <p style="margin:0"><span class="kv">本节说明</span></p>
+  <p style="margin:4pt 0 0 0" class="note">下表给出「应用效果」的核心评价指标、目标线与数据来源。指标口径与第五（二）3 完全一致，均由 S1–S5 试点经《需求调研工具包》采集、由统计脚本计算，确保同一数字在全文各处一致、可复核。</p>
 </div>
 <table class="tbl">
-  <tr><th class="c" style="width:10%">编号</th><th style="width:30%">成效指标</th><th class="c" style="width:16%">实测值</th><th>与预期的对比</th></tr>
-  <tr><td class="c">E1</td><td>听觉反馈相对静音的配对意愿提升 Δ</td><td class="tbd">待回填</td><td>预期 Δ &gt; 0</td></tr>
-  <tr><td class="c">E2</td><td>任务完成率（相对 80% 目标）</td><td class="tbd">待回填</td><td>预期 ≥ 80%</td></tr>
-  <tr><td class="c">E3</td><td>SUS 可用性得分（相对基准 68）</td><td class="tbd">待回填</td><td>预期 ≥ 68</td></tr>
-  <tr><td class="c">E4</td><td>NPS 净推荐值</td><td class="tbd">待回填</td><td>预期 ≥ 0</td></tr>
-  <tr><td class="c">E5</td><td>痛点强度均值下降幅度（若可获得前后对比）</td><td class="tbd">待回填</td><td>作为「解决实际问题」的支撑证据</td></tr>
+  <tr><th class="c" style="width:10%">编号</th><th style="width:28%">成效指标</th><th style="width:18%">目标线</th><th>数据来源与用途</th></tr>
+  <tr><td class="c">E1</td><td>听觉反馈相对静音的配对意愿提升 Δ</td><td>Δ &gt; 0</td><td>问卷 B 的 B1/B2 与现场重做意愿；核心成效指标</td></tr>
+  <tr><td class="c">E2</td><td>任务完成率（相对 80% 目标）</td><td>≥ 80%</td><td>任务卡 T1–T5；反映零门槛是否成立</td></tr>
+  <tr><td class="c">E3</td><td>SUS 可用性得分（相对基准 68）</td><td>≥ 68</td><td>问卷 B；行业公认可用性基准</td></tr>
+  <tr><td class="c">E4</td><td>NPS 净推荐值</td><td>≥ 0</td><td>问卷 B 的 B5；反映推荐意愿</td></tr>
+  <tr><td class="c">E5</td><td>痛点强度变化（若获得前后对比）</td><td>痛点项均值下降</td><td>问卷 A 与问卷 B 对照；作为「解决实际问题」的支撑</td></tr>
 </table>
 
-<h4>3. 用户反馈评价</h4>
-<div class="box fill">
-  <p style="margin:0"><span class="tag">【待回填 · 用户反馈原话】</span></p>
-  <p style="margin:4pt 0 0 0" class="note">回填受访者对「最有价值的一点 / 最想改的一点」的原话，按长者、机构人员、久坐青年分组。<strong>只摘录原话，不加工、不夸大；负面反馈同样保留</strong>——负面反馈恰恰是「问题分析与改进措施」的依据。</p>
+<h4>3. 用户反馈的采集与呈现规范</h4>
+<div class="box">
+  <p style="margin:0"><span class="kv">本节说明</span></p>
+  <p style="margin:4pt 0 0 0" class="note">受访者对「最有价值的一点 / 最想改的一点」的回答，按长者、机构人员、久坐青年三组整理，仅摘录原话、不加工、不夸大；负面反馈同样保留——它正是第五（二）4「问题分析与改进措施」的依据。反馈原话卡片随佐证材料一并提交。</p>
 </div>
 
 <h4>4. 社会效益与商业潜力</h4>
@@ -814,12 +810,12 @@ score1 = 0.28·lower_raise + 0.26·avg_raise
   <li><span class="kv">方法层：</span>沉淀出一套可复用的小样本调研方法学（Nielsen 5 人依据 + 单被试内配对 + 顺序平衡 + 双口径 Δ）与配套工具（执行册、台账、统计脚本），使小样本结论也具备可辩护的严谨性。</li>
 </ul>
 <p>实施过程中的关键突破在于两次「用数据改设计」：一是用抖动-可见度相关性把净化阈值定为 0.30，并<strong>因此放弃看起来更「高级」的时序滤波</strong>（它会牺牲 48% 的动作速度分量）；二是用 95.6% 的镜像比例推翻第 7 式的硬编码朝向假设。这两次都说明，在本场景下<strong>可解释的几何判定 + 真机标定</strong>比堆叠复杂模型更有效。</p>
-<p class="note">同时我们也如实说明当前的不足：小样本试点尚未执行，因此需求验证与应用成效的实测数据仍为「待回填」；五禽戏、太极等延展拳种的可用形象素材尚未随包交付，当前只交付八段锦的可跑闭环；机构侧的多账号与随访看板属规划内容，尚未实现。</p>
+<p class="note">同时我们也如实说明当前的不足：小样本试点尚未执行，因此本报告对需求验证与应用成效给出的是<strong>可复现的评测方案与验收线</strong>（指标定义、样本框、采集口径与判定标准），而非实测数值；五禽戏、太极等延展拳种的可用形象素材尚未随包交付，当前只交付八段锦的可跑闭环；机构侧的多账号与随访看板属规划内容，尚未实现。</p>
 
 <h3>（二）未来展望</h3>
 <table class="tbl">
   <tr><th class="c" style="width:10%">优先级</th><th style="width:26%">方向</th><th>具体规划</th></tr>
-  <tr><td class="c">P0</td><td>完成小样本试点并回填数据</td><td>按工具包执行 S1–S5，产出需求验证与可用性数据，回填本报告第二、五、六章的「待回填」项，并据结论修订操作路径（重点解决长者操作路径偏长的问题）</td></tr>
+  <tr><td class="c">P0</td><td>完成小样本试点并回填数据</td><td>按工具包执行 S1–S5，产出需求验证与可用性数据，按第二（二）3、第五（二）3、第六（二）2 三节的指标口径与验收线产出实测结论，并据结论修订操作路径（重点解决长者操作路径偏长的问题）</td></tr>
   <tr><td class="c">P0</td><td>扩充功法覆盖</td><td>补齐五禽戏、太极等拳种的形象素材与判定规则，使「延展拳种」从规划变为可演示；同步修正各拳种在首页与跟练页的素材状态口径，避免出现「主壳说未交付、内部说已上线」这类自相矛盾的标注</td></tr>
   <tr><td class="c">P1</td><td>机构侧能力</td><td>在保持零后端的前提下，探索机构内网部署的轻量汇总方案（如局域网内的练习看板），并明确其数据边界</td></tr>
   <tr><td class="c">P1</td><td>个体化适配</td><td>引入可选的身体数据（身高、活动能力）以调整判定容差与节奏，使方案对高龄、行动不便人群更友好；所有个体化处理仍在本机完成</td></tr>

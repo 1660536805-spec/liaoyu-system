@@ -49,7 +49,7 @@ async function main() {
     displayHeaderFooter: true,
     headerTemplate,
     footerTemplate,
-    margin: { top: '27mm', bottom: '25mm', left: '30mm', right: '30mm' },
+    margin: { top: '25mm', bottom: '25mm', left: '30mm', right: '30mm' },
   })
   await browser.close()
   console.log('PDF ->', outPdf)
