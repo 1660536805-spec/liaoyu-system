@@ -1,6 +1,6 @@
 {
   "base": "http://127.0.0.1:5400",
-  "generatedAt": "2026-10-11T14:43:29.882Z",
+  "generatedAt": "2026-10-11T15:04:35.174Z",
   "checks": {
     "baduanjin.home.segCount=4": {
       "ok": true,
@@ -93,7 +93,73 @@
     },
     "baduanjin.share.dataUrl": {
       "ok": true,
-      "detail": 428530
+      "detail": 414822
+    },
+    "baduanjin.share.geom.cols=1": {
+      "ok": true,
+      "detail": {
+        "pn": 8,
+        "cols": 1,
+        "rowsPer": 8,
+        "step": 73,
+        "top": 470,
+        "yLast": 981,
+        "footerTop": 1016,
+        "nameFont": 30
+      }
+    },
+    "baduanjin.share.noFooterOverlap": {
+      "ok": true,
+      "detail": {
+        "pn": 8,
+        "cols": 1,
+        "rowsPer": 8,
+        "step": 73,
+        "top": 470,
+        "yLast": 981,
+        "footerTop": 1016,
+        "nameFont": 30
+      }
+    },
+    "baduanjin.share.stepWithin[30,84]": {
+      "ok": true,
+      "detail": 73
+    },
+    "baduanjin.home.rec=八段锦": {
+      "ok": true,
+      "detail": "八段锦 · 宫调"
+    },
+    "baduanjin.profile.title": {
+      "ok": true,
+      "detail": "八段锦·中级阶段"
+    },
+    "baduanjin.profile.note": {
+      "ok": true,
+      "detail": "已完成 3 / 8 节"
+    },
+    "baduanjin.profile.dots=8": {
+      "ok": true,
+      "detail": 8
+    },
+    "baduanjin.profile.dotsOn=3": {
+      "ok": true,
+      "detail": 3
+    },
+    "baduanjin.profile.wrap=false": {
+      "ok": true,
+      "detail": false
+    },
+    "baduanjin.profile.stagepill": {
+      "ok": true,
+      "detail": "八段锦 · 中级阶段 ›"
+    },
+    "baduanjin.profile.noOverflowX": {
+      "ok": true,
+      "detail": false
+    },
+    "baduanjin.inquiry.chip=八段锦": {
+      "ok": true,
+      "detail": "八段锦第一式怎么做？"
     },
     "wuqinxi.home.segCount=4": {
       "ok": true,
@@ -187,6 +253,72 @@
       "ok": true,
       "detail": 330762
     },
+    "wuqinxi.share.geom.cols=1": {
+      "ok": true,
+      "detail": {
+        "pn": 10,
+        "cols": 1,
+        "rowsPer": 10,
+        "step": 49,
+        "top": 470,
+        "yLast": 911,
+        "footerTop": 1016,
+        "nameFont": 20
+      }
+    },
+    "wuqinxi.share.noFooterOverlap": {
+      "ok": true,
+      "detail": {
+        "pn": 10,
+        "cols": 1,
+        "rowsPer": 10,
+        "step": 49,
+        "top": 470,
+        "yLast": 911,
+        "footerTop": 1016,
+        "nameFont": 20
+      }
+    },
+    "wuqinxi.share.stepWithin[30,84]": {
+      "ok": true,
+      "detail": 49
+    },
+    "wuqinxi.home.rec=五禽戏": {
+      "ok": true,
+      "detail": "五禽戏 · 宫调"
+    },
+    "wuqinxi.profile.title": {
+      "ok": true,
+      "detail": "五禽戏·中级阶段"
+    },
+    "wuqinxi.profile.note": {
+      "ok": true,
+      "detail": "已完成 3 / 10 节"
+    },
+    "wuqinxi.profile.dots=10": {
+      "ok": true,
+      "detail": 10
+    },
+    "wuqinxi.profile.dotsOn=3": {
+      "ok": true,
+      "detail": 3
+    },
+    "wuqinxi.profile.wrap=true": {
+      "ok": true,
+      "detail": true
+    },
+    "wuqinxi.profile.stagepill": {
+      "ok": true,
+      "detail": "五禽戏 · 中级阶段 ›"
+    },
+    "wuqinxi.profile.noOverflowX": {
+      "ok": true,
+      "detail": false
+    },
+    "wuqinxi.inquiry.chip=五禽戏": {
+      "ok": true,
+      "detail": "五禽戏第一式怎么做？"
+    },
     "taiji.home.segCount=4": {
       "ok": true,
       "detail": 4
@@ -279,6 +411,72 @@
       "ok": true,
       "detail": 444418
     },
+    "taiji.share.geom.cols=2": {
+      "ok": true,
+      "detail": {
+        "pn": 24,
+        "cols": 2,
+        "rowsPer": 12,
+        "step": 40,
+        "top": 470,
+        "yLast": 910,
+        "footerTop": 1016,
+        "nameFont": 19
+      }
+    },
+    "taiji.share.noFooterOverlap": {
+      "ok": true,
+      "detail": {
+        "pn": 24,
+        "cols": 2,
+        "rowsPer": 12,
+        "step": 40,
+        "top": 470,
+        "yLast": 910,
+        "footerTop": 1016,
+        "nameFont": 19
+      }
+    },
+    "taiji.share.stepWithin[30,84]": {
+      "ok": true,
+      "detail": 40
+    },
+    "taiji.home.rec=太极拳": {
+      "ok": true,
+      "detail": "太极拳 · 宫调"
+    },
+    "taiji.profile.title": {
+      "ok": true,
+      "detail": "太极拳·中级阶段"
+    },
+    "taiji.profile.note": {
+      "ok": true,
+      "detail": "已完成 3 / 24 节"
+    },
+    "taiji.profile.dots=24": {
+      "ok": true,
+      "detail": 24
+    },
+    "taiji.profile.dotsOn=3": {
+      "ok": true,
+      "detail": 3
+    },
+    "taiji.profile.wrap=true": {
+      "ok": true,
+      "detail": true
+    },
+    "taiji.profile.stagepill": {
+      "ok": true,
+      "detail": "太极拳 · 中级阶段 ›"
+    },
+    "taiji.profile.noOverflowX": {
+      "ok": true,
+      "detail": false
+    },
+    "taiji.inquiry.chip=太极拳": {
+      "ok": true,
+      "detail": "太极拳第一式怎么做？"
+    },
     "console.errors=0": {
       "ok": true,
       "detail": []
@@ -291,18 +489,21 @@
     "outputs/style-shell/side-baduanjin.png",
     "outputs/style-shell/done-baduanjin.png",
     "outputs/style-shell/share-baduanjin.png",
+    "outputs/style-shell/profile-baduanjin.png",
     "outputs/style-shell/home-wuqinxi.png",
     "outputs/style-shell/intro-wuqinxi.png",
     "outputs/style-shell/practice-wuqinxi.png",
     "outputs/style-shell/side-wuqinxi.png",
     "outputs/style-shell/done-wuqinxi.png",
     "outputs/style-shell/share-wuqinxi.png",
+    "outputs/style-shell/profile-wuqinxi.png",
     "outputs/style-shell/home-taiji.png",
     "outputs/style-shell/intro-taiji.png",
     "outputs/style-shell/practice-taiji.png",
     "outputs/style-shell/side-taiji.png",
     "outputs/style-shell/done-taiji.png",
-    "outputs/style-shell/share-taiji.png"
+    "outputs/style-shell/share-taiji.png",
+    "outputs/style-shell/profile-taiji.png"
   ],
   "fails": 0
 }

@@ -496,10 +496,21 @@ function nav(cur){var h='<nav class="nav">'
 
 /* ---------- 首页 ---------- */
 function pgHome(){var C=todayContext()
- var recs=[
-  ['八段锦 · 宫调','平和承载 · 12分钟','舒展身心，适合日常练习，调和气息，安定情绪。','八段锦动作柔和，调息养气，帮助舒缓压力、改善睡眠，适合在'+C.T.name+'时节调养身心。',['舒缓减压','调和气息','适合日常']],
-  ['八段锦 · 徵调','轻快舒扬 · 10分钟','活跃气血，适合午后练习，振奋心情。','徵调音色明快，配合开弓动作，帮助活血提神，适合午后精力不足时练习。',['提升活力','舒畅心情','适合午后']],
-  ['八段锦 · 羽调','沉静滋养 · 14分钟','安定心神，适合夜晚练习，助眠安睡。','羽调深沉静谧，配合攀足动作，帮助放松腰肾，适合夜晚睡前安神。',['安神助眠','滋养腰肾','适合夜晚']]]
+ /* 今日推荐按当前拳种给（八段锦档与改前逐字符一致）；三张卡＝宫/徵/羽三调 */
+ var RECS={
+  baduanjin:[
+   ['八段锦 · 宫调','平和承载 · 12分钟','舒展身心，适合日常练习，调和气息，安定情绪。','八段锦动作柔和，调息养气，帮助舒缓压力、改善睡眠，适合在'+C.T.name+'时节调养身心。',['舒缓减压','调和气息','适合日常']],
+   ['八段锦 · 徵调','轻快舒扬 · 10分钟','活跃气血，适合午后练习，振奋心情。','徵调音色明快，配合开弓动作，帮助活血提神，适合午后精力不足时练习。',['提升活力','舒畅心情','适合午后']],
+   ['八段锦 · 羽调','沉静滋养 · 14分钟','安定心神，适合夜晚练习，助眠安睡。','羽调深沉静谧，配合攀足动作，帮助放松腰肾，适合夜晚睡前安神。',['安神助眠','滋养腰肾','适合夜晚']]],
+  wuqinxi:[
+   ['五禽戏 · 宫调','平和承载 · 10分钟','仿虎鹿熊猿鸟五禽，舒展筋骨，调和五脏。','五禽戏仿生导引、舒展灵动，帮助强筋养气、平和身心，适合在'+C.T.name+'时节调养。',['舒展筋骨','强筋养气','适合日常']],
+   ['五禽戏 · 徵调','轻快舒扬 · 8分钟','活跃气血，适合午后练习，振奋心情。','徵调音色明快，配合虎举、鹿奔的舒展开合，帮助活血提神，适合午后练习。',['提升活力','舒畅心情','适合午后']],
+   ['五禽戏 · 羽调','沉静滋养 · 12分钟','安定心神，适合夜晚练习，助眠安睡。','羽调深沉静谧，配合熊运、鸟飞的沉缓圆活，帮助放松身心，适合夜晚睡前安神。',['安神助眠','舒缓身心','适合夜晚']]],
+  taiji:[
+   ['太极拳 · 宫调','平和承载 · 16分钟','圆活舒缓，适合日常练习，调和气息，安定情绪。','太极拳圆活连贯、连绵不断，调息养神、舒缓压力，适合在'+C.T.name+'时节调养身心。',['舒缓减压','调和气息','适合日常']],
+   ['太极拳 · 徵调','轻快舒扬 · 12分钟','活跃气血，适合午后练习，振奋心情。','徵调音色明快，配合云手、野马分鬃的开合转换，帮助活血提神，适合午后练习。',['提升气血','舒畅心情','适合午后']],
+   ['太极拳 · 羽调','沉静滋养 · 18分钟','安定心神，适合夜晚练习，助眠安睡。','羽调深沉静谧，配合起势、收势的静定，帮助收敛心神，适合夜晚睡前安神。',['安神助眠','静心养神','适合夜晚']]]}
+ var recs=RECS[curStyle().id]||RECS.baduanjin
  var r=recs[state.rec%recs.length]
  /* 问诊答过就不再是「人人一样」的推荐：把用户自己的答案摆到「为什么推荐给你」前面 */
  var why=(state.quiz&&state.quiz.tags&&state.quiz.tags.length)
@@ -814,15 +825,16 @@ function pgProfile(){var st=recordStats(),has=st.n>0,sk=has?streak():DESIGN.stre
  var xp=has?Math.min(DESIGN.xpMax,DESIGN.xp+st.n*60):DESIGN.xp;
  var xpPct=Math.max(6,Math.round(xp/DESIGN.xpMax*100));
  var bars=has?recentDays(10).map(function(a){return a.v}):DESIGN.bars;
- var on=has?Math.min(8,st.days+2):DESIGN.stageDone;
- var dots='';for(var q=0;q<8;q++)dots+='<i'+(q<on?' class="on"':'')+'></i>';
+ var sx=curStyle(),tot=sx.full;
+ var on=has?Math.min(tot,st.days+2):Math.min(DESIGN.stageDone,tot);
+ var dots='';for(var q=0;q<tot;q++)dots+='<i'+(q<on?' class="on"':'')+'></i>';
  var av=state.avatar||'/art/q-mood.jpg';
  return '<main class="sc navpad" style="min-height:100dvh;display:flex;flex-direction:column">'
  +'<div class="top"><span></span><div style="display:flex;gap:1rem"><button class="icbtn" data-a="notices" aria-label="通知">'+ic('bell')+(has?'':'<span class="dot"></span>')+'</button><button class="icbtn" data-a="settings" aria-label="设置">'+ic('gear')+'</button></div></div>'
  +'<div class="brandrow" style="margin-top:1rem"><span class="t-callig" style="font-size:4.6rem">我的</span><span class="seal">弦养</span></div>'
  +'<div class="t-sub" style="margin-top:1rem">在弦音中，遇见更好的自己</div>'
  +'<div class="pf-row"><div class="avatar"><img src="'+av+'" alt="头像"><button class="cam" data-a="avatar" aria-label="更换头像">'+ic('camera')+'</button></div>'
-  +'<div><h3>清弦月 <i>›</i></h3><span class="stagepill">'+ic('lotus')+(has?('已练 '+st.days+' 天 · 连续 '+sk+' 天'):'中级阶段 ›')+'</span>'
+  +'<div><h3>清弦月 <i>›</i></h3><span class="stagepill">'+ic('lotus')+(has?('已练 '+st.days+' 天 · 连续 '+sk+' 天'):(sx.name+' · 中级阶段 ›'))+'</span>'
   +'<div class="xprow"><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="'+DESIGN.xpMax+'" aria-valuenow="'+xp+'"><i style="width:'+xpPct+'%"></i></div><span>'+xp+' / '+DESIGN.xpMax+'</span></div>'
   +'<p class="pf-desc">继续练习，舒展身心，遇见更平和的自己。</p></div></div>'
  +'<section class="card bodycard"><div class="sec-h">'+knot()+'身体数据<span class="sec-note">示例指标 · 未连接设备</span></div>'
@@ -836,8 +848,8 @@ function pgProfile(){var st=recordStats(),has=st.n>0,sk=has?streak():DESIGN.stre
   +'<section class="card half"><div class="sec-h" data-a="records" role="button" tabindex="0" style="color:var(--green-deep)">'+ic('bars','width:2rem;height:2rem')+'历史数据 ›</div><p>'+(has?('已打卡 '+st.n+' 次 · 累计 '+Math.round(st.sec/60)+' 分钟'):'记录每一次的练习与变化，见证更好的自己。')+'</p>'
    +'<div class="minibars">'+bars.map(function(v){return '<i style="height:'+v+'%"></i>'}).join('')+'</div></section>'
   +'<section class="card half"><div class="sec-h" data-a="stage" role="button" tabindex="0" style="color:var(--green-deep)">'+ic('leaf','width:2rem;height:2rem')+'阶段进度 ›</div>'
-   +'<p style="color:var(--brown);font-weight:600;margin-top:1rem">八段锦·中级阶段</p><p>已完成 '+on+' / 8 节</p>'
-   +'<div class="dots8">'+dots+'</div></section></div>'
+   +'<p style="color:var(--brown);font-weight:600;margin-top:1rem">'+sx.name+'·中级阶段</p><p>已完成 '+on+' / '+tot+' 节</p>'
+   +'<div class="dots8'+(tot>8?' wrap':'')+'">'+dots+'</div></section></div>'
  +'<section class="card setlist">'
   +'<div class="setrow" data-a="go-lab" data-label="调养实验室"><span class="ic">'+ic('leaf')+'</span><b>调养实验室</b><span>五音 · 食养 · 香事 · 功法 · 问卷</span><span class="r">›</span></div>'
   +'<div class="setrow" data-a="set-basic" data-label="基础设置"><span class="ic">'+ic('gear')+'</span><b>基础设置</b><span>账号管理、提醒设置、个性化偏好</span><span class="r">›</span></div>'
@@ -876,7 +888,7 @@ function pgBody(){function chips(name,opts,multi){return '<div class="chips">'+o
       真实回答的唯一接入点在 askSend() 里那处 setTimeout —— 换成对模型的 fetch 即可（注释已给示例）。
       当前回复由本地占位函数 askStub() 生成，气泡文案与页脚都明确标注「本地占位」，
       不让界面伪装成已接入（与主壳「真 / 假如实标注」的既有原则一致）。 */
-var ASK_CHIPS=['八段锦第一式怎么做？','今天适合练什么？','徵调适合什么时候听？'];
+function askChips(){return [curStyle().name+'第一式怎么做？','今天适合练什么？','徵调适合什么时候听？']}
 var ASK_SEED=[
   {who:'a',text:'你好，我是弦养的练习助手。功法要领、五音调养、今日安排，都可以问我。'},
   {who:'n',text:'本页是智能体交互结构的预览，尚未接入模型服务；下方回复为本地占位，不代表真实回答。'}
@@ -917,7 +929,7 @@ function pgInquiry(){
  +'</div>'
  +'<section class="card ask-card">'
   +'<div id="ask-list" class="ask-list" role="log" aria-live="polite">'+askListHTML()+'</div>'
-  +'<div class="ask-chips">'+ASK_CHIPS.map(function(c){return '<button class="ask-chip" data-a="ask-chip" data-q="'+askEsc(c)+'">'+askEsc(c)+'</button>'}).join('')+'</div>'
+  +'<div class="ask-chips">'+askChips().map(function(c){return '<button class="ask-chip" data-a="ask-chip" data-q="'+askEsc(c)+'">'+askEsc(c)+'</button>'}).join('')+'</div>'
   +'<div class="ask-input">'
    +'<input id="ask-input" type="text" autocomplete="off" maxlength="200" placeholder="写下你想问的…" aria-label="输入要问的问题">'
    +'<button class="ask-send" data-a="ask-send" aria-label="发送">'+ic('chev','width:2rem;height:2rem')+'</button>'
@@ -1016,9 +1028,9 @@ function recipeHTML(){var C=todayContext();
   +'<div class="xs-item"><b>做法</b><p>莲子温水泡 1 小时；与粳米同煮 30 分钟；下百合同煮 10 分钟；起锅前加冰糖调味。</p></div>'
   +'<div class="xs-item"><b>为什么今天推荐</b><p>'+C.T.name+'时节 · '+SEASON_RECIPE_WHY[C.season]+'（食养建议，不替代医嘱）</p></div>'
   +'<div class="xs-item"><b>换着吃</b><p>山药小米粥（健脾）、银耳雪梨汤（润肺）——同样顺时而食。</p></div>'}
-function stageHTML(){var st=recordStats(),on=st.n?Math.min(8,st.days+2):DESIGN.stageDone;
-  return '<div class="xs-note">八段锦 · 中级阶段共 8 节。进度按练习天数推进，当前 '+on+' / 8。</div>'
-   +PRACTICE_INFO.map(function(p,i){return '<div class="xs-item"><b>第 '+(i+1)+' 节 · '+p.name+'</b><p>对应'+(p.string?('第 '+p.string+' 弦'):'七弦齐鸣')+'。'+(i<on?'已开启。':'尚未开启。')+'</p></div>'}).join('')}
+function stageHTML(){var sx=curStyle(),tot=sx.full,st=recordStats(),on=st.n?Math.min(tot,st.days+2):Math.min(DESIGN.stageDone,tot);
+  return '<div class="xs-note">'+sx.name+' · 中级阶段共 '+tot+' 节。进度按练习天数推进，当前 '+on+' / '+tot+'。</div>'
+   +sx.info.map(function(p,i){return '<div class="xs-item"><b>第 '+(i+1)+' 节 · '+p.name+'</b><p>对应'+(p.string?('第 '+p.string+' 弦'):'七弦齐鸣')+'。'+(i<on?'已开启。':'尚未开启。')+'</p></div>'}).join('')}
 function recordsHTML(){var st=recordStats();
   if(!st.n)return '<div class="xs-note">还没有打卡记录。完成一次练习、在结束页点「完成打卡」，记录会出现在这里（存在本机浏览器）。</div>';
   var rows=state.records.slice(-40).reverse().map(function(r){
@@ -1027,6 +1039,18 @@ function recordsHTML(){var st=recordStats();
    +'<button class="btn btn-gho" data-a="clear-records" style="margin-top:1.4rem">清空本机打卡记录</button>'}
 function fmtDur(s){s=Math.max(0,Math.round(s||0));return s<60?(s+' 秒'):(Math.floor(s/60)+' 分 '+(s%60)+' 秒')}
 /* 分享图：canvas 现场绘制，内容只用真实信息（日期 / 式数 / 式名与弦号 / 署名），不画虚拟评分 */
+/* 分享图排版几何（纯函数，便于探针断言「末行不压页脚」）：
+   行距上限由「末行 baseline + 字高 不压到页脚首行(Y=H-104)」反推。
+   ≤8 式（八段锦全套）改前固定 step=84 → 末行 Y=470+7*84=1058，与页脚第二行(1052)叠字，
+   故按可用高度收敛；>8 式沿用原口径（五禽戏单列 10 行 / 太极双列 12 行）。 */
+function shareGeom(pn){
+  var H=1120,cols=pn>12?2:1,rowsPer=Math.ceil(pn/cols),top=470;
+  var yLimit=H-104-34;
+  var step=pn<=8?Math.max(46,Math.min(84,Math.floor((yLimit-top)/Math.max(1,pn-1))))
+                :Math.max(30,Math.min(84,Math.floor(((H-160)-top)/rowsPer)));
+  return {pn:pn,cols:cols,rowsPer:rowsPer,step:step,top:top,yLast:top+(rowsPer-1)*step,footerTop:H-104,
+          nameFont:(step<84?Math.max(19,Math.round(34*step/84)):34)};
+}
 function shareCard(){
   var W=750,H=1120,c=document.createElement('canvas');c.width=W;c.height=H;var g=c.getContext('2d');
   var grd=g.createLinearGradient(0,0,0,H);grd.addColorStop(0,'#FDF9EF');grd.addColorStop(1,'#F7EEDD');g.fillStyle=grd;g.fillRect(0,0,W,H);
@@ -1040,8 +1064,7 @@ function shareCard(){
   /* 式数多时自适应：≤8 式沿用原版式（输出与改前逐字符一致）；>12 式改双列，
      否则单列压行距 —— 八段锦 8 式、五禽戏 10 式都单列，太极 24 式双列，
      保证 24 行不画到画布外、也不与页脚叠字。 */
-  var cols=pn>12?2:1,rowsPer=Math.ceil(pn/cols),top=470;
-  var step=pn<=8?84:Math.max(30,Math.min(84,Math.floor(((H-160)-top)/rowsPer)));
+  var G=shareGeom(pn),cols=G.cols,rowsPer=G.rowsPer,top=G.top,step=G.step;
   var colW=(W-128)/cols,cpad=cols>1?26:0;
   var fsLatex=step<84?Math.max(15,Math.round(24*step/84)):24;
   var fsName=step<84?Math.max(19,Math.round(34*step/84)):34;
@@ -1228,7 +1251,7 @@ document.addEventListener('click',function(e){
     case 'set-help':openSheet('帮助与反馈',helpHTML());break
     case 'set-about':openSheet('版本信息',aboutHTML());break
     case 'records':openSheet('历史数据',recordsHTML());break
-    case 'stage':openSheet('阶段进度 · 八段锦中级',stageHTML());break
+    case 'stage':openSheet('阶段进度 · '+curStyle().name+'中级',stageHTML());break
     case 'avatar':pickAvatar();break
     case 'clear-records':if(el.dataset.arm==='1'){state.records=[];saveRecords();openSheet('历史数据',recordsHTML());toast('本机打卡记录已清空');}
       else{el.dataset.arm='1';el.textContent='再点一次确认清空';toast('再点一次即可清空本机打卡记录');}break
@@ -1271,7 +1294,7 @@ function init(){
      与首页模式条同义：写入 state.mode，五禽戏/太极不提供「招牌 3 式」故 imode 归 0。 */
   var sl=q.get('style');if(sl&&SEG_STYLE.indexOf(sl)>=0){state.mode=SEG_STYLE.indexOf(sl);if(!curStyle().short)state.imode=0}
   var mut=q.get('muted');if(mut==='1')AUDIO.vol=0;
-  window.__xy={state:state,AUDIO:AUDIO,TRACKS:TRACKS,design:DESIGN,styles:STYLES,curStyle:curStyle,sheets:{settings:settingsHTML,notices:noticesHTML,help:helpHTML,about:aboutHTML}};
+  window.__xy={state:state,AUDIO:AUDIO,TRACKS:TRACKS,design:DESIGN,styles:STYLES,curStyle:curStyle,shareGeom:shareGeom,sheets:{settings:settingsHTML,notices:noticesHTML,help:helpHTML,about:aboutHTML}};
   paint()
 }
 init()

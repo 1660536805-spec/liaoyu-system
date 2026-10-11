@@ -154,6 +154,52 @@ function chk(name, ok, detail) {
     const ssh = path.join(OUT, 'share-' + st + '.png')
     await p.locator('.xs-shot').screenshot({ path: ssh }); report.shots.push(path.relative(process.cwd(), ssh))
 
+    /* ---- 分享图排版几何：末行不得压到页脚 ---- */
+    const geom = await p.evaluate(() => window.__xy.shareGeom(window.__xy.curStyle().full))
+    chk(st + '.share.geom.cols=' + geom.cols, geom.cols === (e.full > 12 ? 2 : 1), geom)
+    chk(st + '.share.noFooterOverlap', geom.yLast <= geom.footerTop - 20, geom)
+    chk(st + '.share.stepWithin[30,84]', geom.step >= 30 && geom.step <= 84, geom.step)
+
+    /* ---- 首页「今日推荐」卡随拳种 ---- */
+    await p.goto(BASE + '/?screen=home&style=' + st, { waitUntil: 'networkidle' })
+    await p.waitForSelector('.rec-cols .l h4')
+    const recT = await p.evaluate(() => document.querySelector('.rec-cols .l h4').textContent.trim())
+    chk(st + '.home.rec=' + e.name, recT.startsWith(e.name + ' · '), recT)
+
+    /* ---- 「我的」页：阶段进度随拳种 ---- */
+    await p.goto(BASE + '/?screen=profile&style=' + st, { waitUntil: 'networkidle' })
+    await p.waitForSelector('.halfgrid')
+    const prof = await p.evaluate(() => {
+      const cards = Array.from(document.querySelectorAll('.halfgrid .card.half'))
+      const stage = cards.find((c) => c.textContent.includes('阶段进度'))
+      const box = stage.querySelector('.dots8')
+      const dots = box.querySelectorAll('i')
+      return {
+        title: stage.querySelector('p').textContent.trim(),
+        note: stage.querySelectorAll('p')[1].textContent.trim(),
+        dotN: dots.length,
+        onN: Array.from(dots).filter((d) => d.classList.contains('on')).length,
+        wrap: box.classList.contains('wrap'),
+        pill: document.querySelector('.stagepill').textContent.replace(/\s+/g, ' ').trim(),
+        overflow: document.querySelector('.halfgrid').scrollWidth > document.querySelector('.halfgrid').clientWidth + 1,
+      }
+    })
+    chk(st + '.profile.title', prof.title === e.name + '·中级阶段', prof.title)
+    chk(st + '.profile.note', prof.note === '已完成 3 / ' + e.full + ' 节', prof.note)
+    chk(st + '.profile.dots=' + e.full, prof.dotN === e.full, prof.dotN)
+    chk(st + '.profile.dotsOn=3', prof.onN === 3, prof.onN)
+    chk(st + '.profile.wrap=' + (e.full > 8), prof.wrap === (e.full > 8), prof.wrap)
+    chk(st + '.profile.stagepill', prof.pill.includes(e.name), prof.pill)
+    chk(st + '.profile.noOverflowX', !prof.overflow, prof.overflow)
+    const spf = path.join(OUT, 'profile-' + st + '.png')
+    await p.screenshot({ path: spf, fullPage: false }); report.shots.push(path.relative(process.cwd(), spf))
+
+    /* ---- 问询页快捷 chips 随拳种 ---- */
+    await p.goto(BASE + '/?screen=inquiry&style=' + st, { waitUntil: 'networkidle' })
+    await p.waitForSelector('.ask-chip')
+    const chip = await p.evaluate(() => document.querySelector('.ask-chip').textContent.trim())
+    chk(st + '.inquiry.chip=' + e.name, chip.startsWith(e.name), chip)
+
     await p.close()
   }
 
