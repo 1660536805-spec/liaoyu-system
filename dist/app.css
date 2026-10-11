@@ -655,3 +655,19 @@ body.xs-lock{overflow:hidden}
 .ask-send:disabled{opacity:.5}
 .ask-note{display:flex;align-items:flex-start;gap:.7rem;font-size:1.15rem;color:var(--muted);line-height:1.7;margin-top:1.6rem}
 .ask-note svg{width:1.5rem;height:1.5rem;flex:none;margin-top:.25rem}
+
+/* ============================================================================
+   首页「模式条」扩为 4 段（八段锦 / 五禽戏 / 太极拳 / 帮我选）
+   ----------------------------------------------------------------------------
+   原设计 3 段（八段锦 / 五禽戏 / 帮我选），空手把第 4 段塞进去实测横向溢出：
+   470×836 手机档下可用宽 425px，4 段自然内容宽 469.8px。
+   下面把段内图标由 3.2rem 收到 2.6rem、字号略收、内边距略收 ——
+   实测 4 段合计 422.9px < 425px，单行不折行、四段文字（含副标题）全部保留，
+   与设计稿同构，只是多一段。改的是「同一套三段结构」的尺寸，不是重排版。
+   ============================================================================ */
+.modebar .mseg{gap:.4rem;padding:1rem .3rem}
+.modebar .mseg .ic{width:2.6rem;height:2.6rem}
+.modebar .mseg b{font-size:1.3rem}
+.modebar .mseg span{font-size:.84rem}
+/* 五禽戏 / 太极拳不提供「招牌 3 式」⇒ 练习模式只剩一张卡，让它占满整行（八段锦仍是两列，不受影响） */
+.mode-grid.one{grid-template-columns:1fr}

@@ -525,17 +525,29 @@ function pgHome(){var C=todayContext()
  +'<div class="modebar">'
   +'<button class="mseg'+(state.mode===0?' on':'')+'" data-a="mode" data-i="0"><span class="ic">'+ic('medit')+'</span><span class="tx"><b>八段锦</b><span>经典·全身调养</span></span>'+(state.mode===0?'<span class="ckc">'+ic('check')+'</span>':'')+'</button>'
   +'<button class="mseg'+(state.mode===1?' on':'')+'" data-a="mode" data-i="1"><span class="ic">'+ic('deer')+'</span><span class="tx"><b>五禽戏</b><span>灵动·强筋养气</span></span></button>'
-  +'<button class="mseg'+(state.mode===2?' on':'')+'" data-a="mode" data-i="2"><span class="ic">'+ic('dice')+'</span><span class="tx"><b>帮我选</b><span>智能推荐练习</span></span><span class="arr">›</span></button></div>'
+  +'<button class="mseg'+(state.mode===2?' on':'')+'" data-a="mode" data-i="2"><span class="ic">'+ic('yinyang')+'</span><span class="tx"><b>太极拳</b><span>圆活·调息养神</span></span></button>'
+  +'<button class="mseg" data-a="mode" data-i="3"><span class="ic">'+ic('dice')+'</span><span class="tx"><b>帮我选</b><span>智能推荐练习</span></span><span class="arr">›</span></button></div>'
  +'<div class="quotebar"><img src="/art/card-landscape.jpg" alt=""><p>'+SEASON_POEM[C.season][0]+'<i>——'+SEASON_POEM[C.season][1]+'</i></p><img src="/art/q-none.jpg" style="filter:hue-rotate(15deg)" alt=""></div>'
  +nav('home')+'</main>'}
 
-/* ---------- 八段锦进入页（练习准备） ---------- */
+/* ---------- 练习准备页（按当前拳种：八段锦 / 五禽戏 / 太极拳） ---------- */
 function pgIntro(){
  var stageMotif=[
   '<svg viewBox="0 0 100 44"><ellipse cx="50" cy="30" rx="46" ry="12" fill="#DCE8DC" opacity=".55"/><ellipse cx="30" cy="35" rx="20" ry="7" fill="#CBDCCB" opacity=".6"/><ellipse cx="72" cy="36" rx="16" ry="5" fill="#CBDCCB" opacity=".5"/><circle cx="62" cy="24" r="5.5" fill="#C05A2E"/></svg>',
   '<svg viewBox="0 0 100 44"><ellipse cx="50" cy="32" rx="46" ry="10" fill="#DCE8DC" opacity=".5"/><path d="M8 26c14-12 30 8 44-2s26-10 40 0" fill="none" stroke="#5E7C6B" stroke-width="2.6" stroke-linecap="round"/></svg>',
   '<svg viewBox="0 0 100 44"><ellipse cx="50" cy="30" rx="46" ry="12" fill="#DCE8DC" opacity=".5"/><ellipse cx="50" cy="27" rx="24" ry="8" fill="none" stroke="#8FAF97" stroke-width="1.6"/><ellipse cx="50" cy="27" rx="13" ry="5" fill="none" stroke="#8FAF97" stroke-width="1.6"/><circle cx="50" cy="27" r="4" fill="#C05A2E"/></svg>']
  var stages=[['阶段一 · 点','认识动作 · 建立感觉'],['阶段二 · 线','贯穿动作 · 气息流动'],['阶段三 · 面','完整演练 · 身心融合']]
+ /* 练习模式卡按当前拳种给：全套式数/时长为该拳种口径；「招牌 3 式」仅八段锦提供
+    （五禽戏 10 式、太极拳 24 式按「全套」给，见 STYLES 的 short 字段）。 */
+ var st=curStyle()
+ var mcards='<button class="modecard'+(state.imode===0?' sel':'')+'" data-a="imode" data-i="0"><span class="ck">'+ic('check')+'</span>'
+  +'<img class="pic" src="/art/figure-pose.png" alt="">'
+  +'<div class="tt">全套 <b class="big">'+st.full+'</b> 式</div><div class="meta">约'+st.fullMin+'分钟 · 做到位即进下一式</div>'
+  +'<div class="hr"></div><p>完整体验、循序渐进<br>调身养气，身心更佳</p></button>'
+ if(st.short)mcards+='<button class="modecard'+(state.imode===1?' sel':'')+'" data-a="imode" data-i="1">'+(state.imode===1?'<span class="ck">'+ic('check')+'</span>':'<span class="rd"></span>')
+  +'<img class="pic" src="/art/card-landscape.jpg" alt="">'
+  +'<div class="tt">招牌 <b class="big">3</b> 式</div><div class="meta">约'+st.shortMin+'分钟 · 做到位即进下一式</div>'
+  +'<div class="hr"></div><p>精选核心，轻松跟练<br>快速放松，唤醒状态</p></button>'
  return '<main class="sc" style="min-height:100dvh;display:flex;flex-direction:column;padding-bottom:3rem">'
  +'<div class="top"><button class="icbtn" data-a="back">'+ic('back')+'</button><span></span><button class="icbtn" data-a="help" aria-label="练习帮助">'+ic('qmark')+'</button></div>'
  +'<div class="intro-hero" style="margin-top:.6rem">'
@@ -545,15 +557,7 @@ function pgIntro(){
   +'<div class="dashline t-sub" style="margin-top:1.4rem">— 调身 · 静心 · 启程 —</div>'
   +'<p class="intro-p" style="margin-top:1.6rem">在古琴的呼吸里，<br>安放自己，<br>从这一刻，开始练习。</p></div></div>'
  +'<section class="card i-sec"><div class="sec-h">'+knot()+'选择练习模式<span class="sec-note">根据你的时间与状态，选择适合的练习内容</span></div>'
-  +'<div class="mode-grid">'
-   +'<button class="modecard'+(state.imode===0?' sel':'')+'" data-a="imode" data-i="0"><span class="ck">'+ic('check')+'</span>'
-    +'<img class="pic" src="/art/figure-pose.png" alt="">'
-    +'<div class="tt">全套 <b class="big">8</b> 式</div><div class="meta">约12分钟 · 做到位即进下一式</div>'
-    +'<div class="hr"></div><p>完整体验、循序渐进<br>调身养气，身心更佳</p></button>'
-   +'<button class="modecard'+(state.imode===1?' sel':'')+'" data-a="imode" data-i="1">'+(state.imode===1?'<span class="ck">'+ic('check')+'</span>':'<span class="rd"></span>')
-    +'<img class="pic" src="/art/card-landscape.jpg" alt="">'
-    +'<div class="tt">招牌 <b class="big">3</b> 式</div><div class="meta">约5分钟 · 做到位即进下一式</div>'
-    +'<div class="hr"></div><p>精选核心，轻松跟练<br>快速放松，唤醒状态</p></button>'
+  +'<div class="mode-grid'+(st.short?'':' one')+'">'+mcards
   +'</div></section>'
  +'<section class="card i-sec"><div class="sec-h">'+knot()+'选择练习阶段<span class="sec-note">从"点"到"线"再到"面"，循序渐进，稳步提升</span></div>'
   +'<div class="stage-grid">'+stages.map(function(s,i){return '<button class="stagecard'+(state.istage===i?' sel':'')+'" data-a="istage" data-i="'+i+'">'
@@ -609,13 +613,78 @@ var PRACTICE_INFO=[
 ];
 /* 动作 → 琴弦触发（0 表示收势七弦齐鸣） */
 function pluckChord(gap,force){for(var k=0;k<7;k++)(function(k){setTimeout(function(){pluckString(k,{force:force})},k*(gap||90))})(k)}
-function pluckForStep(i){if(!AUDIO.sound)return;var s=(PRACTICE_INFO[i]||{}).string;if(s===0||s==null)pluckChord(90);else pluckString(s-1)}
+function pluckForStep(i){if(!AUDIO.sound)return;var s=infoAt(i).string;if(s===0||s==null)pluckChord(90);else pluckString(s-1)}
 
 /* ---------- 跟练页 ---------- */
 var POSES=['双手托天理三焦','左右开弓似射雕','调理脾胃须单举','五劳七伤往后瞧','摇头摆尾去心火','两手攀足固肾腰','攒拳怒目增气力','背后七颠百病消']
-function practicePoses(){return state.imode===1?[POSES[0],POSES[1],POSES[2]]:POSES}
-function pgPractice(){var i=state.progress,poses=practicePoses(),info=PRACTICE_INFO[i]||PRACTICE_INFO[0]
- var dots='';for(var k=0;k<poses.length;k++){dots+='<span class="d'+(k===i?' on':'')+'"'+(k===i?' aria-current="step"':'')+'>'+(k+1)+'</span>'}
+
+/* ---------- 拳种注册表（主壳侧内联副本） ----------
+   主壳是无构建的 vanilla 产物，读不到 s4 的 train/src/data/styles.js，所以这里内联一份
+   最小副本：只带主壳真正要用的字段 —— name（式名）/ seg（模式条副标题）/ full（式数）/
+   strings（弦数）/ fullMin（全套时长）/ short（是否提供「招牌 3 式」）/ poses / info
+   （info 形状与 PRACTICE_INFO 相同：name / preview / string / points / faq）。
+   式名、次序、tip、弦号与 train/src/data/styles.js 的 WUQINXI_MOVES / TAIJI_MOVES 逐条一致。
+   「招牌 3 式」只保留给八段锦（沿用原设计）；五禽戏 10 式、太极拳 24 式按「全套」口径给。 */
+var NEW_FAQ=[['这套动作要注意什么？','以跟练页里教练的实时提示为准；主壳这里是静态要点预览。'],
+             ['身体有不适怎么办？','幅度以不痛为度，宁可小而顺；持续不适请咨询专业人士。']]
+function mkMove(name,tip,cue,si){return {name:name,preview:tip,string:si,points:[cue],faq:NEW_FAQ}}
+/* 五禽戏十式（国家标准《健身气功·五禽戏》：虎举/虎扑/鹿抵/鹿奔/熊运/熊晃/猿提/猿摘/鸟伸/鸟飞）
+   十式＝五禽×两式 ⇒ 五弦，一禽一弦，同禽两式弹同弦。 */
+var WQ_POSES=['虎举','虎扑','鹿抵','鹿奔','熊运','熊晃','猿提','猿摘','鸟伸','鸟飞']
+var WQ_INFO=[
+ mkMove('虎举','两手十指撑开成虎爪、再握拳，沿体前中线上提，开筋展肩。','两手十指撑开、屈指成虎爪，再外旋握拳，沿体前中线上提；至肩前松拳成虎爪举过头顶、再下拉还原。',1),
+ mkMove('虎扑','两手成虎爪上举，再前俯下扑、起身后仰，一起一伏如虎扑食。','两手成虎爪沿体前上举过头；再以腰胯带动上体向前下方扑落，两爪随之下按；然后起身、伸膝、送髋挺腹，上体顺劲向后一仰，回到体前抱球。',1),
+ mkMove('鹿抵','迈步成弓步、以腰为轴侧屈拧转，左肘抵腰，目视后腿脚跟。','迈步成弓步，以腰为轴左转、躯干侧屈拧转；左臂屈肘抵靠左腰侧，右臂举至头前向左后方伸抵，转头目视后腿脚跟。',2),
+ mkMove('鹿奔','两臂前伸，含胸收腹、弓背如环，如鹿疾奔前冲。','两臂向前伸出、双手齐肩，随后含胸收腹、弓背如环，如鹿疾奔前冲；停一拍再缓缓展开还原。',2),
+ mkMove('熊运','躯干画圆绕环，重在腰腹带动、左右移重心。','腰腹带动，躯干缓缓画圆，臀部随重心左右起伏，双膝微屈含胸。',3),
+ mkMove('熊晃','提髋提腿、落步踏实，身体左右晃动，两臂自然摆动如熊走路。','一侧髋先提起、同侧腿外摆再踏下，重心随落步左右晃动；两臂放松、只被身体带着自然摆动，如熊迈步走路；左右交替。',3),
+ mkMove('猿提','两手成猿钩上提至胸，耸肩缩项、提踵收腹，头左右各看一眼。','两手成猿钩收在体前，缓缓上提至胸前；同时耸肩缩项、收腹提肛，脚跟提起，头先向左再向右各看一眼（左右观），再慢慢放下。',4),
+ mkMove('猿摘','一手猿钩收于腰侧，另一手斜向上摘取，眼随手动。','一手成猿钩收于腰侧不动，另一手向斜上方缓缓摘取，眼神随摘的那只手走；一腿虚步点地，摘到手略停，再还原。',4),
+ mkMove('鸟伸','两手腹前相叠、上举过头再向前下按落，同时一腿后伸。','两手在腹前相叠、缓缓上举过头；同时一腿向后伸出，如鸟伸颈展翅；两臂再沿体前一路向前下方按落，腿收回还原。',5),
+ mkMove('鸟飞','一腿独立、另一腿屈膝上提，两掌成鸟翅沿体侧上摆至头顶。','一腿独立站稳，另一腿屈膝上提；两掌成鸟翅沿体侧上摆至头顶上方，再收翅、落腿还原。',5)]
+/* 太极拳二十四式（1956 年《简化二十四式》；式名/次序与 styles.js 的 TAIJI_MOVES 一致。
+   二十四式多于七弦 ⇒ 按 (式序-1)%7+1 循环落弦，与 styles.js 的弦位口径一致。 */
+var TJ_POSES=['起势','左右野马分鬃','白鹤亮翅','左右搂膝拗步','手挥琵琶','左右倒卷肱','左揽雀尾','右揽雀尾','单鞭','云手','单鞭','高探马','右蹬脚','双峰贯耳','转身左蹬脚','左下势独立','右下势独立','左右穿梭','海底针','闪通臂','转身搬拦捶','如封似闭','十字手','收势']
+var TJ_INFO=[
+ mkMove('起势','两脚开立与肩同宽，两臂自然下垂，浑身松沉。','两脚与肩同宽站直，双手自然下垂，肩松、肘沉，气沉丹田。',1),
+ mkMove('左右野马分鬃','一手向前上掤出、一手下按，如野马分鬃，左右交替。','一手向前上方掤出，另一手按于胯旁，两臂分开如分鬃，弓步左右交替。',2),
+ mkMove('白鹤亮翅','一手举于额前、一手按于胯旁，如白鹤展翅。','一手缓缓举至额前、掌心向内，另一手按于胯旁，虚步亮翅。',3),
+ mkMove('左右搂膝拗步','一手搂膝、一手前推，弓步拗身，左右交替。','一手经膝前搂过，另一手成立掌向前推出，弓步拗身，左右交替。',4),
+ mkMove('手挥琵琶','两手一前一后合抱于胸前，如抱琵琶。','两手一前一后合抱于胸前，左手在前如扶琵琶，虚步站定。',5),
+ mkMove('左右倒卷肱','两手交替向后卷收、再向前推，退步连环。','一手向后卷收过耳，再向前推出，另一手回收；退步左右交替。',6),
+ mkMove('左揽雀尾','掤、捋、挤、按四法，左式一遍。','左手掤起，向右后捋，再向前挤、双掌下按，左式一遍。',7),
+ mkMove('右揽雀尾','掤、捋、挤、按四法，右式一遍。','右手掤起，向左后捋，再向前挤、双掌下按，右式一遍。',1),
+ mkMove('单鞭','一手成勾手侧伸、一手立掌前推，如挥鞭。','右手五指撮拢成勾手向侧伸出，左手立掌向前推出，弓步。',2),
+ mkMove('云手','两手在体前上下交替划圆，腰随手动。','两手在体前上下交替划圆，如拨云见日，腰随手转，侧行。',3),
+ mkMove('单鞭','一手成勾手侧伸、一手立掌前推，如挥鞭。','右手成勾手向侧伸出，左手立掌向前推出，弓步，定式如前。',4),
+ mkMove('高探马','一手向前探出如探马，虚步轻灵。','左手回收于腰侧，右手成立掌向前探出，虚步轻灵。',5),
+ mkMove('右蹬脚','两手分开、右腿蹬出，劲贯脚跟。','两手交叉后向两侧分开，右腿屈膝提起再缓缓蹬出，劲贯脚跟。',6),
+ mkMove('双峰贯耳','两拳从两侧向前上方合击，如双峰贯耳。','两拳自两侧向前上方弧形合击，拳眼相对，落于耳前。',7),
+ mkMove('转身左蹬脚','转身后两手分开、左腿蹬出。','身体左转，两手交叉后向两侧分开，左腿屈膝提起再缓缓蹬出。',1),
+ mkMove('左下势独立','先下势穿掌，再一腿独立、一手上举。','先屈膝下蹲穿掌，再起身一腿独立，一手上举、一手下按。',2),
+ mkMove('右下势独立','先下势穿掌，再右腿独立、一手上举。','先屈膝下蹲穿掌，再起身右腿独立，一手上举、一手下按。',3),
+ mkMove('左右穿梭','一手架于额前、一手前推，左右穿梭。','一手架于额前，另一手立掌向前推出，弓步穿行，左右交替。',4),
+ mkMove('海底针','俯身向前，一手向下插如探海底。','上体前俯，右手向下插出如探海，左手护于右腕内侧，虚步。',5),
+ mkMove('闪通臂','一手架额、一手前推，如闪身通臂。','一手架于额前，一手立掌前推，弓步，两臂前后撑开。',6),
+ mkMove('转身搬拦捶','转身搬拳、拦掌、冲拳，三式连贯。','转身搬拳、拦掌，再进步冲拳，三式连贯一气。',7),
+ mkMove('如封似闭','两手回收再向前按出，如封似闭。','两手交叉回收于胸前，翻掌向前缓缓按出，重心后移再前移。',1),
+ mkMove('十字手','两手交叉合抱于胸前，如十字。','两手交叉合抱于胸前，再上举于额前，两腿开立，十字手。',2),
+ mkMove('收势','翻掌分手、垂臂落手、并步还原，气归丹田。','两掌翻转向下、左右分开与肩同宽；两臂徐徐下垂，两手落于大腿外侧；左脚轻轻收回并步还原，气归丹田。',3)]
+var STYLES={
+  baduanjin:{id:'baduanjin',name:'八段锦',seg:'经典·全身调养',full:8,strings:7,fullMin:12,short:true,shortMin:5,poses:POSES,info:PRACTICE_INFO},
+  wuqinxi:{id:'wuqinxi',name:'五禽戏',seg:'灵动·强筋养气',full:10,strings:5,fullMin:5,short:false,poses:WQ_POSES,info:WQ_INFO},
+  taiji:{id:'taiji',name:'太极拳',seg:'圆活·调息养神',full:24,strings:7,fullMin:14,short:false,poses:TJ_POSES,info:TJ_INFO}
+}
+/* 首页模式条第 i 段 → 拳种 id（第 3 段是「帮我选」，不映射拳种） */
+var SEG_STYLE=['baduanjin','wuqinxi','taiji']
+function curStyle(){return STYLES[SEG_STYLE[state.mode]]||STYLES.baduanjin}
+function infoAt(i){var st=curStyle();return st.info[i]||st.info[0]}
+function practicePoses(){var st=curStyle();return (st.short&&state.imode===1)?st.poses.slice(0,3):st.poses}
+function pgPractice(){var i=state.progress,poses=practicePoses(),info=infoAt(i)
+ /* 式数多于 8（五禽戏 10 / 太极 24）时，进度点改为 8 格滑窗，避免撑破一行；
+    八段锦 8 式时 win=8、ds=0 ⇒ 输出与改前逐字符一致。 */
+ var win=Math.min(poses.length,8),ds=Math.max(0,Math.min(i-((win/2)|0),poses.length-win))
+ var dots='';for(var k=ds;k<ds+win;k++){dots+='<span class="d'+(k===i?' on':'')+'"'+(k===i?' aria-current="step"':'')+'>'+(k+1)+'</span>'}
  var skel='<svg class="skel" viewBox="0 0 100 100" preserveAspectRatio="none" width="30rem">'
   +'<polyline points="50,4 36,14 64,14 46,42 30,34 46,42 54,42 70,34 54,42 38,62 62,62 50,66 44,84 56,84 50,92" fill="none" stroke="rgba(140,220,170,.85)" stroke-width=".7"/>'
   +[[50,4],[36,14],[64,14],[30,34],[70,34],[46,42],[54,42],[38,62],[62,62],[50,66],[44,84],[56,84],[50,92]].map(function(p){return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="1.5" fill="#8FDCAA" stroke="rgba(255,255,255,.8)" stroke-width=".4"/>'}).join('')+'</svg>'
@@ -666,6 +735,7 @@ function stringScore(S,si){if(!S||!S.scores||!S.scores.length)return null
  if(a.length>=8)return (+a[7]||0)/100
  return null}
 function pgDone(){var S=lastSession(),st=recordStats(),sk=streak()
+ var poses=practicePoses(),full=curStyle().full
  var avg=doneAvg(S),hasReal=!!S,hasScore=avg!=null
  var seed=7;function rnd(){seed=(seed*9301+49297)%233280;return seed/233280}
  /* 点阵：逐点仍按改前的「两次 rnd 消耗」取 left（坐标与改前逐点一致，布局不动），
@@ -688,16 +758,16 @@ function pgDone(){var S=lastSession(),st=recordStats(),sk=streak()
  var off=hasScore?(295*(1-Math.min(100,Math.max(0,avg))/100)):295
  var secs=hasReal?Math.max(0,Math.round(S.seconds||0)):0
  var minTxt=hasReal?(secs>=60?(Math.round(secs/60)+'<i>分钟</i>'):(secs+'<i>秒</i>')):'—'
- var moveTxt=hasReal?(S.moves+'<i>/ '+(S.total||8)+'</i>'):'—'
+ var moveTxt=hasReal?(S.moves+'<i>/ '+(S.total||full)+'</i>'):'—'
  var moveSmall=hasScore?('平均完成度 '+avg+'%'):(hasReal?'未做动作识别':'暂无记录')
  var skTxt=sk>0?(sk+'<i>天</i>'):'—'
- var nextIdx=hasReal?Math.min(7,S.moves):0
- var goal=hasScore?('继续练习「'+POSES[nextIdx]+'」，把完成度提到 '+Math.min(99,Math.max(avg+5,85))+'% 以上。')
-  :('先从「'+POSES[nextIdx]+'」开始：跟着示范做满一遍；再去跟练页开启识别，就有逐式完成度可看。')
+ var nextIdx=hasReal?Math.min(poses.length-1,S.moves):0
+ var goal=hasScore?('继续练习「'+poses[nextIdx]+'」，把完成度提到 '+Math.min(99,Math.max(avg+5,85))+'% 以上。')
+  :('先从「'+poses[nextIdx]+'」开始：跟着示范做满一遍；再去跟练页开启识别，就有逐式完成度可看。')
  var fixTxt=hasScore?'逐式完成度见上方琴谱：完成度偏低的式，放慢半拍把动作做到位，胜过加快做完。'
   :'本次未做动作识别，无法判断个体动作偏差；请以跟练页里教练的实时提示为准。'
  var howTxt='保持呼吸自然，以肘带手、指尖放松；每个动作到末端略停一瞬，再缓缓收回。'
- var trackSub=hasReal?((S.moves+' / '+(S.total||8)+' 式已完成')+(S.tone&&TONE_CN[S.tone]?(' · '+TONE_CN[S.tone]):'')):(practicePoses().length+' 式预览 · '+TRACKS[0].tone)
+ var trackSub=hasReal?((S.moves+' / '+(S.total||full)+' 式已完成')+(S.tone&&TONE_CN[S.tone]?(' · '+TONE_CN[S.tone]):'')):(poses.length+' 式预览 · '+TRACKS[0].tone)
  var recLead=hasReal?'结合本次的练习时长与完成度，推荐温服一碗百合莲子羹，有助于舒缓情绪、宁心安神，让身心更好地恢复。'
   :'练习后温服一碗百合莲子羹，有助于舒缓情绪、宁心安神，让身心更好地恢复。'
  return '<main class="sc" style="padding-bottom:3.4rem;position:relative">'
@@ -905,13 +975,14 @@ function audioPrefsHTML(){
    +'<button class="btn btn-gho btn-sm" data-a="try-strings" style="min-height:4rem;padding:0 1.6rem">试听</button></div>'}
 function settingsHTML(){return audioPrefsHTML()
   +'<div class="xs-note">音源与署名：七弦散音 · RafaelCaro · CC BY 4.0；《梅花三弄》· RafaelCaro · CC BY 4.0；《醉渔唱晚》· 卫仲乐 1934 · archive.org CC0。</div>'
-  +'<div class="xs-note">动作识别（摄像头 + 八段锦判定 + 陪练教练）在真实跟练页运行；主壳「动作示范」可直接进入。</div>'}
+  +'<div class="xs-note">动作识别（摄像头 + 三套功法判定 + 陪练教练）在真实跟练页运行；主壳「动作示范」可直接进入。</div>'}
 function basicHTML(){return '<div class="xs-item"><b>账号与数据</b><p>本机演示版没有线上账号：练习记录、身体数据、音频偏好与头像都保存在这台设备的浏览器里，换设备不会同步。</p></div>'
   +'<div class="xs-item"><b>每日提醒</b><p>提醒依赖浏览器通知权限，本机演示版未开启；当前仅「练习打卡」会在本机留下记录。</p></div>'
   +'<button class="btn btn-gho" data-a="go-body" style="margin:1rem 0 1.4rem">编辑身体数据（身高 / 体重 / 目标 / 饮食偏好）</button>'
   +'<div class="xs-sub">个性化偏好</div>'+audioPrefsHTML()}
 function helpHTML(){
-  var A=[['怎么开始一次练习？','首页点「开始练」→ 选「全套 8 式」或「招牌 3 式」→ 点「开始动作预览」，进入真实跟练页（会请求摄像头）。'],
+  var A=[['怎么开始一次练习？','首页点「开始练」→ 在「练习准备」里选练习模式（全套 / 招牌 3 式）→ 点「开始动作预览」，进入真实跟练页（会请求摄像头）。'],
+   ['三套功法怎么换？','首页那排「八段锦 / 五禽戏 / 太极拳」点一下即可切换；选了哪套，练习准备页、动作要点、结束页与分享图都会跟着换。'],
    ['为什么看不到摄像头？','需要浏览器授权；未授权时自动切到预录画面兜底。建议后退 1.5–2 米，全身入镜、正面受光。'],
    ['音乐点了不出声？','浏览器会拦截「无操作自动播放」，再点一次播放图标即可；音量在「设置 › 曲目音量」。'],
    ['七弦是怎么响的？','进入某一式会拨响对应琴弦（式 1–7 → 弦 1–7；收势「背后七颠」七弦齐鸣）。跟练页右侧那排弦也能直接点着试音。'],
@@ -927,14 +998,14 @@ function noticesHTML(){var st=recordStats(),A=[];
   A.push(['关于动作识别','摄像头识别与陪练教练在真实跟练页运行，主壳是界面预览。']);
   return A.map(function(x){return '<div class="xs-item"><b>'+x[0]+'</b><p>'+x[1]+'</p></div>'}).join('')}
 function aboutHTML(){return '<div class="xs-item"><b>弦养 · Xianyang v1.0.0</b><p>以身为琴，以动为弦。主壳是最终版 9 张设计稿的 1:1 复刻；真实识别与陪练教练在跟练子应用里。</p></div>'
-  +'<div class="xs-item"><b>已接入的真实能力</b><p>古琴曲目播放（3 首真录音）、七弦散音试音与「动作→琴弦」触发、练习打卡与本地记录、头像更换、分享图导出。</p></div>'
-  +'<div class="xs-item"><b>仍未接入（界面已如实标注）</b><p>五禽戏素材、设备体征（心率 / 睡眠）、线上账号与云同步。</p></div>'
+  +'<div class="xs-item"><b>已接入的真实能力</b><p>三套功法（八段锦 8 式 · 五禽戏 10 式 · 太极拳 24 式）、古琴曲目播放（3 首真录音）、七弦散音试音与「动作→琴弦」触发、练习打卡与本地记录、头像更换、分享图导出。</p></div>'
+  +'<div class="xs-item"><b>仍未接入（界面已如实标注）</b><p>设备体征（心率 / 睡眠）、线上账号与云同步。</p></div>'
   +'<div class="xs-note">素材署名：七弦散音 · RafaelCaro · CC BY 4.0；《梅花三弄》· RafaelCaro · CC BY 4.0；《醉渔唱晚》· 卫仲乐 1934 · archive.org CC0。</div>'}
-function analysisHTML(){var poses=practicePoses();var S=lastSession(),avg=doneAvg(S);
+function analysisHTML(){var poses=practicePoses(),full=curStyle().full;var S=lastSession(),avg=doneAvg(S);
   var head=avg!=null
-    ? '<div class="xs-note">本次跟练真实记录 · 平均完成度 '+avg+'% · 用时 '+fmtDur(S.seconds||0)+' · 完成 '+S.moves+' / '+(S.total||8)+' 式。下表为逐式完成度（识别结果），仅作参考，不替代医嘱。</div>'
-    : '<div class="xs-note">最近一次跟练'+(S?('记录了 '+S.moves+' / '+(S.total||8)+' 式、用时 '+fmtDur(S.seconds||0)+'，但未做动作识别，所以没有评分'):'还没有记录')+'。下面是本套动作的式序与要领；真实判定请在跟练页进行。</div>';
-  var rows=poses.map(function(n,i){var p=PRACTICE_INFO[i]||{};
+    ? '<div class="xs-note">本次跟练真实记录 · 平均完成度 '+avg+'% · 用时 '+fmtDur(S.seconds||0)+' · 完成 '+S.moves+' / '+(S.total||full)+' 式。下表为逐式完成度（识别结果），仅作参考，不替代医嘱。</div>'
+    : '<div class="xs-note">最近一次跟练'+(S?('记录了 '+S.moves+' / '+(S.total||full)+' 式、用时 '+fmtDur(S.seconds||0)+'，但未做动作识别，所以没有评分'):'还没有记录')+'。下面是本套动作的式序与要领；真实判定请在跟练页进行。</div>';
+  var rows=poses.map(function(n,i){var p=infoAt(i);
     var sc=stringScore(S,i);
     return '<div class="xs-item"><b>第 '+(i+1)+' 式 · '+n+'</b><p>对应'+(p.string?('第 '+p.string+' 弦'):'七弦齐鸣')+'。要领：'+((p.points||[])[0]||'')
       +(sc!=null?('　完成度 '+Math.round(sc*100)+'%'):'　完成度 —')+'</p></div>'}).join('');
@@ -964,17 +1035,25 @@ function shareCard(){
   g.fillStyle='#97836D';g.font='26px "PingFang SC","Microsoft YaHei",sans-serif';g.fillText('以身为琴 · 以动为弦',W/2,206);
   g.strokeStyle='#DCC9A6';g.lineWidth=2;g.beginPath();g.moveTo(150,248);g.lineTo(W-150,248);g.stroke();
   g.fillStyle='#6B4226';g.font='700 40px "Songti SC","STSong",serif';g.fillText(today(),W/2,332);
-  var poses=practicePoses();
-  g.fillStyle='#97836D';g.font='24px "PingFang SC","Microsoft YaHei",sans-serif';g.fillText('今日练习 · '+poses.length+' 式',W/2,378);
-  var y=470;
-  poses.forEach(function(n,i){var p=PRACTICE_INFO[i]||{};
-    g.textAlign='left';g.fillStyle='#B0552E';g.font='600 26px "PingFang SC","Microsoft YaHei",sans-serif';
-    g.fillText('第 '+(i+1)+' 式',64,y);
-    g.fillStyle='#4A2C1A';g.font='600 34px "Songti SC","STSong",serif';g.fillText(n,164,y+2);
-    g.textAlign='right';g.fillStyle='#6E8F7C';g.font='24px "PingFang SC","Microsoft YaHei",sans-serif';
-    g.fillText(p.string?('第 '+p.string+' 弦'):'七弦齐鸣',W-64,y);
-    g.strokeStyle='#EEE1CA';g.lineWidth=1;g.beginPath();g.moveTo(64,y+26);g.lineTo(W-64,y+26);g.stroke();
-    y+=84});
+  var poses=practicePoses(),pn=poses.length;
+  g.fillStyle='#97836D';g.font='24px "PingFang SC","Microsoft YaHei",sans-serif';g.fillText('今日练习 · '+pn+' 式',W/2,378);
+  /* 式数多时自适应：≤8 式沿用原版式（输出与改前逐字符一致）；>12 式改双列，
+     否则单列压行距 —— 八段锦 8 式、五禽戏 10 式都单列，太极 24 式双列，
+     保证 24 行不画到画布外、也不与页脚叠字。 */
+  var cols=pn>12?2:1,rowsPer=Math.ceil(pn/cols),top=470;
+  var step=pn<=8?84:Math.max(30,Math.min(84,Math.floor(((H-160)-top)/rowsPer)));
+  var colW=(W-128)/cols,cpad=cols>1?26:0;
+  var fsLatex=step<84?Math.max(15,Math.round(24*step/84)):24;
+  var fsName=step<84?Math.max(19,Math.round(34*step/84)):34;
+  var fsn=step<84?Math.max(15,Math.round(26*step/84)):26;
+  poses.forEach(function(n,i){var p=infoAt(i);
+    var col=Math.floor(i/rowsPer),row=i%rowsPer,x0=64+col*colW,y=top+row*step,x1=x0+colW-cpad;
+    g.textAlign='left';g.fillStyle='#B0552E';g.font='600 '+fsn+'px "PingFang SC","Microsoft YaHei",sans-serif';
+    g.fillText('第 '+(i+1)+' 式',x0,y);
+    g.fillStyle='#4A2C1A';g.font='600 '+fsName+'px "Songti SC","STSong",serif';g.fillText(n,x0+100,y+2);
+    g.textAlign='right';g.fillStyle='#6E8F7C';g.font=fsLatex+'px "PingFang SC","Microsoft YaHei",sans-serif';
+    g.fillText(p.string?('第 '+p.string+' 弦'):'七弦齐鸣',x1,y);
+    g.strokeStyle='#EEE1CA';g.lineWidth=1;g.beginPath();g.moveTo(x0,y+Math.round(step*0.31));g.lineTo(x1,y+Math.round(step*0.31));g.stroke()});
   g.textAlign='center';g.fillStyle='#97836D';g.font='22px "PingFang SC","Microsoft YaHei",sans-serif';
   g.fillText('音源：七弦散音 · RafaelCaro · CC BY 4.0',W/2,H-104);
   g.fillText('《梅花三弄》· RafaelCaro · CC BY 4.0   《醉渔唱晚》· 卫仲乐 1934 · CC0',W/2,H-68);
@@ -1026,7 +1105,7 @@ function stopHold(silent){if(HOLD.timer)clearInterval(HOLD.timer);HOLD.timer=nul
 
 /* s4 真跟练页地址（与 PrepareView.begin() 规则一致） */
 function s4url(){return 's4/#/train?stage='+((['point','line','arc'])[state.istage]||'point')
-  +'&mode='+(state.imode===1?'short':'full')+'&style=baduanjin&tone=gong'}
+  +'&mode='+(state.imode===1?'short':'full')+'&style='+curStyle().id+'&tone=gong'}
 
 document.addEventListener('click',function(e){
   var el=e.target.closest('[data-a]');if(!el)return
@@ -1053,12 +1132,11 @@ document.addEventListener('click',function(e){
     case 'go-intro':go('intro');break
     /* ---- 首页 ---- */
     case 'swap-rec':state.rec=(state.rec+1)%3;paint();toast('已换一份推荐：'+['宫调 · 平和承载','徵调 · 轻快舒扬','羽调 · 沉静滋养'][state.rec]);break
-    case 'mode':{var mi=el.dataset.i;
-      if(mi==='1'){openSheet('五禽戏','<div class="xs-item"><b>素材未随包交付</b><p>五禽戏（虎鹿熊猿鸟）目前没有动作示范素材与判定标定，所以没有开放练习入口——界面上如实标注，不做假按钮。</p></div><button class="btn" data-a="goto-s4" style="margin-top:1.4rem">去练八段锦（真实跟练页）</button>');break}
-      if(mi==='2'){
-        /* 「帮我选」真读问诊结果：state.quiz 由 loadQuiz() 在启动时载入（见 init()），
-           applyQuiz 会把 organ/rec/imode/istage 落到界面状态上。
-           没做过问诊时不随机、不假装算过 —— 如实说按最稳妥的默认给。 */
+    case 'mode':{var mi=+el.getAttribute('data-i')
+      /* 第 4 段（data-i=3）是「帮我选」：真读问诊结果 —— state.quiz 由 loadQuiz() 在启动时载入，
+         applyQuiz 会把 organ/rec/imode/istage 落到界面状态上。
+         没做过问诊时不随机、不假装算过 —— 如实说按最稳妥的默认给。 */
+      if(mi===3){
         if(state.quiz&&typeof state.quiz.rec==='number'){
           applyQuiz(state.quiz);state.mode=0;paint();
           toast('已按你的问诊回答推荐：八段锦 · '+['宫调 · 平和承载','徵调 · 轻快舒扬','羽调 · 沉静滋养'][state.rec]+' · 从「'+['点','线','面'][state.istage]+'」起');
@@ -1067,7 +1145,13 @@ document.addEventListener('click',function(e){
           toast('还没做问诊 · 先按最稳妥的「八段锦 · 宫调」；做完首页那几道题会更贴合你');
         }
         break}
-      state.mode=0;paint();break}
+      /* 前三段＝拳种选择（八段锦 / 五禽戏 / 太极拳）：选中即写入 state.mode，
+         之后练习准备页、动作要点、结束页与分享图都跟着换拳种；三套都开、不再拦截。 */
+      state.mode=mi
+      if(!curStyle().short)state.imode=0
+      paint()
+      if(mi!==0)toast('已选「'+curStyle().name+'」· 全套 '+curStyle().full+' 式 · 点下方「开始练」进入')
+      break}
     /* ---- 练习准备 ---- */
     case 'imode':state.imode=+el.getAttribute('data-i');paint();break
     case 'istage':state.istage=+el.getAttribute('data-i');paint();break
@@ -1110,12 +1194,12 @@ document.addEventListener('click',function(e){
       toast('正在进入动作预览…');
       location.href=s4url();
       break}
-    case 'side':{var si=+el.getAttribute('data-i');var info=PRACTICE_INFO[state.progress]||PRACTICE_INFO[0];
+    case 'side':{var si=+el.getAttribute('data-i');var info=infoAt(state.progress),faq=info.faq||[];
       if(si===0){state.side=0;paint();break}
       if(si===1){toast('动作示范 · 进入真实跟练页（摄像头 + 陪练教练）');location.href=s4url();break}
       if(si===2){openSheet('第'+(state.progress+1)+'式 · '+info.name+' 动作要点','<div class="xs-note">'+info.preview+'</div>'
         +info.points.map(function(p){return '<div class="xs-li">'+p+'</div>'}).join(''));break}
-      openSheet('第'+(state.progress+1)+'式 · 常见问题',info.faq.map(function(f){return '<div class="xs-item"><b>'+f[0]+'</b><p>'+f[1]+'</p></div>'}).join(''));break}
+      openSheet('第'+(state.progress+1)+'式 · 常见问题',(faq.length?faq.map(function(f){return '<div class="xs-item"><b>'+f[0]+'</b><p>'+f[1]+'</p></div>'}).join(''):'<div class="xs-note">本式在主壳这边只有静态要点；常见问题以跟练页里教练的实时提示为准。</div>'));break}
     case 'pluck':pluckString(+el.getAttribute('data-i'));el.classList.add('plucked');
       setTimeout(function(){if(el.isConnected)el.classList.remove('plucked')},320);break
     case 'hold':if(HOLD.on)stopHold();else startHold();break
@@ -1183,8 +1267,11 @@ function init(){
   var q=new URLSearchParams(location.search)
   if(q.get('first')==='1'){try{localStorage.removeItem('xy-state')}catch(_){}}
   var sv=q.get('screen');if(sv&&PAGES[sv]){state.screen=sv}
+  /* ?style=baduanjin|wuqinxi|taiji —— 直达某一拳种（预览/取证用）；
+     与首页模式条同义：写入 state.mode，五禽戏/太极不提供「招牌 3 式」故 imode 归 0。 */
+  var sl=q.get('style');if(sl&&SEG_STYLE.indexOf(sl)>=0){state.mode=SEG_STYLE.indexOf(sl);if(!curStyle().short)state.imode=0}
   var mut=q.get('muted');if(mut==='1')AUDIO.vol=0;
-  window.__xy={state:state,AUDIO:AUDIO,TRACKS:TRACKS,design:DESIGN,sheets:{settings:settingsHTML,notices:noticesHTML,help:helpHTML,about:aboutHTML}};
+  window.__xy={state:state,AUDIO:AUDIO,TRACKS:TRACKS,design:DESIGN,styles:STYLES,curStyle:curStyle,sheets:{settings:settingsHTML,notices:noticesHTML,help:helpHTML,about:aboutHTML}};
   paint()
 }
 init()
