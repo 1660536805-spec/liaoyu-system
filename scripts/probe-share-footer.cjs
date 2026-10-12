@@ -24,7 +24,13 @@ function chk(name, ok, detail) {
   const b = await chromium.launch({ executablePath: CHROME })
   const ctx = await b.newContext({ viewport: { width: 470, height: 900 }, deviceScaleFactor: 1 })
   const errors = []
-  ctx.on('page', (pg) => { pg.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) }) })
+  const nf404 = []
+  /* 见 probe-styles-shell.cjs：/local-config.js 是按设计可缺失的本机私钥文件 */
+  const EXPECTED_404 = ['/local-config.js']
+  ctx.on('page', (pg) => {
+    pg.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
+    pg.on('response', (r) => { if (r.status() === 404) { try { nf404.push(new URL(r.url()).pathname) } catch (_) {} } })
+  })
 
   for (const st of ['baduanjin', 'wuqinxi', 'taiji']) {
     console.log('\n=== ' + st + ' ===')
@@ -70,7 +76,8 @@ function chk(name, ok, detail) {
     await p.close()
   }
 
-  chk('console.errors=0', errors.length === 0, errors.slice(0, 3))
+  const realErrors = errors.filter((e) => !(e.indexOf('Failed to load resource') === 0 && nf404.length > 0 && nf404.every((u) => EXPECTED_404.indexOf(u) >= 0)))
+  chk('console.errors=0', realErrors.length === 0, realErrors.slice(0, 3))
   await b.close()
   console.log('\n==> fails=' + fails + '  产物 ' + path.relative(process.cwd(), OUT))
   process.exit(fails ? 1 : 0)

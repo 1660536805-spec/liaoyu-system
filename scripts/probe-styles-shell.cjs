@@ -29,7 +29,14 @@ function chk(name, ok, detail) {
   const b = await chromium.launch({ executablePath: CHROME })
   const ctx = await b.newContext({ viewport: { width: 470, height: 900 }, deviceScaleFactor: 2 })
   const errors = []
-  ctx.on('page', (pg) => { pg.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) }) })
+  const nf404 = []
+  /* /local-config.js 是按设计「存在才用、缺失即 404」的本机私钥文件（已在 .gitignore 忽略，
+     zqh 的顾问页用它在新机预填密钥）。它缺失不算缺陷，故从 console 错误里剔除。 */
+  const EXPECTED_404 = ['/local-config.js']
+  ctx.on('page', (pg) => {
+    pg.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
+    pg.on('response', (r) => { if (r.status() === 404) { try { nf404.push(new URL(r.url()).pathname) } catch (_) {} } })
+  })
 
   for (const st of STYLES) {
     const e = EXPECT[st]
@@ -203,7 +210,8 @@ function chk(name, ok, detail) {
     await p.close()
   }
 
-  chk('console.errors=0', errors.length === 0, errors.slice(0, 5))
+  const realErrors = errors.filter((e) => !(e.indexOf('Failed to load resource') === 0 && nf404.length > 0 && nf404.every((u) => EXPECTED_404.indexOf(u) >= 0)))
+  chk('console.errors=0', realErrors.length === 0, realErrors.slice(0, 5))
   await b.close()
   report.fails = fails
   fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringify(report, null, 2))

@@ -321,7 +321,10 @@
     height: 100dvh; max-height: none;
     border-radius: 2rem 0 0 2rem;
     transform: translateX(102%);
-    box-shadow: -1.4rem 0 4rem rgba(58, 40, 24, .28);
+    /* 素笺：右侧抽屉改发丝线 + 轻投影 */
+    background: #FDF8EC;
+    border-left: 1px solid #E9DDC6;
+    box-shadow: -1rem 2rem 3rem rgba(58, 40, 24, .12);
   }
   .xs.show .xs-panel { transform: translateX(0); }
   .xs-h { padding: 1.8rem 2.2rem; }
@@ -376,4 +379,28 @@
 /* 超高屏（竖屏大显示器 / 竖放 4K）：内容列放宽，避免中间一条细带 */
 @media (min-width: 960px) and (min-height: 1400px) {
   :root { --dt-max: 1240px; }
+}
+
+/* 问询页（弦养顾问）：手机端是一屏 flex 聊天布局（见 app.css .ask-main），
+   桌面档要恢复成两列文档流，否则 100dvh + overflow:hidden 会把右列锁死。 */
+@media (min-width: 960px) {
+  #app[data-screen="inquiry"] > main.ask-main {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+    padding-top: 3rem;
+    padding-bottom: 2rem;
+  }
+  #app[data-screen="inquiry"] .ask-head { padding-top: 0; }
+  /* 桌面左栏：展开常驻「今日面板」（手机端隐藏，走头部图标底部抽屉） */
+  #app[data-screen="inquiry"] .dt-col--a,
+  #app[data-screen="inquiry"] .ask-head { min-width: 0; max-width: 100%; }
+  #app[data-screen="inquiry"] .ask-side { display: block; max-width: 100%; }
+  #app[data-screen="inquiry"] .ask-side .tp-card { padding: 1.6rem 1.8rem; }
+  /* 右列对话卡与左栏等高：卡片拉伸填满列高，消息区撑满后内部滚动 */
+  #app[data-screen="inquiry"] .ask-card { flex: 1 1 auto; }
+  #app[data-screen="inquiry"] .ask-list { flex: 1 1 auto; min-height: 34rem; max-height: none; }
+  #app[data-screen="inquiry"] .ask-note { flex: none; }
+  #app[data-screen="inquiry"] .ask-col,
+  #app[data-screen="inquiry"] .ask-b.ask-u { max-width: 74%; }
 }
