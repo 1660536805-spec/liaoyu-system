@@ -12,7 +12,8 @@ var root, state={
   side:0, breath:0, hold:0,
   body:{h:165,w:55,a:28},
   inj:['无'], goals:['舒缓肩颈'], diet:['少盐'], recipe:true,
-  ask:{msgs:[],typing:false}        // 问询页的对话；只存本次访问内存，不落盘（同「不假装已接入」原则）
+  jrDraft:{sleep:null,energy:null},  // 「每日一记」弹层打开期间的草稿
+  ask:{msgs:null,typing:false,ctrl:null,gen:0,briefDone:false,lastQ:'',draft:[]}  // 问询页：真实历史/简报落 localStorage，气泡模型含 greet/brief/n 标记；draft=待发附件
 };
 
 /* ---------- 图标库（描边风格 SVG） ---------- */
@@ -66,7 +67,16 @@ function ic(n,c){var s={
  home:'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6.5 10v10h11V10"/></g>',
  list:'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4.5" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1" fill="currentColor" stroke="none"/></g>',
  chair:'<g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5v9.5h8"/><path d="M7 13v7.5M15 13v7.5M7 17.5h8"/></g>',
- heart2:'<path d="M12 20s-7.5-4.6-9.3-9.3C1.5 7.6 3.6 4.5 6.9 4.5c2 0 3.7 1.1 5.1 3 1.4-1.9 3.1-3 5.1-3 3.3 0 5.4 3.1 4.2 6.2C19.5 15.4 12 20 12 20z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>'
+ heart2:'<path d="M12 20s-7.5-4.6-9.3-9.3C1.5 7.6 3.6 4.5 6.9 4.5c2 0 3.7 1.1 5.1 3 1.4-1.9 3.1-3 5.1-3 3.3 0 5.4 3.1 4.2 6.2C19.5 15.4 12 20 12 20z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>',
+ edit:'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l.9-3.1L16.2 5.6a2.2 2.2 0 0 1 3.1 0l.1.1a2.2 2.2 0 0 1 0 3.1L8.1 20.1 4 20z"/><path d="M14.6 7.4l3 3"/></g>',
+ download:'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></g>',
+ copy:'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2.2"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/></g>',
+ plus:'<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></g>',
+ x:'<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></g>',
+ trash:'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13M9.5 10.5v6M14.5 10.5v6"/></g>',
+ folder:'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.2h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></g>',
+ image:'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="2.5"/><circle cx="9.5" cy="10" r="1.6"/><path d="m5 17 4.5-4 3.2 2.8L16 12.5 20 16"/></g>',
+ retry2:'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 3v4h-4"/></g>'
 };return '<svg viewBox="0 0 24 24" aria-hidden="true"'+(c?' style="'+c+'"':'')+'>'+s[n]+'</svg>'}
 function knot(){return '<svg class="knot" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 2.5 21.5 12 12 21.5 2.5 12z"/><path d="M12 7 17 12l-5 5-5-5z"/></g></svg>'}
 
@@ -770,6 +780,8 @@ function pgProfile(){var st=recordStats(),has=st.n>0,sk=has?streak():DESIGN.stre
    +'<div class="dots8">'+dots+'</div></section></div>'
  +'<section class="card setlist">'
   +'<div class="setrow" data-a="go-lab" data-label="调养实验室"><span class="ic">'+ic('leaf')+'</span><b>调养实验室</b><span>五音 · 食养 · 香事 · 功法 · 问卷</span><span class="r">›</span></div>'
+  +'<div class="setrow" data-a="set-archive" data-label="我的养生档案"><span class="ic">'+ic('doc')+'</span><b>我的养生档案</b><span>练习与身心数据汇总 · 可导出 Markdown</span><span class="r">›</span></div>'
+  +'<div class="setrow" data-a="set-docs" data-label="我的文档"><span class="ic">'+ic('folder')+'</span><b>我的文档</b><span>体检报告 / 舌象照片 / 养生文章 · 仅存本机</span><span class="r">›</span></div>'
   +'<div class="setrow" data-a="set-basic" data-label="基础设置"><span class="ic">'+ic('gear')+'</span><b>基础设置</b><span>账号管理、提醒设置、个性化偏好</span><span class="r">›</span></div>'
   +'<div class="setrow" data-a="set-help" data-label="帮助与反馈"><span class="ic">'+ic('headset')+'</span><b>帮助与反馈</b><span>常见问题、意见反馈、联系我们</span><span class="r">›</span></div>'
   +'<div class="setrow" data-a="set-about" data-label="版本信息"><span class="ic">'+ic('info')+'</span><b>版本信息</b><span>当前版本为最新版</span><span class="r">v1.0.0 ›</span></div></section>'
@@ -802,58 +814,342 @@ function pgBody(){function chips(name,opts,multi){return '<div class="chips">'+o
  +'</main>'}
 
 /* ==================== 问询（智能体交互页） ====================
-   ⚠️ 诚实边界：本页只提供「智能体对话」的**交互结构**，尚未接入任何模型服务。
-      真实回答的唯一接入点在 askSend() 里那处 setTimeout —— 换成对模型的 fetch 即可（注释已给示例）。
-      当前回复由本地占位函数 askStub() 生成，气泡文案与页脚都明确标注「本地占位」，
-      不让界面伪装成已接入（与主壳「真 / 假如实标注」的既有原则一致）。 */
+   模型配置（接口地址 / 密钥 / 模型名）只存在本机浏览器 localStorage['xy-ask-cfg']，
+   对话时浏览器直连 DeepSeek 兼容接口，不经过弦养的任何中间服务器。
+   未配置密钥时保持「诚实兜底」：明确提示演示模式，绝不伪造回答。
+   dist/local-config.js（gitignored）可在新机上自动预填一次密钥。 */
+var ASK_DEFAULT_BASE='https://api.deepseek.com';
+var ASK_DEFAULT_MODEL='deepseek-flash';
+var ASK_MODELS=['deepseek-flash','deepseek-v4-pro'];
 var ASK_CHIPS=['八段锦第一式怎么做？','今天适合练什么？','徵调适合什么时候听？'];
-var ASK_SEED=[
-  {who:'a',text:'你好，我是弦养的练习助手。功法要领、五音调养、今日安排，都可以问我。'},
-  {who:'n',text:'本页是智能体交互结构的预览，尚未接入模型服务；下方回复为本地占位，不代表真实回答。'}
-];
-function askEsc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-function askMsgs(){if(!state.ask.msgs.length)state.ask.msgs=ASK_SEED.slice();return state.ask.msgs}
-function askStub(q){return '（本地占位）已收到你的问题：「'+q+'」。真实回答需接入模型服务后生成，接入点见本页底部说明。'}
-function askListHTML(){return askMsgs().map(function(m){var mine=m.who==='u';
-    return '<div class="ask-row'+(mine?' r':'')+'"><div class="ask-b ask-'+m.who+'">'+askEsc(m.text)+'</div></div>'}).join('')
-  +(state.ask.typing?'<div class="ask-row"><div class="ask-b ask-a ask-typing" aria-label="正在输入">'+ic('dots')+'</div></div>':'')}
+/* 孙宇晨式 AI 赋能：持续记录留在本机，模型只是可替换的外接大脑。
+   收紧回答格式（150 字 / 最多 3 点 / 禁表格代码块标题），小屏气泡阅读优先。 */
+var ASK_SYS='你是「弦养」的个人养生顾问，要基于用户本机的真实练习与身心数据给建议，而不是泛泛而谈。'
+  +'回答范围：八段锦/五禽戏等功法要领、五音调养（宫商角徵羽）、顺时起居与食养、当日练习安排。'
+  +'格式：口语化、具体可执行，控制在 150 字左右、最多分 3 点；只用换行与少量加粗，禁止使用表格、代码块、标题语法。'
+  +'语气平和温润，像一位懂传统养生的朋友；不做疾病诊断、不开药方，遇到明显不适应建议就医；不确定的内容如实说明，不要编造。'
+  +'个人数据只用于服务本人：不要逐条复述数据，也不要臆造摘要里没有的数据。';
+var ASK_BRIEF_SYS='你是「弦养」的个人养生顾问。请根据用户的【今日时令】与本机数据摘要，主动生成一份「今日养生简报」：'
+  +'开头一句话呼应节气与季节，随后最多 3 条贴合用户近况的建议（今天练什么、听什么调、起居或食养任选），总共 150 字以内；'
+  +'只用换行与少量加粗，不要表格、代码块、标题语法。若缺少练习与日记数据，就按节气给温和的开场建议，'
+  +'并在最后用半句话提示：完成一次练习或「每日一记」后，建议会更贴合本人。';
+var ASK_ARCHIVE_SYS='你是「弦养」的个人养生顾问。请依据用户的本机数据摘要，写一段 200–300 字的「阶段养生小结」：'
+  +'总结近期练习与身心状态的趋势、值得保持的习惯、下一步可调整的一点；语气平实温润，分 2–3 个自然段即可，'
+  +'不要表格、代码块、标题语法，不做疾病诊断；数据不足的部分如实带过，不要编造。';
+/* 首次加载：本机私密文件 dist/local-config.js 若提供了密钥，自动预填一次（用户已保存过配置则不覆盖） */
+function seedAskCfg(){try{var w=window.__XIANYANG_LOCAL__;
+  if(w&&typeof w.askKey==='string'&&w.askKey.trim()&&!localStorage.getItem('xy-ask-cfg')){
+    localStorage.setItem('xy-ask-cfg',JSON.stringify({base:ASK_DEFAULT_BASE,key:w.askKey.trim(),model:ASK_DEFAULT_MODEL}));
+  }}catch(_){}}
+function askCfg(){var c={base:ASK_DEFAULT_BASE,key:'',model:ASK_DEFAULT_MODEL};
+  try{var x=JSON.parse(localStorage.getItem('xy-ask-cfg')||'null');
+    if(x&&typeof x==='object'){
+      if(typeof x.base==='string'&&x.base.trim())c.base=x.base.trim();
+      if(typeof x.key==='string'&&x.key.trim())c.key=x.key.trim();
+      if(typeof x.model==='string'&&x.model.trim())c.model=x.model.trim();
+    }}catch(_){}
+  return c}
+function saveAskCfg(c){try{localStorage.setItem('xy-ask-cfg',JSON.stringify({base:c.base,key:c.key,model:c.model}));return true}
+  catch(_){toast('本机存储不可用，配置仅在本次访问保留');return false}}
+function askMask(k){k=String(k);return k.length>10?k.slice(0,6)+'•••••••'+k.slice(-4):'••••••••'}
+function askEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+/* ---------- 本机存储：隐私 / 历史 / 简报 / 日记 / 档案小结 ---------- */
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(_){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(_){return false}}
+function lsDel(k){try{localStorage.removeItem(k)}catch(_){}}
+function askPriv(){var p={on:true,practice:true,body:true,journal:true},x=lsGet('xy-ask-priv');
+  if(x&&typeof x==='object')['on','practice','body','journal'].forEach(function(k){if(typeof x[k]==='boolean')p[k]=x[k]});
+  if(!p.on){p.practice=false;p.body=false;p.journal=false}return p}
+function savePriv(p){lsSet('xy-ask-priv',p)}
+function loadHist(){var a=lsGet('xy-ask-hist');return Array.isArray(a)?a.filter(function(m){return m&&(m.role==='user'||m.role==='assistant')&&typeof m.content==='string'}).slice(-40):[]}
+function persistHist(){var h=askMsgs().filter(function(m){if(m.greet||m.brief)return false;
+    if(m.who==='u')return !!(m.text||(m.att&&m.att.length));
+    return m.who==='a'&&!!m.text})
+  .map(function(m){if(m.who!=='u')return{role:'assistant',content:m.text};
+    return{role:'user',content:m.text||'',att:(m.att||[]).map(function(a){
+      return{kind:a.kind==='image'?'image':'doc',name:a.name||'',thumb:a.thumb||''}})}}).slice(-40);lsSet('xy-ask-hist',h)}
+/* 历史消息发给模型时：旧图片只留占位文字（原图不入库），文档不重发全文 */
+function apiHistMsg(h){if(h.role!=='user'||!h.att||!h.att.length)return{role:'user',content:h.content||''};
+  var t=h.content||'';
+  h.att.forEach(function(a){t+=(t?'\n':'')+(a.kind==='image'
+    ?('[图片附件：'+(a.name||'图片')+'，原图未重发]')
+    :('[文档附件：'+(a.name||'文档')+'，全文见当时提问]'))});
+  return{role:'user',content:t}}
+function loadBrief(){var b=lsGet('xy-brief');return(b&&typeof b.d==='string'&&typeof b.text==='string')?b:null}
+function saveBrief(text){lsSet('xy-brief',{d:today(),text:text})}
+var JR_SLEEP_OPTS=[['不足 6 小时',5.5],['6–7 小时',6.5],['7–8 小时',7.5],['8 小时以上',8.5]];
+function sleepLab(v){var lab='';JR_SLEEP_OPTS.forEach(function(o){if(Math.abs(o[1]-v)<0.01)lab=o[0]});return lab||(v+' 小时')}
+function loadJournal(){var a=lsGet('xy-journal');return Array.isArray(a)?a.filter(function(j){return j&&typeof j.d==='string'}):[]}
+function saveJournal(a){return lsSet('xy-journal',a.slice(-200))}
+function journalToday(){var t=null;loadJournal().forEach(function(j){if(j.d===today())t=j});return t}
+function recentJournal(n){return loadJournal().slice().sort(function(a,b){return a.d<b.d?1:-1}).slice(0,n).reverse()}
+function upsertJournal(e){var a=loadJournal(),i=-1;a.forEach(function(j,ix){if(j.d===e.d)i=ix});
+  if(i>=0)a[i]=Object.assign({},a[i],e);else a.push(e);return saveJournal(a)}
+function loadArchiveAI(){var a=lsGet('xy-archive-ai');return(a&&typeof a.d==='string'&&typeof a.text==='string')?a:null}
+/* ---------- 个人数据摘要（只发压缩摘要，受隐私开关控制） ---------- */
+var CN_NUM=['一','二','三','四','五','六','七','八'];
+function practice30(){var cut=Date.now()-30*864e5,n=0,sec=0;
+  state.records.forEach(function(r){var t=new Date(r.d+'T00:00:00').getTime();if(t>=cut){n++;sec+=(+r.sec||0)}});
+  return'近 30 天打卡 '+n+' 天 / 约 '+Math.round(sec/60)+' 分钟'}
+function weakMove(S){if(!S||!S.scores||!S.scores.length)return'';var bi=0,bv=101;
+  S.scores.forEach(function(v,i){var n=+v||0;if(n<bv){bv=n;bi=i}});
+  var name=POSES[bi]||'';return'；最弱环节：第'+CN_NUM[bi]+'式「'+name+'」完成度 '+bv+' 分'}
+function askContext(){var p=askPriv(),C=todayContext(),L=[];
+  L.push('【今日时令】'+C.gLunar+'，节气「'+C.T.name+'」，属'+C.season+'季。');
+  if(p.on){
+    if(p.body){
+      if(state.quiz&&state.quiz.tags&&state.quiz.tags.length)L.push('【调养问卷】'+state.quiz.tags.join('、'));
+      L.push('【身体档案】身高 '+state.body.h+' cm，体重 '+state.body.w+' kg，'+state.body.a+' 岁；'
+        +'需避让/不适：'+state.inj.join('、')+'；目标：'+state.goals.join('、')+'；饮食偏好：'+state.diet.join('、'));
+    }
+    if(p.practice){var st=recordStats(),sk=streak();
+      if(st.n)L.push('【练习记录】累计打卡 '+st.n+' 次 / '+st.days+' 天，约 '+Math.round(st.sec/60)+' 分钟，当前连续 '+sk+' 天；'+practice30()+'。');
+      else L.push('【练习记录】还没有打卡记录。');
+      var S=lastSession();
+      if(S)L.push('【最近一次跟练】完成 '+S.moves+' / '+(S.total||8)+' 式，用时 '+fmtDur(S.sec||0)
+        +(doneAvg(S)!=null?('，平均完成度 '+doneAvg(S)+' 分'):'')+weakMove(S)+'。');
+    }
+    if(p.journal){var js=recentJournal(7);
+      if(js.length){var ss=js.filter(function(j){return typeof j.sleep==='number'}),es=js.filter(function(j){return typeof j.energy==='number'});
+        var avg=function(a,f){if(!a.length)return'';return(a.reduce(function(x,j){return x+f(j)},0)/a.length).toFixed(1)};
+        L.push('【每日一记 · 近 7 天】'+(ss.length?('平均睡眠 '+avg(ss,function(j){return j.sleep})+' 小时；'):'')
+          +(es.length?('平均精力 '+avg(es,function(j){return j.energy})+' / 5；'):'')
+          +js.map(function(j){return j.d.slice(5)+' 睡眠'+(typeof j.sleep==='number'?sleepLab(j.sleep):'未记')
+            +'，精力'+(j.energy||'未记')+(j.mood?('，感受「'+j.mood+'」'):'')}).join('；')+'。');
+      }
+    }
+    var ds=docCache.filter(function(r){return r.parse==='ok'&&r.sum==='ok'&&r.summary});
+    if(ds.length)L.push('【我的文档】用户本机文库中现有：'+ds.slice(0,10).map(function(r){
+      return'《'+r.name+'》'+r.summary}).join('；')+'。用户在消息中附上某文档全文时，优先依据附件内容回答。');
+  }
+  return L.join('\n')}
+function askSystem(kind){var base=kind==='brief'?ASK_BRIEF_SYS:kind==='archive'?ASK_ARCHIVE_SYS:ASK_SYS;
+  return base+'\n\n【用户本机数据摘要】\n'+askContext()}
+/* ---------- 对话模型 ---------- */
+function askSeed(){var s=[{who:'a',greet:true,text:'你好，我是弦养顾问。功法要领、五音调养、今日安排，都可以问我。'}];
+  if(!askCfg().key)s.push({who:'n',text:'还没有配置模型接口，当前是演示模式：到「我的 → 设置 → 智能体 API」填入模型密钥，即可真实对话。'});
+  return s}
+function askMsgs(){if(!state.ask.msgs){state.ask.msgs=askSeed();
+    var b=loadBrief();if(b&&b.d===today())state.ask.msgs.push({who:'a',brief:true,text:b.text});
+    loadHist().forEach(function(h){state.ask.msgs.push({who:h.role==='user'?'u':'a',text:h.content,
+      att:Array.isArray(h.att)?h.att.map(function(a){return{kind:a.kind==='image'?'image':'doc',name:a.name||'',thumb:a.thumb||''}}):[]})});
+  }return state.ask.msgs}
+/* 简报要插在问候/提示之后、历史对话之前 */
+function addLeading(m){var ms=askMsgs(),i=0;while(i<ms.length&&(ms[i].greet||ms[i].brief||ms[i].who==='n'))i++;ms.splice(i,0,m)}
+/* ---------- 极简安全 Markdown：先转义 HTML，只放行加粗/换行/无序列表/有序列表 ---------- */
+function askMD(s){var rawLines=String(s||'').replace(/\r/g,'').split('\n'),lines=[],
+    isUL=t=>/^[-·•*]\s+/.test(t),isOL=t=>/^\d+[.、)]\s+/.test(t);
+  /* 模型常在列表项之间插空行（1.…\n\n2.…），把同类列表项间的空行压掉，保证合到同一个 ol/ul */
+  rawLines.forEach(function(t,i){
+    var trim=t.trim();
+    if(!trim&&lines.length){
+      var prev=lines[lines.length-1],next='';
+      for(var j=i+1;j<rawLines.length;j++){if(rawLines[j].trim()){next=rawLines[j].trim();break}}
+      if(next&&((isUL(prev)&&isUL(next))||(isOL(prev)&&isOL(next))))return;
+    }
+    lines.push(trim);
+  });
+  var h=[],ul=false,ol=false;
+  function close(){if(ul){h.push('</ul>');ul=false}if(ol){h.push('</ol>');ol=false}}
+  function inline(t){return askEsc(t).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}
+  lines.forEach(function(t){var mu=t.match(/^[-·•*]\s+(.+)$/),mo=t.match(/^\d+[.、)]\s+(.+)$/);
+    if(mu){if(ol){h.push('</ol>');ol=false}if(!ul){h.push('<ul>');ul=true}h.push('<li>'+inline(mu[1])+'</li>')}
+    else if(mo){if(ul){h.push('</ul>');ul=false}if(!ol){h.push('<ol>');ol=true}h.push('<li>'+inline(mo[1])+'</li>')}
+    else if(!t)close();
+    else{close();h.push('<p>'+inline(t)+'</p>')}});
+  close();return'<div class="ask-md">'+h.join('')+'</div>'}
+function askListHTML(){return askMsgs().map(function(m){
+    if(m.who==='u'){
+      var atts=(m.att||[]).map(function(a){
+        if(a.kind==='image'){var src=a.thumb||a.url||'';
+          return'<button class="ask-uimg" data-a="img-view" data-src="'+askEsc(src)+'"><img src="'+askEsc(src)+'" alt="'+askEsc(a.name||'图片')+'"></button>'}
+        return'<span class="ask-udoc">'+ic('doc')+askEsc(a.name||'文档')+'</span>'}).join('');
+      return'<div class="ask-row r"><div class="ask-col" style="align-items:flex-end">'+(m.text?'<div class="ask-b ask-u">'+askEsc(m.text)+'</div>':'')+(atts?'<div class="ask-uatt">'+atts+'</div>':'')+'</div></div>';
+    }
+    if(m.who==='n')return'<div class="ask-row"><div class="ask-b ask-n"><span>'+askEsc(m.text)+'</span>'
+       +(m.retry?'<button class="ask-retry" data-a="ask-retry" data-q="'+askEsc(m.retry)+'">重试</button>':'')+'</div></div>';
+    var label=m.greet?'弦养顾问':(m.brief?'今日养生简报':'');
+    return'<div class="ask-row"><div class="ask-col">'+(label?'<div class="ask-who'+(m.brief?' brief':'')+'">'+label+'</div>':'')
+      +'<div class="ask-b ask-a">'+(m.wait?'<span class="ask-typing">'+ic('dots')+'</span>':askMD(m.text))+'</div></div></div>';
+  }).join('')}
+var askSyncQueued=false;
+function scheduleAskSync(){if(askSyncQueued)return;askSyncQueued=true;requestAnimationFrame(function(){askSyncQueued=false;syncAskUI()})}
 /* 只改对话区、不重绘整页 —— 与 syncAudioUI 同一思路：重绘会让输入框失焦 */
 function syncAskUI(){
   if(!root)return
-  var list=root.querySelector('#ask-list');if(!list)return
-  list.innerHTML=askListHTML();list.scrollTop=list.scrollHeight;
-  var sb=root.querySelector('[data-a="ask-send"]');if(sb)sb.disabled=!!state.ask.typing}
-function askSend(){
+  var list=root.querySelector('#ask-list');if(list){list.innerHTML=askListHTML();list.scrollTop=list.scrollHeight}
+  var att=root.querySelector('#ask-att');if(att)att.innerHTML=attCapsHTML();
+  var inp=root.querySelector('#ask-input'),sb=root.querySelector('[data-a="ask-send"]');
+  if(sb)sb.disabled=!!state.ask.typing||!((inp&&inp.value.trim())||state.ask.draft.length)}
+function askApiErr(status,d){
+  if(status===401)return'接口鉴权失败（401）：密钥无效或已过期，请到「我的 → 设置 → 智能体 API」检查。';
+  if(status===402)return'模型账户额度不足（402），请充值或更换密钥后再试。';
+  if(status===429)return'请求过于频繁（429），请稍等片刻再发。';
+  var msg=d&&d.error&&d.error.message?String(d.error.message):'';
+  return'模型服务返回错误（'+status+'）'+(msg?'：'+msg:'');}
+/* SSE 流式调用；老浏览器没有 ReadableStream 时回落到一次式 JSON */
+function askComplete(messages,onDelta){var cfg=askCfg();
+  var url=cfg.base.replace(/\/+$/,'')+'/chat/completions';
+  var headers={'Content-Type':'application/json','Authorization':'Bearer '+cfg.key};
+  return new Promise(function(resolve,reject){
+    var ctrl=new AbortController();state.ask.ctrl=ctrl;
+    fetch(url,{method:'POST',headers:headers,signal:ctrl.signal,
+      body:JSON.stringify({model:cfg.model,messages:messages,temperature:.7,max_tokens:800,stream:true})})
+     .then(function(res){
+       if(!res.ok){res.json().catch(function(){return{}}).then(function(d){reject(new Error(askApiErr(res.status,d)))});return}
+       if(!res.body||typeof res.body.getReader!=='function'){legacy();return}
+       var reader=res.body.getReader(),dec=new TextDecoder(),buf='',full='';
+       (function pump(){reader.read().then(function(r){
+         if(r.done){resolve(full.trim());return}
+         buf+=dec.decode(r.value,{stream:true});
+         var nl;while((nl=buf.indexOf('\n'))>=0){var line=buf.slice(0,nl).replace(/\r$/,'');buf=buf.slice(nl+1);
+           if(line.indexOf('data:')===0){var d=line.slice(5).trim();
+             if(d&&d!=='[DONE]'){try{var o=JSON.parse(d),t=o.choices&&o.choices[0]&&o.choices[0].delta&&o.choices[0].delta.content;
+               if(t){full+=t;onDelta&&onDelta(full)}}catch(_){}}}
+         }
+         pump()
+       }).catch(reject)})()
+     }).catch(reject);
+    function legacy(){fetch(url,{method:'POST',headers:headers,signal:ctrl.signal,
+        body:JSON.stringify({model:cfg.model,messages:messages,temperature:.7,max_tokens:800})})
+      .then(function(r){return r.json().catch(function(){return{}}).then(function(d){return{ok:r.ok,status:r.status,d:d}})})
+      .then(function(res){if(res.ok&&res.d&&res.d.choices&&res.d.choices[0]&&res.d.choices[0].message){
+          var t=(res.d.choices[0].message.content||'').trim();onDelta&&onDelta(t);resolve(t)
+        }else reject(new Error(askApiErr(res.status,res.d)))})
+      .catch(function(){reject(new Error('连不上模型服务，请检查网络或接口地址。'))})}
+  })
+}
+function abortAsk(){state.ask.leaving=true;if(state.ask.ctrl){try{state.ask.ctrl.abort()}catch(_){}state.ask.ctrl=null}}
+/* 把待发附件组装成模型消息 content：图片走多模态，文档附全文（截断保护） */
+function buildApiUser(q,atts){
+  var parts=[];
+  if(q)parts.push({type:'text',text:q});
+  return Promise.all(atts.map(function(a){
+    if(a.kind==='image'){
+      if(a.url)return Promise.resolve({type:'image',url:a.url});
+      return docGetDB(a.id).then(function(rec){if(!rec||!rec.blob)throw new Error('图片已从文库删除')
+        return blob2data(rec.blob).then(function(url){return{type:'image',url:url}})})
+    }
+    return docGetDB(a.id).catch(function(){return null}).then(function(rec){
+      var t=(rec&&rec.text||'').slice(0,DOC_SEND_CAP),tail='';
+      if(!rec)t='（该文档已从本机文库删除，无法读取全文）';
+      else if(rec.truncated||rec.text.length>DOC_SEND_CAP)tail='\n（文档较长，仅附前 '+DOC_SEND_CAP+' 字）';
+      return{type:'text',text:'【附件文档：'+a.name+'（'+docKindName(rec?rec.kind:'doc')+'）】\n'+(t||'（未提取到文字）')+tail}
+    })
+  })).then(function(more){
+    more.forEach(function(m){
+      if(m.type==='image')parts.push({type:'image_url',image_url:{url:m.url,detail:'auto'}});
+      else parts.push(m)});
+    if(!parts.some(function(p){return p.type==='text'}))parts.unshift({type:'text',text:'（请看我发的图片）'});
+    if(parts.length===1)return parts[0].text;
+    return parts.map(function(p){return p.type==='text'?{type:'text',text:p.text}:p})
+  })
+}
+/* 普通问答：历史只在成功后持久化，失败给可点「重试」的提示气泡 */
+function askRun(q,atts){
   if(state.ask.typing)return
-  var inp=root.querySelector('#ask-input');if(!inp)return
-  var q=(inp.value||'').trim();if(!q){toast('先写下你想问的问题');inp.focus();return}
-  inp.value='';state.ask.msgs=askMsgs().concat([{who:'u',text:q}]);state.ask.typing=true;syncAskUI();
-  /* ── 真实模型接入点（当前为本地占位，替换下面这段即可）──────────────
-     fetch('https://<你的模型服务>/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-       body:JSON.stringify({question:q})})
-       .then(function(r){return r.json()})
-       .then(function(d){state.ask.typing=false;state.ask.msgs=askMsgs().concat([{who:'a',text:d.answer}]);syncAskUI()})
-       .catch(function(){state.ask.typing=false;state.ask.msgs=askMsgs().concat([{who:'n',text:'模型服务暂时不可用。'}]);syncAskUI()})
-     另需把 ASK_SEED / 页脚那两句「未接入」的标注一并去掉。 ───────────────── */
-  setTimeout(function(){state.ask.typing=false;
-    if(state.screen==='inquiry'){state.ask.msgs=askMsgs().concat([{who:'a',text:askStub(q)}]);syncAskUI()}},420)}
+  atts=atts||[];
+  state.ask.leaving=false;
+  var ms=askMsgs();
+  var disp=atts.map(function(a){return{kind:a.kind,name:a.name,thumb:a.thumb||''}});
+  ms.push({who:'u',text:q,att:disp});
+  var wait={who:'a',wait:true},widx=ms.length;ms.push(wait);
+  state.ask.lastQ=q;state.ask.typing=true;syncAskUI();
+  var cfg=askCfg();
+  if(!cfg.key){ms[widx]={who:'n',text:'还没有配置模型接口，无法真实回答。请到「我的 → 设置 → 智能体 API」填写模型密钥。',retry:q};
+    state.ask.typing=false;syncAskUI();return}
+  var gen=++state.ask.gen,apiHist=loadHist().map(apiHistMsg);
+  buildApiUser(q,atts).then(function(content){
+    apiHist.push({role:'user',content:content});
+    return askComplete([{role:'system',content:askSystem('chat')}].concat(apiHist.slice(-40)),function(full){
+      if(gen!==state.ask.gen)return;state.ask.typing=false;wait.wait=false;wait.text=full;scheduleAskSync()})
+  })
+   .then(function(text){if(gen!==state.ask.gen)return;
+     if(text){wait.wait=false;wait.text=text;persistHist()}
+     else{var i=ms.indexOf(wait);if(i>=0)ms[i]={who:'n',text:'模型这次没有返回文字，换个问法试试。',retry:q}}
+     state.ask.typing=false;syncAskUI()})
+   .catch(function(e){if(gen!==state.ask.gen||state.ask.leaving)return;state.ask.typing=false;
+     var i=ms.indexOf(wait);var msg=(e&&String(e.message||'').indexOf('AbortError')>=0)?'已停止生成。':'连不上模型服务，请检查网络或接口地址。';
+     if(i>=0)ms[i]={who:'n',text:msg,retry:q};syncAskUI()});
+}
+function askSend(q){
+  if(state.ask.typing)return
+  var inp=root.querySelector('#ask-input');
+  if(typeof q!=='string')q=inp?((inp.value||'').trim()):'';
+  q=String(q||'').trim();
+  var atts=state.ask.draft.slice();
+  if(!q&&!atts.length){toast('先写下你想问的问题，或加一张图片');if(inp)inp.focus();return}
+  if(inp)inp.value='';
+  state.ask.draft=[];
+  /* 点「重试」：先移除上一次的失败气泡及其提问气泡，否则同一句话会出现两遍（重试不带附件） */
+  if(!atts.length){var ms0=askMsgs();
+    for(var k=ms0.length-1;k>=0&&ms0[k].who==='n';k--){
+      if(ms0[k].retry===q){
+        ms0.splice(k,1);
+        if(ms0[k-1]&&ms0[k-1].who==='u'&&ms0[k-1].text===q)ms0.splice(k-1,1);
+        break;
+      }
+    }}
+  syncAskUI();askRun(q,atts)
+}
+/* ---------- 今日养生简报：每天自动一次（缓存本机，重生成才再花费） ---------- */
+function briefRun(){
+  var cfg=askCfg();if(!cfg.key){toast('配置模型密钥后才能生成今日简报');return}
+  state.ask.leaving=false;
+  var ms=askMsgs();
+  for(var i=ms.length-1;i>=0;i--)if(ms[i].brief)ms.splice(i,1);
+  var b={who:'a',brief:true,wait:true};addLeading(b);
+  state.ask.typing=true;syncAskUI();
+  var gen=++state.ask.gen;
+  askComplete([{role:'system',content:askSystem('brief')},{role:'user',content:'请给出我今天的养生简报。'}],function(full){
+      if(gen!==state.ask.gen)return;state.ask.typing=false;b.wait=false;b.text=full;scheduleAskSync()})
+   .then(function(text){if(gen!==state.ask.gen)return;b.wait=false;
+     if(text){b.text=text;saveBrief(text)}
+     else{var i=ms.indexOf(b);if(i>=0)ms.splice(i,1)}
+     state.ask.typing=false;syncAskUI()})
+   .catch(function(){if(gen!==state.ask.gen||state.ask.leaving)return;
+     var i=ms.indexOf(b);if(i>=0&&!b.text)ms.splice(i,1);state.ask.typing=false;syncAskUI()});
+}
+function maybeBrief(){var b=loadBrief();
+  if(b&&b.d===today()){if(!askMsgs().some(function(m){return m.brief}))addLeading({who:'a',brief:true,text:b.text});syncAskUI();return}
+  briefRun()}
+function askEnter(){askMsgs();if(!state.ask.briefDone){state.ask.briefDone=true;maybeBrief()}}
+function askNewConfirm(show){var c=root.querySelector('#ask-confirm');if(c)c.hidden=!show}
+function askNew(){abortAsk();lsDel('xy-ask-hist');lsDel('xy-brief');
+  state.ask.gen++;state.ask.msgs=null;state.ask.briefDone=false;state.ask.typing=false;state.ask.draft=[];
+  paint();askEnter()}
+function askNoteHTML(){var c=askCfg(),p=askPriv();
+  if(!c.key)return'<p class="ask-note">'+ic('info')+'<span>演示模式：到「我的 → 设置 → 智能体 API」配置模型密钥，即可获得结合你练习数据与个人文档的真实回答。</span></p>';
+  return'<p class="ask-note">'+ic('info')+'<span>由你配置的 AI 模型生成'+(p.on?'，已结合你的本机练习数据':'，当前未读取本机数据（可在智能体 API 设置中开启）')+'；内容仅供参考，不替代专业医疗建议。</span></p>'}
 
-/* ---------- 问询页 ---------- */
+/* ---------- 问询页（微信式一屏布局：头部固定 / 消息区单滚动 / 输入沉底） ---------- */
 function pgInquiry(){
- return '<main class="sc navpad">'
+ return '<main class="sc ask-main">'
  +'<div class="ask-head">'
-  +'<div class="ask-brand">'+knot()+'<b>问询 · 弦养顾问</b><span class="ask-badge">智能体</span></div>'
-  +'<p class="ask-sub">关于功法要领、五音调养与今日练习安排，都可以问一问。</p>'
+  +'<div class="ask-top"><div class="ask-brand">'+knot()+'<b>问询 · 弦养顾问</b><span class="ask-badge">智能体</span></div>'
+  +'<div class="ask-acts">'
+   +'<button class="icbtn" data-a="ask-today" aria-label="今日面板">'+ic('cal')+'</button>'
+   +'<button class="icbtn" data-a="ask-journal" aria-label="每日一记">'+ic('edit')+'</button>'
+   +'<button class="icbtn" data-a="ask-new" aria-label="新对话">'+ic('refresh')+'</button>'
+  +'</div></div>'
+  +'<p class="ask-sub">关于功法要领、五音调养与今日练习安排，都可以问一问。'
+   +(askCfg().key?'<button class="ask-regen" data-a="ask-brief-regen">重新生成简报</button>':'')+'</p>'
+  +'<div class="ask-confirm" id="ask-confirm" hidden><span>清空当前对话？</span>'
+   +'<button class="btn btn-gho btn-sm" data-a="ask-new-cancel">取消</button>'
+   +'<button class="btn btn-sm" data-a="ask-new-ok">确定</button></div>'
+  +'<aside class="ask-side" aria-label="今日面板">'+todayPanelHTML()+'</aside>'
  +'</div>'
  +'<section class="card ask-card">'
   +'<div id="ask-list" class="ask-list" role="log" aria-live="polite">'+askListHTML()+'</div>'
   +'<div class="ask-chips">'+ASK_CHIPS.map(function(c){return '<button class="ask-chip" data-a="ask-chip" data-q="'+askEsc(c)+'">'+askEsc(c)+'</button>'}).join('')+'</div>'
+  +'<div class="ask-att" id="ask-att">'+attCapsHTML()+'</div>'
   +'<div class="ask-input">'
+   +'<button class="ask-plus" data-a="ask-attach" aria-label="添加图片或文档">'+ic('plus')+'</button>'
    +'<input id="ask-input" type="text" autocomplete="off" maxlength="200" placeholder="写下你想问的…" aria-label="输入要问的问题">'
-   +'<button class="ask-send" data-a="ask-send" aria-label="发送">'+ic('chev','width:2rem;height:2rem')+'</button>'
+   +'<button class="ask-send" data-a="ask-send" aria-label="发送" disabled>'+ic('chev','width:2rem;height:2rem')+'</button>'
   +'</div>'
  +'</section>'
- +'<p class="ask-note">'+ic('info')+'<span>本页为智能体交互结构预览，<b>尚未接入模型服务</b>，回复为本地占位；接入方式见 <b>askSend()</b> 注释。</span></p>'
+ +askNoteHTML()
  +nav('inquiry')+'</main>'}
 
 /* ---------- 渲染 & 事件 ---------- */
@@ -877,7 +1173,10 @@ function paint(){
   syncAudioUI();
   syncAskUI();
 }
-function go(s){if(typeof stopHold==='function')stopHold(true);if(typeof stopBreath==='function')stopBreath(true);state.screen=s;paint();window.scrollTo(0,0);root.querySelector('main').focus({preventScroll:true})}
+function go(s){if(typeof stopHold==='function')stopHold(true);if(typeof stopBreath==='function')stopBreath(true);
+  abortAsk();state.ask.typing=false;
+  state.screen=s;paint();window.scrollTo(0,0);root.querySelector('main').focus({preventScroll:true});
+  if(s==='inquiry')askEnter()}
 
 /* ==================== 浮层：设置 / 通知 / 帮助 / 详情 / 分享 ==================== */
 var SH=null;
@@ -888,7 +1187,8 @@ function sheetEl(){if(SH&&SH.isConnected)return SH;
    +'<div class="xs-b"></div></div>';
   SH.addEventListener('click',function(e){if(e.target===SH.querySelector('.xs-mask'))closeSheet()});
   document.body.appendChild(SH);return SH}
-function openSheet(title,html){var s=sheetEl();s.querySelector('.xs-h b').textContent=title;s.querySelector('.xs-b').innerHTML=html;
+function openSheet(title,html,cls){var s=sheetEl();s.querySelector('.xs-h b').textContent=title;s.querySelector('.xs-b').innerHTML=html;
+  s.querySelector('.xs-panel').className='xs-panel'+(cls?' '+cls:'');
   s.classList.add('show');s.querySelector('.xs-panel').scrollTop=0;document.body.classList.add('xs-lock')}
 function closeSheet(){if(SH){SH.classList.remove('show');document.body.classList.remove('xs-lock')}}
 function sheetOpen(){return !!(SH&&SH.classList.contains('show'))}
@@ -903,7 +1203,369 @@ function audioPrefsHTML(){
    +'<button class="tog'+(AUDIO.loop?' on':'')+'" data-a="loop" role="switch" aria-checked="'+AUDIO.loop+'" aria-label="循环播放"></button></div>'
    +'<div class="xs-row"><div class="xs-lb"><b>七弦试音</b><span>依次弹出七弦散音（正调 C–D–F–G–A–c–d）</span></div>'
    +'<button class="btn btn-gho btn-sm" data-a="try-strings" style="min-height:4rem;padding:0 1.6rem">试听</button></div>'}
-function settingsHTML(){return audioPrefsHTML()
+/* 「设置」浮层顶部的智能体 API 状态行 */
+function askCfgRowHTML(){var c=askCfg();
+  return '<div class="xs-row"><div class="xs-lb"><b>智能体 API</b>'
+   +'<span>'+(c.key?('已配置 · '+askMask(c.key)+' · '+askEsc(c.model)):'未配置 · 问询页为演示模式')+'</span></div>'
+   +'<button class="btn btn-gho btn-sm" data-a="set-ask" style="min-height:4rem;padding:0 1.6rem">配置</button></div>'}
+/* 智能体 API 配置表单（密钥 / 接口地址 / 模型 + 保存 / 测试 / 清除） */
+function askCfgHTML(){var c=askCfg();
+  return '<div class="xs-item"><b>OpenAI 兼容接口</b><p>密钥只保存在本机浏览器（localStorage），提问时浏览器直连你填写的模型服务，不经过弦养的服务器。支持任何 OpenAI 兼容的 Chat Completions 服务。</p></div>'
+   +'<label class="cfgp-lb" for="cfgp-key">API 密钥</label>'
+   +'<input id="cfgp-key" class="cfgp-in" type="password" autocomplete="off" spellcheck="false" placeholder="sk-..." value="'+askEsc(c.key)+'">'
+   +'<label class="cfgp-lb" for="cfgp-base">接口地址</label>'
+   +'<input id="cfgp-base" class="cfgp-in" type="text" autocomplete="off" spellcheck="false" placeholder="'+ASK_DEFAULT_BASE+'" value="'+askEsc(c.base)+'">'
+   +'<label class="cfgp-lb" for="cfgp-model">模型</label>'
+   +'<input id="cfgp-model" class="cfgp-in" type="text" autocomplete="off" spellcheck="false" list="cfgp-models" placeholder="'+ASK_DEFAULT_MODEL+'" value="'+askEsc(c.model)+'">'
+   +'<datalist id="cfgp-models">'+ASK_MODELS.map(function(m){return '<option value="'+m+'">'}).join('')+'</datalist>'
+   +'<div class="cfgp-btns">'
+   +'<button class="btn" data-a="ask-cfg-save">保存</button>'
+   +'<button class="btn btn-gho" data-a="ask-cfg-test">测试连接</button>'
+   +'<button class="btn btn-gho" data-a="ask-cfg-clear">清除密钥</button></div>'
+   +'<div class="xs-note" id="cfgp-res"></div>'
+   +askPrivHTML()
+   +'<div class="xs-note">本机私密文件 dist/local-config.js（已被 git 忽略）会在未保存配置时自动预填密钥；它不会进入任何分支。</div>'}
+/* 隐私：一个总开关 + 练习记录 / 身体数据 / 每日一记三个细分勾选 */
+function askPrivHTML(){var p=askPriv();
+  function row(k,title,sub){return '<div class="xs-row ask-pr'+(p.on?'':' off')+'"><div class="xs-lb"><b>'+title+'</b><span>'+sub+'</span></div>'
+    +'<button class="tog'+(p.on&&p[k]?' on':'')+'" data-a="ask-priv-item" data-k="'+k+'" role="switch" aria-checked="'+(p.on&&p[k])+'"'+(p.on?'':' disabled')+'></button></div>'}
+  return '<div class="xs-sub">助手可读取的本机数据</div>'
+   +'<div class="xs-row"><div class="xs-lb"><b>允许读取本机数据</b><span>关闭后只按通用养生知识回答，不发送任何个人数据</span></div>'
+   +'<button class="tog'+(p.on?' on':'')+'" data-a="ask-priv-on" role="switch" aria-checked="'+p.on+'"></button></div>'
+   +row('practice','练习打卡与跟练','累计次数、连续天数、最近一次逐式完成度')
+   +row('body','问卷与身体数据','调养方向、身高体重、旧伤、目标与饮食偏好')
+   +row('journal','每日一记','睡眠档位、精力评分与一句话感受')}
+/* 从弹层表单读出当前输入（未打开弹层时返回 null） */
+function askCfgForm(){var s=SH;if(!s)return null;
+  var k=s.querySelector('#cfgp-key'),b=s.querySelector('#cfgp-base'),m=s.querySelector('#cfgp-model');
+  if(!k||!b||!m)return null;
+  return{key:k.value.trim(),base:(b.value.trim()||ASK_DEFAULT_BASE),model:(m.value.trim()||ASK_DEFAULT_MODEL)}}
+function askCfgRes(html){var n=SH&&SH.querySelector('#cfgp-res');if(n)n.innerHTML=html}
+/* 用指定配置发一条极简请求验证连通性与密钥；save=true 时验证通过后顺带保存 */
+function askCfgTest(c,save){
+  if(!/^https?:\/\//.test(c.base)){askCfgRes('接口地址需以 http:// 或 https:// 开头。');return}
+  askCfgRes('正在连接 '+askEsc(c.base)+' …');
+  fetch(c.base.replace(/\/+$/,'')+'/chat/completions',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(c.key||'')},
+    body:JSON.stringify({model:c.model,messages:[{role:'user',content:'ping'}],max_tokens:8})})
+   .then(function(r){return r.json().catch(function(){return{}}).then(function(d){return{ok:r.ok,status:r.status,d:d}})})
+   .then(function(res){if(res.ok&&res.d&&res.d.choices&&res.d.choices[0]){
+       if(save)saveAskCfg(c);
+       askCfgRes('<b style="color:var(--green-deep)">连接成功 ✓</b> 模型 '+askEsc(c.model)+' 响应正常。'+(save?'配置已保存。':''));
+       toast('模型连接成功');
+     }else askCfgRes(askEsc(askApiErr(res.status,res.d)));})
+   .catch(function(){askCfgRes('连不上接口：请检查网络与接口地址（默认地址 '+ASK_DEFAULT_BASE+'）。')});}
+/* ==================== 每日一记 ==================== */
+function journalOpenDraft(){var t=journalToday();
+  state.jrDraft={sleep:(t&&typeof t.sleep==='number')?t.sleep:null,energy:t&&t.energy?t.energy:null};
+  return t||null}
+function journalHTML(skippable){var t=journalOpenDraft();
+  var sleepChips=JR_SLEEP_OPTS.map(function(o){
+    return '<button type="button" class="jr-chip'+(state.jrDraft.sleep!=null&&Math.abs(state.jrDraft.sleep-o[1])<0.01?' sel':'')+'" data-a="jr-sleep" data-v="'+o[1]+'">'+o[0]+'</button>'}).join('');
+  var nums='';for(var i=1;i<=5;i++)nums+='<button type="button" class="jr-n'+(state.jrDraft.energy===i?' sel':'')+'" data-a="jr-energy" data-v="'+i+'">'+i+'</button>';
+  return '<div class="xs-item"><b>每日一记</b><p>睡前花十秒记一下，弦养顾问会结合它给出更贴合你的建议。内容只保存在这台设备上。</p></div>'
+   +'<div class="xs-sub">昨晚睡得怎么样</div><div class="jr-chips">'+sleepChips+'</div>'
+   +'<div class="xs-sub">今天精力如何</div><div class="jr-nums"><span class="jr-low">偏乏</span>'+nums+'<span class="jr-low">很足</span></div>'
+   +'<div class="xs-sub">一句话感受（可选）</div>'
+   +'<textarea id="jr-mood" class="cfgp-in jr-ta" rows="2" maxlength="80" placeholder="比如：午饭后有点犯困，肩颈有点紧……">'+askEsc(t&&t.mood?t.mood:'')+'</textarea>'
+   +'<div class="cfgp-btns"><button class="btn" data-a="journal-save">保存</button>'
+   +(skippable?'<button class="btn btn-gho" data-a="sheet-close">跳过</button>':'')+'</div>'
+   +'<div class="xs-note">每天只保留最新一条；也可以随时在「问询」页右上角补记。</div>'}
+function jrSelect(el){if(!el)return;var box=el.parentNode;if(box)box.querySelectorAll('.jr-chip,.jr-n').forEach(function(b){b.classList.remove('sel')});el.classList.add('sel')}
+
+/* ==================== 我的养生档案（Markdown，可带走的数据资产） ==================== */
+function archiveMD(aiText){var st=recordStats(),S=lastSession(),C=todayContext(),L=[];
+  L.push('# 弦养 · 我的养生档案');
+  L.push('> 生成于 '+today()+'（'+C.T.name+' · '+C.season+'季） · 全部数据来自本机记录\n');
+  L.push('## 一、身体档案与目标');
+  if(state.quiz&&state.quiz.tags&&state.quiz.tags.length)L.push('- 调养问卷：'+state.quiz.tags.join('、'));
+  L.push('- 身体数据：身高 '+state.body.h+' cm，体重 '+state.body.w+' kg，'+state.body.a+' 岁');
+  L.push('- 需避让/不适：'+state.inj.join('、'));
+  L.push('- 调养目标：'+state.goals.join('、'));
+  L.push('- 饮食偏好：'+state.diet.join('、')+'\n');
+  L.push('## 二、练习总览');
+  if(st.n){L.push('- 累计打卡：'+st.n+' 次 / '+st.days+' 天，约 '+Math.round(st.sec/60)+' 分钟');
+    L.push('- 当前连续练习：'+streak()+' 天');
+    L.push('- '+practice30());
+    L.push('- 累计完成招式：'+st.poses+' 式次');
+  }else L.push('- 还没有打卡记录。');
+  L.push('');
+  L.push('## 三、最近一次跟练');
+  if(S){L.push('- 完成 '+S.moves+' / '+(S.total||8)+' 式，用时 '+fmtDur(S.sec||0)+(doneAvg(S)!=null?'，平均完成度 '+doneAvg(S)+' 分':''));
+    if(S.scores&&S.scores.length)L.push('- 逐式完成度：\n'+S.scores.map(function(v,i){return '  - 第'+CN_NUM[i]+'式「'+(POSES[i]||'')+'」：'+(+v||0)+' 分'}).join('\n'));
+  }else L.push('- 暂无真实跟练识别记录。');
+  L.push('');
+  L.push('## 四、身心日常（每日一记 · 近 14 天）');
+  var js=recentJournal(14);
+  if(js.length){
+    var ss=js.filter(function(j){return typeof j.sleep==='number'}),es=js.filter(function(j){return typeof j.energy==='number'});
+    var avg=function(a,f){return a.length?(a.reduce(function(x,j){return x+f(j)},0)/a.length).toFixed(1):''};
+    if(ss.length)L.push('- 平均睡眠 '+avg(ss,function(j){return j.sleep})+' 小时');
+    if(es.length)L.push('- 平均精力 '+avg(es,function(j){return j.energy})+' / 5');
+    js.forEach(function(j){L.push('- '+j.d+'：睡眠 '+(typeof j.sleep==='number'?sleepLab(j.sleep):'未记')+'；精力 '+(j.energy||'未记')+(j.mood?'；感受「'+j.mood+'」':''))});
+  }else L.push('- 还没有每日一记。');
+  L.push('');
+  L.push('## 五、阶段养生小结');
+  L.push(aiText||'（在档案页点「生成 AI 小结」后，由你配置的模型生成本节）');
+  return L.join('\n')}
+function archiveHTML(){var ai=loadArchiveAI(),has=!!(ai&&ai.d===today()&&ai.text);
+  return '<div class="xs-item"><b>我的养生档案</b><p>由本机真实数据汇总成 Markdown：换模型、换设备都能带走。前四节随时可导出，AI 小结按需生成。</p></div>'
+   +'<pre class="ar-pre" id="ar-pre">'+askEsc(archiveMD(has?ai.text:null))+'</pre>'
+   +'<div class="cfgp-btns">'
+   +'<button class="btn btn-gho" data-a="ar-copy">'+ic('copy','width:1.6rem;height:1.6rem')+'复制全文</button>'
+   +'<button class="btn btn-gho" data-a="ar-download">'+ic('download','width:1.6rem;height:1.6rem')+'下载 .md</button>'
+   +'<button class="btn" data-a="ar-ai">'+(has?'重新生成 AI 小结':'生成 AI 小结')+'</button></div>'
+   +'<div class="xs-note" id="ar-status">'+(has?('AI 小结生成于 '+ai.d):'AI 小结只读取与问询相同的本机数据摘要；未配置密钥时不可用。')+'</div>'}
+function archiveAIRun(){var s=SH;if(!s)return;
+  var pre=s.querySelector('#ar-pre'),st=s.querySelector('#ar-status'),btns=s.querySelectorAll('.cfgp-btns button');
+  if(!askCfg().key){toast('请先到「智能体 API」配置密钥');if(st)st.textContent='请先到「智能体 API」配置密钥。';return}
+  btns.forEach(function(b){b.disabled=true});if(st)st.textContent='正在生成阶段养生小结…';
+  var gen=++state.ask.gen;
+  askComplete([{role:'system',content:askSystem('archive')},{role:'user',content:'请根据这些数据写我的阶段养生小结。'}],function(full){
+    if(gen!==state.ask.gen)return;if(pre)pre.textContent=archiveMD(full.trim())})
+   .then(function(text){if(gen!==state.ask.gen)return;btns.forEach(function(b){b.disabled=false});
+     if(text){lsSet('xy-archive-ai',{d:today(),text:text});if(pre)pre.textContent=archiveMD(text);if(st)st.textContent='AI 小结已生成 · '+today()}
+     else if(st)st.textContent='模型这次没有返回文字，请重试。';})
+   .catch(function(e){if(gen!==state.ask.gen)return;btns.forEach(function(b){b.disabled=false});
+     if(st)st.textContent=(e&&String(e.message||'').indexOf('AbortError')>=0)?'已停止生成。':'生成失败，请检查网络或密钥后重试。';})}
+function archiveCopy(){var pre=SH&&SH.querySelector('#ar-pre');if(!pre)return;var text=pre.textContent;
+  function done(){toast('档案全文已复制')}
+  function fallback(){var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch(_){toast('复制失败，请手动选择文本')}
+    document.body.removeChild(ta)}
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(done).catch(fallback);else fallback()}
+function archiveDownload(){var pre=SH&&SH.querySelector('#ar-pre');if(!pre)return;
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([pre.textContent],{type:'text/markdown;charset=utf-8'}));
+  a.download='xianyang-archive-'+today()+'.md';document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);if(a.parentNode)a.parentNode.removeChild(a)},1000);toast('已下载 Markdown 档案')}
+
+/* ==================== 我的文档（IndexedDB 本机文库 + 图片/文档附件） ====================
+   原文（含图片 Blob）只存本机 IndexedDB；仅当用户在某条消息显式附上时，内容才随请求
+   发给用户自己配置的模型服务，弦养不经手任何文件。 */
+var DOC_MAX_N=20,IMG_MAX=10*1024*1024,TXT_MAX=5*1024*1024;
+var DOC_STORE_CAP=20000,DOC_SEND_CAP=12000,DOC_SUM_CAP=6000;
+var ASK_DOC_SYS='你是养生助手的文档摘要模块。用户上传了个人文档（体检报告、检验单、养生文章、学习笔记等）。请只用一句话（不超过 50 字）概括其中与健康、养生最相关的要点；若文档与养生无关，概括其主题即可。不要寒暄、不要建议。';
+var docCache=[];
+/* ---------- IndexedDB ---------- */
+var xyDBPromise=null;
+function dbOpen(){if(xyDBPromise)return xyDBPromise;
+  xyDBPromise=new Promise(function(res,rej){
+    if(!window.indexedDB)return rej(new Error('本机文档库不可用（浏览器不支持 IndexedDB）'));
+    var r=indexedDB.open('xy-db',1);
+    r.onupgradeneeded=function(){var db=r.result;if(!db.objectStoreNames.contains('docs'))db.createObjectStore('docs',{keyPath:'id'})};
+    r.onsuccess=function(){res(r.result)};r.onerror=function(){rej(r.error)};
+  });return xyDBPromise}
+function dbIDB(mode,fn){return dbOpen().then(function(db){return new Promise(function(res,rej){
+  var tx=db.transaction('docs',mode),rq=fn(tx.objectStore('docs'));
+  rq.onsuccess=function(){res(rq.result)};rq.onerror=function(){rej(rq.error)};
+})})}
+function docAllDB(){return dbIDB('readonly',function(st){return st.getAll()}).then(function(a){
+  return(a||[]).sort(function(x,y){return x.at<y.at?1:-1})})}
+function docGetDB(id){return dbIDB('readonly',function(st){return st.get(id)})}
+function docPutDB(rec){return dbIDB('readwrite',function(st){return st.put(rec)})}
+function docDelDB(id){return dbIDB('readwrite',function(st){return st.delete(id)})}
+function docsRefresh(){return docAllDB().then(function(a){docCache=a;refreshDocBits();return a}).catch(function(){docCache=[];return[]})}
+function docById(id){for(var i=0;i<docCache.length;i++)if(docCache[i].id===id)return docCache[i];return null}
+/* ---------- 工具 ---------- */
+function docUid(){return'd'+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function fmtSize(n){if(n<1024)return n+' B';if(n<1048576)return Math.round(n/1024)+' KB';return (n/1048576).toFixed(1)+' MB'}
+function docKind(file){var n=(file.name||'').toLowerCase(),t=file.type||'';
+  if(t.indexOf('image/')===0||/\.(jpe?g|png|gif|webp)$/.test(n))return'image';
+  if(t==='application/pdf'||/\.pdf$/.test(n))return'pdf';
+  if(/\.docx?$/.test(n)||/word/.test(t))return'word';
+  if(/\.(txt|md|markdown)$/.test(n)||t.indexOf('text/')===0)return'text';
+  return''}
+function docKindName(k){return{image:'图片',pdf:'PDF',word:'Word',text:'文本'}[k]||'文档'}
+function docIcon(k){return k==='image'?ic('image'):ic('doc')}
+function readAs(blob,as){return new Promise(function(res,rej){var fr=new FileReader();
+  fr.onload=function(){res(fr.result)};fr.onerror=function(){rej(fr.error)};
+  if(as==='text')fr.readAsText(blob);else fr.readAsDataURL(blob)})}
+function blob2data(blob){return readAs(blob,'dataUrl')}
+/* 图片缩略图：最长边 220px 的 JPEG，用于消息气泡与列表展示 */
+function makeThumb(fileOrBlob){return new Promise(function(res){
+  readAs(fileOrBlob,'dataUrl').then(function(url){
+    var img=new Image();
+    img.onload=function(){try{
+      var m=220/Math.max(img.width,img.height),w=img.width,h=img.height;
+      if(m<1){w=Math.round(img.width*m);h=Math.round(img.height*m)}
+      var cv=document.createElement('canvas');cv.width=w;cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);res(cv.toDataURL('image/jpeg',.72))
+    }catch(_){res(url)}};
+    img.onerror=function(){res('')};img.src=url;
+  }).catch(function(){res('')})})}
+/* ---------- 解析（全部本机完成） ---------- */
+function parsePdf(blob){
+  if(window.pdfjsLib&&!pdfjsLib.GlobalWorkerOptions.workerSrc)pdfjsLib.GlobalWorkerOptions.workerSrc='/vendor/pdf.worker.min.js';
+  if(!window.pdfjsLib)return Promise.reject(new Error('PDF 解析组件未加载'));
+  return blob.arrayBuffer().then(function(buf){return pdfjsLib.getDocument({data:buf}).promise})
+   .then(function(pdf){var ps=[],n=Math.min(pdf.numPages,30);
+    for(var i=1;i<=n;i++)ps.push(i);
+    return ps.reduce(function(chain,pi){return chain.then(function(text){
+      return pdf.getPage(pi).then(function(pg){return pg.getTextContent()}).then(function(tc){
+        return text+tc.items.map(function(it){return it.str}).join(' ')+'\n'})})},Promise.resolve(''))
+     .then(function(all){
+      if(all.replace(/\s/g,'').length<20)return{text:'',fail:'扫描件暂不支持文字提取，可拍照后以图片方式上传'};
+      return capText(all)})})}
+function parseWord(blob){
+  if(!window.mammoth)return Promise.reject(new Error('Word 解析组件未加载'));
+  return blob.arrayBuffer().then(function(buf){return mammoth.extractRawText({arrayBuffer:buf})})
+   .then(function(r){return capText(r.value||'')})}
+function capText(t){t=String(t||'').replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
+  if(t.length<=DOC_STORE_CAP)return{text:t,truncated:false};
+  return{text:t.slice(0,DOC_STORE_CAP),truncated:true}}
+function parseFile(kind,blob){
+  if(kind==='text')return readAs(blob,'text').then(capText);
+  if(kind==='pdf')return parsePdf(blob);
+  if(kind==='word')return parseWord(blob);
+  return Promise.resolve({text:'',truncated:false})}
+/* ---------- 入库 + 摘要 ---------- */
+function docSummary(rec,imgDataUrl){
+  if(!askCfg().key){rec.sum='fail';rec.summary='';return docPutDB(rec)}
+  var content;
+  if(rec.kind==='image'){content=[
+    {type:'text',text:'这是我上传的图片（'+rec.name+'），请一句话概括其中与养生、健康相关的信息。'},
+    {type:'image_url',image_url:{url:imgDataUrl||rec.thumb,detail:'low'}}]}
+  else content='文档名：'+rec.name+'（'+docKindName(rec.kind)+'）\n\n'+(rec.text||'').slice(0,DOC_SUM_CAP);
+  return askComplete([{role:'system',content:ASK_DOC_SYS},{role:'user',content:content}])
+   .then(function(t){rec.summary=(t||'').trim().slice(0,120);rec.sum=rec.summary?'ok':'fail'})
+   .catch(function(){rec.sum='fail';rec.summary=''})
+   .then(function(){return docPutDB(rec)})
+}
+function docsIngest(fileList){
+  var files=Array.prototype.slice.call(fileList||[]).filter(Boolean);
+  if(!files.length)return Promise.resolve();
+  return docsRefresh().then(function(existing){
+    var room=DOC_MAX_N-existing.length,ok=0,skipped=[];
+    function next(i){
+      if(i>=files.length){docsRefresh();
+        toast(ok?('已保存 '+ok+' 个文档到本机文库'+(skipped.length?'，'+skipped.length+' 个未支持':'')):'文件未被支持，可传图片 / PDF / Word / txt / md');return}
+      if(room<=0){toast('文档库最多 '+DOC_MAX_N+' 个，请先删除部分文档');return}
+      var f=files[i],kind=docKind(f);
+      if(!kind){skipped.push(f.name);return next(i+1)}
+      var limit=kind==='image'?IMG_MAX:TXT_MAX;
+      if(f.size>limit){toast('「'+f.name+'」超过 '+fmtSize(limit)+' 限制');return next(i+1)}
+      var rec={id:docUid(),name:f.name.slice(0,80),kind:kind,mime:f.type||'',size:f.size,at:new Date().toISOString(),
+        blob:f,text:'',truncated:false,parse:'loading',parseMsg:'',thumb:'',summary:'',sum:'loading'};
+      var thumbP=kind==='image'?makeThumb(f):Promise.resolve('');
+      return thumbP.then(function(thumb){rec.thumb=thumb||'';
+        return parseFile(kind,f).then(function(r){
+          rec.parse='ok';rec.text=r.text||'';rec.truncated=!!r.truncated;
+          if(kind==='pdf'&&r.fail){rec.parse='fail';rec.parseMsg=r.fail;rec.sum='fail'}
+        }).catch(function(e){rec.parse='fail';rec.parseMsg=(e&&e.message)||'解析失败';rec.sum='fail'})
+      }).then(function(){return docPutDB(rec)}).then(function(){room--;ok++})
+       .then(function(){
+         if(rec.parse==='fail')return Promise.resolve();
+         return(kind==='image'&&rec.thumb)?blob2data(f).then(function(u){return docSummary(rec,u)}):docSummary(rec)
+       })
+       .catch(function(){})
+       .then(function(){return next(i+1)})
+    }
+    toast('正在解析并存入本机文库…');return next(0)
+  })
+}
+/* ---------- 文件选择 ---------- */
+function pickFiles(accept,cb){var inp=document.createElement('input');
+  inp.type='file';inp.accept=accept;inp.multiple=true;inp.style.display='none';
+  document.body.appendChild(inp);
+  inp.onchange=function(){var fs=inp.files;
+    setTimeout(function(){if(inp.parentNode)inp.parentNode.removeChild(inp)},120000);cb(fs)};
+  inp.click()}
+/* ---------- 文档库弹层（picker=true 时为「选文档附到本条消息」模式） ---------- */
+var docsPicker=false;
+function docsMeta(rec){
+  var date=rec.at.slice(0,10).replace(/-/g,'/');
+  if(rec.parse==='loading')return'<span class="dl-tag">解析中…</span>';
+  if(rec.parse==='fail')return'<span class="dl-tag bad">'+askEsc(rec.parseMsg||'解析失败')+'</span>';
+  var tag=rec.sum==='ok'?('<span class="dl-sum">'+askEsc(rec.summary)+'</span>')
+    :rec.sum==='loading'?'<span class="dl-tag">正在生成摘要…</span>'
+    :'<span class="dl-tag bad">摘要生成失败</span>';
+  return'<span class="dl-meta">'+docKindName(rec.kind)+' · '+fmtSize(rec.size)+' · '+date+'</span>'+tag}
+function docRowHTML(rec){
+  var picked=state.ask.draft.some(function(a){return a.id===rec.id});
+  var acts='';
+  if(docsPicker&&rec.parse==='ok')
+    acts='<button class="dl-pick'+(picked?' on':'')+'" data-a="doc-pick" data-id="'+rec.id+'">'+(picked?'已附上':'附上')+'</button>';
+  if(!docsPicker){
+    if(rec.parse==='fail')acts+='<button class="dl-act" data-a="doc-reparse" data-id="'+rec.id+'" aria-label="重新解析">'+ic('retry2')+'</button>';
+    else if(rec.sum==='fail')acts+='<button class="dl-act" data-a="doc-retry" data-id="'+rec.id+'" aria-label="重试摘要">'+ic('retry2')+'</button>';
+    acts+='<button class="dl-act danger" data-a="doc-del" data-id="'+rec.id+'" data-arm="0" aria-label="删除">'+ic('trash')+'</button>';
+  }
+  return '<div class="dl-row" data-id="'+rec.id+'"><span class="dl-ic">'+docIcon(rec.kind)+'</span>'
+   +'<div class="dl-main"><b>'+askEsc(rec.name)+'</b>'+docsMeta(rec)+'</div>'
+   +'<div class="dl-acts">'+acts+'</div></div>'
+}
+function docsListHTML(){
+  if(!docCache.length)return'<div class="dl-empty">'+ic('folder')
+   +'<p>还没有文档。上传体检报告、舌象照片或养生文章，<br>顾问就能结合你的资料回答。</p></div>';
+  return docCache.map(docRowHTML).join('')}
+function docsHTML(picker){docsPicker=!!picker;
+  return '<div class="xs-note">'+ic('info')
+   +'<span>文档原文只保存在这台设备（IndexedDB）；当你把它附到某条提问时，内容才会发送给你配置的模型服务。</span></div>'
+   +'<div class="cfgp-btns"><button class="btn" data-a="doc-up">'+ic('plus')+' 上传文档 / 图片</button>'
+   +(picker?'<button class="btn btn-gho" data-a="sheet-close">完成</button>':'')+'</div>'
+   +'<div class="xs-sub" style="margin-top:1.4rem">'+(picker?'选择要附到本条消息的资料（可多个）':'本机文库 · 最多 '+DOC_MAX_N+' 个')+'</div>'
+   +'<div class="dl-list" id="dl-list">'+docsListHTML()+'</div>'}
+/* ---------- 待发附件胶囊 ---------- */
+function attCapsHTML(){return state.ask.draft.map(function(a,i){
+  if(a.kind==='image')
+    return'<span class="att-cap img"><img src="'+(a.thumb||a.url||'')+'" alt=""><b>'+askEsc(a.name)+'</b>'
+     +'<button data-a="att-del" data-i="'+i+'" aria-label="移除">'+ic('x')+'</button></span>';
+  return'<span class="att-cap">'+docIcon(a.kind==='image'?'image':'pdf')+'<b>'+askEsc(a.name)+'</b>'
+   +'<button data-a="att-del" data-i="'+i+'" aria-label="移除">'+ic('x')+'</button></span>';
+}).join('')}
+function refreshAttCaps(){var box=root&&root.querySelector('#ask-att');if(box)box.innerHTML=attCapsHTML()}
+/* ---------- 附件动作弹层（输入框 ＋） ---------- */
+function attachHTML(){
+  return '<button class="att-opt" data-a="att-img">'+ic('image')+'<span><b>发图片</b><em>舌象 / 报告单 / 食材拍照，随本条发送</em></span></button>'
+   +'<button class="att-opt" data-a="att-lib">'+ic('folder')+'<span><b>从我的文档选择</b><em>附上库存的体检报告、文章全文</em></span></button>'
+   +'<button class="att-opt" data-a="att-docup">'+ic('plus')+'<span><b>上传到我的文档</b><em>先存本机文库，随时可引用</em></span></button>'
+   +'<div class="xs-note" style="margin-top:1.2rem">图片单张 ≤'+fmtSize(IMG_MAX)+'，文档单个 ≤'+fmtSize(TXT_MAX)+'；内容仅在你主动发送时提交给模型服务。</div>'}
+/* ---------- 今日面板（桌面左栏常驻；手机端从头部抽屉打开，同一套内容） ---------- */
+function seasonCardHTML(){var C=todayContext();
+  return'<div class="tp-card tp-sea"><div class="tp-k">'+ic('sun')+'<span>今日时令</span></div>'
+   +'<b class="tp-term">'+C.T.name+' · '+C.season+'季</b>'
+   +'<p>'+askEsc(C.desc||'')+'</p></div>'}
+function practiceCardHTML(){var st=recordStats(),S=lastSession(),jn=loadJournal().length,rows=[];
+  if(st.n>0)rows.push(['连续打卡',streak()+' 天']);
+  if(st.n>0)rows.push(['累计练习',Math.round(st.sec/60)+' 分钟 / '+st.days+' 天']);
+  if(S)rows.push(['最近跟练',(doneAvg(S)!=null?doneAvg(S)+' 分完成度':S.moves+' 式')]);
+  if(jn)rows.push(['每日一记',jn+' 条']);
+  if(rows.length)
+    return'<div class="tp-card"><div class="tp-k">'+ic('chart')+'<span>我的练习</span></div>'
+     +'<div class="tp-stats">'+rows.map(function(r){return'<div><b>'+r[1]+'</b><em>'+r[0]+'</em></div>'}).join('')+'</div></div>';
+  return'<div class="tp-card tp-guide"><div class="tp-k">'+ic('lotus')+'<span>开始认识你</span></div>'
+   +'<button class="tp-g" data-a="tp-quiz">'+ic('qmark')+'做 1 分钟调养问卷</button>'
+   +'<button class="tp-g" data-a="tp-practice">'+ic('medit')+'开始第一次练习</button>'
+   +'<button class="tp-g" data-a="tp-journal">'+ic('moon')+'记一笔今天的睡眠</button></div>'}
+function quickCardHTML(){
+  return'<div class="tp-card"><div class="tp-k">'+ic('list')+'<span>快捷</span></div>'
+   +'<div class="tp-quick">'
+   +'<button data-a="tp-journal">'+ic('edit')+'记一笔</button>'
+   +'<button data-a="tp-archive">'+ic('doc')+'养生档案</button>'
+   +'<button data-a="tp-cfg">'+ic('gear')+'API 设置</button>'
+   +'</div></div>'}
+function docsCardHTML(){
+  var recent=docCache.slice(0,3);
+  return'<div class="tp-card"><div class="tp-k">'+ic('folder')+'<span>我的文档</span>'
+   +'<button class="tp-more" data-a="tp-docs">管理 ›</button></div>'
+   +'<div class="tp-docs">'+(recent.length?recent.map(function(r){
+     return'<button class="tp-doc" data-a="tp-docs"><span class="tp-doc-ic">'+docIcon(r.kind)+'</span>'
+      +'<span class="tp-doc-t"><b>'+askEsc(r.name)+'</b><em>'+(r.sum==='ok'?askEsc(r.summary):(r.parse==='fail'?'解析失败':docKindName(r.kind)+' · '+fmtSize(r.size)))+'</em></span></button>'
+   }).join(''):'<button class="tp-doc empty" data-a="tp-docup">'+ic('plus')+'<span class="tp-doc-t"><b>上传体检报告 / 舌象照片</b><em>让顾问更懂你</em></span></button>')
+   +'</div></div>'}
+function todayPanelHTML(){return'<div class="tp-wrap">'
+  +seasonCardHTML()+practiceCardHTML()+quickCardHTML()+docsCardHTML()+'</div>'}
+/* 文档库变化后，同步桌面左栏与所有打开弹层里的文档区块 */
+function refreshDocBits(){
+  var side=root&&root.querySelector('.ask-side .tp-wrap');
+  if(side)side.innerHTML=seasonCardHTML()+practiceCardHTML()+quickCardHTML()+docsCardHTML();
+  var list=document.querySelector('#dl-list');if(list)list.innerHTML=docsListHTML()}
+/* ---------- 图片全屏查看 ---------- */
+function imgLightbox(src){if(!src)return;
+  var v=document.createElement('div');v.className='imgview';v.innerHTML='<img src="'+src+'" alt="附件大图">';
+  v.addEventListener('click',function(){v.remove()});document.body.appendChild(v)}
+
+function settingsHTML(){return askCfgRowHTML()+audioPrefsHTML()
   +'<div class="xs-note">音源与署名：七弦散音 · RafaelCaro · CC BY 4.0；《梅花三弄》· RafaelCaro · CC BY 4.0；《醉渔唱晚》· 卫仲乐 1934 · archive.org CC0。</div>'
   +'<div class="xs-note">动作识别（摄像头 + 八段锦判定 + 陪练教练）在真实跟练页运行；主壳「动作示范」可直接进入。</div>'}
 function basicHTML(){return '<div class="xs-item"><b>账号与数据</b><p>本机演示版没有线上账号：练习记录、身体数据、音频偏好与头像都保存在这台设备的浏览器里，换设备不会同步。</p></div>'
@@ -1132,6 +1794,8 @@ document.addEventListener('click',function(e){
       var rr=checkin(practicePoses().length,fs);stopMusic();go('home');
       toast(rr.first?('打卡成功 · 第 1 次打卡 · 连续 '+rr.streak+' 天 · 今日 '+fmtDur(rr.rec.sec))
         :('打卡成功 · 累计 '+rr.n+' 次 · 连续 '+rr.streak+' 天 · 今日 '+fmtDur(rr.rec.sec)+(rr.ok?'':'（本机存储不可用）')));
+      /* 打卡后顺手记一笔睡眠与精力（可跳过）——给弦养顾问攒「认识你」的数据 */
+      setTimeout(function(){openSheet('每日一记',journalHTML(true))},420);
       break}
     case 'again':state.progress=0;state.running=true;state.sessionStart=Date.now();go('practice');pluckForStep(0);break
     case 'analysis':openSheet('练习详细分析',analysisHTML());break
@@ -1140,6 +1804,26 @@ document.addEventListener('click',function(e){
     /* ---- 我的页 ---- */
     case 'notices':openSheet('通知',noticesHTML());break
     case 'settings':openSheet('设置',settingsHTML());break
+    /* ---- 智能体 API 设置 ---- */
+    case 'set-ask':openSheet('智能体 API 设置',askCfgHTML());break
+    case 'ask-priv-on':{var f0=askCfgForm();if(f0)saveAskCfg(f0);
+      /* 不能用 askPriv() 的返回值：它在关闭态会把细分项虚拟成 false，直接存会冲掉用户的勾选 */
+      var raw0=lsGet('xy-ask-priv')||{};
+      var pp0={on:!(raw0.on===true),
+        practice:raw0.practice!==false,body:raw0.body!==false,journal:raw0.journal!==false};
+      savePriv(pp0);openSheet('智能体 API 设置',askCfgHTML());break}
+    case 'ask-priv-item':{var k=el.dataset.k;if(!k||['practice','body','journal'].indexOf(k)<0)break;
+      var fp=askPriv();if(!fp.on)break;
+      var f1=askCfgForm();if(f1)saveAskCfg(f1);
+      fp[k]=!fp[k];savePriv(fp);openSheet('智能体 API 设置',askCfgHTML());break}
+    case 'set-archive':openSheet('我的养生档案',archiveHTML());break
+    case 'ar-copy':archiveCopy();break
+    case 'ar-download':archiveDownload();break
+    case 'ar-ai':archiveAIRun();break
+    case 'ask-cfg-save':{var fc=askCfgForm();if(fc){saveAskCfg(fc);askCfgRes('<b style="color:var(--green-deep)">已保存 ✓</b> 去「问询」页即可真实对话。');toast('智能体 API 配置已保存');}break}
+    case 'ask-cfg-test':{var tc=askCfgForm();if(tc)askCfgTest(tc,false);break}
+    case 'ask-cfg-clear':{try{localStorage.removeItem('xy-ask-cfg')}catch(_){}
+      openSheet('智能体 API 设置',askCfgHTML());toast('已清除本机保存的密钥');break}
     case 'set-basic':openSheet('基础设置',basicHTML());break
     case 'set-help':openSheet('帮助与反馈',helpHTML());break
     case 'set-about':openSheet('版本信息',aboutHTML());break
@@ -1152,9 +1836,69 @@ document.addEventListener('click',function(e){
     case 'unavailable':toast((el.dataset.label||el.getAttribute('aria-label')||el.textContent.trim()||'此功能')+'：这条暂未接入，已接入的功能清单见「我的 › 版本信息」');break
     /* ---- 我的：调养实验室入口 ---- */
     case 'go-lab':toast('正在进入调养实验室…');location.href='s4/#/preview';break
-    /* ---- 问询（智能体交互页 · 结构预览）---- */
+    /* ---- 问询（弦养顾问）---- */
     case 'ask-send':askSend();break
-    case 'ask-chip':{var ai=root.querySelector('#ask-input');if(ai){ai.value=el.getAttribute('data-q')||'';ai.focus()}break}
+    case 'ask-chip':askSend(el.getAttribute('data-q')||'');break
+    case 'ask-retry':askSend(el.getAttribute('data-q')||'');break
+    case 'ask-new':askNewConfirm(true);break
+    case 'ask-new-cancel':askNewConfirm(false);break
+    case 'ask-new-ok':askNewConfirm(false);askNew();break
+    case 'ask-brief-regen':briefRun();break
+    case 'ask-today':openSheet('今日',todayPanelHTML(),'xs-drawer');break
+    case 'ask-journal':openSheet('每日一记',journalHTML(false));break
+    /* ---- 附件与文档库 ---- */
+    case 'img-view':imgLightbox(el.getAttribute('data-src')||'');break
+    case 'ask-attach':openSheet('添加图片或文档',attachHTML());break
+    case 'att-img':closeSheet();pickFiles('image/*',function(fs){
+      var files=Array.prototype.slice.call(fs||[]),i=0;
+      (function step(){if(i>=files.length){syncAskUI();return}
+        var f=files[i++];
+        if(f.size>IMG_MAX){toast('「'+f.name+'」超过 '+fmtSize(IMG_MAX)+' 限制');step();return}
+        Promise.all([readAs(f,'dataUrl'),makeThumb(f)]).then(function(r){
+          state.ask.draft.push({kind:'image',name:f.name.slice(0,80),url:r[0],thumb:r[1]||r[0]});
+          syncAskUI();step()}).catch(function(){toast('「'+f.name+'」读取失败，请重试');step()})})()});break
+    case 'att-lib':closeSheet();openSheet('从我的文档选择',docsHTML(true));break
+    case 'att-docup':pickFiles('image/*,.pdf,.doc,.docx,.txt,.md',function(fs){docsIngest(fs)});break
+    case 'doc-up':pickFiles('image/*,.pdf,.doc,.docx,.txt,.md',function(fs){docsIngest(fs)});break
+    case 'doc-pick':{var rid=el.dataset.id,rec0=rid&&docById(rid);if(rec0){
+        var dix=state.ask.draft.findIndex(function(a){return a.id===rid});
+        if(dix>=0)state.ask.draft.splice(dix,1);
+        else state.ask.draft.push({kind:rec0.kind==='image'?'image':'doc',id:rid,name:rec0.name,thumb:rec0.thumb||''});
+        openSheet('从我的文档选择',docsHTML(true));syncAskUI()}break}
+    case 'att-del':state.ask.draft.splice(+el.dataset.i,1);syncAskUI();break
+    case 'doc-del':{var row=el.closest('.dl-row'),dr=row&&docById(row.dataset.id);if(dr)
+        row.innerHTML='<div class="dl-confirm"><span>删除《'+askEsc(dr.name)+'》？</span>'
+         +'<button class="dl-del-ok" data-a="doc-del-ok" data-id="'+dr.id+'">删除</button>'
+         +'<button class="btn btn-gho btn-sm" data-a="doc-del-cancel">取消</button></div>';break}
+    case 'doc-del-ok':docDelDB(el.dataset.id).then(function(){toast('文档已从本机删除');return docsRefresh()});break
+    case 'doc-del-cancel':docsRefresh();break
+    case 'doc-retry':{var rr=el.dataset.id&&docById(el.dataset.id);if(rr){
+        rr.sum='loading';docPutDB(rr).then(docsRefresh).then(function(){
+          if(rr.kind==='image')return docGetDB(rr.id).then(function(f){return blob2data(f.blob)}).then(function(u){return docSummary(rr,u)});
+          return docSummary(rr)}).then(docsRefresh)}break}
+    case 'doc-reparse':{var rp=el.dataset.id&&docById(el.dataset.id);if(rp&&rp.blob){
+        rp.parse='loading';docPutDB(rp).then(docsRefresh).then(function(){return parseFile(rp.kind,rp.blob)})
+         .then(function(x){rp.parse=x.fail?'fail':'ok';rp.parseMsg=x.fail||'';rp.text=x.text||'';rp.truncated=!!x.truncated;
+           rp.sum=x.fail?'fail':'loading';return docPutDB(rp)})
+         .then(function(){return docsRefresh()}).then(function(){if(rp.parse==='ok')return docSummary(rp)})
+         .then(docsRefresh).catch(function(){toast('重新解析失败')})}break}
+    /* ---- 今日面板快捷动作（桌面左栏 / 手机抽屉共用） ---- */
+    case 'tp-journal':openSheet('每日一记',journalHTML(false));break
+    case 'tp-archive':openSheet('我的养生档案',archiveHTML());break
+    case 'tp-cfg':openSheet('智能体 API 设置',askCfgHTML());break
+    case 'tp-quiz':closeSheet();go('question');break
+    case 'tp-practice':closeSheet();go('intro');break
+    case 'tp-docs':openSheet('我的文档',docsHTML(false));break
+    case 'tp-docup':pickFiles('image/*,.pdf,.doc,.docx,.txt,.md',function(fs){docsIngest(fs)});break
+    case 'set-docs':openSheet('我的文档',docsHTML(false));break
+    case 'jr-sleep':state.jrDraft.sleep=parseFloat(el.getAttribute('data-v'));jrSelect(el);break
+    case 'jr-energy':state.jrDraft.energy=parseInt(el.getAttribute('data-v'),10);jrSelect(el);break
+    case 'journal-save':{var ta=SH&&SH.querySelector('#jr-mood');
+      var je={d:today(),at:new Date().toISOString(),
+        sleep:(state.jrDraft.sleep==null?null:state.jrDraft.sleep),
+        energy:state.jrDraft.energy||null,mood:ta?(ta.value||'').trim():''};
+      if(je.sleep==null&&!je.energy&&!je.mood){toast('睡眠、精力或感受，至少记一点再保存');break}
+      upsertJournal(je);closeSheet();refreshDocBits();toast('今日一记已保存');break}
     /* ---- 身体数据 ---- */
     case 'go-body':closeSheet();go('body');break
     case 'stp':var k=el.getAttribute('data-k'),d=+el.getAttribute('data-d');if(!Object.prototype.hasOwnProperty.call(BODY_LIMITS,k)||(d!==1&&d!==-1))return;
@@ -1169,6 +1913,12 @@ document.addEventListener('click',function(e){
 })
 document.addEventListener('input',function(e){var el=e.target;if(!el||!el.dataset||el.dataset.a!=='vol')return;
   AUDIO.vol=Math.max(0,Math.min(1,(+el.value||0)/100));saveAudioPref();if(AUDIO.mus)AUDIO.mus.volume=AUDIO.vol})
+/* 问询页：空内容禁用发送；手机键盘弹起时把推荐问题收起来，让空间给消息区 */
+document.addEventListener('input',function(e){if(e.target&&e.target.id==='ask-input')syncAskUI()});
+document.addEventListener('focusin',function(e){if(e.target&&e.target.id==='ask-input'){
+  var card=root&&root.querySelector('.ask-card');if(card)card.classList.add('focused')}});
+document.addEventListener('focusout',function(e){if(e.target&&e.target.id==='ask-input'){
+  setTimeout(function(){var card=root&&root.querySelector('.ask-card');if(card)card.classList.remove('focused')},120)}});
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'&&sheetOpen()){closeSheet();return}
   /* 问询页：回车即发送 */
@@ -1180,12 +1930,15 @@ function init(){
   root=document.getElementById('app')
   root.classList.add('phone');loadBodyState();loadAudioPref();loadRecords();loadProfile();
   loadQuiz();applyQuiz(state.quiz);   // 上次问诊的答案要能记住，并继续驱动推荐
+  seedAskCfg();                       // 本机 local-config.js 的密钥自动预填（仅一次，不覆盖已有配置）
+  docsRefresh();                      // 预热本机文库（IndexedDB 异步加载，完成后自动刷新面板）
   var q=new URLSearchParams(location.search)
   if(q.get('first')==='1'){try{localStorage.removeItem('xy-state')}catch(_){}}
   var sv=q.get('screen');if(sv&&PAGES[sv]){state.screen=sv}
   var mut=q.get('muted');if(mut==='1')AUDIO.vol=0;
   window.__xy={state:state,AUDIO:AUDIO,TRACKS:TRACKS,design:DESIGN,sheets:{settings:settingsHTML,notices:noticesHTML,help:helpHTML,about:aboutHTML}};
-  paint()
+  paint();
+  if(state.screen==='inquiry')askEnter()
 }
 init()
 })()
